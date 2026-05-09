@@ -25,6 +25,12 @@ export const ERROR_CODES = {
   TENANT_CONTEXT_MISSING: 'tenant_context_missing',
   TENANT_SELECTION_REQUIRED: 'tenant_selection_required',
 
+  INVALID_STATE_TRANSITION: 'invalid_state_transition',
+  DRIVER_OFF_SHIFT: 'driver_off_shift',
+  DRIVER_ALREADY_ON_SHIFT: 'driver_already_on_shift',
+  TRUCK_NOT_IN_SERVICE: 'truck_not_in_service',
+  TRUCK_ALREADY_ASSIGNED: 'truck_already_assigned',
+
   // 5xx
   INTERNAL_ERROR: 'internal_error',
   SERVICE_UNAVAILABLE: 'service_unavailable',

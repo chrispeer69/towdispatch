@@ -20,27 +20,43 @@
  * tenant/user GUCs as everything else — the GUCs are global to the
  * connection, not the transaction handle. Fine for our purposes.
  */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   customerVehicles,
   customers,
-  jobNumberSequences,
+  driverShifts,
+  drivers,
+  jobStatusTransitions,
   jobs,
+  trucks,
   uuidv7,
   vehicles,
 } from '@towcommand/db';
 import {
   type CreateJobIntakePayload,
+  DISPATCH_EVENTS,
   ERROR_CODES,
   type IntakeResultDto,
   type JobDto,
+  type JobStatus,
   type QuotePreviewPayload,
   type RateQuote,
 } from '@towcommand/shared';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { CustomersService } from '../customers/customers.service.js';
+import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 import { RateEngineService } from '../rates/rate-engine.service.js';
+import {
+  InvalidJobTransitionError,
+  TERMINAL_STATUSES,
+  assertCanTransition,
+} from './job-state-machine.js';
 
 interface CallerContext {
   tenantId: string;
@@ -56,6 +72,7 @@ export class JobsService {
     private readonly db: TenantAwareDb,
     private readonly customers: CustomersService,
     private readonly rateEngine: RateEngineService,
+    private readonly events: DispatchEventsService,
   ) {}
 
   async quotePreview(ctx: CallerContext, input: QuotePreviewPayload): Promise<RateQuote> {
@@ -173,8 +190,12 @@ export class JobsService {
         .returning();
       if (!row) throw new Error('insert jobs .. returning() yielded no row');
 
+      const jobDto = rowToDto(row);
+
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_CREATED, { job: jobDto });
+
       return {
-        job: rowToDto(row),
+        job: jobDto,
         customer: {
           id: customerRow.id,
           name: customerRow.name,
@@ -208,24 +229,401 @@ export class JobsService {
   }
 
   async cancel(ctx: CallerContext, id: string, reason: string): Promise<JobDto> {
-    const updated = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
-      const existing = await tx.query.jobs.findFirst({
-        where: and(eq(jobs.id, id), isNull(jobs.deletedAt)),
+    return this.transition(ctx, id, 'cancelled', reason);
+  }
+
+  /**
+   * Live dispatch board feed: the four buckets the UI reads on initial load.
+   * Returns recently-created (`new`), in-flight, recently-completed today,
+   * and the driver roster (each driver + active shift + truck + current job).
+   */
+  async dispatchBoard(ctx: CallerContext): Promise<{
+    queue: JobDto[];
+    active: JobDto[];
+    recentlyCompleted: JobDto[];
+  }> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const queueRows = await tx.query.jobs.findMany({
+        where: and(eq(jobs.status, 'new'), isNull(jobs.deletedAt)),
+        orderBy: (t, { asc }) => [asc(t.createdAt)],
+        limit: 200,
       });
-      if (!existing) return null;
-      const [row] = await tx
+
+      const activeRows = await tx.query.jobs.findMany({
+        where: and(
+          inArray(jobs.status, ['dispatched', 'enroute', 'on_scene', 'in_progress']),
+          isNull(jobs.deletedAt),
+        ),
+        orderBy: (t, { asc }) => [asc(t.assignedAt), asc(t.createdAt)],
+        limit: 200,
+      });
+
+      const startOfDay = new Date();
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      const recentlyCompletedRows = await tx.query.jobs.findMany({
+        where: and(
+          inArray(jobs.status, ['completed', 'cancelled', 'goa']),
+          isNull(jobs.deletedAt),
+          sql`${jobs.updatedAt} >= ${startOfDay.toISOString()}`,
+        ),
+        orderBy: (t, { desc: descCol }) => [descCol(t.updatedAt)],
+        limit: 10,
+      });
+
+      return {
+        queue: queueRows.map(rowToDto),
+        active: activeRows.map(rowToDto),
+        recentlyCompleted: recentlyCompletedRows.map(rowToDto),
+      };
+    });
+  }
+
+  async assign(
+    ctx: CallerContext,
+    jobId: string,
+    input: { driverId: string; truckId?: string; shiftId?: string },
+  ): Promise<JobDto> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const job = await tx.query.jobs.findFirst({
+        where: and(eq(jobs.id, jobId), isNull(jobs.deletedAt)),
+      });
+      if (!job) throw notFound();
+      if (TERMINAL_STATUSES.has(job.status)) {
+        throw new BadRequestException({
+          code: ERROR_CODES.INVALID_STATE_TRANSITION,
+          message: `Cannot assign a ${job.status} job`,
+        });
+      }
+      // Allow reassign while job is still pre-enroute. Once a driver is on
+      // the way / on scene / in progress, assignment is a different thing
+      // we'd want explicit dispatcher friction for — block at service layer.
+      if (job.status !== 'new' && job.status !== 'dispatched') {
+        throw new BadRequestException({
+          code: ERROR_CODES.INVALID_STATE_TRANSITION,
+          message: `Cannot reassign a job in '${job.status}' state. Unassign first.`,
+        });
+      }
+
+      // Validate driver — must exist, be active, and have an open shift.
+      const driver = await tx.query.drivers.findFirst({
+        where: and(eq(drivers.id, input.driverId), isNull(drivers.deletedAt)),
+      });
+      if (!driver) {
+        throw new NotFoundException({
+          code: ERROR_CODES.NOT_FOUND,
+          message: 'Driver not found',
+        });
+      }
+      if (!driver.active) {
+        throw new ConflictException({
+          code: ERROR_CODES.DRIVER_OFF_SHIFT,
+          message: 'Driver is not active',
+        });
+      }
+
+      // Resolve current shift if not supplied.
+      let shiftId = input.shiftId ?? null;
+      if (!shiftId) {
+        const openShift = await tx.query.driverShifts.findFirst({
+          where: and(
+            eq(driverShifts.driverId, input.driverId),
+            isNull(driverShifts.endedAt),
+            isNull(driverShifts.deletedAt),
+          ),
+        });
+        if (!openShift) {
+          throw new ConflictException({
+            code: ERROR_CODES.DRIVER_OFF_SHIFT,
+            message: 'Driver has no active shift',
+          });
+        }
+        shiftId = openShift.id;
+      }
+
+      const truckId = input.truckId ?? null;
+      if (truckId) {
+        const truck = await tx.query.trucks.findFirst({
+          where: and(eq(trucks.id, truckId), isNull(trucks.deletedAt)),
+        });
+        if (!truck) {
+          throw new NotFoundException({
+            code: ERROR_CODES.NOT_FOUND,
+            message: 'Truck not found',
+          });
+        }
+        if (!truck.inService) {
+          throw new ConflictException({
+            code: ERROR_CODES.TRUCK_NOT_IN_SERVICE,
+            message: 'Truck is out of service',
+          });
+        }
+      }
+
+      const fromStatus: JobStatus = job.status;
+      const toStatus: JobStatus = 'dispatched';
+      // Walk the state machine. dispatched -> dispatched is a re-assign and
+      // must be expressed as unassign + assign — the service-layer guard
+      // above catches that case.
+      if (fromStatus !== 'dispatched') {
+        try {
+          assertCanTransition(fromStatus, toStatus);
+        } catch (err) {
+          if (err instanceof InvalidJobTransitionError) {
+            throw new BadRequestException({
+              code: ERROR_CODES.INVALID_STATE_TRANSITION,
+              message: err.message,
+            });
+          }
+          throw err;
+        }
+      }
+
+      const previousDriverId = job.assignedDriverId;
+
+      const [updated] = await tx
         .update(jobs)
         .set({
-          status: 'cancelled',
-          cancelledReason: reason,
+          status: 'dispatched',
+          assignedDriverId: input.driverId,
+          assignedTruckId: truckId,
+          assignedShiftId: shiftId,
+          assignedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(jobs.id, id))
+        .where(eq(jobs.id, jobId))
         .returning();
-      return row ?? null;
+      if (!updated) throw notFound();
+
+      // Update the prior shift to clear current_job_id, and update the new
+      // shift to reflect this job + on-the-way status.
+      if (previousDriverId && previousDriverId !== input.driverId) {
+        await tx
+          .update(driverShifts)
+          .set({ currentJobId: null, updatedAt: new Date() })
+          .where(
+            and(
+              eq(driverShifts.driverId, previousDriverId),
+              isNull(driverShifts.endedAt),
+              isNull(driverShifts.deletedAt),
+            ),
+          );
+      }
+      if (shiftId) {
+        await tx
+          .update(driverShifts)
+          .set({
+            currentJobId: jobId,
+            status: 'en_route',
+            updatedAt: new Date(),
+          })
+          .where(eq(driverShifts.id, shiftId));
+      }
+
+      // Append a transition row and let the audit_log trigger capture the
+      // jobs UPDATE.
+      if (fromStatus !== toStatus) {
+        await tx.insert(jobStatusTransitions).values({
+          id: uuidv7(),
+          tenantId: ctx.tenantId,
+          jobId,
+          fromStatus,
+          toStatus,
+          actorUserId: ctx.userId,
+          metadata: {
+            driverId: input.driverId,
+            truckId,
+            shiftId,
+            previousDriverId,
+          },
+        });
+      }
+
+      const dto = rowToDto(updated);
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_ASSIGNED, {
+        jobId: dto.id,
+        jobNumber: dto.jobNumber,
+        status: dto.status,
+        driverId: input.driverId,
+        truckId,
+        shiftId,
+        assignedByUserId: ctx.userId,
+        previousDriverId,
+      });
+      if (fromStatus !== toStatus) {
+        this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_STATUS_CHANGED, {
+          jobId: dto.id,
+          jobNumber: dto.jobNumber,
+          fromStatus,
+          toStatus,
+          actorUserId: ctx.userId,
+        });
+      }
+      return dto;
     });
-    if (!updated) throw notFound();
-    return rowToDto(updated);
+  }
+
+  async unassign(ctx: CallerContext, jobId: string, reason?: string): Promise<JobDto> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const job = await tx.query.jobs.findFirst({
+        where: and(eq(jobs.id, jobId), isNull(jobs.deletedAt)),
+      });
+      if (!job) throw notFound();
+      if (job.status !== 'dispatched') {
+        throw new BadRequestException({
+          code: ERROR_CODES.INVALID_STATE_TRANSITION,
+          message: `Cannot unassign a job in '${job.status}' state`,
+        });
+      }
+      const previousDriverId = job.assignedDriverId;
+
+      const [updated] = await tx
+        .update(jobs)
+        .set({
+          status: 'new',
+          assignedDriverId: null,
+          assignedTruckId: null,
+          assignedShiftId: null,
+          assignedAt: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(jobs.id, jobId))
+        .returning();
+      if (!updated) throw notFound();
+
+      // Clear current_job_id on the previous driver's shift.
+      if (previousDriverId) {
+        await tx
+          .update(driverShifts)
+          .set({
+            currentJobId: null,
+            status: 'available',
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(driverShifts.driverId, previousDriverId),
+              isNull(driverShifts.endedAt),
+              isNull(driverShifts.deletedAt),
+            ),
+          );
+      }
+
+      await tx.insert(jobStatusTransitions).values({
+        id: uuidv7(),
+        tenantId: ctx.tenantId,
+        jobId,
+        fromStatus: 'dispatched',
+        toStatus: 'new',
+        actorUserId: ctx.userId,
+        reason: reason ?? null,
+        metadata: { previousDriverId },
+      });
+
+      const dto = rowToDto(updated);
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_UNASSIGNED, {
+        jobId: dto.id,
+        jobNumber: dto.jobNumber,
+        previousDriverId,
+        reason: reason ?? null,
+        unassignedByUserId: ctx.userId,
+      });
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_STATUS_CHANGED, {
+        jobId: dto.id,
+        jobNumber: dto.jobNumber,
+        fromStatus: 'dispatched',
+        toStatus: 'new',
+        actorUserId: ctx.userId,
+      });
+      return dto;
+    });
+  }
+
+  /**
+   * Generic state transition. Used for cancel, mark-enroute, mark-on-scene,
+   * mark-in-progress, mark-completed, mark-goa. Direct assign/unassign go
+   * through their own methods because they need to touch shift state too.
+   */
+  async transition(
+    ctx: CallerContext,
+    jobId: string,
+    toStatus: JobStatus,
+    reason?: string,
+  ): Promise<JobDto> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const job = await tx.query.jobs.findFirst({
+        where: and(eq(jobs.id, jobId), isNull(jobs.deletedAt)),
+      });
+      if (!job) throw notFound();
+      const fromStatus: JobStatus = job.status;
+      try {
+        assertCanTransition(fromStatus, toStatus);
+      } catch (err) {
+        if (err instanceof InvalidJobTransitionError) {
+          throw new BadRequestException({
+            code: ERROR_CODES.INVALID_STATE_TRANSITION,
+            message: err.message,
+          });
+        }
+        throw err;
+      }
+
+      const updates: Record<string, unknown> = {
+        status: toStatus,
+        updatedAt: new Date(),
+      };
+      if (toStatus === 'cancelled' && reason) {
+        updates.cancelledReason = reason;
+      }
+      if (toStatus === 'completed' || toStatus === 'cancelled' || toStatus === 'goa') {
+        // Free the driver — terminal state means the job no longer pins them.
+        updates.assignedAt = null;
+      }
+
+      const [updated] = await tx.update(jobs).set(updates).where(eq(jobs.id, jobId)).returning();
+      if (!updated) throw notFound();
+
+      // If terminal and a driver was on it, clear their currentJobId and
+      // bring them back to available.
+      if (TERMINAL_STATUSES.has(toStatus) && job.assignedShiftId) {
+        await tx
+          .update(driverShifts)
+          .set({ currentJobId: null, status: 'available', updatedAt: new Date() })
+          .where(eq(driverShifts.id, job.assignedShiftId));
+      }
+
+      // If the driver shift mirrors job-state for the available enums,
+      // sync it (en_route / on_scene / in_progress).
+      if (
+        job.assignedShiftId &&
+        (toStatus === 'enroute' || toStatus === 'on_scene' || toStatus === 'in_progress')
+      ) {
+        const mappedShiftStatus = toStatus === 'enroute' ? 'en_route' : toStatus;
+        await tx
+          .update(driverShifts)
+          .set({ status: mappedShiftStatus, updatedAt: new Date() })
+          .where(eq(driverShifts.id, job.assignedShiftId));
+      }
+
+      await tx.insert(jobStatusTransitions).values({
+        id: uuidv7(),
+        tenantId: ctx.tenantId,
+        jobId,
+        fromStatus,
+        toStatus,
+        actorUserId: ctx.userId,
+        reason: reason ?? null,
+      });
+
+      const dto = rowToDto(updated);
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_STATUS_CHANGED, {
+        jobId: dto.id,
+        jobNumber: dto.jobNumber,
+        fromStatus,
+        toStatus,
+        actorUserId: ctx.userId,
+      });
+      return dto;
+    });
   }
 
   private toTenantCtx(ctx: CallerContext): {
@@ -394,6 +792,10 @@ function rowToDto(j: typeof jobs.$inferSelect): JobDto {
     rateBreakdown: (j.rateBreakdown as JobDto['rateBreakdown']) ?? null,
     notes: j.notes,
     cancelledReason: j.cancelledReason,
+    assignedDriverId: j.assignedDriverId,
+    assignedTruckId: j.assignedTruckId,
+    assignedShiftId: j.assignedShiftId,
+    assignedAt: j.assignedAt ? j.assignedAt.toISOString() : null,
     createdByUserId: j.createdByUserId,
     createdAt: j.createdAt.toISOString(),
     updatedAt: j.updatedAt.toISOString(),

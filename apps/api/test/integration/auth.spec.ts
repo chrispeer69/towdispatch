@@ -93,6 +93,10 @@ describeIfDb('Auth integration', () => {
     process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-with-at-least-32-chars-long';
     process.env.JWT_MFA_SECRET ??= 'test-mfa-secret-with-at-least-32-chars-long';
     process.env.TOTP_ENCRYPTION_KEY ??= 'test-totp-encryption-key-32+-chars-long';
+    // The shared throttler default is per-IP and shared across the test
+    // run; bump it so a busy auth.spec.ts does not 429 itself.
+    process.env.RATE_LIMIT_BURST_LIMIT = process.env.RATE_LIMIT_BURST_LIMIT ?? '5000';
+    process.env.RATE_LIMIT_SUSTAINED_LIMIT = process.env.RATE_LIMIT_SUSTAINED_LIMIT ?? '50000';
 
     admin = new Pool({ connectionString: ADMIN_URL!, max: 2 });
     redis = new Redis(REDIS_URL!);

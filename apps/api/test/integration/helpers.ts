@@ -43,6 +43,11 @@ export function ensureTestEnv(): void {
   process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-with-at-least-32-chars-long';
   process.env.JWT_MFA_SECRET ??= 'test-mfa-secret-with-at-least-32-chars-long';
   process.env.TOTP_ENCRYPTION_KEY ??= 'test-totp-encryption-key-32+-chars-long';
+  // Tests do many signups + intakes against a single API instance; bump the
+  // throttler so a busy test file does not 429 itself. The dedicated auth
+  // throttle (per-email) still enforces sane limits inside AuthService.
+  process.env.RATE_LIMIT_BURST_LIMIT = process.env.RATE_LIMIT_BURST_LIMIT ?? '5000';
+  process.env.RATE_LIMIT_SUSTAINED_LIMIT = process.env.RATE_LIMIT_SUSTAINED_LIMIT ?? '50000';
 }
 
 export async function bootApp(): Promise<NestFastifyApplication> {
@@ -87,10 +92,16 @@ export async function tearDown(ctx: TestContext): Promise<void> {
         if (tenantIds.length) {
           // Delete dependent data inside the captured tenants. Using
           // tenant_id keeps us from touching unrelated test data.
+          await c.query('DELETE FROM job_status_transitions WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM driver_shifts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM jobs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM job_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          await c.query('DELETE FROM drivers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM trucks WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query(
             'DELETE FROM tenant_default_rate_sheets WHERE tenant_id = ANY($1::uuid[])',
             [tenantIds],
@@ -195,11 +206,31 @@ const DEFAULT_TEST_RATE_SHEET = {
       },
       flatFeesByClass: {},
     },
-    { serviceType: 'jump_start' as const, baseCents: 7500, perMileCentsByClass: {}, flatFeesByClass: {} },
-    { serviceType: 'lockout' as const, baseCents: 6500, perMileCentsByClass: {}, flatFeesByClass: {} },
-    { serviceType: 'tire_change' as const, baseCents: 8500, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'jump_start' as const,
+      baseCents: 7500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'lockout' as const,
+      baseCents: 6500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'tire_change' as const,
+      baseCents: 8500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
     { serviceType: 'fuel' as const, baseCents: 7500, perMileCentsByClass: {}, flatFeesByClass: {} },
-    { serviceType: 'winch' as const, baseCents: 15000, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'winch' as const,
+      baseCents: 15000,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
     {
       serviceType: 'recovery' as const,
       baseCents: 25000,
@@ -228,7 +259,12 @@ const DEFAULT_TEST_RATE_SHEET = {
       },
       flatFeesByClass: {},
     },
-    { serviceType: 'other' as const, baseCents: 10000, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'other' as const,
+      baseCents: 10000,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
   ],
   surcharges: [],
   fixedLineItems: [{ code: 'admin_fee', label: 'Admin fee', amountCents: 500 }],
@@ -273,7 +309,7 @@ export async function getAuditLogCount(
     let q = `SELECT count(*)::int AS n FROM audit_log
              WHERE tenant_id = $1::uuid AND resource_type = $2`;
     if (resourceId) {
-      q += ` AND resource_id = $3::uuid`;
+      q += ' AND resource_id = $3::uuid';
       params.push(resourceId);
     }
     const r = await c.query<{ n: number }>(q, params);

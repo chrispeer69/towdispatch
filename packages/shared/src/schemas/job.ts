@@ -188,6 +188,11 @@ export const jobSchema = z.object({
   rateBreakdown: rateQuoteSchema.nullable(),
   notes: z.string().nullable(),
   cancelledReason: z.string().nullable(),
+  /** Populated when status leaves `new` via assign(). */
+  assignedDriverId: z.string().uuid().nullable(),
+  assignedTruckId: z.string().uuid().nullable(),
+  assignedShiftId: z.string().uuid().nullable(),
+  assignedAt: z.string().datetime().nullable(),
   createdByUserId: z.string().uuid().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

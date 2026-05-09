@@ -10,3 +10,6 @@ export * from './vehicles';
 export * from './customer-vehicles';
 export * from './rate-sheets';
 export * from './jobs';
+export * from './drivers';
+export * from './trucks';
+export * from './driver-shifts';

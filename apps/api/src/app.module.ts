@@ -9,6 +9,8 @@ import { IntegrationsModule } from './integrations/integrations.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
+import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
+import { DispatchModule } from './modules/dispatch/dispatch.module.js';
 import { EmailModule } from './modules/email/email.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
@@ -33,7 +35,9 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     CustomersModule,
     VehiclesModule,
     RatesModule,
+    DispatchEventsModule,
     JobsModule,
+    DispatchModule,
     HealthModule,
   ],
   providers: [
