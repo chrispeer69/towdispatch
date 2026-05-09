@@ -1,0 +1,113 @@
+/**
+ * Thin JWT wrapper around `jose`. We picked `jose` over `jsonwebtoken`:
+ *   - it's standards-correct (validates issuer/audience/iat/exp by default),
+ *   - has zero CVE history compared to the long jsonwebtoken track record,
+ *   - supports HS256 with `Uint8Array` keys (no PEM gymnastics for shared secrets).
+ *
+ * Access tokens: HS256, signed with JWT_ACCESS_SECRET, short TTL (~15m).
+ * Refresh tokens: a 256-bit random opaque string. We do NOT use a JWT for the
+ *   refresh token — opaque tokens with a server-side argon2id hash are simpler
+ *   to revoke and don't leak claims.
+ * MFA challenge tokens: short-lived (5m) HS256 JWTs that sit between password
+ *   verification and TOTP entry. They carry sub/tid/role and a `mfa: true`
+ *   marker so they can never be exchanged for a normal access token.
+ */
+import { randomBytes } from 'node:crypto';
+import { Injectable } from '@nestjs/common';
+import { type JWTPayload, SignJWT, jwtVerify } from 'jose';
+import { ConfigService } from '../../config/config.service.js';
+
+export interface MfaChallengeClaims extends JWTPayload {
+  sub: string;
+  tid: string;
+  role: string;
+  mfa: true;
+}
+
+@Injectable()
+export class JwtService {
+  private readonly accessKey: Uint8Array;
+  private readonly mfaKey: Uint8Array;
+
+  constructor(private readonly config: ConfigService) {
+    this.accessKey = new TextEncoder().encode(config.jwt.accessSecret);
+    this.mfaKey = new TextEncoder().encode(config.jwt.mfaSecret);
+  }
+
+  async signAccess(claims: {
+    sub: string;
+    tid: string;
+    role: string;
+    jti: string;
+  }): Promise<string> {
+    return new SignJWT(claims)
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(this.config.jwt.audience)
+      .setExpirationTime(this.config.jwt.accessTtl)
+      .sign(this.accessKey);
+  }
+
+  async verifyAccess(token: string): Promise<JWTPayload> {
+    const { payload } = await jwtVerify(token, this.accessKey, {
+      issuer: this.config.jwt.issuer,
+      audience: this.config.jwt.audience,
+      algorithms: ['HS256'],
+    });
+    return payload;
+  }
+
+  async signMfaChallenge(claims: { sub: string; tid: string; role: string }): Promise<string> {
+    return new SignJWT({ ...claims, mfa: true })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(`${this.config.jwt.audience}-mfa`)
+      .setExpirationTime('5m')
+      .sign(this.mfaKey);
+  }
+
+  async verifyMfaChallenge(token: string): Promise<MfaChallengeClaims> {
+    const { payload } = await jwtVerify(token, this.mfaKey, {
+      issuer: this.config.jwt.issuer,
+      audience: `${this.config.jwt.audience}-mfa`,
+      algorithms: ['HS256'],
+    });
+    if (
+      payload.mfa !== true ||
+      typeof payload.sub !== 'string' ||
+      typeof payload.tid !== 'string'
+    ) {
+      throw new Error('Invalid MFA challenge token');
+    }
+    return payload as MfaChallengeClaims;
+  }
+
+  /** Generates a refresh token: 32 random bytes, base64url-encoded. */
+  generateRefreshToken(): string {
+    return randomBytes(32).toString('base64url');
+  }
+
+  /** Returns access TTL in seconds, used as the `expires_in` field. */
+  accessTtlSeconds(): number {
+    return parseDuration(this.config.jwt.accessTtl);
+  }
+
+  refreshTtlSeconds(): number {
+    return parseDuration(this.config.jwt.refreshTtl);
+  }
+}
+
+function parseDuration(input: string): number {
+  const m = /^(\d+)([smhd])$/.exec(input.trim());
+  if (!m) {
+    const n = Number.parseInt(input, 10);
+    if (!Number.isFinite(n)) throw new Error(`Invalid duration: ${input}`);
+    return n;
+  }
+  const value = Number.parseInt(m[1] ?? '0', 10);
+  const unit = m[2];
+  const multipliers: Record<string, number> = { s: 1, m: 60, h: 3_600, d: 86_400 };
+  return value * (multipliers[unit ?? 's'] ?? 1);
+}

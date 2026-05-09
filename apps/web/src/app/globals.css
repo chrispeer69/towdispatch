@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Brand tokens — LOCKED. Mirrored in tailwind.config.ts. Change both or
+ * neither.
+ */
+:root {
+  --orange: #f05a1a;
+  --orange-dark: #c44410;
+  --orange-light: #ff7a3d;
+  --orange-glow: rgba(240, 90, 26, 0.15);
+
+  --steel: #1a1e2a;
+  --steel-mid: #252a38;
+  --steel-light: #2e3447;
+  --steel-border: #3a4158;
+  --steel-border-light: #4a5270;
+
+  --text-primary: #f0ede8;
+  --text-secondary: #9ca3b5;
+  --text-muted: #626882;
+
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* shadcn-ui semantic tokens, mapped onto our palette. */
+  --background: var(--steel);
+  --foreground: var(--text-primary);
+  --card: var(--steel-mid);
+  --card-foreground: var(--text-primary);
+  --popover: var(--steel-mid);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--orange);
+  --primary-foreground: #ffffff;
+  --secondary: var(--steel-light);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--steel-light);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--orange-glow);
+  --accent-foreground: var(--orange-light);
+  --destructive: var(--red);
+  --destructive-foreground: #ffffff;
+  --border: var(--steel-border);
+  --input: var(--steel-border);
+  --ring: var(--orange);
+}
+
+* {
+  box-sizing: border-box;
+  border-color: hsl(var(--border));
+}
+
+html,
+body {
+  background: var(--steel);
+  color: var(--text-primary);
+  font-family: var(--font-barlow), system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle dispatch-room grid for landing surfaces. */
+.bg-grid {
+  background-image: linear-gradient(rgba(74, 82, 112, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 82, 112, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+.bg-orange-glow-radial {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(240, 90, 26, 0.18) 0%,
+    rgba(240, 90, 26, 0) 60%
+  );
+}

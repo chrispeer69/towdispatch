@@ -1,0 +1,75 @@
+# =====================================================================
+# Local development stack for TowCommand Pro.
+# Postgres uses postgis/postgis:16-3.4 because PostGIS is required for
+# service-zone geometry, driver-position geography, and route-matching.
+# Restart policy is unless-stopped so a Docker Desktop restart brings
+# everything back without manual intervention.
+# =====================================================================
+
+name: towcommand
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: towcommand-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-towcommand}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-towcommand_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-towcommand}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - towcommand
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: towcommand-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - towcommand
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: towcommand-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - towcommand
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8025/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+    name: towcommand-postgres-data
+  redis-data:
+    name: towcommand-redis-data
+
+networks:
+  towcommand:
+    name: towcommand
+    driver: bridge

@@ -1,0 +1,1 @@
+ALTER TABLE "customers" ADD COLUMN "created_via" text DEFAULT 'manual' NOT NULL;

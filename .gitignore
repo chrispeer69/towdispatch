@@ -1,0 +1,54 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+
+# testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# editor / OS
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# drizzle
+drizzle/meta/_journal.json.bak
+
+# docker
+postgres-data/
+redis-data/
+
+# misc
+*.pem
+.cache/
+
+# local AI agent / Claude Code state
+.claude/

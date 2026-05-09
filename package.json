@@ -1,0 +1,40 @@
+{
+  "name": "towcommand",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TowCommand Pro — multi-tenant SaaS operating system for the towing industry",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter=./apps/* run dev",
+    "build": "pnpm -r run build",
+    "start": "pnpm -r --parallel --filter=./apps/* run start",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "test:e2e": "pnpm --filter @towcommand/web run test:e2e",
+    "db:generate": "pnpm --filter @towcommand/db run generate",
+    "db:migrate": "pnpm --filter @towcommand/db run migrate",
+    "db:seed": "pnpm --filter @towcommand/db run seed",
+    "db:studio": "pnpm --filter @towcommand/db run studio",
+    "db:reset": "pnpm --filter @towcommand/db run reset",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "22.9.3",
+    "husky": "9.1.7",
+    "lint-staged": "15.2.10",
+    "rimraf": "6.0.1",
+    "tsx": "4.19.2",
+    "typescript": "5.6.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md}": ["biome check --write --no-errors-on-unmatched"]
+  }
+}

@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-id="th-modified">TowCommand Pro — Towing Management Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #F05A1A;
+  --orange-dark: #C44410;
+  --orange-light: #FF7A3D;
+  --orange-glow: rgba(240,90,26,0.15);
+  --steel: #1A1E2A;
+  --steel-mid: #252A38;
+  --steel-light: #2E3447;
+  --steel-border: #3A4158;
+  --steel-border-light: #4A5270;
+  --text-primary: #F0EDE8;
+  --text-secondary: #9CA3B5;
+  --text-muted: #626882;
+  --green: #22C55E;
+  --green-bg: rgba(34,197,94,0.12);
+  --yellow: #EAB308;
+  --yellow-bg: rgba(234,179,8,0.12);
+  --red: #EF4444;
+  --red-bg: rgba(239,68,68,0.12);
+  --blue: #3B82F6;
+  --blue-bg: rgba(59,130,246,0.12);
+  --purple: #A855F7;
+  --sidebar-w: 240px;
+  --header-h: 60px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --font: 'Barlow', sans-serif;
+  --font-condensed: 'Barlow Condensed', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font); background: var(--steel); color: var(--text-primary); font-size: 14px; overflow: hidden; }
+
+/* LAYOUT */
+.app { display: flex; height: 100vh; }
+.sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--steel); border-right: 1px solid var(--steel-border); display: flex; flex-direction: column; height: 100vh; overflow-y: auto; z-index: 100; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { height: var(--header-h); background: var(--steel); border-bottom: 1px solid var(--steel-border); display: flex; align-items: center; padding: 0 24px; gap: 16px; flex-shrink: 0; }
+.content { flex: 1; overflow-y: auto; background: #131620; }
+
+/* SIDEBAR */
+.brand { padding: 20px 18px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--steel-border); }
+.brand-icon { width: 34px; height: 34px; background: var(--orange); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.brand-icon svg { width: 20px; height: 20px; fill: white; }
+.brand-name { font-family: var(--font-condensed); font-size: 18px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.1; }
+.brand-name span { color: var(--orange); }
+.brand-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+.nav-section { padding: 14px 12px 6px; }
+.nav-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); padding: 0 6px 8px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; transition: all 0.15s; color: var(--text-secondary); font-size: 13.5px; font-weight: 500; position: relative; user-select: none; }
+.nav-item:hover { background: var(--steel-light); color: var(--text-primary); }
+.nav-item.active { background: var(--orange-glow); color: var(--orange-light); }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--orange); border-radius: 0 3px 3px 0; }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: var(--orange); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+.nav-badge.green { background: var(--green); }
+.sidebar-footer { margin-top: auto; padding: 14px 12px; border-top: 1px solid var(--steel-border); }
+.company-badge { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--steel-light); border-radius: var(--radius); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--orange); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.avatar.small { width: 26px; height: 26px; font-size: 11px; }
+.avatar.driver { background: var(--steel-border-light); }
+.company-info { flex: 1; min-width: 0; }
+.company-name { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.company-role { font-size: 11px; color: var(--text-muted); }
+
+/* TOPBAR */
+.topbar-title { font-family: var(--font-condensed); font-size: 20px; font-weight: 700; flex: 1; }
+.topbar-title span { color: var(--text-muted); font-weight: 400; }
+.search-bar { display: flex; align-items: center; gap: 8px; background: var(--steel-light); border: 1px solid var(--steel-border); border-radius: 8px; padding: 7px 12px; width: 260px; }
+.search-bar input { background: none; border: none; outline: none; color: var(--text-primary); font-size: 13px; width: 100%; font-family: var(--font); }
+.search-bar input::placeholder { color: var(--text-muted); }
+.search-bar svg { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--steel-light); border: 1px solid var(--steel-border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; color: var(--text-secondary); }
+.icon-btn:hover { border-color: var(--steel-border-light); color: var(--text-primary); }
+.icon-btn svg { width: 15px; height: 15px; }
+.notif-dot { position: relative; }
+.notif-dot::after { content: ''; position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; background: var(--orange); border-radius: 50%; border: 1.5px solid var(--steel); }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: var(--font); }
+.btn-primary { background: var(--orange); color: white; }
+.btn-primary:hover { background: var(--orange-light); }
+.btn-secondary { background: var(--steel-light); color: var(--text-primary); border: 1px solid var(--steel-border); }
+.btn-secondary:hover { border-color: var(--steel-border-light); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+.btn svg { width: 14px; height: 14px; }
+
+/* PAGE */
+.page { display: none; padding: 28px; }
+.page.active { display: block; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-family: var(--font-condensed); font-size: 26px; font-weight: 800; }
+.page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.actions-row { display: flex; align-items: center; gap: 10px; }
+
+/* STATS GRID */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: var(--radius-lg); padding: 18px 20px; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.stat-card.orange::before { background: var(--orange); }
+.stat-card.green::before { background: var(--green); }
+.stat-card.blue::before { background: var(--blue); }
+.stat-card.yellow::before { background: var(--yellow); }
+.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.stat-value { font-family: var(--font-condensed); font-size: 32px; font-weight: 800; line-height: 1; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+.stat-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; }
+.stat-trend.up { color: var(--green); }
+.stat-trend.down { color: var(--red); }
+
+/* GRID LAYOUT */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+
+/* CARDS */
+.card { background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: var(--radius-lg); }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--steel-border); }
+.card-title { font-size: 14px; font-weight: 700; }
+.card-body { padding: 20px; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--steel-border); white-space: nowrap; }
+td { padding: 13px 16px; border-bottom: 1px solid rgba(58,65,88,0.4); font-size: 13px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.td-bold { font-weight: 600; }
+.td-mono { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-orange { background: var(--orange-glow); color: var(--orange-light); }
+.badge-purple { background: rgba(168,85,247,0.12); color: var(--purple); }
+.badge-gray { background: rgba(156,163,181,0.1); color: var(--text-secondary); }
+
+/* FORM ELEMENTS */
+.form-grid { display: grid; gap: 16px; }
+.form-grid-2 { grid-template-columns: 1fr 1fr; }
+.form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); }
+.form-input, .form-select, .form-textarea { background: var(--steel-light); border: 1px solid var(--steel-border); border-radius: 8px; padding: 9px 12px; color: var(--text-primary); font-size: 13px; font-family: var(--font); outline: none; width: 100%; transition: border-color 0.15s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--orange); }
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+.form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239CA3B5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-hint { font-size: 11px; color: var(--text-muted); }
+.section-divider { border: none; border-top: 1px solid var(--steel-border); margin: 20px 0; }
+.section-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--steel-border); }
+
+/* STATUS ITEMS */
+.job-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(58,65,88,0.4); }
+.job-row:last-child { border-bottom: none; padding-bottom: 0; }
+.job-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.job-icon.dispatched { background: var(--blue-bg); }
+.job-icon.enroute { background: var(--orange-glow); }
+.job-icon.complete { background: var(--green-bg); }
+.job-icon.pending { background: var(--yellow-bg); }
+.job-icon svg { width: 16px; height: 16px; }
+.job-info { flex: 1; min-width: 0; }
+.job-title { font-weight: 600; font-size: 13px; }
+.job-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.job-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); flex-shrink: 0; }
+
+/* MAP PLACEHOLDER */
+.map-area { background: var(--steel); border-radius: var(--radius); height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid var(--steel-border); }
+.map-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--steel-border) 1px, transparent 1px), linear-gradient(90deg, var(--steel-border) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.3; }
+.map-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; }
+.map-dot::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; animation: pulse 2s ease-out infinite; }
+.map-dot.orange { background: var(--orange); }
+.map-dot.orange::after { background: rgba(240,90,26,0.3); }
+.map-dot.green { background: var(--green); }
+.map-dot.green::after { background: rgba(34,197,94,0.3); }
+.map-dot.blue { background: var(--blue); }
+.map-dot.blue::after { background: rgba(59,130,246,0.3); }
+@keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
+.map-label { position: absolute; bottom: 10px; left: 10px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+
+/* DRIVER CARD */
+.driver-card { background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.driver-header { display: flex; align-items: center; gap: 12px; }
+.driver-avt { width: 44px; height: 44px; border-radius: 50%; background: var(--steel-border-light); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+.driver-avt.active { box-shadow: 0 0 0 2px var(--green); }
+.driver-avt.offline { opacity: 0.5; }
+.driver-name { font-weight: 700; font-size: 14px; }
+.driver-status { font-size: 11px; margin-top: 2px; }
+.driver-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.driver-stat { text-align: center; background: var(--steel); padding: 8px 4px; border-radius: 8px; }
+.driver-stat-val { font-family: var(--font-condensed); font-size: 18px; font-weight: 700; }
+.driver-stat-key { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* FLEET CARD */
+.truck-card { background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: var(--radius-lg); padding: 16px; }
+.truck-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.truck-icon-wrap { width: 42px; height: 42px; background: var(--steel); border: 1px solid var(--steel-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.truck-icon-wrap svg { width: 22px; height: 22px; color: var(--orange); }
+.progress-bar { height: 4px; background: var(--steel); border-radius: 2px; overflow: hidden; margin: 4px 0; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.progress-fill.green { background: var(--green); }
+.progress-fill.yellow { background: var(--yellow); }
+.progress-fill.red { background: var(--red); }
+
+/* MODALS */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; }
+.modal { background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: var(--radius-lg); width: 100%; max-width: 820px; max-height: 90vh; display: flex; flex-direction: column; }
+.modal-lg { max-width: 1000px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--steel-border); flex-shrink: 0; }
+.modal-title { font-family: var(--font-condensed); font-size: 20px; font-weight: 800; }
+.modal-close { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
+.modal-close:hover { background: var(--steel-light); color: var(--text-primary); }
+.modal-close svg { width: 16px; height: 16px; }
+.modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--steel-border); display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-shrink: 0; }
+
+/* TABS */
+.tabs { display: flex; gap: 2px; background: var(--steel); border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+.tab { flex: 1; text-align: center; padding: 8px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; color: var(--text-muted); }
+.tab.active { background: var(--steel-mid); color: var(--text-primary); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* UPLOAD AREA */
+.upload-area { border: 2px dashed var(--steel-border); border-radius: var(--radius); padding: 32px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.upload-area:hover { border-color: var(--orange); background: var(--orange-glow); }
+.upload-icon { width: 40px; height: 40px; margin: 0 auto 12px; color: var(--text-muted); }
+.upload-icon svg { width: 100%; height: 100%; }
+.upload-text { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.upload-sub { font-size: 12px; color: var(--text-muted); }
+.photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.photo-thumb { aspect-ratio: 1; background: var(--steel); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid var(--steel-border); position: relative; overflow: hidden; }
+.photo-thumb-label { position: absolute; bottom: 4px; left: 4px; right: 4px; font-size: 9px; color: var(--text-muted); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* INTEGRATION CARDS */
+.integration-card { background: var(--steel); border: 1px solid var(--steel-border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+.integration-logo { width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; flex-shrink: 0; }
+.integration-info { flex: 1; }
+.integration-name { font-weight: 700; font-size: 13px; }
+.integration-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.toggle { width: 42px; height: 24px; background: var(--steel-border); border-radius: 12px; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.toggle.on { background: var(--green); }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.toggle.on::after { transform: translateX(18px); }
+
+/* INVOICE */
+.invoice-preview { background: white; color: #1a1a1a; border-radius: var(--radius-lg); padding: 32px; font-family: 'Barlow', sans-serif; }
+.invoice-preview table { width: 100%; border-collapse: collapse; }
+.invoice-preview th { background: #f5f5f5; padding: 8px 12px; font-size: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+.invoice-preview td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #f0f0f0; }
+.invoice-total-row td { font-weight: 700; background: #FFF3EE; color: #C44410; }
+
+/* INSPECTION */
+.check-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(58,65,88,0.4); }
+.check-item:last-child { border-bottom: none; }
+.check-radio { display: flex; gap: 8px; }
+.check-option { display: flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer; }
+.check-option input { accent-color: var(--orange); }
+.check-label { flex: 1; font-size: 13px; }
+.check-pass { color: var(--green); }
+.check-fail { color: var(--red); }
+.check-na { color: var(--text-muted); }
+
+/* ACCOUNTING */
+.invoice-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(58,65,88,0.4); }
+.invoice-row:last-child { border-bottom: none; }
+.invoice-amount { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+.overdue-highlight { background: rgba(239,68,68,0.05); border-radius: 8px; padding: 12px 16px; border: 1px solid rgba(239,68,68,0.15); }
+
+/* EMAIL SETTINGS */
+.email-template-box { background: var(--steel); border: 1px solid var(--steel-border); border-radius: var(--radius); padding: 16px; margin-top: 12px; }
+.email-template-box textarea { background: transparent; border: none; color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; width: 100%; resize: vertical; min-height: 160px; outline: none; line-height: 1.6; }
+
+/* SIGNIN PAGE */
+.signin-page { min-height: 100vh; background: var(--steel); display: flex; align-items: center; justify-content: center; }
+.signin-card { background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: 20px; padding: 48px; width: 420px; }
+.signin-logo { text-align: center; margin-bottom: 36px; }
+.signin-logo .brand-icon { width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 12px; }
+.signin-logo .brand-icon svg { width: 32px; height: 32px; }
+.signin-title { font-family: var(--font-condensed); font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 6px; }
+.signin-sub { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 32px; }
+.signin-form { display: flex; flex-direction: column; gap: 16px; }
+.signin-footer { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 24px; }
+.signin-footer a { color: var(--orange); text-decoration: none; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--steel-mid); border: 1px solid var(--steel-border); border-radius: var(--radius); padding: 12px 20px; display: flex; align-items: center; gap: 10px; z-index: 1000; font-size: 13px; font-weight: 500; animation: slideUp 0.3s ease; max-width: 360px; }
+.toast-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.toast.success .toast-icon { background: var(--green-bg); color: var(--green); }
+.toast.error .toast-icon { background: var(--red-bg); color: var(--red); }
+.toast.info .toast-icon { background: var(--blue-bg); color: var(--blue); }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--steel-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--steel-border-light); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; transition: left 0.3s; }
+  .sidebar.open { left: 0; }
+}
+</style>
+<meta property="og:title" content="TowCommand Pro — Towing Management Platform" data-id="th-modified" ><meta name="description" content="towcommand-pro" data-id="th-modified" ><meta property="og:description" content="towcommand-pro" data-id="th-modified" ><meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png" data-id="th-modified" ><meta property="og:url" content="https://chocolate-mei-22.tiiny.site/" data-id="th-modified" ><meta property="og:type" content="website" data-id="th-modified" ><script defer data-domain="chocolate-mei-22.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script></head>
+<body>
+
+<!-- SIGN IN PAGE (shown first) -->
+<div id="signin-screen" class="signin-page">
+  <div class="signin-card">
+    <div class="signin-logo">
+      <div class="brand-icon" style="width:56px;height:56px;border-radius:14px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--orange)">
+        <svg viewBox="0 0 24 24" fill="white"><path d="M1 17h2v2a1 1 0 001 1h2a1 1 0 001-1v-2h10v2a1 1 0 001 1h2a1 1 0 001-1v-2h1a1 1 0 001-1v-4a1 1 0 00-.29-.71L20.5 9H4a1 1 0 00-.94.66L1 14.17V17zM5.5 10h13l1.5 1.5H4zM4 14.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm16 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"></path></svg>
+      </div>
+      <div style="font-family:var(--font-condensed);font-size:26px;font-weight:800;">TOW<span style="color:var(--orange)">COMMAND</span></div>
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-top:4px;">Professional Fleet Management</div>
+    </div>
+    <div class="signin-form">
+      <div class="form-group">
+        <label class="form-label">Company ID or Email</label>
+        <input class="form-input" type="text" placeholder="company@domain.com" value="adams@premiumtowing.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" placeholder="••••••••" value="••••••••">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary)">
+          <input type="checkbox" checked style="accent-color:var(--orange)"> Remember me
+        </label>
+        <a href="#" style="color:var(--orange);text-decoration:none;">Forgot password?</a>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;" onclick="enterDashboard()">Sign In to Dashboard</button>
+      <div style="text-align:center;font-size:12px;color:var(--text-muted);">
+        Driver sign-in? <a href="#" style="color:var(--orange);text-decoration:none;" onclick="enterDriver()">Driver Portal →</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--steel-border);margin-top:28px;padding-top:20px;text-align:center;">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;font-weight:700;letter-spacing:1px;">MOTOR CLUB INTEGRATIONS</div>
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+        <span style="background:var(--steel);border:1px solid var(--steel-border);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text-secondary);">Agero</span>
+        <span style="background:var(--steel);border:1px solid var(--steel-border);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text-secondary);">AAA</span>
+        <span style="background:var(--steel);border:1px solid var(--steel-border);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text-secondary);">Urgently</span>
+        <span style="background:var(--steel);border:1px solid var(--steel-border);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text-secondary);">GEICO</span>
+        <span style="background:var(--steel);border:1px solid var(--steel-border);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--text-secondary);">NSD</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-screen" class="app" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M1 17h2v2a1 1 0 001 1h2a1 1 0 001-1v-2h10v2a1 1 0 001 1h2a1 1 0 001-1v-2h1a1 1 0 001-1v-4a1 1 0 00-.29-.71L20.5 9H4a1 1 0 00-.94.66L1 14.17V17z"></path></svg>
+      </div>
+      <div>
+        <div class="brand-name">TOW<span>COMMAND</span></div>
+        <div class="brand-sub">Pro Platform</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('tow-jobs')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path></svg>
+        Tow Jobs
+        <span class="nav-badge">12</span>
+      </div>
+      <div class="nav-item" onclick="showPage('dispatch')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+        Dispatch Map
+      </div>
+      <div class="nav-item" onclick="showPage('inspection')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+        Inspections
+        <span class="nav-badge green">3</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Management</div>
+      <div class="nav-item" onclick="showPage('drivers')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+        Drivers
+      </div>
+      <div class="nav-item" onclick="showPage('fleet')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 4H6C4.9 4 4 4.9 4 6v13a1 1 0 001 1h14a1 1 0 001-1V6c0-1.1-.9-2-2-2zm0 14H6V6h12v12z"></path></svg>
+        Fleet
+      </div>
+      <div class="nav-item" onclick="showPage('customers')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
+        Customers
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Finance</div>
+      <div class="nav-item" onclick="showPage('accounting')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"></path></svg>
+        Accounting
+      </div>
+      <div class="nav-item" onclick="showPage('invoices')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path></svg>
+        Invoices
+      </div>
+      <div class="nav-item" onclick="showPage('email-settings')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path></svg>
+        Email Settings
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <div class="nav-item" onclick="showPage('integrations')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg>
+        Integrations
+      </div>
+      <div class="nav-item" onclick="signOut()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path></svg>
+        Sign Out
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="company-badge">
+        <div class="avatar">PA</div>
+        <div class="company-info">
+          <div class="company-name">Premium Towing LLC</div>
+          <div class="company-role">Owner / Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard <span>/ Overview</span></div>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+        <input type="text" placeholder="Search jobs, customers, plates...">
+      </div>
+      <div class="topbar-actions">
+        <div class="icon-btn notif-dot" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>
+        </div>
+        <div class="icon-btn" title="Settings">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"></path></svg>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openNewJob()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+          New Job
+        </button>
+      </div>
+    </header>
+
+    <!-- PAGES CONTAINER -->
+    <div class="content">
+
+      <!-- DASHBOARD PAGE -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Operations Overview</div>
+            <div class="page-subtitle">Tuesday, March 24, 2026 · Real-time data</div>
+          </div>
+          <div class="actions-row">
+            <button class="btn btn-secondary btn-sm">Export Report</button>
+            <button class="btn btn-primary btn-sm" onclick="openNewJob()">+ New Tow Job</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card orange">
+            <div class="stat-label">Active Jobs Today</div>
+            <div class="stat-value">12</div>
+            <div class="stat-sub"><span class="stat-trend up">↑ 4</span> since yesterday</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Revenue Today</div>
+            <div class="stat-value">$4,820</div>
+            <div class="stat-sub"><span class="stat-trend up">↑ 18%</span> vs last Tuesday</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-label">Drivers On Duty</div>
+            <div class="stat-value">7<span style="font-size:18px;color:var(--text-muted)">/9</span></div>
+            <div class="stat-sub">2 drivers offline</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-label">Open Invoices</div>
+            <div class="stat-value">$28,450</div>
+            <div class="stat-sub"><span class="stat-trend down" style="color:var(--red)">6 overdue</span> past 8 days</div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <!-- Active Jobs -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Active Jobs</div>
+              <button class="btn btn-secondary btn-sm" onclick="showPage('tow-jobs')">View All</button>
+            </div>
+            <div class="card-body" style="padding:12px 20px;">
+              <div class="job-row">
+                <div class="job-icon enroute"><svg viewBox="0 0 24 24" fill="var(--orange-light)" width="16" height="16"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"></path></svg></div>
+                <div class="job-info">
+                  <div class="job-title">TJ-2024-0891 · 2019 Honda Civic</div>
+                  <div class="job-meta">Driver: Marcus T. · I-95 & Exit 12 → AutoZone</div>
+                </div>
+                <span class="badge badge-orange">En Route</span>
+              </div>
+              <div class="job-row">
+                <div class="job-icon dispatched"><svg viewBox="0 0 24 24" fill="var(--blue)" width="16" height="16"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path></svg></div>
+                <div class="job-info">
+                  <div class="job-title">TJ-2024-0892 · 2022 Ford F-150</div>
+                  <div class="job-meta">Driver: Sandra K. · 4th & Main → Ford Dealer</div>
+                </div>
+                <span class="badge badge-blue">Dispatched</span>
+              </div>
+              <div class="job-row">
+                <div class="job-icon enroute"><svg viewBox="0 0 24 24" fill="var(--orange-light)" width="16" height="16"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"></path></svg></div>
+                <div class="job-info">
+                  <div class="job-title">TJ-2024-0893 · 2021 Toyota RAV4</div>
+                  <div class="job-meta">Driver: James W. · Walmart Pkwy (PPT)</div>
+                </div>
+                <span class="badge badge-orange">En Route</span>
+              </div>
+              <div class="job-row">
+                <div class="job-icon pending"><svg viewBox="0 0 24 24" fill="var(--yellow)" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"></path></svg></div>
+                <div class="job-info">
+                  <div class="job-title">TJ-2024-0894 · 2020 BMW 330i</div>
+                  <div class="job-meta">AAA · Awaiting driver assignment</div>
+                </div>
+                <span class="badge badge-yellow">Pending</span>
+              </div>
+              <div class="job-row">
+                <div class="job-icon complete"><svg viewBox="0 0 24 24" fill="var(--green)" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg></div>
+                <div class="job-info">
+                  <div class="job-title">TJ-2024-0890 · 2018 Chevy Malibu</div>
+                  <div class="job-meta">Driver: Marcus T. · Completed 10:42 AM</div>
+                </div>
+                <span class="badge badge-green">Complete</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <!-- Live Map -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Live Dispatch Map</div>
+                <button class="btn btn-secondary btn-sm" onclick="showPage('dispatch')">Full Map</button>
+              </div>
+              <div class="card-body" style="padding:12px;">
+                <div class="map-area">
+                  <div class="map-grid"></div>
+                  <div class="map-dot orange" style="top:35%;left:40%;"></div>
+                  <div class="map-dot orange" style="top:55%;left:65%;"></div>
+                  <div class="map-dot green" style="top:25%;left:55%;"></div>
+                  <div class="map-dot green" style="top:70%;left:30%;"></div>
+                  <div class="map-dot blue" style="top:45%;left:75%;"></div>
+                  <div class="map-dot blue" style="top:20%;left:20%;"></div>
+                  <div class="map-label">
+                    <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:var(--orange);border-radius:50%;display:inline-block;"></span>En Route</span>
+                    <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:var(--green);border-radius:50%;display:inline-block;"></span>Available</span>
+                    <span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:var(--blue);border-radius:50%;display:inline-block;"></span>Dispatched</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Motor Club Notifications -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Incoming Requests</div>
+                <span class="badge badge-red" style="animation: pulse2 1.5s infinite;">3 New</span>
+              </div>
+              <div class="card-body" style="padding:10px 16px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(58,65,88,0.4);">
+                  <div style="width:36px;height:36px;background:#006CB7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:white;flex-shrink:0;">AAA</div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:600;">Light Duty Tow · 2020 Nissan Altima</div><div style="font-size:11px;color:var(--text-muted);">Market & 5th · 0.8mi away</div></div>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;">Accept</button>
+                    <button class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:11px;">Reject</button>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(58,65,88,0.4);">
+                  <div style="width:36px;height:36px;background:#E31837;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white;flex-shrink:0;">GEICO</div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:600;">Lockout Service · 2023 Tesla M3</div><div style="font-size:11px;color:var(--text-muted);">Oak & Highland · 1.2mi away</div></div>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;">Accept</button>
+                    <button class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:11px;">Reject</button>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+                  <div style="width:36px;height:36px;background:#FF6B00;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white;flex-shrink:0;">AGERO</div>
+                  <div style="flex:1;"><div style="font-size:12px;font-weight:600;">Medium Duty Tow · 2018 Box Truck</div><div style="font-size:11px;color:var(--text-muted);">Industrial Blvd · 2.1mi away</div></div>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:11px;">Accept</button>
+                    <button class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:11px;">Reject</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOW JOBS PAGE -->
+      <div id="page-tow-jobs" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Tow Jobs</div>
+            <div class="page-subtitle">All jobs · Today: 12 active, 8 completed</div>
+          </div>
+          <div class="actions-row">
+            <select class="form-select" style="width:auto;padding:7px 28px 7px 10px;font-size:12px;">
+              <option>All Statuses</option><option>Pending</option><option>Dispatched</option><option>En Route</option><option>Complete</option>
+            </select>
+            <button class="btn btn-primary" onclick="openNewJob()">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+              New Tow Job
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job #</th><th>Customer</th><th>Vehicle</th><th>Pickup</th><th>Drop-off</th><th>Service</th><th>Driver</th><th>Status</th><th>Amount</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="td-bold">TJ-2024-0892</td><td>Sarah Mitchell<br><span style="font-size:11px;color:var(--text-muted);">(614) 555-0182</span></td><td>2022 Ford F-150<br><span class="td-mono">1FTFW1E84NFA12345</span></td><td>4th & Main St</td><td>Ford Dealer N</td><td><span class="badge badge-blue">AAA Tow</span></td><td>Sandra K.</td><td><span class="badge badge-blue">Dispatched</span></td><td class="invoice-amount">$145</td><td><button class="btn btn-secondary btn-sm" onclick="openJobDetail()">View</button></td></tr>
+                <tr><td class="td-bold">TJ-2024-0891</td><td>Robert Davis<br><span style="font-size:11px;color:var(--text-muted);">(614) 555-0145</span></td><td>2019 Honda Civic<br><span class="td-mono">2HGFC2F59KH123456</span></td><td>I-95 & Exit 12</td><td>AutoZone Broad</td><td><span class="badge badge-orange">Agero</span></td><td>Marcus T.</td><td><span class="badge badge-orange">En Route</span></td><td class="invoice-amount">$185</td><td><button class="btn btn-secondary btn-sm" onclick="openJobDetail()">View</button></td></tr>
+                <tr><td class="td-bold">TJ-2024-0890</td><td>Jennifer Lee<br><span style="font-size:11px;color:var(--text-muted);">(614) 555-0201</span></td><td>2018 Chevy Malibu<br><span class="td-mono">1G1ZD5ST5JF123789</span></td><td>Oak & Highland</td><td>Customer Home</td><td><span class="badge badge-green">Cash Tow</span></td><td>Marcus T.</td><td><span class="badge badge-green">Complete</span></td><td class="invoice-amount">$220</td><td><button class="btn btn-secondary btn-sm" onclick="openJobDetail()">View</button></td></tr>
+                <tr><td class="td-bold">TJ-2024-0889</td><td>Michael Torres<br><span style="font-size:11px;color:var(--text-muted);">(614) 555-0378</span></td><td>2021 Toyota RAV4<br><span class="td-mono">2T3RWRFV9MW123456</span></td><td>Walmart Pkwy</td><td>Toyota Service</td><td><span class="badge badge-purple">PPT</span></td><td>James W.</td><td><span class="badge badge-orange">En Route</span></td><td class="invoice-amount">$0</td><td><button class="btn btn-secondary btn-sm" onclick="openJobDetail()">View</button></td></tr>
+                <tr><td class="td-bold">TJ-2024-0888</td><td>Emily Watson<br><span style="font-size:11px;color:var(--text-muted);">(614) 555-0412</span></td><td>2020 BMW 330i<br><span class="td-mono">3MW5R7J06L8B12345</span></td><td>Commerce Dr</td><td>BMW Columbus</td><td><span class="badge badge-blue">GEICO</span></td><td>Unassigned</td><td><span class="badge badge-yellow">Pending</span></td><td class="invoice-amount">$280</td><td><button class="btn btn-secondary btn-sm" onclick="openJobDetail()">View</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVERS PAGE -->
+      <div id="page-drivers" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Driver Management</div><div class="page-subtitle">9 employees registered · 7 on duty</div></div>
+          <button class="btn btn-primary" onclick="openAddDriver()">+ Add Driver</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div class="driver-card">
+            <div class="driver-header">
+              <div class="driver-avt active">MT</div>
+              <div style="flex:1;">
+                <div class="driver-name">Marcus Thompson</div>
+                <div class="driver-status"><span class="badge badge-orange">En Route · TJ-0891</span></div>
+              </div>
+              <button class="btn btn-secondary btn-sm">Profile</button>
+            </div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="driver-stat-val">34</div><div class="driver-stat-key">Jobs MTD</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">4.9★</div><div class="driver-stat-key">Rating</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">$6.2K</div><div class="driver-stat-key">Revenue</div></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Assign Job</button>
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Message</button>
+            </div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-header">
+              <div class="driver-avt active" style="background:#3B82F6;">SK</div>
+              <div style="flex:1;">
+                <div class="driver-name">Sandra Kowalski</div>
+                <div class="driver-status"><span class="badge badge-blue">Dispatched · TJ-0892</span></div>
+              </div>
+              <button class="btn btn-secondary btn-sm">Profile</button>
+            </div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="driver-stat-val">28</div><div class="driver-stat-key">Jobs MTD</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">4.8★</div><div class="driver-stat-key">Rating</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">$5.1K</div><div class="driver-stat-key">Revenue</div></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Assign Job</button>
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Message</button>
+            </div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-header">
+              <div class="driver-avt active" style="background:#A855F7;">JW</div>
+              <div style="flex:1;">
+                <div class="driver-name">James Williams</div>
+                <div class="driver-status"><span class="badge badge-orange">On Scene · TJ-0889</span></div>
+              </div>
+              <button class="btn btn-secondary btn-sm">Profile</button>
+            </div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="driver-stat-val">22</div><div class="driver-stat-key">Jobs MTD</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">4.7★</div><div class="driver-stat-key">Rating</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">$4.3K</div><div class="driver-stat-key">Revenue</div></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Assign Job</button>
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Message</button>
+            </div>
+          </div>
+          <div class="driver-card">
+            <div class="driver-header">
+              <div class="driver-avt" style="background:var(--green);">TM</div>
+              <div style="flex:1;">
+                <div class="driver-name">Tony Martinez</div>
+                <div class="driver-status"><span class="badge badge-green">Available</span></div>
+              </div>
+              <button class="btn btn-secondary btn-sm">Profile</button>
+            </div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="driver-stat-val">19</div><div class="driver-stat-key">Jobs MTD</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">4.6★</div><div class="driver-stat-key">Rating</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">$3.8K</div><div class="driver-stat-key">Revenue</div></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Assign Job</button>
+              <button class="btn btn-primary btn-sm" style="flex:1;" onclick="openNewJob()">Quick Dispatch</button>
+            </div>
+          </div>
+          <div class="driver-card" style="opacity:0.6;">
+            <div class="driver-header">
+              <div class="driver-avt offline">RB</div>
+              <div style="flex:1;">
+                <div class="driver-name">Ray Brown</div>
+                <div class="driver-status"><span class="badge badge-gray">Off Duty</span></div>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="showToast('Driver access revoked','success')">Revoke</button>
+            </div>
+            <div class="driver-stats">
+              <div class="driver-stat"><div class="driver-stat-val">8</div><div class="driver-stat-key">Jobs MTD</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">4.2★</div><div class="driver-stat-key">Rating</div></div>
+              <div class="driver-stat"><div class="driver-stat-val">$1.4K</div><div class="driver-stat-key">Revenue</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLEET PAGE -->
+      <div id="page-fleet" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Fleet Management</div><div class="page-subtitle">5 trucks · 4 active, 1 in maintenance</div></div>
+          <button class="btn btn-primary">+ Add Vehicle</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div class="truck-card">
+            <div class="truck-header">
+              <div class="truck-icon-wrap"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"></path></svg></div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Unit #101 — Heavy Wrecker</div><div style="font-size:11px;color:var(--text-muted);">2022 Kenworth T440 · OH-44102</div></div>
+              <span class="badge badge-orange">Active</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--text-muted);">Driver</div><div style="font-size:12px;font-weight:600;">Marcus T.</div>
+              <div style="font-size:11px;color:var(--text-muted);">Mileage</div><div style="font-size:12px;font-family:var(--font-mono);">87,340 mi</div>
+              <div style="font-size:11px;color:var(--text-muted);">Last Inspection</div><div style="font-size:12px;">Mar 20, 2026</div>
+              <div style="font-size:11px;color:var(--text-muted);">Next Service</div><div style="font-size:12px;color:var(--yellow);">Due in 1,200 mi</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;"><span>Oil Life</span><span>42%</span></div>
+              <div class="progress-bar"><div class="progress-fill yellow" style="width:42%"></div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Maintenance Log</button>
+              <button class="btn btn-secondary btn-sm" onclick="showPage('inspection')">Inspect</button>
+            </div>
+          </div>
+          <div class="truck-card">
+            <div class="truck-header">
+              <div class="truck-icon-wrap"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"></path></svg></div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Unit #102 — Flatbed</div><div style="font-size:11px;color:var(--text-muted);">2021 Ford F-550 · OH-44103</div></div>
+              <span class="badge badge-orange">Active</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--text-muted);">Driver</div><div style="font-size:12px;font-weight:600;">Sandra K.</div>
+              <div style="font-size:11px;color:var(--text-muted);">Mileage</div><div style="font-size:12px;font-family:var(--font-mono);">54,120 mi</div>
+              <div style="font-size:11px;color:var(--text-muted);">Last Inspection</div><div style="font-size:12px;">Mar 22, 2026</div>
+              <div style="font-size:11px;color:var(--text-muted);">Next Service</div><div style="font-size:12px;color:var(--green);">3,400 mi away</div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;"><span>Oil Life</span><span>78%</span></div>
+              <div class="progress-bar"><div class="progress-fill green" style="width:78%"></div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">Maintenance Log</button>
+              <button class="btn btn-secondary btn-sm" onclick="showPage('inspection')">Inspect</button>
+            </div>
+          </div>
+          <div class="truck-card" style="border-color:rgba(239,68,68,0.3);">
+            <div class="truck-header">
+              <div class="truck-icon-wrap" style="border-color:rgba(239,68,68,0.3);"><svg viewBox="0 0 24 24" fill="var(--red)"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4z"></path></svg></div>
+              <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Unit #103 — Wheel Lift</div><div style="font-size:11px;color:var(--text-muted);">2019 Ram 3500 · OH-44104</div></div>
+              <span class="badge badge-red">Maintenance</span>
+            </div>
+            <div style="background:var(--red-bg);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px;font-size:12px;color:var(--red);margin-bottom:12px;">
+              ⚠ Brake inspection required. Out of service since Mar 23.
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="btn btn-secondary btn-sm" style="flex:1;">View Maintenance</button>
+              <button class="btn btn-primary btn-sm">Mark Ready</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSPECTION PAGE -->
+      <div id="page-inspection" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Pre-Trip Inspection</div><div class="page-subtitle">Unit #101 · Marcus Thompson · Mar 24, 2026</div></div>
+          <div class="actions-row">
+            <select class="form-select" style="width:auto;font-size:12px;padding:7px 28px 7px 10px;">
+              <option>Unit #101 — Heavy Wrecker</option><option>Unit #102 — Flatbed</option><option>Unit #103 — Wheel Lift</option>
+            </select>
+            <button class="btn btn-primary" onclick="showToast('Inspection submitted & signed','success')">Submit & Sign</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">🔧 Mechanical Systems</div></div>
+            <div class="card-body">
+              <div id="inspection-items"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div class="card-header"><div class="card-title">💡 Lights & Electrical</div></div>
+              <div class="card-body">
+                <div id="inspection-lights"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">📝 Inspector Notes</div></div>
+              <div class="card-body">
+                <textarea class="form-textarea" style="min-height:100px;" placeholder="Add any notes, concerns, or defects observed..."></textarea>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                  <div style="flex:1;">
+                    <div class="form-label" style="margin-bottom:6px;">Driver Signature</div>
+                    <div style="background:var(--steel);border:1px dashed var(--steel-border);border-radius:8px;height:60px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted);cursor:pointer;">Click to sign</div>
+                  </div>
+                  <div style="flex:1;">
+                    <div class="form-label" style="margin-bottom:6px;">Odometer Reading</div>
+                    <input class="form-input" type="number" value="87340" placeholder="Miles">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS PAGE -->
+      <div id="page-customers" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Customer Accounts</div><div class="page-subtitle">All accounts with billing & service rates</div></div>
+          <button class="btn btn-primary">+ Add Account</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Account</th><th>Type</th><th>Contact</th><th>Services & Rates</th><th>Open Balance</th><th>Last Job</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="td-bold">AAA Mid-Atlantic</div><div class="td-mono">ACC-1001</div></td>
+                  <td><span class="badge badge-blue">Motor Club</span></td>
+                  <td>dispatch@aaa.com<br><span style="font-size:11px;color:var(--text-muted);">(800) 222-4357</span></td>
+                  <td><span class="badge badge-gray" style="font-size:10px;">Light Tow: $85</span> <span class="badge badge-gray" style="font-size:10px;">Lockout: $45</span><br><span class="badge badge-gray" style="font-size:10px;">Flatbed: $120</span></td>
+                  <td class="invoice-amount" style="color:var(--red);">$3,240</td>
+                  <td>Mar 24, 2026</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-secondary btn-sm">Manage</button></td>
+                </tr>
+                <tr>
+                  <td><div class="td-bold">Agero Services</div><div class="td-mono">ACC-1002</div></td>
+                  <td><span class="badge badge-orange">Motor Club</span></td>
+                  <td>ops@agero.com<br><span style="font-size:11px;color:var(--text-muted);">(877) 247-3687</span></td>
+                  <td><span class="badge badge-gray" style="font-size:10px;">Light Tow: $90</span> <span class="badge badge-gray" style="font-size:10px;">Medium: $140</span></td>
+                  <td class="invoice-amount">$1,820</td>
+                  <td>Mar 24, 2026</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-secondary btn-sm">Manage</button></td>
+                </tr>
+                <tr>
+                  <td><div class="td-bold">GEICO Insurance</div><div class="td-mono">ACC-1003</div></td>
+                  <td><span class="badge badge-purple">Insurance</span></td>
+                  <td>towing@geico.com<br><span style="font-size:11px;color:var(--text-muted);">(800) 841-1587</span></td>
+                  <td><span class="badge badge-gray" style="font-size:10px;">All services: $110</span></td>
+                  <td class="invoice-amount">$980</td>
+                  <td>Mar 23, 2026</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-secondary btn-sm">Manage</button></td>
+                </tr>
+                <tr>
+                  <td><div class="td-bold">Riverside Auto Body</div><div class="td-mono">ACC-2001</div></td>
+                  <td><span class="badge badge-yellow">Body Shop</span></td>
+                  <td>manager@riverside.com<br><span style="font-size:11px;color:var(--text-muted);">(614) 555-0922</span></td>
+                  <td><span class="badge badge-gray" style="font-size:10px;">Flatbed: $95/hr</span></td>
+                  <td class="invoice-amount" style="color:var(--red);">$4,560</td>
+                  <td>Mar 21, 2026</td>
+                  <td><span class="badge badge-red">Overdue 12d</span></td>
+                  <td><button class="btn btn-secondary btn-sm">Manage</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTING PAGE -->
+      <div id="page-accounting" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Accounting</div><div class="page-subtitle">Financial overview · March 2026</div></div>
+          <div class="actions-row">
+            <button class="btn btn-secondary btn-sm">Export to QuickBooks</button>
+            <button class="btn btn-primary" onclick="showPage('invoices')">Manage Invoices</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-label">Monthly Revenue</div>
+            <div class="stat-value">$68,240</div>
+            <div class="stat-sub"><span class="stat-trend up">↑ 12%</span> vs Feb 2026</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-label">Outstanding AR</div>
+            <div class="stat-value">$28,450</div>
+            <div class="stat-sub">Across 24 open invoices</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-label">Collected MTD</div>
+            <div class="stat-value">$39,790</div>
+            <div class="stat-sub">58% collection rate</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-label">Overdue 8+ Days</div>
+            <div class="stat-value" style="color:var(--red);">$14,200</div>
+            <div class="stat-sub" style="color:var(--red);">6 accounts · Auto-email Tuesday</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Overdue Accounts</div><button class="btn btn-danger btn-sm" onclick="showToast('Overdue statements emailed to 6 accounts','success')">Send All Reminders</button></div>
+            <div class="card-body">
+              <div class="overdue-highlight" style="margin-bottom:12px;">
+                <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:4px;">⚠ Auto-Email Scheduled: Tuesday 6:00 AM</div>
+                <div style="font-size:11px;color:var(--text-muted);">6 accounts with balances overdue more than 8 days will receive automated statements.</div>
+              </div>
+              <div class="invoice-row">
+                <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Riverside Auto Body</div><div style="font-size:11px;color:var(--text-muted);">12 days overdue · 8 unpaid invoices</div></div>
+                <div class="invoice-amount" style="color:var(--red);">$4,560</div>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Statement emailed to Riverside Auto Body','success')">Email Now</button>
+              </div>
+              <div class="invoice-row">
+                <div style="flex:1;"><div style="font-size:13px;font-weight:600;">AAA Mid-Atlantic</div><div style="font-size:11px;color:var(--text-muted);">9 days overdue · 15 unpaid invoices</div></div>
+                <div class="invoice-amount" style="color:var(--red);">$3,240</div>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Statement emailed to AAA Mid-Atlantic','success')">Email Now</button>
+              </div>
+              <div class="invoice-row">
+                <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Metro Police Dept</div><div style="font-size:11px;color:var(--text-muted);">14 days overdue · 6 invoices</div></div>
+                <div class="invoice-amount" style="color:var(--red);">$2,180</div>
+                <button class="btn btn-secondary btn-sm" onclick="showToast('Statement emailed to Metro Police Dept','success')">Email Now</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Payments</div></div>
+            <div class="card-body">
+              <div class="invoice-row">
+                <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Agero Services</div><div style="font-size:11px;color:var(--text-muted);">INV-0821 · Wire transfer</div></div>
+                <div class="invoice-amount" style="color:var(--green);">+$2,450</div>
+                <span class="badge badge-green">Paid</span>
+              </div>
+              <div class="invoice-row">
+                <div style="flex:1;"><div style="font-size:13px;font-weight:600;">GEICO Insurance</div><div style="font-size:11px;color:var(--text-muted);">INV-0818 · ACH</div></div>
+                <div class="invoice-amount" style="color:var(--green);">+$1,890</div>
+                <span class="badge badge-green">Paid</span>
+              </div>
+              <div class="invoice-row">
+                <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Cash Customer</div><div style="font-size:11px;color:var(--text-muted);">TJ-0887 · Cash</div></div>
+                <div class="invoice-amount" style="color:var(--green);">+$220</div>
+                <span class="badge badge-green">Paid</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICES PAGE -->
+      <div id="page-invoices" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Invoices</div><div class="page-subtitle">All invoices and statements</div></div>
+          <div class="actions-row">
+            <button class="btn btn-secondary btn-sm" onclick="openInvoicePreview()">Preview Template</button>
+            <button class="btn btn-primary" onclick="openInvoicePreview()">+ Create Invoice</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Invoice #</th><th>Account</th><th>Job #</th><th>Date</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td class="td-bold">INV-0892</td><td>AAA Mid-Atlantic</td><td>TJ-0891</td><td>Mar 24, 2026</td><td>Apr 7, 2026</td><td class="invoice-amount">$185</td><td><span class="badge badge-yellow">Pending</span></td><td><button class="btn btn-secondary btn-sm" onclick="openInvoicePreview()">View</button></td></tr>
+                <tr><td class="td-bold">INV-0891</td><td>GEICO Insurance</td><td>TJ-0890</td><td>Mar 23, 2026</td><td>Apr 6, 2026</td><td class="invoice-amount">$280</td><td><span class="badge badge-yellow">Pending</span></td><td><button class="btn btn-secondary btn-sm" onclick="openInvoicePreview()">View</button></td></tr>
+                <tr><td class="td-bold">INV-0882</td><td>Riverside Auto Body</td><td>TJ-0878</td><td>Mar 12, 2026</td><td>Mar 16, 2026</td><td class="invoice-amount" style="color:var(--red);">$560</td><td><span class="badge badge-red">Overdue 12d</span></td><td><button class="btn btn-secondary btn-sm" onclick="openInvoicePreview()">View</button></td></tr>
+                <tr><td class="td-bold">INV-0821</td><td>Agero Services</td><td>TJ-0815</td><td>Mar 1, 2026</td><td>Mar 15, 2026</td><td class="invoice-amount" style="color:var(--green);">$2,450</td><td><span class="badge badge-green">Paid</span></td><td><button class="btn btn-secondary btn-sm" onclick="openInvoicePreview()">View</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL SETTINGS PAGE -->
+      <div id="page-email-settings" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Email Settings</div><div class="page-subtitle">Automated billing, overdue reminders, and templates</div></div>
+          <button class="btn btn-primary" onclick="showToast('Email settings saved successfully','success')">Save Settings</button>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="card" style="margin-bottom:20px;">
+              <div class="card-header"><div class="card-title">📧 SMTP Configuration</div></div>
+              <div class="card-body">
+                <div class="form-grid" style="gap:14px;">
+                  <div class="form-group"><label class="form-label">From Email Address</label><input class="form-input" value="billing@premiumtowing.com"></div>
+                  <div class="form-group"><label class="form-label">From Name</label><input class="form-input" value="Premium Towing LLC – Billing"></div>
+                  <div class="form-grid form-grid-2">
+                    <div class="form-group"><label class="form-label">SMTP Host</label><input class="form-input" value="smtp.gmail.com"></div>
+                    <div class="form-group"><label class="form-label">Port</label><input class="form-input" value="587"></div>
+                  </div>
+                  <div class="form-group"><label class="form-label">SMTP Password</label><input class="form-input" type="password" value="••••••••••"></div>
+                  <button class="btn btn-secondary btn-sm" onclick="showToast('Test email sent to billing@premiumtowing.com','info')">Send Test Email</button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">⏰ Auto-Send Schedule</div></div>
+              <div class="card-body">
+                <div class="form-grid" style="gap:14px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--steel);border-radius:8px;border:1px solid var(--steel-border);">
+                    <div><div style="font-size:13px;font-weight:600;">Overdue Invoice Auto-Email</div><div style="font-size:11px;color:var(--text-muted);">Sends to all accounts overdue 8+ days</div></div>
+                    <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+                  </div>
+                  <div class="form-grid form-grid-2">
+                    <div class="form-group"><label class="form-label">Send Day</label>
+                      <select class="form-select"><option>Every Tuesday</option><option>Every Monday</option><option>Every Wednesday</option><option>Daily</option></select>
+                    </div>
+                    <div class="form-group"><label class="form-label">Send Time</label>
+                      <select class="form-select"><option>6:00 AM</option><option>7:00 AM</option><option>8:00 AM</option><option>9:00 AM</option></select>
+                    </div>
+                  </div>
+                  <div class="form-group"><label class="form-label">Overdue Threshold (Days)</label><input class="form-input" type="number" value="8" min="1" max="90"></div>
+                  <div style="background:var(--orange-glow);border:1px solid rgba(240,90,26,0.2);border-radius:8px;padding:10px;font-size:12px;">
+                    <strong style="color:var(--orange-light);">Next scheduled send:</strong> <span style="color:var(--text-secondary);">Tuesday, March 31, 2026 at 6:00 AM — 6 accounts queued</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">✍️ Overdue Invoice Email Template</div>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Template saved','success')">Save Template</button>
+            </div>
+            <div class="card-body">
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Email Subject Line</label>
+                <input class="form-input" value="Action Required: Outstanding Balance — {{company_name}}">
+              </div>
+              <div class="form-label" style="margin-bottom:8px;">Email Body</div>
+              <div class="email-template-box">
+                <textarea>Subject: Friendly Reminder — Outstanding Invoice Balance
+
+Dear {{customer_name}},
+
+We hope this message finds you well. We're reaching out regarding an outstanding balance on your account with Premium Towing LLC.
+
+Our records show the following invoices are currently past due:
+
+{{invoice_table}}
+
+Total Amount Due: {{total_due}}
+Original Due Date: {{due_date}}
+Days Overdue: {{days_overdue}}
+
+We truly value your business and the relationship we've built together. We understand that sometimes invoices can be overlooked, and we're happy to work with you to resolve this promptly.
+
+To settle your balance, please visit our payment portal at:
+https://pay.premiumtowing.com
+
+Or contact our billing team at:
+📞 (614) 555-0100
+📧 billing@premiumtowing.com
+
+If you have already submitted payment, please disregard this notice. If you have any questions or would like to discuss a payment arrangement, we are always here to help.
+
+Thank you for your continued partnership. We look forward to continuing to serve you.
+
+Warm regards,
+
+The Premium Towing LLC Billing Team
+(614) 555-0100 | billing@premiumtowing.com
+www.premiumtowing.com
+
+---
+This is an automated reminder. To unsubscribe from billing notifications, contact our office.
+</textarea>
+              </div>
+              <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
+                Available variables: {{customer_name}}, {{company_name}}, {{invoice_table}}, {{total_due}}, {{due_date}}, {{days_overdue}}, {{payment_link}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTEGRATIONS PAGE -->
+      <div id="page-integrations" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Motor Club Integrations</div><div class="page-subtitle">Connect to dispatch networks to receive jobs automatically</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;">
+          <div class="integration-card">
+            <div class="integration-logo" style="background:#006CB7;color:white;">AAA</div>
+            <div class="integration-info">
+              <div class="integration-name">AAA Mid-Atlantic</div>
+              <div class="integration-desc">Receive roadside & tow dispatch via AAA Connect API</div>
+              <div style="margin-top:6px;"><span class="badge badge-green">Connected · 42 jobs/mo</span></div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo" style="background:#FF6B00;color:white;font-size:10px;">AGERO</div>
+            <div class="integration-info">
+              <div class="integration-name">Agero</div>
+              <div class="integration-desc">Digital dispatch via Agero ServicePower network</div>
+              <div style="margin-top:6px;"><span class="badge badge-green">Connected · 31 jobs/mo</span></div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo" style="background:#E31837;color:white;font-size:10px;">GEICO</div>
+            <div class="integration-info">
+              <div class="integration-name">GEICO Roadside</div>
+              <div class="integration-desc">Auto-receive insurance-dispatched tow jobs</div>
+              <div style="margin-top:6px;"><span class="badge badge-green">Connected · 18 jobs/mo</span></div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo" style="background:#1A56DB;color:white;font-size:9px;">URGNTLY</div>
+            <div class="integration-info">
+              <div class="integration-name">Urgently</div>
+              <div class="integration-desc">On-demand roadside via Urgently dispatch platform</div>
+              <div style="margin-top:6px;"><span class="badge badge-yellow">API Key Required</span></div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('on');showToast('Enter API key to activate Urgently','info')"></div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo" style="background:#6B21A8;color:white;font-size:11px;">NSD</div>
+            <div class="integration-info">
+              <div class="integration-name">NSD (National Service Dispatch)</div>
+              <div class="integration-desc">Heavy duty and specialty tow requests</div>
+              <div style="margin-top:6px;"><span class="badge badge-yellow">Setup Required</span></div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="integration-card">
+            <div class="integration-logo" style="background:#15803D;color:white;font-size:10px;">QUEST</div>
+            <div class="integration-info">
+              <div class="integration-name">Quest Towing Network</div>
+              <div class="integration-desc">Regional dispatch & private motor club integration</div>
+              <div style="margin-top:6px;"><span class="badge badge-gray">Not Connected</span></div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;">
+          <div class="section-label">Accounting Integrations</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;">
+            <div class="integration-card">
+              <div class="integration-logo" style="background:#2CA01C;color:white;font-size:9px;">QB</div>
+              <div class="integration-info">
+                <div class="integration-name">QuickBooks Online</div>
+                <div class="integration-desc">Sync invoices, payments, and customer records</div>
+                <div style="margin-top:6px;"><span class="badge badge-green">Connected · Last sync 2h ago</span></div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISPATCH PAGE -->
+      <div id="page-dispatch" class="page">
+        <div class="page-header">
+          <div><div class="page-title">Live Dispatch Map</div><div class="page-subtitle">7 drivers active · 12 open jobs</div></div>
+          <button class="btn btn-primary" onclick="openNewJob()">+ Dispatch New Job</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;">
+          <div class="card" style="overflow:hidden;">
+            <div style="background:var(--steel);height:480px;position:relative;display:flex;align-items:center;justify-content:center;">
+              <div style="position:absolute;inset:0;background-image:linear-gradient(var(--steel-border) 1px, transparent 1px), linear-gradient(90deg, var(--steel-border) 1px, transparent 1px);background-size:50px 50px;opacity:0.2;"></div>
+              <div style="font-family:var(--font-condensed);font-size:18px;font-weight:700;color:var(--text-muted);text-align:center;">
+                <div style="font-size:48px;margin-bottom:8px;">🗺</div>
+                Live GPS Map<br><span style="font-size:13px;font-weight:400;">Connects to Google Maps / GPS provider API</span>
+              </div>
+              <div class="map-dot orange" style="top:30%;left:40%;"></div>
+              <div class="map-dot orange" style="top:60%;left:55%;"></div>
+              <div class="map-dot green" style="top:45%;left:25%;"></div>
+              <div class="map-dot green" style="top:20%;left:70%;"></div>
+              <div class="map-dot blue" style="top:70%;left:35%;"></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Driver Status</div></div>
+              <div class="card-body" style="padding:10px 14px;">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--steel);border-radius:8px;"><div class="avatar small">MT</div><div style="flex:1;"><div style="font-size:12px;font-weight:600;">Marcus T.</div><div style="font-size:10px;color:var(--text-muted);">Unit 101 · TJ-0891</div></div><span class="badge badge-orange" style="font-size:10px;">En Route</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--steel);border-radius:8px;"><div class="avatar small" style="background:#3B82F6;">SK</div><div style="flex:1;"><div style="font-size:12px;font-weight:600;">Sandra K.</div><div style="font-size:10px;color:var(--text-muted);">Unit 102 · TJ-0892</div></div><span class="badge badge-blue" style="font-size:10px;">Dispatched</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--steel);border-radius:8px;"><div class="avatar small" style="background:var(--green);">TM</div><div style="flex:1;"><div style="font-size:12px;font-weight:600;">Tony M.</div><div style="font-size:10px;color:var(--text-muted);">Unit 104 · Available</div></div><span class="badge badge-green" style="font-size:10px;">Available</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .content -->
+  </div><!-- end .main -->
+</div><!-- end .app -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- NEW TOW JOB MODAL -->
+<div id="modal-new-job" class="modal-overlay" style="display:none;">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">New Tow Job</div>
+      <div class="modal-close" onclick="closeModal('modal-new-job')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></div>
+    </div>
+    <div class="modal-body">
+
+      <div class="section-label">Customer Information</div>
+      <div class="form-grid form-grid-3" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" placeholder="Full name"></div>
+        <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" placeholder="(614) 555-0000" type="tel"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" placeholder="customer@email.com" type="email"></div>
+      </div>
+      <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">Account / Motor Club</label>
+          <select class="form-select">
+            <option>-- Cash / Private --</option><option>AAA Mid-Atlantic</option><option>Agero Services</option><option>GEICO Insurance</option><option>Urgently</option><option>NSD</option><option>Quest</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Service Type</label>
+          <select class="form-select">
+            <option>Light Duty Tow</option><option>Medium Duty Tow</option><option>Heavy Duty Tow</option><option>Flatbed Transport</option><option>Lockout Service</option><option>Jump Start</option><option>Tire Change</option><option>Fuel Delivery</option><option>Winch Out</option><option>Private Property Tow (PPT)</option><option>Impound</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">Vehicle Information</div>
+      <div class="form-grid form-grid-3" style="margin-bottom:8px;">
+        <div class="form-group"><label class="form-label">Year</label><input class="form-input" placeholder="2022"></div>
+        <div class="form-group"><label class="form-label">Make</label><input class="form-input" placeholder="Ford"></div>
+        <div class="form-group"><label class="form-label">Model</label><input class="form-input" placeholder="F-150"></div>
+      </div>
+      <div class="form-grid form-grid-3" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">Color</label><input class="form-input" placeholder="Blue Metallic"></div>
+        <div class="form-group"><label class="form-label">License Plate</label><input class="form-input" placeholder="OH-ABC1234"></div>
+        <div class="form-group"><label class="form-label">VIN Number</label><input class="form-input" placeholder="1FTFW1E84NFA..." style="font-family:var(--font-mono);font-size:12px;"></div>
+      </div>
+
+      <div class="section-label">Locations</div>
+      <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Pickup Location</label>
+          <input class="form-input" placeholder="Street address or cross streets">
+          <div class="form-hint">Enter address or drag pin on map</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Drop-off Location</label>
+          <input class="form-input" placeholder="Destination address">
+          <div class="form-hint">Customer's preferred destination</div>
+        </div>
+      </div>
+
+      <div class="section-label">Assignment & Billing</div>
+      <div class="form-grid form-grid-3" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">Assign Driver</label>
+          <select class="form-select"><option>-- Auto Assign --</option><option>Marcus Thompson (En Route)</option><option>Sandra Kowalski (Dispatched)</option><option>Tony Martinez ✓ Available</option><option>James Williams (On Scene)</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Job Amount ($)</label><input class="form-input" type="number" placeholder="0.00"></div>
+        <div class="form-group"><label class="form-label">Payment Method</label>
+          <select class="form-select"><option>Invoice / Net 30</option><option>Cash</option><option>Credit Card</option><option>Motor Club Billing</option></select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Job Notes</label>
+        <textarea class="form-textarea" placeholder="Vehicle condition, special instructions, gate codes, customer notes..."></textarea>
+      </div>
+
+      <div class="section-label">Photos & Media</div>
+      <div class="upload-area" onclick="showToast('Photo upload ready — attach from device or camera','info')">
+        <div class="upload-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"></path></svg></div>
+        <div class="upload-text">Upload Vehicle Photos or Videos</div>
+        <div class="upload-sub">Drag & drop or click · JPG, PNG, MP4 · Unlimited files</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-new-job')">Cancel</button>
+      <button class="btn btn-secondary">Save as Draft</button>
+      <button class="btn btn-primary" onclick="saveJob()">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>
+        Create & Dispatch Job
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- JOB DETAIL MODAL -->
+<div id="modal-job-detail" class="modal-overlay" style="display:none;">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">TJ-2024-0891 — 2019 Honda Civic</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Created Mar 24, 2026 · Agero · En Route</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="badge badge-orange">En Route</span>
+        <div class="modal-close" onclick="closeModal('modal-job-detail')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this,'job-detail')">Job Details</div>
+        <div class="tab" onclick="switchTab(this,'job-photos')">Photos & Media</div>
+        <div class="tab" onclick="switchTab(this,'job-invoice')">Invoice</div>
+      </div>
+
+      <div id="tab-job-detail" class="tab-content active">
+        <div class="grid-2">
+          <div>
+            <div class="section-label">Customer</div>
+            <div style="background:var(--steel);border-radius:8px;padding:14px;margin-bottom:16px;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:8px;">Robert Davis</div>
+              <div style="font-size:13px;color:var(--text-secondary);">📞 (614) 555-0145</div>
+              <div style="font-size:13px;color:var(--text-secondary);">✉ robert.davis@email.com</div>
+            </div>
+            <div class="section-label">Vehicle</div>
+            <div style="background:var(--steel);border-radius:8px;padding:14px;margin-bottom:16px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+                <div style="color:var(--text-muted);">Year / Make / Model</div><div style="font-weight:600;">2019 Honda Civic</div>
+                <div style="color:var(--text-muted);">Color</div><div>Silver</div>
+                <div style="color:var(--text-muted);">License Plate</div><div style="font-family:var(--font-mono);">OH-GHJ8821</div>
+                <div style="color:var(--text-muted);">VIN</div><div style="font-family:var(--font-mono);font-size:11px;">2HGFC2F59KH123456</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Locations</div>
+            <div style="background:var(--steel);border-radius:8px;padding:14px;margin-bottom:16px;">
+              <div style="display:flex;gap:10px;margin-bottom:10px;">
+                <div style="width:8px;height:8px;background:var(--orange);border-radius:50%;margin-top:4px;flex-shrink:0;"></div>
+                <div><div style="font-size:11px;color:var(--text-muted);">PICKUP</div><div style="font-size:13px;font-weight:600;">I-95 Northbound & Exit 12<br>Columbus, OH 43201</div></div>
+              </div>
+              <div style="display:flex;gap:10px;">
+                <div style="width:8px;height:8px;background:var(--green);border-radius:50%;margin-top:4px;flex-shrink:0;"></div>
+                <div><div style="font-size:11px;color:var(--text-muted);">DROP-OFF</div><div style="font-size:13px;font-weight:600;">AutoZone #4421 — Broad St<br>Columbus, OH 43215</div></div>
+              </div>
+            </div>
+            <div class="section-label">Notes</div>
+            <div style="background:var(--steel);border-radius:8px;padding:14px;font-size:13px;line-height:1.5;color:var(--text-secondary);">Vehicle won't start. Keys with customer. Customer is standing by on shoulder. Hazards on. Call ahead to AutoZone.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-job-photos" class="tab-content">
+        <div style="margin-bottom:16px;">
+          <div class="upload-area" style="padding:20px;" onclick="showToast('Add photos from camera or file','info')">
+            <div class="upload-text">Add Vehicle Photos</div>
+            <div class="upload-sub">Unlimited photos & videos · All evidence stored permanently</div>
+          </div>
+        </div>
+        <div class="photo-grid">
+          <div class="photo-thumb">🚗<div class="photo-thumb-label">front_damage.jpg</div></div>
+          <div class="photo-thumb">📸<div class="photo-thumb-label">vin_plate.jpg</div></div>
+          <div class="photo-thumb">🚗<div class="photo-thumb-label">rear_view.jpg</div></div>
+          <div class="photo-thumb">📹<div class="photo-thumb-label">arrival_video.mp4</div></div>
+        </div>
+      </div>
+
+      <div id="tab-job-invoice" class="tab-content">
+        <div class="invoice-preview">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+            <div>
+              <div style="font-size:22px;font-weight:900;color:#F05A1A;font-family:'Barlow Condensed',sans-serif;">TOWCOMMAND PRO</div>
+              <div style="font-size:12px;color:#666;">Premium Towing LLC</div>
+              <div style="font-size:11px;color:#999;margin-top:4px;">123 Industrial Blvd, Columbus OH 43201<br>billing@premiumtowing.com · (614) 555-0100</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:24px;font-weight:800;color:#1a1a1a;">INVOICE</div>
+              <div style="font-size:13px;font-weight:600;color:#F05A1A;">#INV-0891</div>
+              <div style="font-size:11px;color:#666;margin-top:4px;">Issued: Mar 24, 2026<br>Due: Apr 7, 2026</div>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Description</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Amount</th></tr></thead>
+            <tbody>
+              <tr><td>Light Duty Tow — Agero #A8821001<br><span style="font-size:10px;color:#999;">2019 Honda Civic · I-95 → AutoZone</span></td><td style="text-align:right;">1</td><td style="text-align:right;">$185.00</td><td style="text-align:right;font-weight:600;">$185.00</td></tr>
+              <tr class="invoice-total-row"><td colspan="3" style="text-align:right;font-size:13px;">Total Due</td><td style="text-align:right;font-size:16px;font-weight:900;">$185.00</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:20px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:12px;">Thank you for your business. Payment due within 14 days. Questions? billing@premiumtowing.com</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn btn-primary" onclick="showToast('Invoice emailed to robert.davis@email.com','success')">📧 Email Invoice</button>
+          <button class="btn btn-secondary" onclick="showToast('Invoice PDF downloaded','info')">⬇ Download PDF</button>
+          <button class="btn btn-secondary" onclick="showToast('Invoice marked as paid','success')">✓ Mark as Paid</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE PREVIEW MODAL -->
+<div id="modal-invoice-preview" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Invoice Preview — INV-0892</div><div class="modal-close" onclick="closeModal('modal-invoice-preview')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></div></div>
+    <div class="modal-body">
+      <div class="invoice-preview">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+          <div>
+            <div style="font-size:22px;font-weight:900;color:#F05A1A;font-family:'Barlow Condensed',sans-serif;">TOWCOMMAND PRO</div>
+            <div style="font-size:12px;color:#666;">Premium Towing LLC</div>
+            <div style="font-size:11px;color:#999;margin-top:4px;">123 Industrial Blvd, Columbus OH 43201</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:24px;font-weight:800;">INVOICE</div>
+            <div style="font-size:13px;font-weight:600;color:#F05A1A;">#INV-0892</div>
+            <div style="font-size:11px;color:#666;margin-top:4px;">Due: Apr 7, 2026</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Description</th><th style="text-align:right;">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>AAA Tow — 2022 Ford F-150</td><td style="text-align:right;font-weight:600;">$145.00</td></tr>
+            <tr class="invoice-total-row"><td style="text-align:right;">Total</td><td style="text-align:right;font-size:16px;">$145.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-invoice-preview')">Close</button>
+      <button class="btn btn-primary" onclick="showToast('Invoice emailed','success');closeModal('modal-invoice-preview')">Email to Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DRIVER MODAL -->
+<div id="modal-add-driver" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Add / Register Driver</div><div class="modal-close" onclick="closeModal('modal-add-driver')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg></div></div>
+    <div class="modal-body">
+      <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" placeholder="Marcus"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Thompson"></div>
+      </div>
+      <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="driver@premiumtowing.com"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" placeholder="(614) 555-0000"></div>
+      </div>
+      <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">CDL License #</label><input class="form-input" placeholder="OH-CDL-12345"></div>
+        <div class="form-group"><label class="form-label">License Expiry</label><input class="form-input" type="date"></div>
+      </div>
+      <div class="form-grid form-grid-2" style="margin-bottom:16px;">
+        <div class="form-group"><label class="form-label">Assign Truck</label>
+          <select class="form-select"><option>-- Unassigned --</option><option>Unit #101 — Heavy Wrecker</option><option>Unit #102 — Flatbed</option><option>Unit #104 — Wheel Lift 2</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Access Level</label>
+          <select class="form-select"><option>Driver (Mobile Only)</option><option>Dispatcher</option><option>Manager</option></select>
+        </div>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group"><label class="form-label">Portal Password</label><input class="form-input" type="password" placeholder="Temporary password"></div>
+        <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" placeholder="Confirm"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-driver')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDriver()">Create Driver Account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// INIT INSPECTION
+const inspItems = ['Engine Oil Level','Coolant Level','Brake Fluid','Transmission Fluid','Tire Pressure — FL','Tire Pressure — FR','Tire Pressure — RL','Tire Pressure — RR','Brake Condition','Steering Response','Air Brakes (if applicable)','Safety Chains & Hooks'];
+const inspLights = ['Headlights','Taillights','Brake Lights','Turn Signals — Front','Turn Signals — Rear','Emergency Strobe/Beacon','Hazard Lights','DOT Reflectors','Cab Interior Lights'];
+function buildInspection(items, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = items.map(item => `
+    <div class="check-item">
+      <div class="check-label">${item}</div>
+      <div class="check-radio">
+        <label class="check-option"><input type="radio" name="${item.replace(/\s/g,'_')}" value="pass" style="accent-color:var(--green)"> <span class="check-pass">Pass</span></label>
+        <label class="check-option"><input type="radio" name="${item.replace(/\s/g,'_')}" value="fail" style="accent-color:var(--red)"> <span class="check-fail">Fail</span></label>
+        <label class="check-option"><input type="radio" name="${item.replace(/\s/g,'_')}" value="na"> <span class="check-na">N/A</span></label>
+      </div>
+    </div>`).join('');
+  // default all pass
+  el.querySelectorAll('input[value="pass"]').forEach(r => r.checked = true);
+}
+buildInspection(inspItems, 'inspection-items');
+buildInspection(inspLights, 'inspection-lights');
+
+// NAVIGATION
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  const titles = {
+    'dashboard': 'Dashboard <span>/ Overview</span>',
+    'tow-jobs': 'Tow Jobs <span>/ All Jobs</span>',
+    'dispatch': 'Dispatch <span>/ Live Map</span>',
+    'inspection': 'Inspections <span>/ Pre-Trip</span>',
+    'drivers': 'Drivers <span>/ Management</span>',
+    'fleet': 'Fleet <span>/ Vehicles</span>',
+    'customers': 'Customers <span>/ Accounts</span>',
+    'accounting': 'Accounting <span>/ Finance</span>',
+    'invoices': 'Invoices <span>/ Billing</span>',
+    'email-settings': 'Email Settings <span>/ Automation</span>',
+    'integrations': 'Integrations <span>/ Motor Clubs</span>',
+  };
+  document.getElementById('page-title').innerHTML = titles[id] || id;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+}
+
+// MODALS
+function openNewJob() { document.getElementById('modal-new-job').style.display = 'flex'; }
+function openJobDetail() { document.getElementById('modal-job-detail').style.display = 'flex'; }
+function openInvoicePreview() { document.getElementById('modal-invoice-preview').style.display = 'flex'; }
+function openAddDriver() { document.getElementById('modal-add-driver').style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.style.display = 'none'; });
+});
+
+// TABS
+function switchTab(el, prefix) {
+  const tabs = el.parentElement.querySelectorAll('.tab');
+  const contents = el.parentElement.parentElement.querySelectorAll('.tab-content');
+  tabs.forEach((t, i) => {
+    t.classList.toggle('active', t === el);
+    if (contents[i]) contents[i].classList.toggle('active', t === el);
+  });
+}
+
+// TOAST
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-icon">${icons[type]}</div><span>${msg}</span>`;
+  document.body.appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), 3500);
+}
+
+// ACTIONS
+function saveJob() {
+  closeModal('modal-new-job');
+  showToast('Tow job created and driver notified via app', 'success');
+}
+function saveDriver() {
+  closeModal('modal-add-driver');
+  showToast('Driver account created — login email sent', 'success');
+}
+
+// AUTH
+function enterDashboard() {
+  document.getElementById('signin-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'flex';
+  showToast('Welcome back, Premium Towing LLC', 'success');
+}
+function enterDriver() {
+  showToast('Redirecting to Driver Portal...', 'info');
+  setTimeout(() => {
+    document.getElementById('signin-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'flex';
+    showPage('tow-jobs');
+    showToast('Driver portal — Marcus Thompson', 'success');
+  }, 800);
+}
+function signOut() {
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('signin-screen').style.display = 'flex';
+}
+
+// Live clock
+function updateClock() {
+  const now = new Date();
+  const sub = document.querySelector('#page-dashboard .page-subtitle');
+  if (sub) {
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const t = now.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+    sub.textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} · ${t} · Real-time data`;
+  }
+}
+setInterval(updateClock, 1000);
+updateClock();
+</script>
+</body>
+</html>
