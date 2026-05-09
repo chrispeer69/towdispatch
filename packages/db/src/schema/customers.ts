@@ -44,6 +44,22 @@ export const customers = pgTable(
 
     billingAddress: jsonb('billing_address'),
 
+    // Session 4 cleanup: home address split into discrete columns so we can
+    // index zip and feed mileage / service-area lookups without parsing JSON.
+    homeAddressStreet: text('home_address_street'),
+    homeAddressCity: text('home_address_city'),
+    homeAddressState: text('home_address_state'),
+    homeAddressZip: text('home_address_zip'),
+
+    // Secondary contact: most often the customer's spouse or shop manager —
+    // captured during intake so the second leg of a call can reach someone.
+    secondaryContactName: text('secondary_contact_name'),
+    secondaryContactPhone: text('secondary_contact_phone'),
+
+    // Whether the customer downloaded the Convini app — Session 5 will use
+    // this to suppress the in-call invite when they already have it.
+    conviniAppDownloaded: boolean('convini_app_downloaded').notNull().default(false),
+
     accountId: uuid('account_id').references(() => accounts.id, { onDelete: 'set null' }),
 
     taxExempt: boolean('tax_exempt').notNull().default(false),
@@ -70,6 +86,9 @@ export const customers = pgTable(
     tenantEmailIdx: index('customers_tenant_email_idx').on(t.tenantId, t.email),
     tenantAccountIdx: index('customers_tenant_account_idx').on(t.tenantId, t.accountId),
     tenantTypeIdx: index('customers_tenant_type_idx').on(t.tenantId, t.type),
+    // Session 4 cleanup: zip index — Session 5+ filters jobs/customers by
+    // service-area zip ranges, so this index pays for itself fast.
+    tenantZipIdx: index('customers_tenant_zip_idx').on(t.tenantId, t.homeAddressZip),
   }),
 );
 

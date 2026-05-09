@@ -174,6 +174,13 @@ export class CustomersService {
             phone: input.phone,
             email: input.email ?? null,
             billingAddress: input.billingAddress ?? null,
+            homeAddressStreet: input.homeAddressStreet ?? null,
+            homeAddressCity: input.homeAddressCity ?? null,
+            homeAddressState: input.homeAddressState ?? null,
+            homeAddressZip: input.homeAddressZip ?? null,
+            secondaryContactName: input.secondaryContactName ?? null,
+            secondaryContactPhone: input.secondaryContactPhone ?? null,
+            conviniAppDownloaded: input.conviniAppDownloaded ?? false,
             createdVia: 'auto_intake',
             createdBy: ctx.userId,
           })
@@ -208,6 +215,13 @@ export class CustomersService {
             email: input.email ?? null,
             phone: input.phone ?? null,
             billingAddress: input.billingAddress ?? null,
+            homeAddressStreet: input.homeAddressStreet ?? null,
+            homeAddressCity: input.homeAddressCity ?? null,
+            homeAddressState: input.homeAddressState ?? null,
+            homeAddressZip: input.homeAddressZip ?? null,
+            secondaryContactName: input.secondaryContactName ?? null,
+            secondaryContactPhone: input.secondaryContactPhone ?? null,
+            conviniAppDownloaded: input.conviniAppDownloaded ?? false,
             accountId: input.accountId ?? null,
             taxExempt: input.taxExempt ?? false,
             taxExemptCertificateUrl: input.taxExemptCertificateUrl ?? null,
@@ -246,6 +260,16 @@ export class CustomersService {
         if (input.email !== undefined) patch.email = input.email;
         if (input.phone !== undefined) patch.phone = input.phone;
         if (input.billingAddress !== undefined) patch.billingAddress = input.billingAddress;
+        if (input.homeAddressStreet !== undefined) patch.homeAddressStreet = input.homeAddressStreet;
+        if (input.homeAddressCity !== undefined) patch.homeAddressCity = input.homeAddressCity;
+        if (input.homeAddressState !== undefined) patch.homeAddressState = input.homeAddressState;
+        if (input.homeAddressZip !== undefined) patch.homeAddressZip = input.homeAddressZip;
+        if (input.secondaryContactName !== undefined)
+          patch.secondaryContactName = input.secondaryContactName;
+        if (input.secondaryContactPhone !== undefined)
+          patch.secondaryContactPhone = input.secondaryContactPhone;
+        if (input.conviniAppDownloaded !== undefined)
+          patch.conviniAppDownloaded = input.conviniAppDownloaded;
         if (input.accountId !== undefined) patch.accountId = input.accountId;
         if (input.taxExempt !== undefined) patch.taxExempt = input.taxExempt;
         if (input.taxExemptCertificateUrl !== undefined)
@@ -434,6 +458,13 @@ function toDto(c: typeof customers.$inferSelect): CustomerDto {
     email: c.email,
     phone: c.phone,
     billingAddress: (c.billingAddress as CustomerDto['billingAddress']) ?? null,
+    homeAddressStreet: c.homeAddressStreet,
+    homeAddressCity: c.homeAddressCity,
+    homeAddressState: c.homeAddressState,
+    homeAddressZip: c.homeAddressZip,
+    secondaryContactName: c.secondaryContactName,
+    secondaryContactPhone: c.secondaryContactPhone,
+    conviniAppDownloaded: c.conviniAppDownloaded,
     accountId: c.accountId,
     taxExempt: c.taxExempt,
     taxExemptCertificateUrl: c.taxExemptCertificateUrl,
