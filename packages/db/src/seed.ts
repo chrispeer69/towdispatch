@@ -24,6 +24,110 @@ import { uuidv7 } from './uuid';
 
 const SEED_PASSWORD = 'ChangeMe123!';
 
+/**
+ * Pricing modeled on a typical small/mid-market towing rate card. Tow has a
+ * $95 hookup + $4.50/mi for light-duty; medium/heavy bump higher. Lighter
+ * services are flat fees. After-hours surcharge $35 between 22:00–06:00.
+ * Admin fee $5 is always-on. Edit through tenant settings once the UI exists.
+ */
+const DEFAULT_RATE_SHEET_DEFINITION = {
+  version: 1 as const,
+  currency: 'USD' as const,
+  freeMilesIncluded: 5,
+  services: [
+    {
+      serviceType: 'tow' as const,
+      baseCents: 9500,
+      perMileCentsByClass: {
+        light_duty: 450,
+        medium_duty: 700,
+        heavy_duty: 1100,
+        motorcycle: 450,
+        commercial: 900,
+        rv: 800,
+        unknown: 450,
+      },
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'jump_start' as const,
+      baseCents: 7500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'lockout' as const,
+      baseCents: 6500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'tire_change' as const,
+      baseCents: 8500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'fuel' as const,
+      baseCents: 7500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'winch' as const,
+      baseCents: 15000,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'recovery' as const,
+      baseCents: 25000,
+      perMileCentsByClass: {
+        light_duty: 600,
+        medium_duty: 900,
+        heavy_duty: 1500,
+        motorcycle: 600,
+        commercial: 1200,
+        rv: 1200,
+        unknown: 600,
+      },
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'impound' as const,
+      baseCents: 12500,
+      perMileCentsByClass: {
+        light_duty: 450,
+        medium_duty: 700,
+        heavy_duty: 1100,
+        motorcycle: 450,
+        commercial: 900,
+        rv: 800,
+        unknown: 450,
+      },
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'other' as const,
+      baseCents: 10000,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+  ],
+  surcharges: [
+    {
+      code: 'after_hours',
+      label: 'After-hours surcharge',
+      startHHmm: '22:00',
+      endHHmm: '06:00',
+      crossesMidnight: true,
+      amountCents: 3500,
+      daysOfWeek: [],
+    },
+  ],
+  fixedLineItems: [{ code: 'admin_fee', label: 'Admin fee', amountCents: 500 }],
+};
+
 const adminUrl = process.env.DATABASE_ADMIN_URL ?? process.env.DATABASE_URL;
 if (!adminUrl) {
   throw new Error('DATABASE_ADMIN_URL is required to run seed');
@@ -260,6 +364,44 @@ async function main(): Promise<void> {
         });
         log(`  inserted user ${u.email}`);
         if (u.role === 'owner') ownerUserId = userId;
+      }
+
+      // ---------- rate_sheets (default) ----------
+      // Every tenant gets a default rate sheet seeded so the call-intake
+      // flow has something to quote against. Account-level rate sheets are
+      // additive in later sessions; they override this default at quote time.
+      let defaultRateSheetId: string | null = null;
+      const existingDefault = await db.query.rateSheets.findFirst({
+        where: and(
+          eq(schema.rateSheets.tenantId, tenantId),
+          eq(schema.rateSheets.name, 'Tenant Default'),
+        ),
+      });
+      if (existingDefault) {
+        defaultRateSheetId = existingDefault.id;
+        log('  default rate sheet already exists, skipping');
+      } else {
+        defaultRateSheetId = uuidv7();
+        await db.insert(schema.rateSheets).values({
+          id: defaultRateSheetId,
+          tenantId,
+          name: 'Tenant Default',
+          notes: 'Seeded default rate sheet. Edit in Tenant Settings.',
+          definition: DEFAULT_RATE_SHEET_DEFINITION,
+          createdBy: ownerUserId,
+        });
+        await db
+          .insert(schema.tenantDefaultRateSheets)
+          .values({
+            tenantId,
+            rateSheetId: defaultRateSheetId,
+            updatedBy: ownerUserId,
+          })
+          .onConflictDoUpdate({
+            target: schema.tenantDefaultRateSheets.tenantId,
+            set: { rateSheetId: defaultRateSheetId, updatedAt: new Date() },
+          });
+        log('  inserted default rate sheet');
       }
 
       // ---------- accounts ----------

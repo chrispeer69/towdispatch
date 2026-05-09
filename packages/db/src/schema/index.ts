@@ -8,3 +8,5 @@ export * from './accounts';
 export * from './customers';
 export * from './vehicles';
 export * from './customer-vehicles';
+export * from './rate-sheets';
+export * from './jobs';

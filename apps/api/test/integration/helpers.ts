@@ -87,12 +87,21 @@ export async function tearDown(ctx: TestContext): Promise<void> {
         if (tenantIds.length) {
           // Delete dependent data inside the captured tenants. Using
           // tenant_id keeps us from touching unrelated test data.
+          await c.query('DELETE FROM jobs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM job_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query(
+            'DELETE FROM tenant_default_rate_sheets WHERE tenant_id = ANY($1::uuid[])',
+            [tenantIds],
+          );
           await c.query('DELETE FROM customer_vehicles WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
           await c.query('DELETE FROM vehicles WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM customers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM accounts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM rate_sheets WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query(
             `DELETE FROM email_verification_tokens
              WHERE user_id IN (SELECT id FROM users WHERE email = ANY($1::text[]))`,
@@ -160,3 +169,116 @@ export async function signup(ctx: TestContext, body: SignupBody): Promise<Authed
 export const auth = (token: string): Record<string, string> => ({
   authorization: `Bearer ${token}`,
 });
+
+/**
+ * Seed a tenant default rate sheet directly via the admin pool. Lets job-
+ * intake tests rely on real RateEngineService output (source: 'tenant_default')
+ * instead of the hard-coded fallback. Idempotent: safe to call multiple
+ * times for the same tenant.
+ */
+const DEFAULT_TEST_RATE_SHEET = {
+  version: 1 as const,
+  currency: 'USD' as const,
+  freeMilesIncluded: 0,
+  services: [
+    {
+      serviceType: 'tow' as const,
+      baseCents: 9500,
+      perMileCentsByClass: {
+        light_duty: 450,
+        medium_duty: 700,
+        heavy_duty: 1100,
+        motorcycle: 450,
+        commercial: 900,
+        rv: 800,
+        unknown: 450,
+      },
+      flatFeesByClass: {},
+    },
+    { serviceType: 'jump_start' as const, baseCents: 7500, perMileCentsByClass: {}, flatFeesByClass: {} },
+    { serviceType: 'lockout' as const, baseCents: 6500, perMileCentsByClass: {}, flatFeesByClass: {} },
+    { serviceType: 'tire_change' as const, baseCents: 8500, perMileCentsByClass: {}, flatFeesByClass: {} },
+    { serviceType: 'fuel' as const, baseCents: 7500, perMileCentsByClass: {}, flatFeesByClass: {} },
+    { serviceType: 'winch' as const, baseCents: 15000, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'recovery' as const,
+      baseCents: 25000,
+      perMileCentsByClass: {
+        light_duty: 600,
+        medium_duty: 900,
+        heavy_duty: 1500,
+        motorcycle: 600,
+        commercial: 1200,
+        rv: 1200,
+        unknown: 600,
+      },
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'impound' as const,
+      baseCents: 12500,
+      perMileCentsByClass: {
+        light_duty: 450,
+        medium_duty: 700,
+        heavy_duty: 1100,
+        motorcycle: 450,
+        commercial: 900,
+        rv: 800,
+        unknown: 450,
+      },
+      flatFeesByClass: {},
+    },
+    { serviceType: 'other' as const, baseCents: 10000, perMileCentsByClass: {}, flatFeesByClass: {} },
+  ],
+  surcharges: [],
+  fixedLineItems: [{ code: 'admin_fee', label: 'Admin fee', amountCents: 500 }],
+};
+
+export async function seedDefaultRateSheet(ctx: TestContext, tenantId: string): Promise<string> {
+  const c = await ctx.admin.connect();
+  try {
+    await c.query('BEGIN');
+    const sheetIdRes = await c.query<{ id: string }>(
+      `INSERT INTO rate_sheets (id, tenant_id, name, definition, active, created_at, updated_at)
+       VALUES (gen_random_uuid(), $1::uuid, 'Test Default', $2::jsonb, true, now(), now())
+       RETURNING id`,
+      [tenantId, JSON.stringify(DEFAULT_TEST_RATE_SHEET)],
+    );
+    const sheetId = sheetIdRes.rows[0]?.id as string;
+    await c.query(
+      `INSERT INTO tenant_default_rate_sheets (tenant_id, rate_sheet_id, updated_at)
+       VALUES ($1::uuid, $2::uuid, now())
+       ON CONFLICT (tenant_id) DO UPDATE SET rate_sheet_id = EXCLUDED.rate_sheet_id, updated_at = now()`,
+      [tenantId, sheetId],
+    );
+    await c.query('COMMIT');
+    return sheetId;
+  } catch (e) {
+    await c.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    c.release();
+  }
+}
+
+export async function getAuditLogCount(
+  ctx: TestContext,
+  tenantId: string,
+  resourceType: string,
+  resourceId?: string,
+): Promise<number> {
+  const c = await ctx.admin.connect();
+  try {
+    const params: unknown[] = [tenantId, resourceType];
+    let q = `SELECT count(*)::int AS n FROM audit_log
+             WHERE tenant_id = $1::uuid AND resource_type = $2`;
+    if (resourceId) {
+      q += ` AND resource_id = $3::uuid`;
+      params.push(resourceId);
+    }
+    const r = await c.query<{ n: number }>(q, params);
+    return r.rows[0]?.n ?? 0;
+  } finally {
+    c.release();
+  }
+}

@@ -5,3 +5,5 @@ export * from './auth';
 export * from './account';
 export * from './customer';
 export * from './vehicle';
+export * from './job';
+export * from './rate-sheet';
