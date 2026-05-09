@@ -233,4 +233,50 @@ describeIfDb('Customers integration', () => {
     expect(bBody.customer.id).not.toBe(aBody.customer.id);
     expect(bBody.customer.tenantId).not.toBe(session.tenant.id);
   });
+
+  // -------------------------------------------------------------------- //
+  // Two customers in the same tenant must be allowed to share a zip.
+  // The (tenant_id, home_address_zip) index in 0009 is intentionally a
+  // regular partial index, not unique — Columbus has many residents at
+  // 43215. This test locks that invariant in.
+  // -------------------------------------------------------------------- //
+  it('allows two customers in the same tenant to share a home_address_zip', async () => {
+    const first = await app.inject({
+      method: 'POST',
+      url: '/customers',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: {
+        type: 'cash',
+        name: 'Zip Twin A',
+        phone: '+15555558001',
+        email: 'zip.twin.a@spec.test',
+        homeAddressStreet: '101 Apple St',
+        homeAddressCity: 'Columbus',
+        homeAddressState: 'OH',
+        homeAddressZip: '43215',
+      },
+    });
+    expect(first.statusCode).toBe(201);
+
+    const second = await app.inject({
+      method: 'POST',
+      url: '/customers',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: {
+        type: 'cash',
+        name: 'Zip Twin B',
+        phone: '+15555558002',
+        email: 'zip.twin.b@spec.test',
+        homeAddressStreet: '202 Pear St',
+        homeAddressCity: 'Columbus',
+        homeAddressState: 'OH',
+        homeAddressZip: '43215',
+      },
+    });
+    expect(second.statusCode).toBe(201);
+
+    const aId = (first.json() as { id: string }).id;
+    const bId = (second.json() as { id: string }).id;
+    expect(aId).not.toBe(bId);
+  });
 });
