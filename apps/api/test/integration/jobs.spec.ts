@@ -29,12 +29,38 @@ import {
 const SUFFIX = `job-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6).toString(36)}`;
 const describeIfDb = skipIfNoDb ? describe.skip : describe;
 
+// Per-run VIN factory. Each test gets a unique 17-char VIN that passes the
+// A-Z (no I/O/Q) + digits check. Per-tenant uniqueness is enforced by a
+// partial unique index, so these must vary across tests within the same
+// tenant — and across full reruns of the suite against a non-reset dev DB.
+const VIN_PREFIX = 'WBA'; // 3-char WMI
+const vinTail = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`
+  .toUpperCase()
+  .replace(/[IOQ]/g, '0')
+  .padStart(12, '0')
+  .slice(0, 12);
+let vinCounter = 0;
+const nextVin = (): string => {
+  vinCounter += 1;
+  // Reserve last 2 chars for the per-test counter (handles up to 36*36 tests).
+  const counter = vinCounter.toString(36).toUpperCase().padStart(2, '0').replace(/[IOQ]/g, '0');
+  return (VIN_PREFIX + vinTail + counter).slice(0, 17);
+};
+
 interface JobIntakeBody {
-  customer: { name: string; phone: string; email?: string };
+  customer: {
+    name: string;
+    phone: string;
+    email: string;
+    homeAddress?: { street?: string; city?: string; state?: string; zip?: string };
+    secondaryContactName?: string;
+    secondaryContactPhone?: string;
+    conviniAppDownloaded?: boolean;
+  };
   vehicle: {
+    vin: string;
     plate?: string;
     plateState?: string;
-    vin?: string;
     year?: number;
     make?: string;
     model?: string;
@@ -65,7 +91,7 @@ interface IntakeResponse {
     rateBreakdown: { source: string; lineItems: Array<{ code: string }>; calculationTrace: string[] };
   };
   customer: { id: string; name: string; created: boolean };
-  vehicle: { id: string; plate: string | null; created: boolean };
+  vehicle: { id: string; plate: string | null; vin: string | null; created: boolean };
   rateQuote: {
     source: string;
     rateSheetId: string | null;
@@ -123,23 +149,33 @@ describeIfDb('Jobs intake integration', () => {
     await tearDown(ctx);
   });
 
-  const baseTowIntake = (overrides: Partial<JobIntakeBody> = {}): JobIntakeBody => ({
-    customer: { name: 'John Caller', phone: '+15555557001', email: 'john.caller@spec.test' },
-    vehicle: {
-      plate: 'JOB1234',
-      plateState: 'OH',
-      year: 2018,
-      make: 'Honda',
-      model: 'Civic',
-      color: 'Blue',
-      vehicleClass: 'light_duty',
-    },
-    serviceType: 'tow',
-    pickup: { address: '100 Main St, Columbus OH', lat: 39.9612, lng: -82.9988 },
-    dropoff: { address: '200 Broad St, Columbus OH', lat: 39.9655, lng: -82.9852 },
-    authorizedBy: 'customer',
-    ...overrides,
-  });
+  const baseTowIntake = (overrides: Partial<JobIntakeBody> = {}): JobIntakeBody => {
+    const { customer: customerOverride, vehicle: vehicleOverride, ...rest } = overrides;
+    return {
+      customer: {
+        name: 'John Caller',
+        phone: '+15555557001',
+        email: 'john.caller@spec.test',
+        ...customerOverride,
+      },
+      vehicle: {
+        vin: nextVin(),
+        plate: 'JOB1234',
+        plateState: 'OH',
+        year: 2018,
+        make: 'Honda',
+        model: 'Civic',
+        color: 'Blue',
+        vehicleClass: 'light_duty',
+        ...vehicleOverride,
+      },
+      serviceType: 'tow',
+      pickup: { address: '100 Main St, Columbus OH', lat: 39.9612, lng: -82.9988 },
+      dropoff: { address: '200 Broad St, Columbus OH', lat: 39.9655, lng: -82.9852 },
+      authorizedBy: 'customer',
+      ...rest,
+    };
+  };
 
   it('intake creates a tow job with a fresh customer and vehicle', async () => {
     const res = await app.inject({
@@ -170,8 +206,13 @@ describeIfDb('Jobs intake integration', () => {
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: baseTowIntake({
-        customer: { name: 'John Caller (returning)', phone: '+15555557001' },
+        customer: {
+          name: 'John Caller (returning)',
+          phone: '+15555557001',
+          email: 'john.caller@spec.test',
+        },
         vehicle: {
+          vin: nextVin(),
           plate: 'NEW2345',
           plateState: 'OH',
           year: 2020,
@@ -191,8 +232,11 @@ describeIfDb('Jobs intake integration', () => {
 
   it('intake reuses an existing vehicle when the same plate+state is supplied', async () => {
     const intake = baseTowIntake({
-      customer: { name: 'New Driver', phone: '+15555557002' },
+      customer: { name: 'New Driver', phone: '+15555557002', email: 'new.driver@spec.test' },
       vehicle: {
+        // Different VIN — forces lookup to fall through to plate+state, which
+        // is exactly the path we're proving here.
+        vin: nextVin(),
         plate: 'JOB1234',
         plateState: 'OH',
         vehicleClass: 'light_duty',
@@ -213,8 +257,12 @@ describeIfDb('Jobs intake integration', () => {
 
   it('intake attaches a job to an account when accountId is given', async () => {
     const intake = baseTowIntake({
-      customer: { name: 'Account Caller', phone: '+15555557003' },
-      vehicle: { plate: 'ACCT777', plateState: 'OH', vehicleClass: 'light_duty' },
+      customer: {
+        name: 'Account Caller',
+        phone: '+15555557003',
+        email: 'account.caller@spec.test',
+      },
+      vehicle: { vin: nextVin(), plate: 'ACCT777', plateState: 'OH', vehicleClass: 'light_duty' },
       accountId,
       authorizedBy: 'account_contact',
       authorizedByName: 'Mary AP',
@@ -232,8 +280,8 @@ describeIfDb('Jobs intake integration', () => {
 
   it('intake supports a cash job (no accountId)', async () => {
     const intake = baseTowIntake({
-      customer: { name: 'Cash Caller', phone: '+15555557004' },
-      vehicle: { plate: 'CASH123', plateState: 'OH', vehicleClass: 'light_duty' },
+      customer: { name: 'Cash Caller', phone: '+15555557004', email: 'cash.caller@spec.test' },
+      vehicle: { vin: nextVin(), plate: 'CASH123', plateState: 'OH', vehicleClass: 'light_duty' },
     });
     const res = await app.inject({
       method: 'POST',
@@ -248,8 +296,8 @@ describeIfDb('Jobs intake integration', () => {
 
   it('intake supports a motor-club authorized job', async () => {
     const intake = baseTowIntake({
-      customer: { name: 'MC Caller', phone: '+15555557005' },
-      vehicle: { plate: 'AGERO11', plateState: 'OH', vehicleClass: 'light_duty' },
+      customer: { name: 'MC Caller', phone: '+15555557005', email: 'mc.caller@spec.test' },
+      vehicle: { vin: nextVin(), plate: 'AGERO11', plateState: 'OH', vehicleClass: 'light_duty' },
       accountId: motorClubId,
       authorizedBy: 'motor_club',
       authorizedByName: 'Agero dispatch line',
@@ -267,8 +315,12 @@ describeIfDb('Jobs intake integration', () => {
 
   it('intake creates a non-tow service without dropoff', async () => {
     const intake: JobIntakeBody = {
-      customer: { name: 'Lockout Caller', phone: '+15555557006' },
-      vehicle: { plate: 'LOCK111', plateState: 'OH', vehicleClass: 'light_duty' },
+      customer: {
+        name: 'Lockout Caller',
+        phone: '+15555557006',
+        email: 'lockout.caller@spec.test',
+      },
+      vehicle: { vin: nextVin(), plate: 'LOCK111', plateState: 'OH', vehicleClass: 'light_duty' },
       serviceType: 'lockout',
       pickup: { address: '500 High St, Columbus OH', lat: 39.96, lng: -83.0 },
       authorizedBy: 'customer',
@@ -293,8 +345,8 @@ describeIfDb('Jobs intake integration', () => {
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: {
-        customer: { name: 'No Drop', phone: '+15555557007' },
-        vehicle: { plate: 'NDROP1', plateState: 'OH' },
+        customer: { name: 'No Drop', phone: '+15555557007', email: 'no.drop@spec.test' },
+        vehicle: { vin: nextVin(), plate: 'NDROP1', plateState: 'OH' },
         serviceType: 'tow',
         pickup: { address: '600 Front St' },
         authorizedBy: 'customer',
@@ -309,8 +361,8 @@ describeIfDb('Jobs intake integration', () => {
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: {
-        customer: { name: 'Bad Service', phone: '+15555557008' },
-        vehicle: { plate: 'BADSVC', plateState: 'OH' },
+        customer: { name: 'Bad Service', phone: '+15555557008', email: 'bad.svc@spec.test' },
+        vehicle: { vin: nextVin(), plate: 'BADSVC', plateState: 'OH' },
         serviceType: 'teleport',
         pickup: { address: '700 Front St' },
         authorizedBy: 'customer',
@@ -325,8 +377,8 @@ describeIfDb('Jobs intake integration', () => {
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: {
-        customer: { name: 'Empty Pickup', phone: '+15555557009' },
-        vehicle: { plate: 'EMPTYP', plateState: 'OH' },
+        customer: { name: 'Empty Pickup', phone: '+15555557009', email: 'empty@spec.test' },
+        vehicle: { vin: nextVin(), plate: 'EMPTYP', plateState: 'OH' },
         serviceType: 'lockout',
         pickup: { address: '' },
         authorizedBy: 'customer',
@@ -335,14 +387,211 @@ describeIfDb('Jobs intake integration', () => {
     expect(res.statusCode).toBe(400);
   });
 
+  // -------------------------------------------------------------------- //
+  // Session 4 cleanup: VIN gate + email gate at intake.
+  // -------------------------------------------------------------------- //
+  it('intake REJECTS when VIN is missing', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/jobs/intake',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: {
+        customer: { name: 'No VIN', phone: '+15555557040', email: 'no.vin@spec.test' },
+        vehicle: { plate: 'NOVIN1', plateState: 'OH', vehicleClass: 'light_duty' },
+        serviceType: 'tow',
+        pickup: { address: '100 Main', lat: 39.9, lng: -83.0 },
+        dropoff: { address: '200 Broad', lat: 39.91, lng: -83.01 },
+        authorizedBy: 'customer',
+      },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('intake REJECTS when VIN is malformed (contains forbidden I/O/Q)', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/jobs/intake',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: {
+        customer: { name: 'Bad VIN', phone: '+15555557041', email: 'bad.vin@spec.test' },
+        vehicle: {
+          // Includes I, O, Q → rejected by the VIN regex.
+          vin: 'IOQ45678901234567',
+          plate: 'BADVIN',
+          plateState: 'OH',
+          vehicleClass: 'light_duty',
+        },
+        serviceType: 'tow',
+        pickup: { address: '100 Main', lat: 39.9, lng: -83.0 },
+        dropoff: { address: '200 Broad', lat: 39.91, lng: -83.01 },
+        authorizedBy: 'customer',
+      },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('intake ACCEPTS a fully-formed VIN', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/jobs/intake',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: baseTowIntake({
+        customer: {
+          name: 'Good VIN',
+          phone: '+15555557042',
+          email: 'good.vin@spec.test',
+        },
+        vehicle: {
+          vin: 'WBA1234567HGNM042',
+          plate: 'GOODVIN',
+          plateState: 'OH',
+          vehicleClass: 'light_duty',
+        },
+      }),
+    });
+    expect(res.statusCode).toBe(201);
+    const body = res.json() as IntakeResponse;
+    expect(body.vehicle.vin).toBe('WBA1234567HGNM042');
+  });
+
+  it('intake REJECTS when email is missing', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/jobs/intake',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: {
+        customer: { name: 'No Email', phone: '+15555557043' },
+        vehicle: { vin: nextVin(), plate: 'NOMAIL', plateState: 'OH', vehicleClass: 'light_duty' },
+        serviceType: 'tow',
+        pickup: { address: '100 Main', lat: 39.9, lng: -83.0 },
+        dropoff: { address: '200 Broad', lat: 39.91, lng: -83.01 },
+        authorizedBy: 'customer',
+      },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  // -------------------------------------------------------------------- //
+  // Session 4 cleanup: customer model expansion — extra fields persisted.
+  // -------------------------------------------------------------------- //
+  it('intake persists home address + secondary contact + Convini-app flag', async () => {
+    const phone = '+15555557050';
+    const res = await app.inject({
+      method: 'POST',
+      url: '/jobs/intake',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: baseTowIntake({
+        customer: {
+          name: 'Expanded Customer',
+          phone,
+          email: 'expanded@spec.test',
+          homeAddress: {
+            street: '123 Apple St',
+            city: 'Columbus',
+            state: 'OH',
+            zip: '43215',
+          },
+          secondaryContactName: 'Jane Spouse',
+          secondaryContactPhone: '+15555557051',
+          conviniAppDownloaded: true,
+        },
+      }),
+    });
+    expect(res.statusCode).toBe(201);
+    const created = res.json() as IntakeResponse & { customer: { id: string } };
+    const customerId = created.customer.id;
+
+    // GET /customers/:id surfaces the new fields.
+    const peek = await app.inject({
+      method: 'GET',
+      url: `/customers/${customerId}`,
+      headers: auth(session.accessToken),
+    });
+    expect(peek.statusCode).toBe(200);
+    const persisted = peek.json() as {
+      homeAddressStreet: string | null;
+      homeAddressCity: string | null;
+      homeAddressState: string | null;
+      homeAddressZip: string | null;
+      secondaryContactName: string | null;
+      secondaryContactPhone: string | null;
+      conviniAppDownloaded: boolean;
+      email: string | null;
+    };
+    expect(persisted.homeAddressStreet).toBe('123 Apple St');
+    expect(persisted.homeAddressCity).toBe('Columbus');
+    expect(persisted.homeAddressState).toBe('OH');
+    expect(persisted.homeAddressZip).toBe('43215');
+    expect(persisted.secondaryContactName).toBe('Jane Spouse');
+    expect(persisted.secondaryContactPhone).toBe('+15555557051');
+    expect(persisted.conviniAppDownloaded).toBe(true);
+    expect(persisted.email).toBe('expanded@spec.test');
+  });
+
+  it('cross-tenant SELECT cannot see new home_address / secondary_contact / convini fields', async () => {
+    // Tenant A creates a customer with the new fields populated.
+    const created = await app.inject({
+      method: 'POST',
+      url: '/jobs/intake',
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: baseTowIntake({
+        customer: {
+          name: 'RLS New Fields',
+          phone: '+15555557060',
+          email: 'rls.new@spec.test',
+          homeAddress: { street: '999 Secret Ln', city: 'Columbus', state: 'OH', zip: '43210' },
+          secondaryContactName: 'Hidden Person',
+          secondaryContactPhone: '+15555557061',
+          conviniAppDownloaded: true,
+        },
+      }),
+    });
+    expect(created.statusCode).toBe(201);
+    const targetCustomerId = (created.json() as IntakeResponse & {
+      customer: { id: string };
+    }).customer.id;
+
+    // Tenant B tries to read tenant A's customer by id — RLS must hide it.
+    const peek = await app.inject({
+      method: 'GET',
+      url: `/customers/${targetCustomerId}`,
+      headers: auth(agentSession.accessToken),
+    });
+    expect(peek.statusCode).toBe(404);
+
+    // Direct DB confirmation: SELECT under tenant B's GUC must return zero rows.
+    const c = await ctx.admin.connect();
+    try {
+      await c.query('BEGIN');
+      await c.query("SELECT set_config('app.current_tenant_id', $1, true)", [agentTenantId]);
+      await c.query("SELECT set_config('app.current_user_id', $1, true)", [agentSession.user.id]);
+      await c.query('SET LOCAL ROLE app_user');
+      const r = await c.query<{ n: number }>(
+        `SELECT count(*)::int AS n FROM customers
+           WHERE id = $1::uuid
+             AND (home_address_street IS NOT NULL
+                  OR secondary_contact_phone IS NOT NULL
+                  OR convini_app_downloaded = true)`,
+        [targetCustomerId],
+      );
+      expect(r.rows[0]?.n).toBe(0);
+      await c.query('COMMIT');
+    } catch (e) {
+      await c.query('ROLLBACK').catch(() => {});
+      throw e;
+    } finally {
+      c.release();
+    }
+  });
+
   it('cross-tenant SELECT cannot see jobs created in tenant A (RLS proof)', async () => {
     const created = await app.inject({
       method: 'POST',
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: baseTowIntake({
-        customer: { name: 'RLS Target', phone: '+15555557090' },
-        vehicle: { plate: 'RLSCANT', plateState: 'OH', vehicleClass: 'light_duty' },
+        customer: { name: 'RLS Target', phone: '+15555557090', email: 'rls@spec.test' },
+        vehicle: { vin: nextVin(), plate: 'RLSCANT', plateState: 'OH', vehicleClass: 'light_duty' },
       }),
     });
     expect(created.statusCode).toBe(201);
@@ -426,8 +675,8 @@ describeIfDb('Jobs intake integration', () => {
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: baseTowIntake({
-        customer: { name: 'Audit Target', phone: '+15555557099' },
-        vehicle: { plate: 'AUDIT11', plateState: 'OH', vehicleClass: 'light_duty' },
+        customer: { name: 'Audit Target', phone: '+15555557099', email: 'audit@spec.test' },
+        vehicle: { vin: nextVin(), plate: 'AUDIT11', plateState: 'OH', vehicleClass: 'light_duty' },
       }),
     });
     expect(res.statusCode).toBe(201);
@@ -443,8 +692,8 @@ describeIfDb('Jobs intake integration', () => {
       url: '/jobs/intake',
       headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
       payload: baseTowIntake({
-        customer: { name: 'Cancel Target', phone: '+15555557100' },
-        vehicle: { plate: 'CANCEL1', plateState: 'OH', vehicleClass: 'light_duty' },
+        customer: { name: 'Cancel Target', phone: '+15555557100', email: 'cancel@spec.test' },
+        vehicle: { vin: nextVin(), plate: 'CANCEL1', plateState: 'OH', vehicleClass: 'light_duty' },
       }),
     });
     expect(created.statusCode).toBe(201);

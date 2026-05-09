@@ -79,11 +79,26 @@ export class JobsService {
   async createIntake(ctx: CallerContext, input: CreateJobIntakePayload): Promise<IntakeResultDto> {
     // findOrCreateByContact — runs its own transaction and returns the
     // resolved customer. We re-fetch the customer inside the job-creation
-    // transaction so RLS sees it from the same connection.
+    // transaction so RLS sees it from the same connection. Email is required
+    // by the createJobIntakeSchema, so it's always present here.
+    const home = input.customer.homeAddress ?? {};
     const customerResult = await this.customers.findOrCreateByContact(ctx, {
       name: input.customer.name,
       phone: input.customer.phone,
-      ...(input.customer.email ? { email: input.customer.email } : {}),
+      email: input.customer.email,
+      ...(home.street ? { homeAddressStreet: home.street } : {}),
+      ...(home.city ? { homeAddressCity: home.city } : {}),
+      ...(home.state ? { homeAddressState: home.state } : {}),
+      ...(home.zip ? { homeAddressZip: home.zip } : {}),
+      ...(input.customer.secondaryContactName
+        ? { secondaryContactName: input.customer.secondaryContactName }
+        : {}),
+      ...(input.customer.secondaryContactPhone
+        ? { secondaryContactPhone: input.customer.secondaryContactPhone }
+        : {}),
+      ...(input.customer.conviniAppDownloaded !== undefined
+        ? { conviniAppDownloaded: input.customer.conviniAppDownloaded }
+        : {}),
     });
 
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {

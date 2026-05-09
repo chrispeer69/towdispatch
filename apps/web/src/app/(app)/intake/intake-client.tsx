@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
  * Three-column call intake.
  *
@@ -99,6 +101,14 @@ interface FormState {
   phone: string;
   customerName: string;
   customerEmail: string;
+  // additional contact info (Session 4 cleanup — surfaced in collapsible panel)
+  homeAddressStreet: string;
+  homeAddressCity: string;
+  homeAddressState: string;
+  homeAddressZip: string;
+  secondaryContactName: string;
+  secondaryContactPhone: string;
+  conviniAppDownloaded: boolean;
   // vehicle
   plate: string;
   plateState: string;
@@ -126,6 +136,13 @@ const EMPTY: FormState = {
   phone: '',
   customerName: '',
   customerEmail: '',
+  homeAddressStreet: '',
+  homeAddressCity: '',
+  homeAddressState: '',
+  homeAddressZip: '',
+  secondaryContactName: '',
+  secondaryContactPhone: '',
+  conviniAppDownloaded: false,
   plate: '',
   plateState: '',
   vin: '',
@@ -162,9 +179,19 @@ export function IntakeClient(): JSX.Element {
   const [quote, setQuote] = useState<RateQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
 
+  // Has the user typed in the VIN / email fields yet? Used to suppress
+  // inline error messages until the dispatcher has had a chance to fill in
+  // the field — we still gate DISPATCH on validity from the start.
+  const [vinTouched, setVinTouched] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+
   const update = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   }, []);
+
+  const vinValid = VIN_REGEX.test(form.vin.trim().toUpperCase());
+  const emailValid = EMAIL_REGEX.test(form.customerEmail.trim());
+  const dispatchDisabled = submitting || !vinValid || !emailValid;
 
   // -------- existing-customer detection (debounced phone lookup) --------
   useEffect(() => {
@@ -336,8 +363,14 @@ export function IntakeClient(): JSX.Element {
       setSubmitError('Customer name is required.');
       return;
     }
-    if (!form.plate.trim() && !form.vin.trim()) {
-      setSubmitError('Either plate or VIN is required.');
+    if (!emailValid) {
+      setEmailTouched(true);
+      setSubmitError('A valid email is required to dispatch.');
+      return;
+    }
+    if (!vinValid) {
+      setVinTouched(true);
+      setSubmitError('A valid 17-character VIN is required to dispatch.');
       return;
     }
     if (!form.pickupAddress.trim()) {
@@ -351,16 +384,32 @@ export function IntakeClient(): JSX.Element {
     setSubmitError(null);
     setSubmitting(true);
 
+    const homeAddress: Record<string, string> = {};
+    if (form.homeAddressStreet.trim()) homeAddress.street = form.homeAddressStreet.trim();
+    if (form.homeAddressCity.trim()) homeAddress.city = form.homeAddressCity.trim();
+    if (form.homeAddressState.trim())
+      homeAddress.state = form.homeAddressState.trim().toUpperCase();
+    if (form.homeAddressZip.trim()) homeAddress.zip = form.homeAddressZip.trim();
+    const secondaryPhone = form.secondaryContactPhone.trim()
+      ? toE164(form.secondaryContactPhone)
+      : null;
+
     const payload = {
       customer: {
         name: form.customerName.trim(),
         phone: e164,
-        ...(form.customerEmail.trim() ? { email: form.customerEmail.trim() } : {}),
+        email: form.customerEmail.trim(),
+        ...(Object.keys(homeAddress).length ? { homeAddress } : {}),
+        ...(form.secondaryContactName.trim()
+          ? { secondaryContactName: form.secondaryContactName.trim() }
+          : {}),
+        ...(secondaryPhone ? { secondaryContactPhone: secondaryPhone } : {}),
+        ...(form.conviniAppDownloaded ? { conviniAppDownloaded: true } : {}),
       },
       vehicle: {
+        vin: form.vin.trim().toUpperCase(),
         ...(form.plate.trim() ? { plate: form.plate.trim() } : {}),
         ...(form.plateState.trim() ? { plateState: form.plateState.trim().toUpperCase() } : {}),
-        ...(form.vin.trim() ? { vin: form.vin.trim().toUpperCase() } : {}),
         ...(form.year ? { year: Number(form.year) } : {}),
         ...(form.make.trim() ? { make: form.make.trim() } : {}),
         ...(form.model.trim() ? { model: form.model.trim() } : {}),
@@ -469,18 +518,28 @@ export function IntakeClient(): JSX.Element {
               autoComplete="name"
             />
           </Field>
-          <Field label="Email">
+          <Field label="Email" required>
             <Input
               tabIndex={3}
               type="email"
-              placeholder="optional"
+              placeholder="customer@example.com"
+              data-testid="intake-customer-email"
               value={form.customerEmail}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 update('customerEmail', e.target.value)
               }
+              onBlur={() => setEmailTouched(true)}
+              aria-invalid={emailTouched && !emailValid}
+              aria-describedby="intake-email-error"
               autoComplete="email"
             />
+            {emailTouched && !emailValid ? (
+              <p id="intake-email-error" data-testid="intake-email-error" className="text-xs text-danger">
+                Email is required to dispatch — needed for receipts and the Convini app invite.
+              </p>
+            ) : null}
           </Field>
+          <AdditionalContactInfo form={form} update={update} />
         </Card>
 
         {/* CENTER — Vehicle */}
@@ -514,17 +573,28 @@ export function IntakeClient(): JSX.Element {
             </div>
           </div>
           {existingVehicleSummary ? <Badge>Existing vehicle · {existingVehicleSummary}</Badge> : null}
-          <Field label="VIN">
+          <Field label="VIN" required>
             <Input
               tabIndex={6}
-              placeholder="17 chars (optional)"
+              placeholder="17 characters, A-Z (no I/O/Q) and digits"
               maxLength={17}
               value={form.vin}
+              data-testid="intake-vin"
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 update('vin', e.target.value.toUpperCase())
               }
+              onBlur={() => setVinTouched(true)}
+              aria-invalid={vinTouched && !vinValid}
+              aria-describedby="intake-vin-error"
               autoComplete="off"
             />
+            {vinTouched && !vinValid ? (
+              <p id="intake-vin-error" data-testid="intake-vin-error" className="text-xs text-danger">
+                {form.vin.trim().length === 0
+                  ? 'VIN is required.'
+                  : 'VIN must be 17 characters: uppercase A–Z (no I/O/Q) and digits only.'}
+              </p>
+            ) : null}
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Year">
@@ -734,8 +804,9 @@ export function IntakeClient(): JSX.Element {
             type="submit"
             name="dispatch-submit"
             tabIndex={31}
-            disabled={submitting}
+            disabled={dispatchDisabled}
             data-testid="intake-dispatch"
+            aria-disabled={dispatchDisabled}
             className="w-full"
             size="lg"
           >
@@ -769,12 +840,129 @@ function Card({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }): JSX.Element {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}): JSX.Element {
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        {required ? (
+          <span aria-label="required" className="ml-0.5 text-danger" data-testid={`intake-required-${label.toLowerCase()}`}>
+            *
+          </span>
+        ) : null}
+      </Label>
       {children}
     </div>
+  );
+}
+
+function AdditionalContactInfo({
+  form,
+  update,
+}: {
+  form: FormState;
+  update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
+}): JSX.Element {
+  return (
+    <details className="rounded-[10px] border border-steel-border bg-steel/40 px-3 py-2" data-testid="intake-additional-contact">
+      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">
+        Additional contact info
+      </summary>
+      <div className="mt-3 space-y-3">
+        <Field label="Home address — street">
+          <Input
+            data-testid="intake-home-street"
+            value={form.homeAddressStreet}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              update('homeAddressStreet', e.target.value)
+            }
+            placeholder="123 Main St"
+            autoComplete="street-address"
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="City">
+            <Input
+              data-testid="intake-home-city"
+              value={form.homeAddressCity}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                update('homeAddressCity', e.target.value)
+              }
+              placeholder="Columbus"
+              autoComplete="address-level2"
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="State">
+              <Input
+                data-testid="intake-home-state"
+                value={form.homeAddressState}
+                maxLength={2}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  update('homeAddressState', e.target.value.toUpperCase())
+                }
+                placeholder="OH"
+                autoComplete="address-level1"
+              />
+            </Field>
+            <Field label="ZIP">
+              <Input
+                data-testid="intake-home-zip"
+                value={form.homeAddressZip}
+                maxLength={20}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  update('homeAddressZip', e.target.value)
+                }
+                placeholder="43215"
+                autoComplete="postal-code"
+              />
+            </Field>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Secondary contact name">
+            <Input
+              data-testid="intake-secondary-name"
+              value={form.secondaryContactName}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                update('secondaryContactName', e.target.value)
+              }
+              placeholder="Spouse, shop manager, etc."
+              autoComplete="off"
+            />
+          </Field>
+          <Field label="Secondary contact phone">
+            <Input
+              data-testid="intake-secondary-phone"
+              value={form.secondaryContactPhone}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                update('secondaryContactPhone', e.target.value)
+              }
+              placeholder="555-555-0102"
+              autoComplete="off"
+            />
+          </Field>
+        </div>
+        <label className="mt-1 inline-flex cursor-pointer items-center gap-2 text-xs text-text-secondary">
+          <input
+            type="checkbox"
+            data-testid="intake-convini-app"
+            checked={form.conviniAppDownloaded}
+            onChange={(e) => update('conviniAppDownloaded', e.target.checked)}
+            className="h-4 w-4 rounded border-steel-border bg-steel-mid"
+          />
+          Customer has the Convini app installed
+        </label>
+      </div>
+    </details>
   );
 }
 

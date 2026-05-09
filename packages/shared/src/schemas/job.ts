@@ -88,15 +88,39 @@ export const rateQuoteSchema = z.object({
 });
 export type RateQuote = z.infer<typeof rateQuoteSchema>;
 
-const intakeVehicleSchema = z
+// Session 4 cleanup: VIN is required at intake (it's the canonical vehicle
+// identifier across the audit / billing / future Carfax integrations). Plate
+// stays optional — many recovery / scene jobs come in plateless.
+const intakeVehicleSchema = z.object({
+  vin: z
+    .string()
+    .transform((v) => v.toUpperCase())
+    .pipe(vinSchema),
+  plate: z.string().max(20).optional(),
+  plateState: z
+    .string()
+    .transform((v) => v.toUpperCase())
+    .pipe(
+      z
+        .string()
+        .length(2)
+        .regex(/^[A-Z]{2}$/, 'Two uppercase letters'),
+    )
+    .optional(),
+  year: z.coerce.number().int().min(1900).max(2100).optional(),
+  make: z.string().max(60).optional(),
+  model: z.string().max(120).optional(),
+  color: z.string().max(60).optional(),
+  vehicleClass: z.enum(vehicleClassValues).default('light_duty'),
+  specialInstructions: z.string().max(2000).optional(),
+});
+export type IntakeVehicleInput = z.infer<typeof intakeVehicleSchema>;
+
+const intakeHomeAddressSchema = z
   .object({
-    vin: z
-      .string()
-      .transform((v) => v.toUpperCase())
-      .pipe(vinSchema)
-      .optional(),
-    plate: z.string().max(20).optional(),
-    plateState: z
+    street: z.string().max(240).optional(),
+    city: z.string().max(120).optional(),
+    state: z
       .string()
       .transform((v) => v.toUpperCase())
       .pipe(
@@ -106,23 +130,22 @@ const intakeVehicleSchema = z
           .regex(/^[A-Z]{2}$/, 'Two uppercase letters'),
       )
       .optional(),
-    year: z.coerce.number().int().min(1900).max(2100).optional(),
-    make: z.string().max(60).optional(),
-    model: z.string().max(120).optional(),
-    color: z.string().max(60).optional(),
-    vehicleClass: z.enum(vehicleClassValues).default('light_duty'),
-    specialInstructions: z.string().max(2000).optional(),
+    zip: z.string().max(20).optional(),
   })
-  .refine((v) => v.vin !== undefined || v.plate !== undefined, {
-    message: 'Either VIN or plate is required',
-    path: ['plate'],
-  });
-export type IntakeVehicleInput = z.infer<typeof intakeVehicleSchema>;
+  .partial()
+  .optional();
 
+// Session 4 cleanup: email is now required at intake — it's how we send job
+// confirmations, receipts, and the Convini app invite. Customers without an
+// email must still be served, but intake forces the dispatcher to ask.
 const intakeCustomerSchema = z.object({
   name: z.string().min(1).max(240),
   phone: phoneE164Schema,
-  email: z.string().email().max(254).optional(),
+  email: z.string().email().max(254),
+  homeAddress: intakeHomeAddressSchema,
+  secondaryContactName: z.string().max(240).optional(),
+  secondaryContactPhone: phoneE164Schema.optional(),
+  conviniAppDownloaded: z.boolean().optional(),
 });
 export type IntakeCustomerInput = z.infer<typeof intakeCustomerSchema>;
 
