@@ -51,8 +51,9 @@ grep -q "FleetGuard Pro is the insurance and risk-management" /tmp/eco-fleetguar
 grep -q "color:#F59E0B" /tmp/eco-fleetguard.html && \
   echo "FG_ACCENT=PASS" || echo "FG_ACCENT=FAIL"
 
-# Active-state highlight when on the convini page should use the brand color.
-grep -q "background-color:#0F9D5826" /tmp/eco-convini.html && \
+# Active-state highlight when on the convini page should use the brand color
+# at 8% opacity (`14` hex) per the ECOSYSTEM tab spec.
+grep -q "#0F9D5814" /tmp/eco-convini.html && \
   echo "CONVINI_ACTIVE_BG=PASS" || echo "CONVINI_ACTIVE_BG=FAIL"
 
 # Dashboard remains intact (regression guard).

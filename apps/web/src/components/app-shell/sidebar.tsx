@@ -11,6 +11,7 @@ import {
   type LucideIcon,
   Mail,
   Navigation,
+  PhoneCall,
   Radio,
   Receipt,
   Settings,
@@ -26,10 +27,13 @@ import {
  * navigable until their respective sessions ship.
  *
  * Per-item accentColor: ECOSYSTEM tabs (CONVINI, FleetCommand, FleetGuard Pro)
- * each get a brand color that overrides the default orange for active state +
- * the side bar indicator. Hover state for inactive items keeps the neutral
- * steel hover. Implemented via inline style on the active link so we don't
- * have to enumerate every brand color in the Tailwind config.
+ * each get a brand color used for the icon at all times, the text + 3px
+ * indicator bar when active, an 8%-tint background when active, and a
+ * 4%-tint background on hover. Implemented by writing the per-item color +
+ * derived tints as CSS custom properties on the link, so Tailwind's
+ * arbitrary-value classes can reference them for hover (which inline `style`
+ * can't express). Avoids enumerating every brand color in the Tailwind
+ * config.
  */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -72,9 +76,20 @@ const SECTIONS: NavSection[] = [
     // still exists for deep-link editing, but there's no list view.
     label: 'Operations',
     items: [
+      {
+        label: 'Intake',
+        href: '/intake',
+        icon: PhoneCall,
+        match: (p) => p.startsWith('/intake'),
+      },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'Tow Jobs', href: null, icon: Truck, disabled: true },
-      { label: 'Live Dispatch', href: null, icon: Radio, disabled: true },
+      {
+        label: 'Live Dispatch',
+        href: '/dispatch',
+        icon: Radio,
+        match: (p) => p.startsWith('/dispatch'),
+      },
       { label: 'Drivers', href: null, icon: Users, disabled: true },
       { label: 'Fleet', href: null, icon: CarFront, disabled: true },
     ],
@@ -176,38 +191,58 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                   </span>
                 );
                 if (item.href && !item.disabled) {
-                  // When an accentColor is set, drive active-state colors via
-                  // inline style. `${hex}26` ≈ 15% alpha for the background pill.
                   const accent = item.accentColor;
-                  const activeStyle: CSSProperties | undefined =
-                    isActive && accent
-                      ? { backgroundColor: `${accent}26`, color: accent }
-                      : undefined;
-                  const indicatorStyle: CSSProperties | undefined = accent
-                    ? { backgroundColor: accent }
-                    : undefined;
+                  if (accent) {
+                    // ECOSYSTEM tab. `${hex}14` = ~8% alpha (active bg),
+                    // `${hex}0A` = ~4% alpha (hover bg). The Tailwind
+                    // arbitrary-value classes below read these via var().
+                    const accentVars = {
+                      '--accent': accent,
+                      '--accent-bg-active': `${accent}14`,
+                      '--accent-bg-hover': `${accent}0A`,
+                    } as CSSProperties;
+                    return (
+                      <li key={item.label}>
+                        <Link
+                          href={item.href}
+                          style={accentVars}
+                          className={cn(
+                            'group relative flex items-center justify-between rounded-[8px] px-3 py-2 transition-colors',
+                            isActive
+                              ? 'bg-[var(--accent-bg-active)] text-[var(--accent)]'
+                              : 'text-text-secondary hover:bg-[var(--accent-bg-hover)]',
+                          )}
+                        >
+                          {isActive ? (
+                            <span
+                              aria-hidden
+                              style={{ backgroundColor: accent }}
+                              className="absolute -left-3 top-1.5 h-6 w-[3px] rounded-r-full"
+                            />
+                          ) : null}
+                          <span className="flex items-center gap-3">
+                            <item.icon className="h-4 w-4" style={{ color: accent }} />
+                            <span className="text-sm font-medium">{item.label}</span>
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  }
                   return (
                     <li key={item.label}>
                       <Link
                         href={item.href}
-                        style={activeStyle}
                         className={cn(
                           'group relative flex items-center justify-between rounded-[8px] px-3 py-2 transition-colors',
-                          isActive && !accent
+                          isActive
                             ? 'bg-orange/15 text-orange-light'
-                            : !isActive
-                              ? 'text-text-secondary hover:bg-steel-light hover:text-text-primary'
-                              : '',
+                            : 'text-text-secondary hover:bg-steel-light hover:text-text-primary',
                         )}
                       >
                         {isActive ? (
                           <span
                             aria-hidden
-                            style={indicatorStyle}
-                            className={cn(
-                              'absolute -left-3 top-1.5 h-6 w-1 rounded-r-full',
-                              !accent && 'bg-orange',
-                            )}
+                            className="absolute -left-3 top-1.5 h-6 w-1 rounded-r-full bg-orange"
                           />
                         ) : null}
                         {content}
