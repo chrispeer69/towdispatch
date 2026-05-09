@@ -96,7 +96,7 @@ test.describe('Auth', () => {
 
     // Continue to dashboard via the success button
     await page.click('a:has-text("Continue to dashboard")');
-    await expect(page).toHaveURL(/\/app/);
+    await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole('heading', { name: /Operations Overview/i }).first()).toBeVisible();
 
     // Sign out
@@ -110,7 +110,7 @@ test.describe('Auth', () => {
     await page.click('button[type="submit"]');
 
     // Lands on /app
-    await expect(page).toHaveURL(/\/app/);
+    await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByRole('heading', { name: /Operations Overview/i }).first()).toBeVisible();
   });
 });
