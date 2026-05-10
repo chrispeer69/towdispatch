@@ -1,10 +1,16 @@
 -- =====================================================================
--- 0009_drivers_trucks_shifts.sql
+-- 0010_drivers_trucks_shifts.sql
 --
 -- RLS, partial unique indexes, audit triggers, and check constraints for
 -- Session 5 — the live dispatch board. Adds: drivers, trucks, driver_shifts,
 -- job_status_transitions. Also extends jobs with assignment columns FK'd
 -- back to drivers / trucks / driver_shifts.
+--
+-- Renumbered from 0009 → 0010 to sequence after Session 4.5's
+-- 0009_customers_extended_contact.sql, which landed on master while this
+-- branch was in flight. Drizzle migrations (and the _journal.json) are
+-- untouched — master's Drizzle entries stop at 0004, so the 0005 entry on
+-- this branch does not collide.
 --
 -- Invariants:
 --   * Every new tenant-scoped table is FORCE RLS.
