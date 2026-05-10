@@ -1,0 +1,11 @@
+# Gradle wrapper script must stay LF — Bash shebang and PATH munging both
+# break under CRLF.
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+*.sh text eol=lf
+
+# Binary — never touched by line-ending or filter rules.
+*.jar binary
+*.png binary
+*.jpg binary
+*.webp binary
