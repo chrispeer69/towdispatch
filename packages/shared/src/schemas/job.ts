@@ -168,6 +168,13 @@ export const createJobIntakeSchema = z
     notes: z.string().max(4000).optional(),
     /** Optional client-supplied scheduled time (ISO 8601). Defaults to now. */
     scheduledAt: z.string().datetime().optional(),
+    /**
+     * When true, the auto customer-tracking SMS is suppressed for this job.
+     * Used by fleet/account intakes that handle their own customer comms.
+     * Persisted as `[skip_customer_sms]` in jobs.notes so re-assignment also
+     * honors it. The dispatcher can override later via the resend endpoint.
+     */
+    skipCustomerSms: z.boolean().optional(),
   })
   .refine((v) => v.serviceType !== 'tow' || v.dropoff !== undefined, {
     message: 'Dropoff is required for tow service',

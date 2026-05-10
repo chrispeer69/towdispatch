@@ -17,3 +17,4 @@ export * from './driver-truck-assignments';
 export * from './documents';
 export * from './dvirs';
 export * from './maintenance';
+export * from './tracking-links';

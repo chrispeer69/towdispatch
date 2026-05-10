@@ -123,6 +123,12 @@ export class DispatchGateway implements OnModuleInit, OnModuleDestroy {
     this.log.log(`Dispatch gateway attached on :${port} (path=/socket.io)`);
   }
 
+  /** Expose the underlying io server so other gateways can mount their own
+   * namespaces on top (e.g. the public /track namespace). */
+  getServer(): Server | null {
+    return this.io;
+  }
+
   async onModuleDestroy(): Promise<void> {
     this.unsubscribeEvents?.();
     if (this.io) {

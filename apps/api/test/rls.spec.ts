@@ -183,6 +183,65 @@ describeIfDb('RLS tenant isolation', () => {
     }
   });
 
+  it('tracking_links: tenant A cannot read or modify tenant B rows', async () => {
+    // Seed a tracking link under tenant B via the admin pool (RLS bypass).
+    const c = await admin.connect();
+    let jobBId = '';
+    let linkBId = '';
+    try {
+      await c.query('BEGIN');
+      // Need a job for tenant B; create the minimum row directly. We bypass
+      // the rate engine and intake since this test is about RLS.
+      const jobRes = await c.query<{ id: string }>(
+        `INSERT INTO jobs (id, tenant_id, job_number, status, service_type, pickup_address, authorized_by)
+         VALUES (gen_random_uuid(), $1::uuid, '20990101-0001', 'new', 'tow', '1 Test', 'customer')
+         RETURNING id`,
+        [tenantB],
+      );
+      jobBId = jobRes.rows[0]?.id as string;
+      const linkRes = await c.query<{ id: string }>(
+        `INSERT INTO tracking_links (id, tenant_id, job_id, token, expires_at)
+         VALUES (gen_random_uuid(), $1::uuid, $2::uuid, 'rls-test-token-aaaaaaaaaaaaaaaaaaaa', now() + interval '1 hour')
+         RETURNING id`,
+        [tenantB, jobBId],
+      );
+      linkBId = linkRes.rows[0]?.id as string;
+      await c.query('COMMIT');
+    } catch (e) {
+      await c.query('ROLLBACK').catch(() => {});
+      throw e;
+    } finally {
+      c.release();
+    }
+
+    // From tenant A's app context, tenant B's link must be invisible.
+    const a = await app.connect();
+    try {
+      await a.query('BEGIN');
+      await a.query("SELECT set_config('app.current_tenant_id', $1, true)", [tenantA]);
+      await a.query("SELECT set_config('app.current_user_id', $1, true)", [userA]);
+      const sel = await a.query('SELECT id FROM tracking_links WHERE id = $1::uuid', [linkBId]);
+      expect(sel.rows).toHaveLength(0);
+      const upd = await a.query(
+        'UPDATE tracking_links SET revoked_at = now() WHERE id = $1::uuid',
+        [linkBId],
+      );
+      expect(upd.rowCount).toBe(0);
+      await a.query('COMMIT');
+    } finally {
+      a.release();
+    }
+
+    // Cleanup the seeded rows so afterAll doesn't have to special-case them.
+    const cleanup = await admin.connect();
+    try {
+      await cleanup.query('DELETE FROM tracking_links WHERE id = $1::uuid', [linkBId]);
+      await cleanup.query('DELETE FROM jobs WHERE id = $1::uuid', [jobBId]);
+    } finally {
+      cleanup.release();
+    }
+  });
+
   it('without GUCs set, no tenant rows are visible (fail-closed)', async () => {
     const c = await app.connect();
     try {

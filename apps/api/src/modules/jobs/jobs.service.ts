@@ -199,7 +199,7 @@ export class JobsService {
           authorizedByName: input.authorizedByName ?? null,
           rateQuotedCents: quote.totalCents,
           rateBreakdown: quote,
-          notes: input.notes ?? null,
+          notes: composeIntakeNotes(input.notes, !!input.skipCustomerSms),
           createdByUserId: ctx.userId,
         })
         .returning();
@@ -769,6 +769,19 @@ function formatDayKey(when: Date): string {
   const m = String(when.getUTCMonth() + 1).padStart(2, '0');
   const d = String(when.getUTCDate()).padStart(2, '0');
   return `${y}${m}${d}`;
+}
+
+/**
+ * Encode the `skipCustomerSms` per-intake flag into the notes column. We
+ * stash a bracketed marker rather than adding a new column because the flag
+ * is sticky across re-assignments and rare (fleet intakes only). The
+ * tracking module greps for the marker; humans see it as obvious metadata.
+ */
+function composeIntakeNotes(notes: string | undefined, skipSms: boolean): string | null {
+  const base = notes?.trim() ?? '';
+  if (!skipSms) return base.length > 0 ? base : null;
+  if (base.includes('[skip_customer_sms]')) return base;
+  return base.length > 0 ? `${base}\n[skip_customer_sms]` : '[skip_customer_sms]';
 }
 
 function numToText(n?: number | null): string | null {

@@ -19,6 +19,8 @@ import type {
   JobCreatedEvent,
   JobStatusChangedEvent,
   JobUnassignedEvent,
+  TrackingLinkSummaryEvent,
+  TrackingMessageReceivedEvent,
 } from '@towcommand/shared';
 import { DISPATCH_EVENTS } from '@towcommand/shared';
 
@@ -30,7 +32,14 @@ export type DispatchEventPayload =
   | { name: typeof DISPATCH_EVENTS.DRIVER_LOCATION_CHANGED; payload: DriverLocationChangedEvent }
   | { name: typeof DISPATCH_EVENTS.DRIVER_SHIFT_STARTED; payload: DriverShiftStartedEvent }
   | { name: typeof DISPATCH_EVENTS.DRIVER_SHIFT_ENDED; payload: DriverShiftEndedEvent }
-  | { name: typeof DISPATCH_EVENTS.DRIVER_STATUS_CHANGED; payload: DriverStatusChangedEvent };
+  | { name: typeof DISPATCH_EVENTS.DRIVER_STATUS_CHANGED; payload: DriverStatusChangedEvent }
+  | { name: typeof DISPATCH_EVENTS.TRACKING_LINK_CREATED; payload: TrackingLinkSummaryEvent }
+  | { name: typeof DISPATCH_EVENTS.TRACKING_LINK_UPDATED; payload: TrackingLinkSummaryEvent }
+  | { name: typeof DISPATCH_EVENTS.TRACKING_LINK_VIEWED; payload: TrackingLinkSummaryEvent }
+  | {
+      name: typeof DISPATCH_EVENTS.TRACKING_MESSAGE_RECEIVED;
+      payload: TrackingMessageReceivedEvent;
+    };
 
 export type DispatchSubscriber = (
   tenantId: string,

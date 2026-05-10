@@ -23,6 +23,8 @@ interface BoardResponse {
 
 interface SearchParams {
   created?: string;
+  /** 'pending' | 'skipped' — set by /intake on success to surface in the toast. */
+  sms?: string;
 }
 
 export default async function DispatchPage({
@@ -33,6 +35,7 @@ export default async function DispatchPage({
   await requireUser();
   const params = await searchParams;
   const createdJobNumber = params.created ?? null;
+  const smsHint = params.sms === 'skipped' ? 'skipped' : params.sms === 'pending' ? 'pending' : null;
 
   let snapshot: BoardResponse = {
     queue: [],
@@ -61,6 +64,7 @@ export default async function DispatchPage({
       initialSnapshot={snapshot}
       mapboxToken={mapboxToken}
       createdJobNumber={createdJobNumber}
+      smsHint={smsHint}
     />
   );
 }

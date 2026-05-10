@@ -106,6 +106,15 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM driver_truck_assignments WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          // Session 9 tracking leaves: tracking_messages references
+          // tracking_links; tracking_links and job_ratings reference jobs.
+          await c.query('DELETE FROM tracking_messages WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM job_ratings WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM tracking_links WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           // Session 5 dispatch leaves: job_status_transitions and
           // driver_shifts both reference jobs/drivers/trucks.
           await c.query('DELETE FROM job_status_transitions WHERE tenant_id = ANY($1::uuid[])', [

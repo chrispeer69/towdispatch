@@ -55,6 +55,22 @@ export const configSchema = z.object({
 
   SENTRY_DSN: z.string().optional().default(''),
   SENTRY_ENVIRONMENT: z.string().default('development'),
+
+  // Notification provider — Twilio if creds are set, stub otherwise. The
+  // config service derives `notification.activeProviderId` from these.
+  TWILIO_ACCOUNT_SID: z.string().optional().default(''),
+  TWILIO_AUTH_TOKEN: z.string().optional().default(''),
+  TWILIO_FROM_PHONE: z.string().optional().default(''),
+  TWILIO_BASE_URL: z.string().optional().default(''),
+
+  // Default SMS body when a tenant hasn't customised one. Handlebars-style
+  // {{tracking_url}} and {{tenant_name}} placeholders.
+  TRACKING_SMS_DEFAULT_BODY: z
+    .string()
+    .default(
+      'Your tow truck is on the way. Track live: {{tracking_url}} — {{tenant_name}}',
+    ),
+  TRACKING_LINK_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(24),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
