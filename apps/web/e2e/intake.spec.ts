@@ -29,7 +29,8 @@ test.describe('Call intake', () => {
 
     // Plate that's unique per run so we don't trip the existing-vehicle
     // re-use path on repeat test runs against the dev DB.
-    const stamp = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e3).toString(36)}`.toUpperCase();
+    const stamp =
+      `${Date.now().toString(36)}${Math.floor(Math.random() * 1e3).toString(36)}`.toUpperCase();
     const plate = `E2E${stamp}`.slice(0, 8);
     const phoneTail = String(Date.now() % 1_000_000).padStart(6, '0');
     const phone = `555-555-${phoneTail.slice(0, 4)}`;
@@ -97,7 +98,13 @@ test.describe('Call intake', () => {
     const intakeResp = await intakeRespPromise;
     expect(intakeResp.status()).toBe(201);
     const intakeData = (await intakeResp.json()) as {
-      job: { id: string; jobNumber: string; tenantId: string; status: string; rateQuotedCents: number };
+      job: {
+        id: string;
+        jobNumber: string;
+        tenantId: string;
+        status: string;
+        rateQuotedCents: number;
+      };
       customer: { id: string };
     };
 
@@ -132,10 +139,9 @@ test.describe('Call intake', () => {
     expect(job.jobNumber).toBe(intakeData.job.jobNumber);
 
     // Confirm the new customer expansion fields persisted (Session 4 cleanup).
-    const customerResp = await page.request.get(
-      `${API_URL}/customers/${intakeData.customer.id}`,
-      { headers: { authorization: `Bearer ${apiLoginData.accessToken}` } },
-    );
+    const customerResp = await page.request.get(`${API_URL}/customers/${intakeData.customer.id}`, {
+      headers: { authorization: `Bearer ${apiLoginData.accessToken}` },
+    });
     expect(customerResp.status()).toBe(200);
     const cust = (await customerResp.json()) as {
       homeAddressStreet: string | null;

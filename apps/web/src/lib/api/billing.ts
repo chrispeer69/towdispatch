@@ -47,11 +47,11 @@ export async function fetchAging(
 }
 
 export async function fetchCreditMemos(): Promise<CreditMemoDto[]> {
-  return apiServer<CreditMemoDto[]>(`/billing/credit-memos`);
+  return apiServer<CreditMemoDto[]>('/billing/credit-memos');
 }
 
 export async function fetchRecurringSchedules(): Promise<RecurringScheduleDto[]> {
-  return apiServer<RecurringScheduleDto[]>(`/billing/recurring`);
+  return apiServer<RecurringScheduleDto[]>('/billing/recurring');
 }
 
 function toQuery(q: Record<string, string | undefined>): string {

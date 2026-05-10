@@ -17,6 +17,7 @@ import { EmailModule } from './modules/email/email.module.js';
 import { FleetModule } from './modules/fleet/fleet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
@@ -48,6 +49,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     FleetModule,
     TrackingModule,
     BillingModule,
+    PaymentsModule,
     HealthModule,
   ],
   providers: [

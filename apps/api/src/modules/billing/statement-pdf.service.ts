@@ -1,9 +1,9 @@
+import { Injectable } from '@nestjs/common';
 /**
  * StatementPdfService — renders a single-account A/R statement PDF.
  * Companion to InvoicePdfService; same PDFKit setup, simpler layout.
  */
 import PDFDocument from 'pdfkit';
-import { Injectable } from '@nestjs/common';
 import type { PdfLanguage } from './invoice-pdf.service.js';
 
 interface OpenInvoice {
@@ -99,10 +99,7 @@ export class StatementPdfService {
         doc
           .fontSize(10)
           .font('Helvetica')
-          .text(
-            `${labels.account}: ${input.accountName}`,
-            { align: 'right', width: 512 },
-          );
+          .text(`${labels.account}: ${input.accountName}`, { align: 'right', width: 512 });
         doc.text(`${labels.as_of}: ${input.asOf.slice(0, 10)}`, {
           align: 'right',
           width: 512,
@@ -145,7 +142,11 @@ export class StatementPdfService {
         doc.text(labels.status, 340, headerY, { width: 100 });
         doc.text(labels.total, 430, headerY, { width: 60, align: 'right' });
         doc.text(labels.balance, 500, headerY, { width: 60, align: 'right' });
-        doc.moveTo(48, doc.y + 4).lineTo(560, doc.y + 4).strokeColor('#cccccc').stroke();
+        doc
+          .moveTo(48, doc.y + 4)
+          .lineTo(560, doc.y + 4)
+          .strokeColor('#cccccc')
+          .stroke();
         doc.moveDown(0.5);
         doc.font('Helvetica').fontSize(10).fillColor('#000');
         for (const inv of input.invoices) {

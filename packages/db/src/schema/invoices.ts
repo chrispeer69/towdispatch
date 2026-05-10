@@ -120,6 +120,9 @@ export const invoices = pgTable(
     /** Cause when status = void. Required by the void endpoint. */
     voidReason: text('void_reason'),
 
+    /** Public payment token — drives /pay/[token]. Unique per tenant. */
+    paymentToken: text('payment_token'),
+
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -288,6 +291,15 @@ export const payments = pgTable(
 
     status: text('status', { enum: paymentStatusValues }).notNull().default('cleared'),
     notes: text('notes'),
+
+    // Session 11 — Stripe linkage.
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+    stripeChargeId: text('stripe_charge_id'),
+    stripeRefundId: text('stripe_refund_id'),
+    /** Margin we kept on top of Stripe's fees (basis points × amount). */
+    platformMarginCents: bigint('platform_margin_cents', { mode: 'number' }).notNull().default(0),
+    /** Stripe's processing fee (informational — for net-payout reporting). */
+    stripeFeeCents: bigint('stripe_fee_cents', { mode: 'number' }).notNull().default(0),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

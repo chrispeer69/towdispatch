@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { RateQuote } from '@towcommand/shared';
+import { describe, expect, it } from 'vitest';
 import { mapRateCodeToLineType, rateQuoteToInvoiceLineItems } from './billing-line-items.js';
 
 describe('mapRateCodeToLineType', () => {
@@ -33,7 +33,13 @@ describe('rateQuoteToInvoiceLineItems', () => {
     distanceMiles: 12,
     lineItems: [
       { code: 'base', label: 'Tow base fee', amountCents: 9500 },
-      { code: 'mileage', label: 'Mileage (12 mi @ $4.50/mi)', amountCents: 5400, quantity: 12, unit: 'mi' },
+      {
+        code: 'mileage',
+        label: 'Mileage (12 mi @ $4.50/mi)',
+        amountCents: 5400,
+        quantity: 12,
+        unit: 'mi',
+      },
       { code: 'admin_fee', label: 'Admin fee', amountCents: 500 },
     ],
     subtotalCents: 15400,

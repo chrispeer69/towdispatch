@@ -50,7 +50,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
@@ -209,10 +208,9 @@ export function IntakeClient(): JSX.Element {
           return;
         }
         try {
-          const res = await fetch(
-            `/api/customers/search?q=${encodeURIComponent(e164)}&limit=5`,
-            { cache: 'no-store' },
-          );
+          const res = await fetch(`/api/customers/search?q=${encodeURIComponent(e164)}&limit=5`, {
+            cache: 'no-store',
+          });
           if (!res.ok) {
             setExistingCustomerName(null);
             return;
@@ -426,8 +424,7 @@ export function IntakeClient(): JSX.Element {
         address: form.pickupAddress.trim(),
         ...optionalCoord(form.pickupLat, form.pickupLng),
       },
-      ...(form.dropoffAddress.trim() ||
-      (form.dropoffLat.trim() && form.dropoffLng.trim())
+      ...(form.dropoffAddress.trim() || (form.dropoffLat.trim() && form.dropoffLng.trim())
         ? {
             dropoff: {
               address: form.dropoffAddress.trim() || 'pending',
@@ -469,9 +466,9 @@ export function IntakeClient(): JSX.Element {
 
   function onKeyDownGlobal(e: KeyboardEvent<HTMLFormElement>): void {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      const submitBtn = (e.currentTarget.elements.namedItem('dispatch-submit') as
-        | HTMLButtonElement
-        | null);
+      const submitBtn = e.currentTarget.elements.namedItem(
+        'dispatch-submit',
+      ) as HTMLButtonElement | null;
       submitBtn?.click();
     }
   }
@@ -506,28 +503,32 @@ export function IntakeClient(): JSX.Element {
           <Field label="Phone">
             <Input
               autoFocus
-              tabIndex={1}
+              tabIndex="0"
               data-testid="intake-phone"
               placeholder="555-555-0100"
               value={form.phone}
               onChange={(e: ChangeEvent<HTMLInputElement>) => update('phone', e.target.value)}
               autoComplete="tel"
             />
-            {existingCustomerName ? <Badge>Existing customer · {existingCustomerName}</Badge> : null}
+            {existingCustomerName ? (
+              <Badge>Existing customer · {existingCustomerName}</Badge>
+            ) : null}
           </Field>
           <Field label="Name">
             <Input
-              tabIndex={2}
+              tabIndex="0"
               data-testid="intake-customer-name"
               placeholder="Customer name"
               value={form.customerName}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => update('customerName', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                update('customerName', e.target.value)
+              }
               autoComplete="name"
             />
           </Field>
           <Field label="Email" required>
             <Input
-              tabIndex={3}
+              tabIndex="0"
               type="email"
               placeholder="customer@example.com"
               data-testid="intake-customer-email"
@@ -541,7 +542,11 @@ export function IntakeClient(): JSX.Element {
               autoComplete="email"
             />
             {emailTouched && !emailValid ? (
-              <p id="intake-email-error" data-testid="intake-email-error" className="text-xs text-danger">
+              <p
+                id="intake-email-error"
+                data-testid="intake-email-error"
+                className="text-xs text-danger"
+              >
                 Email is required to dispatch — needed for receipts and the Convini app invite.
               </p>
             ) : null}
@@ -555,7 +560,7 @@ export function IntakeClient(): JSX.Element {
             <div className="col-span-2 space-y-1.5">
               <Label>Plate</Label>
               <Input
-                tabIndex={4}
+                tabIndex="0"
                 data-testid="intake-plate"
                 placeholder="Plate"
                 value={form.plate}
@@ -568,7 +573,7 @@ export function IntakeClient(): JSX.Element {
             <div className="space-y-1.5">
               <Label>State</Label>
               <Input
-                tabIndex={5}
+                tabIndex="0"
                 placeholder="OH"
                 maxLength={2}
                 value={form.plateState}
@@ -579,10 +584,12 @@ export function IntakeClient(): JSX.Element {
               />
             </div>
           </div>
-          {existingVehicleSummary ? <Badge>Existing vehicle · {existingVehicleSummary}</Badge> : null}
+          {existingVehicleSummary ? (
+            <Badge>Existing vehicle · {existingVehicleSummary}</Badge>
+          ) : null}
           <Field label="VIN" required>
             <Input
-              tabIndex={6}
+              tabIndex="0"
               placeholder="17 characters, A-Z (no I/O/Q) and digits"
               maxLength={17}
               value={form.vin}
@@ -596,7 +603,11 @@ export function IntakeClient(): JSX.Element {
               autoComplete="off"
             />
             {vinTouched && !vinValid ? (
-              <p id="intake-vin-error" data-testid="intake-vin-error" className="text-xs text-danger">
+              <p
+                id="intake-vin-error"
+                data-testid="intake-vin-error"
+                className="text-xs text-danger"
+              >
                 {form.vin.trim().length === 0
                   ? 'VIN is required.'
                   : 'VIN must be 17 characters: uppercase A–Z (no I/O/Q) and digits only.'}
@@ -606,7 +617,7 @@ export function IntakeClient(): JSX.Element {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Year">
               <Input
-                tabIndex={7}
+                tabIndex="0"
                 type="number"
                 inputMode="numeric"
                 placeholder="2018"
@@ -616,7 +627,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Color">
               <Input
-                tabIndex={10}
+                tabIndex="0"
                 placeholder="Blue"
                 value={form.color}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('color', e.target.value)}
@@ -624,7 +635,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Make">
               <Input
-                tabIndex={8}
+                tabIndex="0"
                 placeholder="Honda"
                 value={form.make}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('make', e.target.value)}
@@ -632,7 +643,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Model">
               <Input
-                tabIndex={9}
+                tabIndex="0"
                 placeholder="Civic"
                 value={form.model}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('model', e.target.value)}
@@ -641,11 +652,9 @@ export function IntakeClient(): JSX.Element {
           </div>
           <Field label="Class">
             <select
-              tabIndex={11}
+              tabIndex="0"
               value={form.vehicleClass}
-              onChange={(e) =>
-                update('vehicleClass', e.target.value as FormState['vehicleClass'])
-              }
+              onChange={(e) => update('vehicleClass', e.target.value as FormState['vehicleClass'])}
               className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
             >
               {VEHICLE_CLASSES.map((c) => (
@@ -657,7 +666,7 @@ export function IntakeClient(): JSX.Element {
           </Field>
           <Field label="Special instructions">
             <textarea
-              tabIndex={12}
+              tabIndex="0"
               value={form.specialInstructions}
               onChange={(e) => update('specialInstructions', e.target.value)}
               rows={2}
@@ -693,7 +702,7 @@ export function IntakeClient(): JSX.Element {
 
           <Field label="Pickup">
             <Input
-              tabIndex={22}
+              tabIndex="0"
               data-testid="intake-pickup-address"
               placeholder="Address or landmark"
               value={form.pickupAddress}
@@ -703,14 +712,14 @@ export function IntakeClient(): JSX.Element {
             />
             <div className="mt-2 grid grid-cols-3 gap-2">
               <Input
-                tabIndex={23}
+                tabIndex="0"
                 placeholder="Lat"
                 inputMode="decimal"
                 value={form.pickupLat}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('pickupLat', e.target.value)}
               />
               <Input
-                tabIndex={24}
+                tabIndex="0"
                 placeholder="Lng"
                 inputMode="decimal"
                 value={form.pickupLng}
@@ -727,10 +736,12 @@ export function IntakeClient(): JSX.Element {
             </div>
           </Field>
 
-          {form.serviceType === 'tow' || form.serviceType === 'impound' || form.serviceType === 'recovery' ? (
+          {form.serviceType === 'tow' ||
+          form.serviceType === 'impound' ||
+          form.serviceType === 'recovery' ? (
             <Field label="Dropoff">
               <Input
-                tabIndex={25}
+                tabIndex="0"
                 data-testid="intake-dropoff-address"
                 placeholder="Where the vehicle is going"
                 value={form.dropoffAddress}
@@ -740,7 +751,7 @@ export function IntakeClient(): JSX.Element {
               />
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Input
-                  tabIndex={26}
+                  tabIndex="0"
                   placeholder="Lat"
                   inputMode="decimal"
                   value={form.dropoffLat}
@@ -749,7 +760,7 @@ export function IntakeClient(): JSX.Element {
                   }
                 />
                 <Input
-                  tabIndex={27}
+                  tabIndex="0"
                   placeholder="Lng"
                   inputMode="decimal"
                   value={form.dropoffLng}
@@ -764,7 +775,7 @@ export function IntakeClient(): JSX.Element {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Authorized by">
               <select
-                tabIndex={28}
+                tabIndex="0"
                 value={form.authorizedBy}
                 onChange={(e) => update('authorizedBy', e.target.value as JobAuthorizedBy)}
                 className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
@@ -778,7 +789,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Authorized name">
               <Input
-                tabIndex={29}
+                tabIndex="0"
                 placeholder="Optional"
                 value={form.authorizedByName}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -792,7 +803,7 @@ export function IntakeClient(): JSX.Element {
 
           <Field label="Notes">
             <textarea
-              tabIndex={30}
+              tabIndex="0"
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
               rows={2}
@@ -810,8 +821,8 @@ export function IntakeClient(): JSX.Element {
               className="mt-0.5"
             />
             <span>
-              Skip customer SMS (e.g. fleet/account customer manages their own
-              comms). Dispatcher can still resend manually from the board.
+              Skip customer SMS (e.g. fleet/account customer manages their own comms). Dispatcher
+              can still resend manually from the board.
             </span>
           </label>
 
@@ -824,7 +835,7 @@ export function IntakeClient(): JSX.Element {
           <Button
             type="submit"
             name="dispatch-submit"
-            tabIndex={31}
+            tabIndex="0"
             disabled={dispatchDisabled}
             data-testid="intake-dispatch"
             aria-disabled={dispatchDisabled}
@@ -875,7 +886,11 @@ function Field({
       <Label>
         {label}
         {required ? (
-          <span aria-label="required" className="ml-0.5 text-danger" data-testid={`intake-required-${label.toLowerCase()}`}>
+          <span
+            aria-label="required"
+            className="ml-0.5 text-danger"
+            data-testid={`intake-required-${label.toLowerCase()}`}
+          >
             *
           </span>
         ) : null}
@@ -893,7 +908,10 @@ function AdditionalContactInfo({
   update: <K extends keyof FormState>(key: K, value: FormState[K]) => void;
 }): JSX.Element {
   return (
-    <details className="rounded-[10px] border border-steel-border bg-steel/40 px-3 py-2" data-testid="intake-additional-contact">
+    <details
+      className="rounded-[10px] border border-steel-border bg-steel/40 px-3 py-2"
+      data-testid="intake-additional-contact"
+    >
       <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">
         Additional contact info
       </summary>
@@ -1030,7 +1048,9 @@ function RateQuotePanel({
               <span className="font-mono">{formatCents(li.amountCents)}</span>
             </li>
           ))}
-          {quote.lineItems.length === 0 ? <li className="text-text-muted">No line items.</li> : null}
+          {quote.lineItems.length === 0 ? (
+            <li className="text-text-muted">No line items.</li>
+          ) : null}
         </ul>
       ) : (
         <p className="mt-2 text-xs text-text-muted">

@@ -84,10 +84,7 @@ export type CreditMemoApplication = (typeof creditMemoApplicationValues)[number]
 
 const cents = z.number().int();
 const nonnegCents = z.number().int().nonnegative();
-const quantitySchema = z.union([
-  z.number().nonnegative(),
-  z.string().regex(/^-?\d+(\.\d+)?$/),
-]);
+const quantitySchema = z.union([z.number().nonnegative(), z.string().regex(/^-?\d+(\.\d+)?$/)]);
 
 const billingAddressSchema = z
   .object({
@@ -193,9 +190,7 @@ export const createInvoiceLineItemSchema = z.object({
   unit: z.string().min(1).max(40).default('each'),
   unitPriceCents: cents,
   taxable: z.boolean().default(false),
-  taxRatePct: z
-    .union([z.number().nonnegative(), z.string().regex(/^\d+(\.\d+)?$/)])
-    .default(0),
+  taxRatePct: z.union([z.number().nonnegative(), z.string().regex(/^\d+(\.\d+)?$/)]).default(0),
   rateRuleId: z.string().max(120).nullable().optional(),
 });
 export type CreateInvoiceLineItemPayload = z.infer<typeof createInvoiceLineItemSchema>;

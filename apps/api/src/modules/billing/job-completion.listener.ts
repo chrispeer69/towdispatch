@@ -21,7 +21,11 @@ export class JobCompletionListener implements OnModuleInit, OnModuleDestroy {
   onModuleInit(): void {
     this.unsubscribe = this.events.subscribe(async (tenantId, event) => {
       if (event.name !== 'job.status_changed') return;
-      const payload = event.payload as { jobId: string; toStatus: string; actorUserId: string | null };
+      const payload = event.payload as {
+        jobId: string;
+        toStatus: string;
+        actorUserId: string | null;
+      };
       if (payload.toStatus !== 'completed') return;
       try {
         await this.invoices.generateFromJob(

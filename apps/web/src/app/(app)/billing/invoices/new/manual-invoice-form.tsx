@@ -1,6 +1,6 @@
 'use client';
 
-import { invoiceTermsValues, type InvoiceWithDetailsDto } from '@towcommand/shared';
+import { type InvoiceWithDetailsDto, invoiceTermsValues } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 

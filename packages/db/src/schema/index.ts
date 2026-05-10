@@ -19,3 +19,4 @@ export * from './dvirs';
 export * from './maintenance';
 export * from './tracking-links';
 export * from './invoices';
+export * from './stripe-events';

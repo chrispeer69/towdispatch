@@ -260,7 +260,8 @@ export class CustomersService {
         if (input.email !== undefined) patch.email = input.email;
         if (input.phone !== undefined) patch.phone = input.phone;
         if (input.billingAddress !== undefined) patch.billingAddress = input.billingAddress;
-        if (input.homeAddressStreet !== undefined) patch.homeAddressStreet = input.homeAddressStreet;
+        if (input.homeAddressStreet !== undefined)
+          patch.homeAddressStreet = input.homeAddressStreet;
         if (input.homeAddressCity !== undefined) patch.homeAddressCity = input.homeAddressCity;
         if (input.homeAddressState !== undefined) patch.homeAddressState = input.homeAddressState;
         if (input.homeAddressZip !== undefined) patch.homeAddressZip = input.homeAddressZip;

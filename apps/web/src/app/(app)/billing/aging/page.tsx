@@ -50,9 +50,7 @@ export default async function AgingPage(): Promise<JSX.Element> {
           <tbody className="divide-y divide-steel-border">
             {aging.rows.map((r) => (
               <tr key={`${r.accountId ?? r.customerId ?? 'unk'}`}>
-                <td className="px-4 py-2">
-                  {r.accountName ?? r.customerName ?? '—'}
-                </td>
+                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? '—'}</td>
                 <td className="px-4 py-2 text-right font-mono">
                   {formatMoneyCents(r.currentDueCents)}
                 </td>

@@ -16,6 +16,7 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { AppModule } from './app.module.js';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
+import { registerRawBodyJsonParser } from './common/middleware/raw-body.middleware.js';
 import { registerRequestContext } from './common/middleware/request-context.middleware.js';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
 import { ConfigService } from './config/config.service.js';
@@ -53,6 +54,12 @@ async function bootstrap(): Promise<void> {
   app.useGlobalInterceptors(new LoggingInterceptor(config.logger));
 
   app.enableShutdownHooks();
+
+  // Replace Nest's default application/json parser with one that captures the
+  // raw body for Stripe webhook signature verification. Must run after Nest
+  // has wired its parser middleware (which happens during the implicit init).
+  await app.init();
+  registerRawBodyJsonParser(app.getHttpAdapter().getInstance());
 
   const port = config.apiPort;
   const host = config.apiHost;

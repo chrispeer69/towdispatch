@@ -13,15 +13,10 @@
  *   3. renderStatementPdf() — A/R aging snapshot PDF for one account.
  */
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { accounts, invoices, tenants } from '@towcommand/db';
 import {
-  accounts,
-  customers,
-  invoices,
-  tenants,
-} from '@towcommand/db';
-import {
-  ERROR_CODES,
   type CreditMemoDto,
+  ERROR_CODES,
   type InvoiceBillingAddress,
   type InvoiceWithDetailsDto,
   type StorageProvider,
@@ -33,8 +28,8 @@ import { ConfigService } from '../../config/config.service.js';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { EmailService } from '../email/email.service.js';
 import { STORAGE_PROVIDER } from '../storage/storage.module.js';
-import { InvoicesService } from './invoices.service.js';
 import { InvoicePdfService, type PdfLanguage } from './invoice-pdf.service.js';
+import { InvoicesService } from './invoices.service.js';
 import { StatementPdfService } from './statement-pdf.service.js';
 
 interface CallerContext {

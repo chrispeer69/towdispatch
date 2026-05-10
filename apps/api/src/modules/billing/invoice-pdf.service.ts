@@ -1,14 +1,3 @@
-/**
- * InvoicePdfService — renders a customer-facing invoice PDF using PDFKit.
- *
- * Decision (commit message has the rationale): PDFKit over @react-pdf/renderer.
- * Smaller dependency tree, simpler imperative API, no JSX runtime. The PDF
- * renders to bytes; persistence to the StorageProvider happens in
- * InvoicesService.streamPdf() — keeps PDF rendering free of storage concerns.
- *
- * Bilingual (EN / ES): each label string switches on the `language` param.
- */
-import PDFDocument from 'pdfkit';
 import { Injectable } from '@nestjs/common';
 import {
   type InvoiceDto,
@@ -22,6 +11,17 @@ import {
   invoiceTypeLabel,
   paymentMethodLabel,
 } from '@towcommand/shared';
+/**
+ * InvoicePdfService — renders a customer-facing invoice PDF using PDFKit.
+ *
+ * Decision (commit message has the rationale): PDFKit over @react-pdf/renderer.
+ * Smaller dependency tree, simpler imperative API, no JSX runtime. The PDF
+ * renders to bytes; persistence to the StorageProvider happens in
+ * InvoicesService.streamPdf() — keeps PDF rendering free of storage concerns.
+ *
+ * Bilingual (EN / ES): each label string switches on the `language` param.
+ */
+import PDFDocument from 'pdfkit';
 
 export type PdfLanguage = 'en' | 'es';
 
@@ -131,9 +131,7 @@ export class InvoicePdfService {
         doc.fontSize(20).font('Helvetica-Bold').text(input.tenant.name, { continued: false });
         doc.fontSize(9).font('Helvetica');
         const addr = (input.tenant.address ?? {}) as Record<string, string | null | undefined>;
-        const addrLine = [addr.street, addr.city, addr.state, addr.zip]
-          .filter((s) => s)
-          .join(', ');
+        const addrLine = [addr.street, addr.city, addr.state, addr.zip].filter((s) => s).join(', ');
         if (addrLine) doc.text(addrLine);
         const contactLine = [input.tenant.phone, input.tenant.email].filter(Boolean).join('  ·  ');
         if (contactLine) doc.text(contactLine);
@@ -176,12 +174,10 @@ export class InvoicePdfService {
           doc.y,
           { width: 180, align: 'right' },
         );
-        doc.text(
-          `${labels.terms}: ${humanTerms(input.invoice.terms, lang)}`,
-          380,
-          doc.y,
-          { width: 180, align: 'right' },
-        );
+        doc.text(`${labels.terms}: ${humanTerms(input.invoice.terms, lang)}`, 380, doc.y, {
+          width: 180,
+          align: 'right',
+        });
 
         // Bill-to block
         doc.moveDown(2);
@@ -199,9 +195,11 @@ export class InvoicePdfService {
         if (bill.phone) doc.text(bill.phone);
 
         doc.moveDown(1);
-        doc.font('Helvetica').fontSize(9).fillColor('#666666').text(
-          invoiceTypeLabel[input.invoice.invoiceType as InvoiceType],
-        );
+        doc
+          .font('Helvetica')
+          .fontSize(9)
+          .fillColor('#666666')
+          .text(invoiceTypeLabel[input.invoice.invoiceType as InvoiceType]);
         doc.fillColor('#000000');
 
         // Line items table
@@ -217,7 +215,11 @@ export class InvoicePdfService {
         doc.text(labels.qty, colQtyX, tableTop, { width: 50, align: 'right' });
         doc.text(labels.unit_price, colUnitX, tableTop, { width: 100, align: 'right' });
         doc.text(labels.line_total, colTotalX, tableTop, { width: 60, align: 'right' });
-        doc.moveTo(48, doc.y + 4).lineTo(560, doc.y + 4).strokeColor('#cccccc').stroke();
+        doc
+          .moveTo(48, doc.y + 4)
+          .lineTo(560, doc.y + 4)
+          .strokeColor('#cccccc')
+          .stroke();
         doc.moveDown(0.5);
         doc.font('Helvetica').fontSize(10).fillColor('#000000');
 
@@ -244,7 +246,11 @@ export class InvoicePdfService {
           }
         }
 
-        doc.moveTo(380, doc.y + 6).lineTo(560, doc.y + 6).strokeColor('#cccccc').stroke();
+        doc
+          .moveTo(380, doc.y + 6)
+          .lineTo(560, doc.y + 6)
+          .strokeColor('#cccccc')
+          .stroke();
         doc.moveDown(0.6);
 
         // Totals stack

@@ -22,22 +22,42 @@ describe('invoice state machine', () => {
   });
   it('statusAfterPayment: full payment of issued → paid', () => {
     expect(
-      statusAfterPayment({ current: 'issued', totalCents: 1000, newPaidCents: 1000, isOverdue: false }),
+      statusAfterPayment({
+        current: 'issued',
+        totalCents: 1000,
+        newPaidCents: 1000,
+        isOverdue: false,
+      }),
     ).toBe('paid');
   });
   it('statusAfterPayment: partial payment of issued → partially_paid', () => {
     expect(
-      statusAfterPayment({ current: 'issued', totalCents: 1000, newPaidCents: 400, isOverdue: false }),
+      statusAfterPayment({
+        current: 'issued',
+        totalCents: 1000,
+        newPaidCents: 400,
+        isOverdue: false,
+      }),
     ).toBe('partially_paid');
   });
   it('statusAfterPayment: partial payment + overdue → overdue', () => {
     expect(
-      statusAfterPayment({ current: 'overdue', totalCents: 1000, newPaidCents: 400, isOverdue: true }),
+      statusAfterPayment({
+        current: 'overdue',
+        totalCents: 1000,
+        newPaidCents: 400,
+        isOverdue: true,
+      }),
     ).toBe('overdue');
   });
   it('statusAfterPayment: void stays void regardless of payments', () => {
     expect(
-      statusAfterPayment({ current: 'void', totalCents: 1000, newPaidCents: 1000, isOverdue: false }),
+      statusAfterPayment({
+        current: 'void',
+        totalCents: 1000,
+        newPaidCents: 1000,
+        isOverdue: false,
+      }),
     ).toBe('void');
   });
 });

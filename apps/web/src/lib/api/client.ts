@@ -43,7 +43,7 @@ const apiBase = (): string =>
   process.env.NEXT_PUBLIC_API_URL ?? process.env.API_PUBLIC_URL ?? 'http://localhost:3001';
 
 interface RequestOpts<TBody> {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   body?: TBody;
   /** Set false to skip the auth header. Default: true. */
   authenticated?: boolean;

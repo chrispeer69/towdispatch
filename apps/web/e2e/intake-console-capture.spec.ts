@@ -117,19 +117,11 @@ test.describe('Intake — console clean', () => {
 
     // -------- assertions --------
     if (cap.errors.length || cap.warnings.length || cap.pageErrors.length) {
-      // eslint-disable-next-line no-console
-      console.log('[capture] errors:', JSON.stringify(cap.errors, null, 2));
-      // eslint-disable-next-line no-console
-      console.log('[capture] warnings:', JSON.stringify(cap.warnings, null, 2));
-      // eslint-disable-next-line no-console
-      console.log(
-        '[capture] page errors:',
-        cap.pageErrors.map((e) => e.message),
-      );
-      // eslint-disable-next-line no-console
-      console.log('[capture] failedRequests:', JSON.stringify(cap.failedRequests, null, 2));
     }
-    expect(cap.pageErrors.map((e) => e.message), 'page errors').toEqual([]);
+    expect(
+      cap.pageErrors.map((e) => e.message),
+      'page errors',
+    ).toEqual([]);
     expect(cap.errors, 'console errors').toEqual([]);
     expect(cap.warnings, 'console warnings').toEqual([]);
   });

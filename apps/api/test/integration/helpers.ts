@@ -11,6 +11,7 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { Pool } from 'pg';
 import { AppModule } from '../../src/app.module.js';
 import { GlobalExceptionFilter } from '../../src/common/filters/global-exception.filter.js';
+import { registerRawBodyJsonParser } from '../../src/common/middleware/raw-body.middleware.js';
 import { registerRequestContext } from '../../src/common/middleware/request-context.middleware.js';
 import { ZodValidationPipe } from '../../src/common/pipes/zod-validation.pipe.js';
 import { ConfigService } from '../../src/config/config.service.js';
@@ -60,6 +61,10 @@ export async function bootApp(): Promise<NestFastifyApplication> {
   app.useGlobalPipes(new ZodValidationPipe());
   app.useGlobalFilters(new GlobalExceptionFilter(config.logger));
   await app.init();
+  // Replace Nest's default application/json parser with one that captures
+  // the raw body for Stripe webhook signature verification. Must run after
+  // init() so Nest's default has been registered first.
+  registerRawBodyJsonParser(app.getHttpAdapter().getInstance());
   await app.getHttpAdapter().getInstance().ready();
   return app;
 }
@@ -120,16 +125,15 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           // invoices.tenant_id has ON DELETE RESTRICT — so they MUST be cleared
           // before the tenant DELETE below.
           await c.query('DELETE FROM payments WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
-          await c.query('DELETE FROM invoice_taxes WHERE tenant_id = ANY($1::uuid[])', [
-            tenantIds,
-          ]);
+          await c.query('DELETE FROM invoice_taxes WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM invoice_line_items WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
           await c.query('DELETE FROM credit_memos WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
-          await c.query('DELETE FROM recurring_billing_schedules WHERE tenant_id = ANY($1::uuid[])', [
-            tenantIds,
-          ]);
+          await c.query(
+            'DELETE FROM recurring_billing_schedules WHERE tenant_id = ANY($1::uuid[])',
+            [tenantIds],
+          );
           await c.query('DELETE FROM invoices WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM invoice_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
