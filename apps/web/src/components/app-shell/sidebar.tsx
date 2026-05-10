@@ -90,8 +90,13 @@ const SECTIONS: NavSection[] = [
         icon: Radio,
         match: (p) => p.startsWith('/dispatch'),
       },
+      {
+        label: 'Fleet',
+        href: '/fleet',
+        icon: CarFront,
+        match: (p) => p.startsWith('/fleet'),
+      },
       { label: 'Drivers', href: null, icon: Users, disabled: true },
-      { label: 'Fleet', href: null, icon: CarFront, disabled: true },
     ],
   },
   {

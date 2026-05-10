@@ -7,3 +7,5 @@ export * from './customer';
 export * from './vehicle';
 export * from './job';
 export * from './rate-sheet';
+export * from './storage-provider';
+export * from './fleet';

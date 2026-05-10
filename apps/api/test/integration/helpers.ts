@@ -87,6 +87,21 @@ export async function tearDown(ctx: TestContext): Promise<void> {
         if (tenantIds.length) {
           // Delete dependent data inside the captured tenants. Using
           // tenant_id keeps us from touching unrelated test data.
+          // Session 8 fleet tables — order matters (children before parents).
+          await c.query('DELETE FROM dvirs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM maintenance_records WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM maintenance_schedules WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM documents WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM driver_truck_assignments WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM driver_shifts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM trucks WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM drivers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM jobs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM job_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
@@ -195,11 +210,31 @@ const DEFAULT_TEST_RATE_SHEET = {
       },
       flatFeesByClass: {},
     },
-    { serviceType: 'jump_start' as const, baseCents: 7500, perMileCentsByClass: {}, flatFeesByClass: {} },
-    { serviceType: 'lockout' as const, baseCents: 6500, perMileCentsByClass: {}, flatFeesByClass: {} },
-    { serviceType: 'tire_change' as const, baseCents: 8500, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'jump_start' as const,
+      baseCents: 7500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'lockout' as const,
+      baseCents: 6500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
+    {
+      serviceType: 'tire_change' as const,
+      baseCents: 8500,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
     { serviceType: 'fuel' as const, baseCents: 7500, perMileCentsByClass: {}, flatFeesByClass: {} },
-    { serviceType: 'winch' as const, baseCents: 15000, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'winch' as const,
+      baseCents: 15000,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
     {
       serviceType: 'recovery' as const,
       baseCents: 25000,
@@ -228,7 +263,12 @@ const DEFAULT_TEST_RATE_SHEET = {
       },
       flatFeesByClass: {},
     },
-    { serviceType: 'other' as const, baseCents: 10000, perMileCentsByClass: {}, flatFeesByClass: {} },
+    {
+      serviceType: 'other' as const,
+      baseCents: 10000,
+      perMileCentsByClass: {},
+      flatFeesByClass: {},
+    },
   ],
   surcharges: [],
   fixedLineItems: [{ code: 'admin_fee', label: 'Admin fee', amountCents: 500 }],
@@ -273,7 +313,7 @@ export async function getAuditLogCount(
     let q = `SELECT count(*)::int AS n FROM audit_log
              WHERE tenant_id = $1::uuid AND resource_type = $2`;
     if (resourceId) {
-      q += ` AND resource_id = $3::uuid`;
+      q += ' AND resource_id = $3::uuid';
       params.push(resourceId);
     }
     const r = await c.query<{ n: number }>(q, params);
