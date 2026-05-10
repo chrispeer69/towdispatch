@@ -159,14 +159,17 @@ describeIfDb('Tracking integration', () => {
     return { jobId, jobNumber: intakeBodyRes.job.jobNumber };
   }
 
-  // The auto-create runs in a fire-and-forget event subscriber. Wait for the
-  // tracking_links row to land (small window in dev, larger in CI).
+  // The auto-create runs in a fire-and-forget event subscriber and the SMS
+  // dispatch is itself fire-and-forget after that. Wait for both: the row to
+  // land AND smsStatus to leave 'pending' so callers can assert against the
+  // settled state without a race.
   async function waitForTrackingLink(
     sess: AuthedResp,
     jobId: string,
     timeoutMs = 4000,
   ): Promise<{ link: { id: string; token: string; smsStatus: string; url: string } }> {
     const deadline = Date.now() + timeoutMs;
+    let last: { id: string; token: string; smsStatus: string; url: string } | null = null;
     while (Date.now() < deadline) {
       const res = await app.inject({
         method: 'GET',
@@ -176,9 +179,13 @@ describeIfDb('Tracking integration', () => {
       const body = res.json() as {
         link: { id: string; token: string; smsStatus: string; url: string } | null;
       };
-      if (res.statusCode === 200 && body.link) return { link: body.link };
+      if (res.statusCode === 200 && body.link) {
+        last = body.link;
+        if (body.link.smsStatus !== 'pending') return { link: body.link };
+      }
       await new Promise((r) => setTimeout(r, 50));
     }
+    if (last) return { link: last };
     throw new Error(`tracking link for job=${jobId} did not appear within ${timeoutMs}ms`);
   }
 
