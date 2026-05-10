@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -178,7 +179,7 @@ private fun CameraPreview(
         providerFuture.addListener({
             val provider = providerFuture.get()
             val preview = androidx.camera.core.Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
+                it.setSurfaceProvider(previewView.surfaceProvider)
             }
             val ic = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
