@@ -22,8 +22,8 @@ import { Inbox, MapPin, Truck, Users } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { type Socket, io as ioClient } from 'socket.io-client';
 import { DispatchMap } from './dispatch-map';
-import { TrackingBadge } from './tracking-badge';
 import { type DispatchSnapshot, dispatchReducer, initialState } from './dispatch-state';
+import { TrackingBadge } from './tracking-badge';
 
 interface Props {
   initialSnapshot: DispatchSnapshot;

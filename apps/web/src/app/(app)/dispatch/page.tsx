@@ -35,7 +35,8 @@ export default async function DispatchPage({
   await requireUser();
   const params = await searchParams;
   const createdJobNumber = params.created ?? null;
-  const smsHint = params.sms === 'skipped' ? 'skipped' : params.sms === 'pending' ? 'pending' : null;
+  const smsHint =
+    params.sms === 'skipped' ? 'skipped' : params.sms === 'pending' ? 'pending' : null;
 
   let snapshot: BoardResponse = {
     queue: [],

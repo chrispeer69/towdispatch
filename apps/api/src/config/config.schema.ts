@@ -67,10 +67,16 @@ export const configSchema = z.object({
   // {{tracking_url}} and {{tenant_name}} placeholders.
   TRACKING_SMS_DEFAULT_BODY: z
     .string()
-    .default(
-      'Your tow truck is on the way. Track live: {{tracking_url}} — {{tenant_name}}',
-    ),
+    .default('Your tow truck is on the way. Track live: {{tracking_url}} — {{tenant_name}}'),
   TRACKING_LINK_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(24),
+
+  // Session 11 — Stripe Connect. When STRIPE_SECRET_KEY is missing, the
+  // payments module falls back to the in-memory stub provider so the API
+  // boots cleanly in dev without real keys. The stub is also the test
+  // default. Tests can override secrets via env in the test setup.
+  STRIPE_SECRET_KEY: z.string().optional().default(''),
+  STRIPE_PUBLIC_KEY: z.string().optional().default(''),
+  STRIPE_WEBHOOK_SECRET: z.string().optional().default('whsec_test_session11_default_dev_secret'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

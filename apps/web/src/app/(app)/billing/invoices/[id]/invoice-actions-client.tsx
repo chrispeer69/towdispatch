@@ -1,6 +1,6 @@
 'use client';
 
-import { paymentMethodValues, type InvoiceWithDetailsDto } from '@towcommand/shared';
+import { type InvoiceWithDetailsDto, paymentMethodValues } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -84,7 +84,7 @@ export function InvoiceActionsClient({ invoice }: Props): JSX.Element {
             type="button"
             onClick={() => {
               const reason = window.prompt('Reason for voiding?');
-              if (reason && reason.trim()) {
+              if (reason?.trim()) {
                 void call('POST', `invoices/${invoice.id}/void`, { reason });
               }
             }}

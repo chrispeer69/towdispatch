@@ -20,7 +20,6 @@
  */
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -97,7 +96,10 @@ export class InvoicesService {
   // Invoice CRUD
   // =====================================================================
 
-  async list(ctx: CallerContext, filters: InvoiceFilters): Promise<{
+  async list(
+    ctx: CallerContext,
+    filters: InvoiceFilters,
+  ): Promise<{
     data: InvoiceDto[];
     total: number;
     limit: number;
@@ -240,28 +242,25 @@ export class InvoicesService {
         terms,
         notes:
           job.serviceType === 'tow'
-            ? `${serviceTypeLabel(job.serviceType)} — ${job.pickupAddress}` +
-              (job.dropoffAddress ? ` → ${job.dropoffAddress}` : '')
+            ? `${serviceTypeLabel(job.serviceType)} — ${job.pickupAddress}${job.dropoffAddress ? ` → ${job.dropoffAddress}` : ''}`
             : `${serviceTypeLabel(job.serviceType)} — ${job.pickupAddress}`,
         internalNotes: `Auto-generated from job ${job.jobNumber}`,
         billingAddress: billingAddr,
       });
 
       // Build line items from rateBreakdown (the persisted RateQuote).
-      const breakdown = job.rateBreakdown as
-        | {
-            lineItems: Array<{
-              code: string;
-              label: string;
-              amountCents: number;
-              quantity?: number;
-              unit?: string;
-            }>;
-            subtotalCents: number;
-            totalCents: number;
-            calculationTrace?: string[];
-          }
-        | null;
+      const breakdown = job.rateBreakdown as {
+        lineItems: Array<{
+          code: string;
+          label: string;
+          amountCents: number;
+          quantity?: number;
+          unit?: string;
+        }>;
+        subtotalCents: number;
+        totalCents: number;
+        calculationTrace?: string[];
+      } | null;
       if (breakdown && Array.isArray(breakdown.lineItems) && breakdown.lineItems.length > 0) {
         // Reuse the helper. We treat the breakdown as a RateQuote for typing.
         const draftLines = rateQuoteToInvoiceLineItems(
@@ -398,14 +397,12 @@ export class InvoicesService {
       if (patch.taxRatePct !== undefined) next.taxRatePct = String(patch.taxRatePct);
       if (patch.rateRuleId !== undefined) next.rateRuleId = patch.rateRuleId;
 
-      const newQuantity = patch.quantity !== undefined ? Number(patch.quantity) : Number(li.quantity);
+      const newQuantity =
+        patch.quantity !== undefined ? Number(patch.quantity) : Number(li.quantity);
       const newUnitPrice = patch.unitPriceCents ?? li.unitPriceCents;
       next.lineTotalCents = Math.round(newQuantity * newUnitPrice);
 
-      await tx
-        .update(invoiceLineItems)
-        .set(next)
-        .where(eq(invoiceLineItems.id, lineItemId));
+      await tx.update(invoiceLineItems).set(next).where(eq(invoiceLineItems.id, lineItemId));
       await this.recomputeTotals(tx, ctx.tenantId, invoiceId);
       return this.assembleWithDetails(tx, invoiceId);
     });
@@ -420,12 +417,7 @@ export class InvoicesService {
       await this.requireDraft(tx, invoiceId);
       await tx
         .delete(invoiceLineItems)
-        .where(
-          and(
-            eq(invoiceLineItems.id, lineItemId),
-            eq(invoiceLineItems.invoiceId, invoiceId),
-          ),
-        );
+        .where(and(eq(invoiceLineItems.id, lineItemId), eq(invoiceLineItems.invoiceId, invoiceId)));
       await this.recomputeTotals(tx, ctx.tenantId, invoiceId);
       return this.assembleWithDetails(tx, invoiceId);
     });
@@ -583,7 +575,10 @@ export class InvoicesService {
     });
   }
 
-  async listPayments(ctx: CallerContext, filters: PaymentFilters): Promise<{
+  async listPayments(
+    ctx: CallerContext,
+    filters: PaymentFilters,
+  ): Promise<{
     data: PaymentDto[];
     total: number;
   }> {
@@ -591,7 +586,8 @@ export class InvoicesService {
       const conds = [isNull(payments.deletedAt)];
       if (filters.invoiceId) conds.push(eq(payments.invoiceId, filters.invoiceId));
       if (filters.paymentMethod) conds.push(eq(payments.paymentMethod, filters.paymentMethod));
-      if (filters.receivedFrom) conds.push(gte(payments.receivedAt, new Date(filters.receivedFrom)));
+      if (filters.receivedFrom)
+        conds.push(gte(payments.receivedAt, new Date(filters.receivedFrom)));
       if (filters.receivedTo) conds.push(lte(payments.receivedAt, new Date(filters.receivedTo)));
       const whereExpr = and(...conds);
       const totalRows = await tx
@@ -765,10 +761,18 @@ export class InvoicesService {
 
       // Resolve names for accounts/customers.
       const accountIds = Array.from(
-        new Set(Array.from(byKey.values()).map((b) => b.accountId).filter((x): x is string => Boolean(x))),
+        new Set(
+          Array.from(byKey.values())
+            .map((b) => b.accountId)
+            .filter((x): x is string => Boolean(x)),
+        ),
       );
       const customerIds = Array.from(
-        new Set(Array.from(byKey.values()).map((b) => b.customerId).filter((x): x is string => Boolean(x))),
+        new Set(
+          Array.from(byKey.values())
+            .map((b) => b.customerId)
+            .filter((x): x is string => Boolean(x)),
+        ),
       );
       const accountNames = new Map<string, string>();
       const customerNames = new Map<string, string>();
@@ -787,9 +791,9 @@ export class InvoicesService {
       const out: AgingRow[] = Array.from(byKey.values())
         .map((b) => ({
           accountId: b.accountId,
-          accountName: b.accountId ? accountNames.get(b.accountId) ?? null : null,
+          accountName: b.accountId ? (accountNames.get(b.accountId) ?? null) : null,
           customerId: b.customerId,
-          customerName: b.customerId ? customerNames.get(b.customerId) ?? null : null,
+          customerName: b.customerId ? (customerNames.get(b.customerId) ?? null) : null,
           currentDueCents: b.currentDueCents,
           bucket1To30Cents: b.bucket1To30Cents,
           bucket31To60Cents: b.bucket31To60Cents,
@@ -1033,10 +1037,7 @@ export class InvoicesService {
     return 'due_on_receipt';
   }
 
-  private async invoiceTypeFromJob(
-    tx: Tx,
-    job: typeof jobs.$inferSelect,
-  ): Promise<InvoiceType> {
+  private async invoiceTypeFromJob(tx: Tx, job: typeof jobs.$inferSelect): Promise<InvoiceType> {
     if (job.accountId) {
       const a = await tx.query.accounts.findFirst({
         where: and(eq(accounts.id, job.accountId), isNull(accounts.deletedAt)),
@@ -1048,7 +1049,11 @@ export class InvoicesService {
     return 'cash_receipt';
   }
 
-  private async recomputeTotals(
+  /**
+   * Public so PaymentsService (Session 11 Stripe) can re-trigger totals after
+   * inserting a payment row directly.
+   */
+  async recomputeTotals(
     tx: Tx,
     _tenantId: string,
     invoiceId: string,
@@ -1176,7 +1181,7 @@ export class InvoicesService {
     };
   }
 
-  private async assembleWithDetails(tx: Tx, invoiceId: string): Promise<InvoiceWithDetailsDto> {
+  async assembleWithDetails(tx: Tx, invoiceId: string): Promise<InvoiceWithDetailsDto> {
     const inv = await tx.query.invoices.findFirst({
       where: and(eq(invoices.id, invoiceId), isNull(invoices.deletedAt)),
     });

@@ -139,10 +139,9 @@ describeIfDb('Billing integration', () => {
         await c.query('DELETE FROM invoice_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
           ids,
         ]);
-        await c.query(
-          'DELETE FROM recurring_billing_schedules WHERE tenant_id = ANY($1::uuid[])',
-          [ids],
-        );
+        await c.query('DELETE FROM recurring_billing_schedules WHERE tenant_id = ANY($1::uuid[])', [
+          ids,
+        ]);
         await c.query('COMMIT');
       } catch (e) {
         await c.query('ROLLBACK').catch(() => {});

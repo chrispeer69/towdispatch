@@ -15,7 +15,7 @@
  * Logs in as the seeded acme owner — signup-via-throttler would limit
  * how many times this can run against the dev DB.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { type Page, expect, test } from '@playwright/test';
 
 interface Tab {
   label: string;
@@ -32,9 +32,9 @@ const TABS: Tab[] = (
     { label: 'FleetGuard Pro', href: '/ecosystem/fleetguard', hex: '#F59E0B' },
   ] as const
 ).map((t) => {
-  const r = parseInt(t.hex.slice(1, 3), 16);
-  const g = parseInt(t.hex.slice(3, 5), 16);
-  const b = parseInt(t.hex.slice(5, 7), 16);
+  const r = Number.parseInt(t.hex.slice(1, 3), 16);
+  const g = Number.parseInt(t.hex.slice(3, 5), 16);
+  const b = Number.parseInt(t.hex.slice(5, 7), 16);
   return { ...t, rgb: `rgb(${r}, ${g}, ${b})`, rgbParts: { r, g, b } };
 });
 
@@ -61,7 +61,10 @@ test.describe('Ecosystem sidebar brand colors', () => {
       const link = page.locator(`a[href="${tab.href}"]`);
       await expect(link, `${tab.label} link visible`).toBeVisible();
 
-      const iconColor = await link.locator('svg').first().evaluate((el) => getComputedStyle(el).color);
+      const iconColor = await link
+        .locator('svg')
+        .first()
+        .evaluate((el) => getComputedStyle(el).color);
       expect(iconColor, `${tab.label} icon color (inactive)`).toBe(tab.rgb);
 
       const labelColor = await link
@@ -115,7 +118,10 @@ test.describe('Ecosystem sidebar brand colors', () => {
       expect(indicatorStyle.width, `${tab.label} indicator width = 3px`).toBe('3px');
       expect(indicatorStyle.bg, `${tab.label} indicator bg = brand`).toBe(tab.rgb);
 
-      const iconColor = await link.locator('svg').first().evaluate((el) => getComputedStyle(el).color);
+      const iconColor = await link
+        .locator('svg')
+        .first()
+        .evaluate((el) => getComputedStyle(el).color);
       expect(iconColor, `${tab.label} active icon color`).toBe(tab.rgb);
     }
   });

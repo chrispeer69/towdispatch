@@ -16,18 +16,12 @@ export default async function CreditMemosPage(): Promise<JSX.Element> {
         <table className="w-full divide-y divide-steel-border text-sm">
           <thead className="bg-steel-mid/60 text-left">
             <tr>
-              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
-                Memo #
-              </th>
-              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
-                Reason
-              </th>
+              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Memo #</th>
+              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Reason</th>
               <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
                 Applied to
               </th>
-              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
-                Issued
-              </th>
+              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Issued</th>
               <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
                 Amount
               </th>

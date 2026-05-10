@@ -24,9 +24,7 @@ export default async function RecurringPage(): Promise<JSX.Element> {
               <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
                 Started
               </th>
-              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
-                Status
-              </th>
+              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Status</th>
               <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
                 Daily rate
               </th>

@@ -86,9 +86,7 @@ export default async function InvoicesPage({
               </th>
               <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Status</th>
               <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Type</th>
-              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
-                Issued
-              </th>
+              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Issued</th>
               <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">Due</th>
               <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
                 Total

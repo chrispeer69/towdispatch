@@ -135,6 +135,23 @@ export class ConfigService {
     };
   }
 
+  get stripe(): {
+    secretKey: string;
+    publicKey: string;
+    webhookSecret: string;
+    configured: boolean;
+  } {
+    const secretKey = this.config.STRIPE_SECRET_KEY;
+    const publicKey = this.config.STRIPE_PUBLIC_KEY;
+    const webhookSecret = this.config.STRIPE_WEBHOOK_SECRET;
+    return {
+      secretKey,
+      publicKey,
+      webhookSecret,
+      configured: !!secretKey && !!publicKey && !secretKey.includes('missing'),
+    };
+  }
+
   get rateLimits(): {
     burstTtl: number;
     burstLimit: number;

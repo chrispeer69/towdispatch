@@ -88,7 +88,11 @@ interface IntakeResponse {
     accountId: string | null;
     pickupAddress: string;
     rateQuotedCents: number;
-    rateBreakdown: { source: string; lineItems: Array<{ code: string }>; calculationTrace: string[] };
+    rateBreakdown: {
+      source: string;
+      lineItems: Array<{ code: string }>;
+      calculationTrace: string[];
+    };
   };
   customer: { id: string; name: string; created: boolean };
   vehicle: { id: string; plate: string | null; vin: string | null; created: boolean };
@@ -547,9 +551,11 @@ describeIfDb('Jobs intake integration', () => {
       }),
     });
     expect(created.statusCode).toBe(201);
-    const targetCustomerId = (created.json() as IntakeResponse & {
-      customer: { id: string };
-    }).customer.id;
+    const targetCustomerId = (
+      created.json() as IntakeResponse & {
+        customer: { id: string };
+      }
+    ).customer.id;
 
     // Tenant B tries to read tenant A's customer by id — RLS must hide it.
     const peek = await app.inject({
@@ -612,7 +618,7 @@ describeIfDb('Jobs intake integration', () => {
       await c.query("SELECT set_config('app.current_tenant_id', $1, true)", [agentTenantId]);
       await c.query("SELECT set_config('app.current_user_id', $1, true)", [agentSession.user.id]);
       // Use app_user role within transaction to enforce RLS (admin bypasses unless we switch).
-      await c.query("SET LOCAL ROLE app_user");
+      await c.query('SET LOCAL ROLE app_user');
       const r = await c.query<{ n: number }>(
         'SELECT count(*)::int AS n FROM jobs WHERE id = $1::uuid',
         [targetJobId],
@@ -640,7 +646,11 @@ describeIfDb('Jobs intake integration', () => {
       },
     });
     expect(res.statusCode).toBe(200);
-    const body = res.json() as { totalCents: number; lineItems: Array<{ code: string }>; source: string };
+    const body = res.json() as {
+      totalCents: number;
+      lineItems: Array<{ code: string }>;
+      source: string;
+    };
     expect(body.totalCents).toBeGreaterThan(0);
     expect(body.source).toBe('tenant_default');
     expect(body.lineItems.find((li) => li.code === 'base')).toBeTruthy();

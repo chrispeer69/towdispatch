@@ -149,10 +149,7 @@ export class RateEngineService {
           });
           if (acct?.defaultRateSheetId) {
             const sheet = await tx.query.rateSheets.findFirst({
-              where: and(
-                eq(rateSheets.id, acct.defaultRateSheetId),
-                isNull(rateSheets.deletedAt),
-              ),
+              where: and(eq(rateSheets.id, acct.defaultRateSheetId), isNull(rateSheets.deletedAt)),
             });
             if (sheet) {
               const parsed = rateSheetDefinitionSchema.safeParse(sheet.definition);

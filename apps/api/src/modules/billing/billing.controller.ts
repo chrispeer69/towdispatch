@@ -11,7 +11,6 @@
  *   /billing/recurring            recurring storage schedules
  */
 import {
-  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -185,10 +184,7 @@ export class BillingController {
     const result = await this.delivery.renderInvoicePdf(ctx, params.id, lang);
     reply
       .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="${result.invoice.invoiceNumber}.pdf"`,
-      )
+      .header('content-disposition', `inline; filename="${result.invoice.invoiceNumber}.pdf"`)
       .send(result.bytes);
   }
 
@@ -346,9 +342,7 @@ export class BillingController {
   @Post('ops/sweep-overdue')
   @HttpCode(HttpStatus.OK)
   @Roles(ROLES.OWNER, ROLES.ADMIN)
-  async sweepOverdue(
-    @Req() req: FastifyRequest,
-  ): Promise<{ flipped: number; sentEmails: number }> {
+  async sweepOverdue(@Req() req: FastifyRequest): Promise<{ flipped: number; sentEmails: number }> {
     const ctx = this.ctx(req);
     const flipped = await this.invoices.markOverdueSweep(ctx);
     const sentEmails = await this.delivery.sendOverdueRemindersForTenant(ctx);

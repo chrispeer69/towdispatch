@@ -17,7 +17,16 @@
  * 'auto_intake' (findOrCreateByContact, called from the future Session 4
  * call intake flow). The audit_log captures this in after_state.
  */
-import { boolean, index, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { accounts } from './accounts';
 import { tenants } from './tenants';
 import { users } from './users';
@@ -72,6 +81,15 @@ export const customers = pgTable(
       .default('manual'),
 
     defaultRateSheetId: uuid('default_rate_sheet_id'),
+
+    // Session 11 — Stripe customer + saved card on file.
+    stripeCustomerId: text('stripe_customer_id'),
+    autoChargeEnabled: boolean('auto_charge_enabled').notNull().default(false),
+    defaultPaymentMethodId: text('default_payment_method_id'),
+    cardLast4: text('card_last4'),
+    cardBrand: text('card_brand'),
+    cardExpMonth: integer('card_exp_month'),
+    cardExpYear: integer('card_exp_year'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

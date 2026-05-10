@@ -26,10 +26,7 @@ export default async function InvoiceDetailPage({
           >
             {invoice.invoiceNumber}
           </h1>
-          <p
-            className="mt-1 text-sm text-text-secondary"
-            data-testid="invoice-status-label"
-          >
+          <p className="mt-1 text-sm text-text-secondary" data-testid="invoice-status-label">
             Status: <span className="font-medium">{invoiceStatusLabel[invoice.status]}</span>
           </p>
         </div>
@@ -75,10 +72,7 @@ export default async function InvoiceDetailPage({
             </div>
             <div className="flex justify-between border-t border-steel-border pt-1">
               <dt className="font-semibold">Total</dt>
-              <dd
-                className="font-mono font-bold"
-                data-testid="invoice-total"
-              >
+              <dd className="font-mono font-bold" data-testid="invoice-total">
                 {formatMoneyCents(invoice.totalCents)}
               </dd>
             </div>
@@ -88,10 +82,7 @@ export default async function InvoiceDetailPage({
             </div>
             <div className="flex justify-between">
               <dt className="text-text-secondary">Balance</dt>
-              <dd
-                className="font-mono"
-                data-testid="invoice-balance"
-              >
+              <dd className="font-mono" data-testid="invoice-balance">
                 {formatMoneyCents(invoice.balanceCents)}
               </dd>
             </div>
