@@ -1,0 +1,11 @@
+// PLACEHOLDER — do NOT commit a real google-services.json yet.
+//
+// To activate FCM:
+//   1. Create a Firebase project (recommended name: "TowCommand-Driver").
+//   2. Add an Android app with package name: ai.bluecollar.towcommand.driver
+//   3. Download the generated google-services.json
+//   4. Place it at apps/driver-android/app/google-services.json
+//   5. Re-run a build — the google-services plugin will pick it up automatically.
+//
+// Until then, the app builds but DriverFcmService receives no pushes.
+// The job-list screen still works via pull-to-refresh.

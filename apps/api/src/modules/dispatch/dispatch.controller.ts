@@ -4,7 +4,16 @@
  * The web UI calls these on initial mount; subsequent updates flow over the
  * Socket.IO gateway so nothing here is on a poll loop.
  */
-import { Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import {
   type AssignJobPayload,
   type DriverDto,
@@ -33,7 +42,22 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodBody, ZodParam } from '../../common/decorators/zod.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { JobsService } from '../jobs/jobs.service.js';
+import {
+  type DriverMobileJobDto,
+  DriverMobileService,
+  type DriverProfileMobileDto,
+} from './driver-mobile.service.js';
 import { DriversService } from './drivers.service.js';
+
+const photoUploadSchema = z.object({
+  fileName: z.string().min(1).max(240),
+  mimeType: z.string().min(1).max(160),
+  contentBase64: z.string().min(1),
+  capturedAt: z.string().datetime(),
+  lat: z.number().min(-90).max(90).optional(),
+  lng: z.number().min(-180).max(180).optional(),
+  tag: z.string().max(80).optional(),
+});
 
 const idSchema = z.object({ id: z.string().uuid() });
 const shiftIdSchema = z.object({ id: z.string().uuid() });
@@ -52,7 +76,55 @@ export class DispatchController {
   constructor(
     private readonly drivers: DriversService,
     private readonly jobs: JobsService,
+    private readonly driverMobile: DriverMobileService,
   ) {}
+
+  // ---------- Driver mobile app (Session 7) ----------
+
+  /** Returns the driver record linked to the current authenticated user. */
+  @Get('me/driver')
+  @Roles(ROLES.DRIVER, ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async myDriver(@Req() req: FastifyRequest): Promise<DriverProfileMobileDto> {
+    return this.driverMobile.myDriverProfile(this.callerCtx(req));
+  }
+
+  /** Active jobs assigned to the current authenticated driver. */
+  @Get('my-jobs')
+  @Roles(ROLES.DRIVER, ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async myJobs(@Req() req: FastifyRequest): Promise<DriverMobileJobDto[]> {
+    return this.driverMobile.myJobs(this.callerCtx(req));
+  }
+
+  /**
+   * Driver-uploaded job photo (pre-tow walkaround, GOA photo, customer
+   * signature, etc.). Stored as a tenant document with ownerType=job.
+   */
+  @Post('jobs/:id/photos')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles(ROLES.DRIVER, ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async uploadJobPhoto(
+    @ZodParam(idSchema) params: { id: string },
+    @ZodBody(photoUploadSchema) body: z.infer<typeof photoUploadSchema>,
+    @Req() req: FastifyRequest,
+  ): Promise<{ id: string; fileUrl: string; uploadedAt: string }> {
+    let bytes: Buffer;
+    try {
+      bytes = Buffer.from(body.contentBase64, 'base64');
+    } catch {
+      throw new BadRequestException('contentBase64 is not valid base64');
+    }
+    if (bytes.byteLength === 0) throw new BadRequestException('Empty upload');
+    return this.driverMobile.uploadJobPhoto(this.callerCtx(req), {
+      jobId: params.id,
+      fileName: body.fileName,
+      mimeType: body.mimeType,
+      bytes,
+      capturedAt: body.capturedAt,
+      lat: body.lat ?? null,
+      lng: body.lng ?? null,
+      tag: body.tag ?? null,
+    });
+  }
 
   @Get('board')
   @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
