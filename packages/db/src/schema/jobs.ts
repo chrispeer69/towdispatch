@@ -113,7 +113,19 @@ export const jobs = pgTable(
 
     cancelledReason: text('cancelled_reason'),
 
-    createdByUserId: uuid('created_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+    /**
+     * Assignment fields populated when the job moves out of `new`. Set as
+     * a side effect of the JobsService.assign() transition. Cleared by
+     * unassign() (which moves the job back to `new`).
+     */
+    assignedDriverId: uuid('assigned_driver_id'),
+    assignedTruckId: uuid('assigned_truck_id'),
+    assignedShiftId: uuid('assigned_shift_id'),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }),
+
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -128,11 +140,51 @@ export const jobs = pgTable(
     tenantCustomerIdx: index('jobs_tenant_customer_idx').on(t.tenantId, t.customerId),
     tenantVehicleIdx: index('jobs_tenant_vehicle_idx').on(t.tenantId, t.vehicleId),
     tenantAccountIdx: index('jobs_tenant_account_idx').on(t.tenantId, t.accountId),
+    tenantDriverIdx: index('jobs_tenant_assigned_driver_idx').on(t.tenantId, t.assignedDriverId),
   }),
 );
 
 export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;
+
+/**
+ * job_status_transitions — append-only history of every state machine move.
+ * The audit_log trigger captures the UPDATE on jobs, but a dedicated
+ * transition table is faster to query for "who moved this job from new to
+ * dispatched, when?" and lets us attach a free-form reason to each move
+ * (cancel/goa reasons, dispatcher notes on reassign).
+ */
+export const jobStatusTransitions = pgTable(
+  'job_status_transitions',
+  {
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => jobs.id, { onDelete: 'restrict' }),
+
+    fromStatus: text('from_status', { enum: jobStatusValues }).notNull(),
+    toStatus: text('to_status', { enum: jobStatusValues }).notNull(),
+
+    actorUserId: uuid('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
+    reason: text('reason'),
+    metadata: jsonb('metadata'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    tenantJobIdx: index('job_status_transitions_tenant_job_idx').on(
+      t.tenantId,
+      t.jobId,
+      t.createdAt,
+    ),
+  }),
+);
+
+export type JobStatusTransition = typeof jobStatusTransitions.$inferSelect;
+export type NewJobStatusTransition = typeof jobStatusTransitions.$inferInsert;
 
 /**
  * job_number_sequences — one row per (tenant_id, day_key) issuing the next

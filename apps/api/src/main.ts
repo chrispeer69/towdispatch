@@ -19,6 +19,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js
 import { registerRequestContext } from './common/middleware/request-context.middleware.js';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
 import { ConfigService } from './config/config.service.js';
+import { DispatchGateway } from './modules/dispatch/dispatch.gateway.js';
 
 async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({
@@ -55,6 +56,14 @@ async function bootstrap(): Promise<void> {
   const port = config.apiPort;
   const host = config.apiHost;
   await app.listen(port, host);
+
+  // Attach the dispatch Socket.IO gateway to the running HTTP server. The
+  // Fastify-adapted Nest app exposes the underlying Node http.Server via
+  // getHttpServer(); we hand it to the gateway which adds the /socket.io
+  // listener on top.
+  const dispatchGateway = app.get(DispatchGateway);
+  await dispatchGateway.attach(app.getHttpServer());
+
   config.logger.info({ port, host, env: config.nodeEnv }, 'TowCommand API listening');
 }
 

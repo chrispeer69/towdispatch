@@ -7,3 +7,6 @@ export * from './customer';
 export * from './vehicle';
 export * from './job';
 export * from './rate-sheet';
+export * from './driver';
+export * from './dispatch-events';
+export * from './maps-provider';

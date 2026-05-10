@@ -511,6 +511,132 @@ async function main(): Promise<void> {
           isPrimary: true,
         });
       }
+
+      // ---------- trucks ----------
+      // Each tenant gets 4 trucks of varied capability: a flatbed, a
+      // wheel-lift, a heavy-duty, and a service truck. Unit numbers are
+      // tenant-tagged (acme = T-A-NN, metro = T-M-NN) so a single shared
+      // dev DB can host both without unit_number collisions.
+      const tenantTag = t.slug === 'acme' ? 'A' : 'M';
+      const truckSeeds = [
+        {
+          unit: `T-${tenantTag}-01`,
+          type: 'flatbed' as const,
+          year: '2021',
+          make: 'Ford',
+          model: 'F-550',
+        },
+        {
+          unit: `T-${tenantTag}-02`,
+          type: 'wheel_lift' as const,
+          year: '2020',
+          make: 'Chevy',
+          model: 'Silverado 5500',
+        },
+        {
+          unit: `T-${tenantTag}-03`,
+          type: 'heavy_duty' as const,
+          year: '2019',
+          make: 'Peterbilt',
+          model: '337',
+        },
+        {
+          unit: `T-${tenantTag}-04`,
+          type: 'light_duty' as const,
+          year: '2022',
+          make: 'Ford',
+          model: 'F-450',
+        },
+      ];
+      const truckIds: string[] = [];
+      for (const tk of truckSeeds) {
+        const existingTruck = await db.query.trucks.findFirst({
+          where: and(eq(schema.trucks.tenantId, tenantId), eq(schema.trucks.unitNumber, tk.unit)),
+        });
+        if (existingTruck) {
+          truckIds.push(existingTruck.id);
+          continue;
+        }
+        const id = uuidv7();
+        await db.insert(schema.trucks).values({
+          id,
+          tenantId,
+          unitNumber: tk.unit,
+          truckType: tk.type,
+          year: tk.year,
+          make: tk.make,
+          model: tk.model,
+          inService: true,
+          createdBy: ownerUserId,
+        });
+        truckIds.push(id);
+        log(`  inserted truck ${tk.unit}`);
+      }
+
+      // ---------- drivers ----------
+      const driverSeeds =
+        t.slug === 'acme'
+          ? [
+              { firstName: 'Drew', lastName: 'Driver', empNum: 'A-D01', cdl: 'A' as const },
+              { firstName: 'Tasha', lastName: 'Williams', empNum: 'A-D02', cdl: 'B' as const },
+              { firstName: 'Miguel', lastName: 'Reyes', empNum: 'A-D03', cdl: 'A' as const },
+              { firstName: 'Lena', lastName: 'Park', empNum: 'A-D04', cdl: 'C' as const },
+            ]
+          : [
+              { firstName: 'Mel', lastName: 'Morgan', empNum: 'M-D01', cdl: 'A' as const },
+              { firstName: 'Sarah', lastName: 'Khan', empNum: 'M-D02', cdl: 'B' as const },
+              { firstName: 'Jordan', lastName: 'Hayes', empNum: 'M-D03', cdl: 'A' as const },
+              { firstName: 'Ren', lastName: 'Tanaka', empNum: 'M-D04', cdl: 'C' as const },
+            ];
+      const driverIds: string[] = [];
+      for (const d of driverSeeds) {
+        const existingDriver = await db.query.drivers.findFirst({
+          where: and(
+            eq(schema.drivers.tenantId, tenantId),
+            eq(schema.drivers.employeeNumber, d.empNum),
+          ),
+        });
+        if (existingDriver) {
+          driverIds.push(existingDriver.id);
+          continue;
+        }
+        const id = uuidv7();
+        await db.insert(schema.drivers).values({
+          id,
+          tenantId,
+          employeeNumber: d.empNum,
+          firstName: d.firstName,
+          lastName: d.lastName,
+          cdlClass: d.cdl,
+          active: true,
+          createdBy: ownerUserId,
+        });
+        driverIds.push(id);
+        log(`  inserted driver ${d.firstName} ${d.lastName}`);
+      }
+
+      // ---------- driver_shifts ----------
+      // One open shift per driver, paired with the matching truck.
+      for (let i = 0; i < driverIds.length; i++) {
+        const driverId = driverIds[i];
+        const truckId = truckIds[i];
+        if (!driverId) continue;
+        const existingShift = await db.query.driverShifts.findFirst({
+          where: and(
+            eq(schema.driverShifts.tenantId, tenantId),
+            eq(schema.driverShifts.driverId, driverId),
+          ),
+        });
+        if (existingShift) continue;
+        await db.insert(schema.driverShifts).values({
+          id: uuidv7(),
+          tenantId,
+          driverId,
+          truckId: truckId ?? null,
+          status: 'available',
+          createdBy: ownerUserId,
+        });
+      }
     }
 
     log(`done. login with any seeded email + password "${SEED_PASSWORD}"`);
