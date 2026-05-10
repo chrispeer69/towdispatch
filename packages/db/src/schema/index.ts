@@ -13,3 +13,7 @@ export * from './jobs';
 export * from './drivers';
 export * from './trucks';
 export * from './driver-shifts';
+export * from './driver-truck-assignments';
+export * from './documents';
+export * from './dvirs';
+export * from './maintenance';

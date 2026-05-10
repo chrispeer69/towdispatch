@@ -23,6 +23,13 @@ async function main(): Promise<void> {
     await pool.query('DROP SCHEMA IF EXISTS public CASCADE');
     await pool.query('CREATE SCHEMA public');
     await pool.query('GRANT ALL ON SCHEMA public TO CURRENT_USER');
+    // Drop drizzle's bookkeeping schema too. Without this, the next
+    // `migrate` run sees the old __drizzle_migrations rows, thinks every
+    // migration has already been applied, and silently skips them — yet
+    // FK references try to resolve against a now-empty public schema and
+    // fail with "relation tenants does not exist". Dropping forces a
+    // clean re-apply of the entire chain.
+    await pool.query('DROP SCHEMA IF EXISTS drizzle CASCADE');
     process.stdout.write('[reset] done\n');
   } finally {
     await pool.end();

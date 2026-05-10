@@ -12,10 +12,12 @@ import { CustomersModule } from './modules/customers/customers.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
 import { EmailModule } from './modules/email/email.module.js';
+import { FleetModule } from './modules/fleet/fleet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
+import { StorageModule } from './modules/storage/storage.module.js';
 import { TenantsModule } from './modules/tenants/tenants.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
@@ -38,6 +40,8 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     DispatchEventsModule,
     JobsModule,
     DispatchModule,
+    StorageModule,
+    FleetModule,
     HealthModule,
   ],
   providers: [

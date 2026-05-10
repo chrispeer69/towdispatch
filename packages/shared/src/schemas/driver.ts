@@ -1,11 +1,21 @@
 /**
- * Driver / truck / driver-shift contracts shared between API and Web.
- * The schemas here describe what the dispatch board reads and writes.
+ * Dispatch-board contracts: driver shifts, roster row, and shift/job
+ * lifecycle payloads.
+ *
+ * The long-form driver/truck DTOs (with license, certifications, equipment,
+ * etc.) live in ./fleet.ts — that file is the single source of truth for
+ * the row shapes. This file owns only the dispatch-only objects that
+ * fleet.ts intentionally doesn't redefine: live shifts, the roster row, and
+ * the shift/job control payloads the Session-5 dispatch board uses.
+ *
+ * Session 8 merge note: prior to merge this file also exported driverSchema,
+ * truckSchema, driverCdlClassValues, truckTypeValues, and the basic
+ * DriverDto/TruckDto. Those overlapped with fleet.ts (the superset) and were
+ * removed during the Session-5↔Session-8 merge. Dispatch consumers that
+ * imported them now resolve to the fleet.ts versions instead.
  */
 import { z } from 'zod';
-
-export const driverCdlClassValues = ['none', 'A', 'B', 'C'] as const;
-export type DriverCdlClass = (typeof driverCdlClassValues)[number];
+import { driverSchema, truckSchema } from './fleet';
 
 export const driverShiftStatusValues = [
   'available',
@@ -16,50 +26,6 @@ export const driverShiftStatusValues = [
   'break',
 ] as const;
 export type DriverShiftStatus = (typeof driverShiftStatusValues)[number];
-
-export const truckTypeValues = [
-  'light_duty',
-  'medium_duty',
-  'heavy_duty',
-  'flatbed',
-  'wheel_lift',
-  'service',
-  'other',
-] as const;
-export type TruckType = (typeof truckTypeValues)[number];
-
-export const driverSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  userId: z.string().uuid().nullable(),
-  employeeNumber: z.string().nullable(),
-  firstName: z.string(),
-  lastName: z.string(),
-  phone: z.string().nullable(),
-  email: z.string().nullable(),
-  cdlClass: z.enum(driverCdlClassValues),
-  active: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-export type DriverDto = z.infer<typeof driverSchema>;
-
-export const truckSchema = z.object({
-  id: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  unitNumber: z.string(),
-  truckType: z.enum(truckTypeValues),
-  year: z.string().nullable(),
-  make: z.string().nullable(),
-  model: z.string().nullable(),
-  plate: z.string().nullable(),
-  plateState: z.string().nullable(),
-  vin: z.string().nullable(),
-  inService: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-export type TruckDto = z.infer<typeof truckSchema>;
 
 export const driverShiftSchema = z.object({
   id: z.string().uuid(),

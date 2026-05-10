@@ -7,6 +7,13 @@ export * from './customer';
 export * from './vehicle';
 export * from './job';
 export * from './rate-sheet';
+// fleet — single source of truth for driver/truck DTOs (Session 8 superset).
+// Must be exported BEFORE ./driver because driver re-exports from fleet.
+export * from './storage-provider';
+export * from './fleet';
+// driver — dispatch-only contracts (shifts, roster, transition payloads).
+// The basic driver/truck DTOs live in ./fleet; this file owns the live
+// dispatch surface only.
 export * from './driver';
 export * from './dispatch-events';
 export * from './maps-provider';

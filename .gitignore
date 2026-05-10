@@ -52,3 +52,7 @@ redis-data/
 
 # local AI agent / Claude Code state
 .claude/
+
+# fleet — local-disk storage provider (dev only); runtime-uploaded files
+# under apps/api/storage/tenants/ should never land in git.
+apps/api/storage/tenants/

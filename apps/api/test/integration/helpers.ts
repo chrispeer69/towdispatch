@@ -92,6 +92,22 @@ export async function tearDown(ctx: TestContext): Promise<void> {
         if (tenantIds.length) {
           // Delete dependent data inside the captured tenants. Using
           // tenant_id keeps us from touching unrelated test data.
+          // Order matters — children (FK referrers) before parents.
+          // Session 8 fleet leaves: dvirs / maintenance / documents /
+          // driver_truck_assignments all reference drivers and/or trucks.
+          await c.query('DELETE FROM dvirs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM maintenance_records WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM maintenance_schedules WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM documents WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM driver_truck_assignments WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          // Session 5 dispatch leaves: job_status_transitions and
+          // driver_shifts both reference jobs/drivers/trucks.
           await c.query('DELETE FROM job_status_transitions WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);

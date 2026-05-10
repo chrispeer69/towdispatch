@@ -317,6 +317,9 @@ export class DriversService {
   }
 }
 
+// Session-5↔Session-8 merge: DriverDto/TruckDto are now the Session-8
+// superset (fleet.ts). We expand these mappers locally rather than import
+// from the fleet module so dispatch keeps its independence.
 function driverRowToDto(d: typeof drivers.$inferSelect): DriverDto {
   return {
     id: d.id,
@@ -325,12 +328,28 @@ function driverRowToDto(d: typeof drivers.$inferSelect): DriverDto {
     employeeNumber: d.employeeNumber,
     firstName: d.firstName,
     lastName: d.lastName,
+    preferredName: d.preferredName,
     phone: d.phone,
     email: d.email,
     cdlClass: d.cdlClass,
+    cdlExpiresAt: d.cdlExpiresAt,
+    licenseNumber: d.licenseNumber,
+    licenseState: d.licenseState,
+    licenseExpiresAt: d.licenseExpiresAt,
+    medicalCardExpiresAt: d.medicalCardExpiresAt,
+    drugTestLastAt: d.drugTestLastAt,
+    roadTestCompletedAt: d.roadTestCompletedAt,
+    motorClubCredentials: (d.motorClubCredentials as DriverDto['motorClubCredentials']) ?? null,
+    certifications: (d.certifications as DriverDto['certifications']) ?? null,
+    hiredAt: d.hiredAt,
+    employmentStatus: d.employmentStatus,
+    assignedYardId: d.assignedYardId,
+    commissionRuleId: d.commissionRuleId,
+    notes: d.notes,
     active: d.active,
     createdAt: d.createdAt.toISOString(),
     updatedAt: d.updatedAt.toISOString(),
+    deletedAt: d.deletedAt ? d.deletedAt.toISOString() : null,
   };
 }
 
@@ -346,9 +365,25 @@ function truckRowToDto(t: typeof trucks.$inferSelect): TruckDto {
     plate: t.plate,
     plateState: t.plateState,
     vin: t.vin,
+    capacityClass: t.capacityClass,
+    gvwrLbs: t.gvwrLbs,
+    fuelType: t.fuelType,
+    equipment: (t.equipment as TruckDto['equipment']) ?? null,
+    registrationExpiresAt: t.registrationExpiresAt,
+    insuranceExpiresAt: t.insuranceExpiresAt,
+    iftaLicense: t.iftaLicense,
+    irpAccount: t.irpAccount,
+    teslaCertified: t.teslaCertified,
+    aaaFlatbed: t.aaaFlatbed,
+    heavyDutyCapable: t.heavyDutyCapable,
+    currentOdometer: t.currentOdometer,
+    odometerUpdatedAt: t.odometerUpdatedAt ? t.odometerUpdatedAt.toISOString() : null,
+    status: t.status,
     inService: t.inService,
+    notes: t.notes,
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),
+    deletedAt: t.deletedAt ? t.deletedAt.toISOString() : null,
   };
 }
 

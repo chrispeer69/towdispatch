@@ -1,19 +1,13 @@
 /**
- * driver_shifts — one row per (driver, truck) on-shift session. Drivers move
- * in and out of shifts daily; the row is created when a driver clocks on and
- * `endedAt` is stamped when they clock off. While a shift is active, the
- * row carries last-known GPS position and the driver's current operational
- * status (available / en_route / on_scene / in_progress / returning / break).
+ * driver_shifts — one row per (driver, truck) on-shift session.
  *
- * One driver can only have one active shift at a time — partial unique index
- * (tenant_id, driver_id) WHERE ended_at IS NULL AND deleted_at IS NULL
- * enforced in 0009. Same goes for a truck: one truck can only be tied to
- * one active shift.
+ * Identical to the Session 5 shape: drivers move in and out of shifts daily;
+ * the row is created when a driver clocks on and `endedAt` is stamped when
+ * they clock off. Session 8 leaves this table alone; it's referenced by the
+ * fleet UI for "current driver of truck X" / "current truck of driver Y" but
+ * the dispatch module is the only writer for status and GPS columns.
  *
- * GPS columns are text-encoded decimals (matching jobs.pickupLat/Lng) so
- * the schema travels cleanly across PostGIS-on/off environments. The
- * driver app (Session 6) will report position via REST every 30s on an
- * active job, 120s otherwise.
+ * Active-shift uniqueness is enforced by partial unique indexes in 0010 SQL.
  */
 import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { drivers } from './drivers';
@@ -51,11 +45,20 @@ export const driverShifts = pgTable(
 
     lastLat: text('last_lat'),
     lastLng: text('last_lng'),
-    /** When the last GPS ping landed. NULL = never reported. */
     lastPositionAt: timestamp('last_position_at', { withTimezone: true }),
 
+    /**
+     * Scheduled vs actual: scheduled_*at for upcoming shifts (future Session
+     * extends shift planning); started_at / ended_at for actuals. Both
+     * scheduled fields nullable today since the session-5 path was clock-on
+     * driven only.
+     */
+    scheduledStartAt: timestamp('scheduled_start_at', { withTimezone: true }),
+    scheduledEndAt: timestamp('scheduled_end_at', { withTimezone: true }),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
     endedAt: timestamp('ended_at', { withTimezone: true }),
+
+    notes: text('notes'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
