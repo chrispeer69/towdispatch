@@ -9,6 +9,7 @@ import { IntegrationsModule } from './integrations/integrations.module.js';
 import { NotificationModule } from './integrations/notification/notification.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { BillingModule } from './modules/billing/billing.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
@@ -46,6 +47,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     StorageModule,
     FleetModule,
     TrackingModule,
+    BillingModule,
     HealthModule,
   ],
   providers: [

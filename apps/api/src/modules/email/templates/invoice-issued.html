@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, sans-serif; color: #1A1E2A; max-width: 640px; margin: 0 auto; padding: 24px;">
+    <div style="background-color: {{orange}}; color: white; padding: 16px; border-radius: 6px 6px 0 0;">
+      <h1 style="margin: 0; font-size: 20px;">{{productName}}</h1>
+    </div>
+    <div style="background-color: #fff; border: 1px solid #E2E8F0; border-top: 0; padding: 24px; border-radius: 0 0 6px 6px;">
+      <p>Hi {{recipientName}},</p>
+      <p>Your invoice <strong>{{invoiceNumber}}</strong> from <strong>{{tenantName}}</strong> is ready.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr><td style="padding: 6px 0; color: #475569;">Total</td><td style="padding: 6px 0; text-align: right; font-weight: bold;">{{totalFormatted}}</td></tr>
+        <tr><td style="padding: 6px 0; color: #475569;">Balance due</td><td style="padding: 6px 0; text-align: right;">{{balanceFormatted}}</td></tr>
+        {{#if dueDate}}<tr><td style="padding: 6px 0; color: #475569;">Due</td><td style="padding: 6px 0; text-align: right;">{{dueDate}}</td></tr>{{/if}}
+      </table>
+      {{#if invoiceUrl}}<p><a href="{{invoiceUrl}}" style="background-color: {{orange}}; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">View invoice</a></p>{{/if}}
+      <p style="color: #475569; font-size: 14px; margin-top: 24px;">Reply to this email if you have any questions.</p>
+    </div>
+  </body>
+</html>

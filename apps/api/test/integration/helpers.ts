@@ -115,6 +115,25 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM tracking_links WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          // Session 10 billing leaves: payments / invoice_taxes / invoice_line_items
+          // / credit_memos / invoices reference jobs/customers/accounts, and
+          // invoices.tenant_id has ON DELETE RESTRICT — so they MUST be cleared
+          // before the tenant DELETE below.
+          await c.query('DELETE FROM payments WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM invoice_taxes WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM invoice_line_items WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM credit_memos WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM recurring_billing_schedules WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM invoices WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM invoice_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           // Session 5 dispatch leaves: job_status_transitions and
           // driver_shifts both reference jobs/drivers/trucks.
           await c.query('DELETE FROM job_status_transitions WHERE tenant_id = ANY($1::uuid[])', [

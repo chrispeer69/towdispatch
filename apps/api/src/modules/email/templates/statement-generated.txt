@@ -1,0 +1,12 @@
+Statement of account
+
+Hi {{recipientName}},
+
+Here is the statement of your account with {{tenantName}} as of {{asOfDate}}.
+
+Open invoices: {{invoiceCount}}
+Balance due:   {{totalFormatted}}
+
+Reply to this email with any questions about your statement.
+
+— {{productName}}

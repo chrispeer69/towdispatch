@@ -1,0 +1,13 @@
+Hi {{recipientName}},
+
+Your invoice {{invoiceNumber}} from {{tenantName}} is ready.
+
+Total: {{totalFormatted}}
+Balance due: {{balanceFormatted}}
+{{#if dueDate}}Due: {{dueDate}}{{/if}}
+
+{{#if invoiceUrl}}View invoice: {{invoiceUrl}}{{/if}}
+
+Reply to this email if you have any questions.
+
+— {{productName}}

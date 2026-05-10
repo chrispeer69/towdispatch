@@ -116,6 +116,110 @@ export class EmailService implements OnModuleInit {
     });
   }
 
+  // ----- Session 10: billing emails -----
+
+  async sendInvoiceIssuedEmail(opts: {
+    to: string;
+    recipientName: string;
+    tenantName: string;
+    invoiceNumber: string;
+    totalFormatted: string;
+    balanceFormatted: string;
+    dueDate: string | null;
+    invoiceUrl: string | null;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Invoice ${opts.invoiceNumber} from ${opts.tenantName}`,
+      template: 'invoice-issued',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.recipientName,
+        tenantName: opts.tenantName,
+        invoiceNumber: opts.invoiceNumber,
+        totalFormatted: opts.totalFormatted,
+        balanceFormatted: opts.balanceFormatted,
+        dueDate: opts.dueDate,
+        invoiceUrl: opts.invoiceUrl,
+      },
+    });
+  }
+
+  async sendInvoiceOverdueEmail(opts: {
+    to: string;
+    recipientName: string;
+    tenantName: string;
+    invoiceNumber: string;
+    balanceFormatted: string;
+    dueDate: string | null;
+    invoiceUrl: string | null;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Past due: invoice ${opts.invoiceNumber}`,
+      template: 'invoice-overdue',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.recipientName,
+        tenantName: opts.tenantName,
+        invoiceNumber: opts.invoiceNumber,
+        balanceFormatted: opts.balanceFormatted,
+        dueDate: opts.dueDate,
+        invoiceUrl: opts.invoiceUrl,
+      },
+    });
+  }
+
+  async sendStatementGeneratedEmail(opts: {
+    to: string;
+    recipientName: string;
+    tenantName: string;
+    asOfDate: string;
+    invoiceCount: number;
+    totalFormatted: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Statement of account — ${opts.tenantName}`,
+      template: 'statement-generated',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.recipientName,
+        tenantName: opts.tenantName,
+        asOfDate: opts.asOfDate,
+        invoiceCount: opts.invoiceCount,
+        totalFormatted: opts.totalFormatted,
+      },
+    });
+  }
+
+  async sendCreditMemoIssuedEmail(opts: {
+    to: string;
+    recipientName: string;
+    tenantName: string;
+    memoNumber: string;
+    invoiceNumber: string;
+    amountFormatted: string;
+    reason: string;
+    appliedToText: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Credit memo ${opts.memoNumber}`,
+      template: 'credit-memo-issued',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.recipientName,
+        tenantName: opts.tenantName,
+        memoNumber: opts.memoNumber,
+        invoiceNumber: opts.invoiceNumber,
+        amountFormatted: opts.amountFormatted,
+        reason: opts.reason,
+        appliedToText: opts.appliedToText,
+      },
+    });
+  }
+
   private async send(args: SendArgs): Promise<void> {
     const { html, text } = this.renderer.render(args.template, args.variables);
     try {

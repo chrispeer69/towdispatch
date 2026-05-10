@@ -115,7 +115,12 @@ const SECTIONS: NavSection[] = [
         // Plain /accounts path. Motor Clubs filters via /accounts?type=motor_club.
         match: (p) => p === '/accounts' || p.startsWith('/accounts/'),
       },
-      { label: 'Invoices', href: null, icon: Receipt, disabled: true },
+      {
+        label: 'Billing',
+        href: '/billing/invoices',
+        icon: Receipt,
+        match: (p) => p.startsWith('/billing'),
+      },
     ],
   },
   {

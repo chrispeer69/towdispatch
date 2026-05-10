@@ -18,3 +18,4 @@ export * from './documents';
 export * from './dvirs';
 export * from './maintenance';
 export * from './tracking-links';
+export * from './invoices';

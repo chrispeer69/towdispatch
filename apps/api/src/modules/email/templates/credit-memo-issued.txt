@@ -1,0 +1,12 @@
+Credit memo issued
+
+Hi {{recipientName}},
+
+{{tenantName}} has issued credit memo {{memoNumber}} against invoice {{invoiceNumber}}.
+
+Credit amount: {{amountFormatted}}
+Reason: {{reason}}
+
+{{appliedToText}}
+
+— {{productName}}

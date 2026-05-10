@@ -1,0 +1,14 @@
+Past due notice — {{invoiceNumber}}
+
+Hi {{recipientName}},
+
+Invoice {{invoiceNumber}} from {{tenantName}} is past due.
+
+Balance due: {{balanceFormatted}}
+{{#if dueDate}}Was due: {{dueDate}}{{/if}}
+
+{{#if invoiceUrl}}Pay now: {{invoiceUrl}}{{/if}}
+
+Please reply if you have questions or have already remitted payment.
+
+— {{productName}}

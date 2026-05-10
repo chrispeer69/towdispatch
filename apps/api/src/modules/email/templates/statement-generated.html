@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, sans-serif; color: #1A1E2A; max-width: 640px; margin: 0 auto; padding: 24px;">
+    <div style="background-color: {{orange}}; color: white; padding: 16px; border-radius: 6px 6px 0 0;">
+      <h1 style="margin: 0; font-size: 20px;">Statement of account</h1>
+    </div>
+    <div style="background-color: #fff; border: 1px solid #E2E8F0; border-top: 0; padding: 24px; border-radius: 0 0 6px 6px;">
+      <p>Hi {{recipientName}},</p>
+      <p>Here is the statement of your account with <strong>{{tenantName}}</strong> as of <strong>{{asOfDate}}</strong>.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr><td style="padding: 6px 0; color: #475569;">Open invoices</td><td style="padding: 6px 0; text-align: right;">{{invoiceCount}}</td></tr>
+        <tr><td style="padding: 6px 0; color: #475569;">Balance due</td><td style="padding: 6px 0; text-align: right; font-weight: bold;">{{totalFormatted}}</td></tr>
+      </table>
+      <p style="color: #475569; font-size: 14px;">Reply to this email with any questions about your statement.</p>
+    </div>
+  </body>
+</html>

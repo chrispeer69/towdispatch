@@ -156,5 +156,33 @@ export async function tryRefresh(): Promise<{ accessToken: string } | null> {
   return { accessToken: data.accessToken };
 }
 
+/**
+ * BFF call that returns the raw fetch Response — used by routes that stream
+ * binary payloads (PDFs, file downloads). Same refresh-on-401 behavior as
+ * apiServerBff. Caller is responsible for piping the body through to the
+ * NextResponse.
+ */
+export async function apiServerBffRaw(
+  path: string,
+  opts: { method?: 'GET' | 'POST' } = {},
+): Promise<Response> {
+  let accessToken = await readAccessToken();
+  const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
+  const buildInit = (token: string | null): RequestInit => ({
+    method: opts.method ?? 'GET',
+    headers: buildHeaders(token, false),
+    cache: 'no-store',
+  });
+  let res = await fetch(url, buildInit(accessToken));
+  if (res.status === 401) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      accessToken = refreshed.accessToken;
+      res = await fetch(url, buildInit(accessToken));
+    }
+  }
+  return res;
+}
+
 // Re-export the cookie names so BFF routes can clear them by name in error paths.
 export { ACCESS_COOKIE, REFRESH_COOKIE };
