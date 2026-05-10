@@ -109,6 +109,32 @@ export class ConfigService {
       from: this.config.SMTP_FROM,
     };
   }
+  get notification(): {
+    activeProviderId: 'twilio' | 'stub';
+    twilioConfigured: boolean;
+    twilio: { accountSid: string; authToken: string; fromPhone: string; baseUrl: string };
+    smsDefaultBody: string;
+    trackingLinkTtlHours: number;
+  } {
+    const twilioConfigured = !!(
+      this.config.TWILIO_ACCOUNT_SID &&
+      this.config.TWILIO_AUTH_TOKEN &&
+      this.config.TWILIO_FROM_PHONE
+    );
+    return {
+      activeProviderId: twilioConfigured ? 'twilio' : 'stub',
+      twilioConfigured,
+      twilio: {
+        accountSid: this.config.TWILIO_ACCOUNT_SID,
+        authToken: this.config.TWILIO_AUTH_TOKEN,
+        fromPhone: this.config.TWILIO_FROM_PHONE,
+        baseUrl: this.config.TWILIO_BASE_URL,
+      },
+      smsDefaultBody: this.config.TRACKING_SMS_DEFAULT_BODY,
+      trackingLinkTtlHours: this.config.TRACKING_LINK_TTL_HOURS,
+    };
+  }
+
   get rateLimits(): {
     burstTtl: number;
     burstLimit: number;

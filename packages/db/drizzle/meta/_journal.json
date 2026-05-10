@@ -50,6 +50,13 @@
       "when": 1778600000000,
       "tag": "0006_fleet_documents_dvirs_maintenance",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779100000000,
+      "tag": "0007_tracking_links",
+      "breakpoints": true
     }
   ]
 }

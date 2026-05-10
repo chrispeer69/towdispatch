@@ -17,3 +17,4 @@ export * from './fleet';
 export * from './driver';
 export * from './dispatch-events';
 export * from './maps-provider';
+export * from './tracking';

@@ -20,6 +20,7 @@ import { registerRequestContext } from './common/middleware/request-context.midd
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
 import { ConfigService } from './config/config.service.js';
 import { DispatchGateway } from './modules/dispatch/dispatch.gateway.js';
+import { TrackingGateway } from './modules/tracking/tracking.gateway.js';
 
 async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({
@@ -63,6 +64,12 @@ async function bootstrap(): Promise<void> {
   // listener on top.
   const dispatchGateway = app.get(DispatchGateway);
   await dispatchGateway.attach(app.getHttpServer());
+
+  // Mount the public /track namespace on top of the same Socket.IO server.
+  // This way one Redis adapter + one set of CORS/origin rules is shared.
+  const trackingGateway = app.get(TrackingGateway);
+  const io = dispatchGateway.getServer();
+  if (io) trackingGateway.attachNamespace(io);
 
   config.logger.info({ port, host, env: config.nodeEnv }, 'TowCommand API listening');
 }

@@ -15,8 +15,37 @@ export const DISPATCH_EVENTS = {
   DRIVER_SHIFT_STARTED: 'driver.shift_started',
   DRIVER_SHIFT_ENDED: 'driver.shift_ended',
   DRIVER_STATUS_CHANGED: 'driver.status_changed',
+  // Session 9 — tracking link lifecycle. Dispatch board listens so the
+  // small "Tracking" badge on the job card stays current.
+  TRACKING_LINK_CREATED: 'tracking.link_created',
+  TRACKING_LINK_UPDATED: 'tracking.link_updated',
+  TRACKING_LINK_VIEWED: 'tracking.link_viewed',
+  TRACKING_MESSAGE_RECEIVED: 'tracking.message_received',
 } as const;
 export type DispatchEventName = (typeof DISPATCH_EVENTS)[keyof typeof DISPATCH_EVENTS];
+
+export const trackingLinkSummaryEventSchema = z.object({
+  jobId: z.string().uuid(),
+  jobNumber: z.string(),
+  trackingLinkId: z.string().uuid(),
+  smsStatus: z.string(),
+  firstViewedAt: z.string().datetime().nullable(),
+  lastViewedAt: z.string().datetime().nullable(),
+  viewCount: z.number().int(),
+  expiresAt: z.string().datetime(),
+  revokedAt: z.string().datetime().nullable(),
+});
+export type TrackingLinkSummaryEvent = z.infer<typeof trackingLinkSummaryEventSchema>;
+
+export const trackingMessageReceivedEventSchema = z.object({
+  jobId: z.string().uuid(),
+  jobNumber: z.string(),
+  messageId: z.string().uuid(),
+  direction: z.enum(['inbound', 'outbound', 'system']),
+  body: z.string(),
+  createdAt: z.string().datetime(),
+});
+export type TrackingMessageReceivedEvent = z.infer<typeof trackingMessageReceivedEventSchema>;
 
 export const jobCreatedEventSchema = z.object({
   job: jobSchema,

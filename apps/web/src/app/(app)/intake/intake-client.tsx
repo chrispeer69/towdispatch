@@ -130,6 +130,7 @@ interface FormState {
   authorizedBy: JobAuthorizedBy;
   authorizedByName: string;
   notes: string;
+  skipCustomerSms: boolean;
 }
 
 const EMPTY: FormState = {
@@ -162,6 +163,7 @@ const EMPTY: FormState = {
   authorizedBy: 'customer',
   authorizedByName: '',
   notes: '',
+  skipCustomerSms: false,
 };
 
 export function IntakeClient(): JSX.Element {
@@ -436,6 +438,7 @@ export function IntakeClient(): JSX.Element {
       authorizedBy: form.authorizedBy,
       ...(form.authorizedByName.trim() ? { authorizedByName: form.authorizedByName.trim() } : {}),
       ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
+      ...(form.skipCustomerSms ? { skipCustomerSms: true } : {}),
     };
 
     try {
@@ -452,7 +455,11 @@ export function IntakeClient(): JSX.Element {
       }
       const data = (await res.json()) as { job: { jobNumber: string } };
       const jobNumber = data.job.jobNumber;
-      router.push(`/dispatch?created=${encodeURIComponent(jobNumber)}`);
+      // Tracking SMS is dispatched server-side on the DISPATCHED transition,
+      // not at intake. Surface a hint in the toast so dispatchers know to
+      // expect the badge once they assign the job.
+      const smsParam = form.skipCustomerSms ? '&sms=skipped' : '&sms=pending';
+      router.push(`/dispatch?created=${encodeURIComponent(jobNumber)}${smsParam}`);
     } catch (err) {
       const reason = err instanceof Error ? err.message : 'unknown';
       setSubmitError(`Network error: ${reason}`);
@@ -793,6 +800,20 @@ export function IntakeClient(): JSX.Element {
               placeholder="Anything the driver needs to know"
             />
           </Field>
+
+          <label className="flex items-start gap-2 text-xs text-text-secondary">
+            <input
+              type="checkbox"
+              checked={form.skipCustomerSms}
+              onChange={(e) => update('skipCustomerSms', e.target.checked)}
+              data-testid="skip-customer-sms"
+              className="mt-0.5"
+            />
+            <span>
+              Skip customer SMS (e.g. fleet/account customer manages their own
+              comms). Dispatcher can still resend manually from the board.
+            </span>
+          </label>
 
           {submitError ? (
             <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">

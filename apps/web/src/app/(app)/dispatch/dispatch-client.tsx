@@ -22,6 +22,7 @@ import { Inbox, MapPin, Truck, Users } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { type Socket, io as ioClient } from 'socket.io-client';
 import { DispatchMap } from './dispatch-map';
+import { TrackingBadge } from './tracking-badge';
 import { type DispatchSnapshot, dispatchReducer, initialState } from './dispatch-state';
 
 interface Props {
@@ -33,6 +34,8 @@ interface Props {
    * preserved on top of the live dispatch board.
    */
   createdJobNumber?: string | null;
+  /** 'pending' = SMS will fire on assign; 'skipped' = no SMS for this job. */
+  smsHint?: 'pending' | 'skipped' | null;
 }
 
 const QUEUE_DROPPABLE_ID = 'queue';
@@ -41,6 +44,7 @@ export function DispatchClient({
   initialSnapshot,
   mapboxToken,
   createdJobNumber = null,
+  smsHint = null,
 }: Props): JSX.Element {
   const [state, dispatch] = useReducer(dispatchReducer, {
     ...initialState,
@@ -246,6 +250,13 @@ export function DispatchClient({
           className="rounded-[12px] border border-ok/40 bg-ok/10 px-4 py-3 text-sm text-ok"
         >
           Job #{createdJobNumber} created and waiting in the new queue.
+          {smsHint === 'pending' ? (
+            <span className="ml-1 text-text-secondary">
+              Customer tracking SMS will fire automatically on assign.
+            </span>
+          ) : smsHint === 'skipped' ? (
+            <span className="ml-1 text-text-secondary">Customer SMS skipped for this job.</span>
+          ) : null}
         </div>
       ) : null}
 
@@ -359,8 +370,11 @@ function ActivePane({ jobs }: { jobs: JobDto[] }): JSX.Element {
               </p>
               <ul className="space-y-2">
                 {group.map((job) => (
-                  <li key={job.id}>
+                  <li key={job.id} className="space-y-1">
                     <JobCard job={job} compact />
+                    <div className="flex justify-end pr-1">
+                      <TrackingBadge jobId={job.id} jobNumber={job.jobNumber} canRevoke />
+                    </div>
                   </li>
                 ))}
               </ul>
