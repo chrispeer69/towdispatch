@@ -20,3 +20,6 @@ export * from './maintenance';
 export * from './tracking-links';
 export * from './invoices';
 export * from './stripe-events';
+export * from './accounting-connections';
+export * from './account-mappings';
+export * from './sync-jobs';

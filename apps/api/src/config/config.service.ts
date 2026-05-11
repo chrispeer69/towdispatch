@@ -152,6 +152,30 @@ export class ConfigService {
     };
   }
 
+  get quickbooks(): {
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+    sandbox: boolean;
+    tokenEncryptionKey: string;
+    webhookVerifierToken: string;
+    configured: boolean;
+  } {
+    const clientId = this.config.QBO_CLIENT_ID;
+    const clientSecret = this.config.QBO_CLIENT_SECRET;
+    const redirectUri =
+      this.config.QBO_REDIRECT_URI || `${this.config.API_PUBLIC_URL}/accounting/connect/callback`;
+    return {
+      clientId,
+      clientSecret,
+      redirectUri,
+      sandbox: this.config.QBO_SANDBOX,
+      tokenEncryptionKey: this.config.QBO_TOKEN_ENCRYPTION_KEY,
+      webhookVerifierToken: this.config.QBO_WEBHOOK_VERIFIER_TOKEN,
+      configured: !!clientId && !!clientSecret,
+    };
+  }
+
   get rateLimits(): {
     burstTtl: number;
     burstLimit: number;

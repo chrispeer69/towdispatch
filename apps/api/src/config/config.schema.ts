@@ -77,6 +77,27 @@ export const configSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional().default(''),
   STRIPE_PUBLIC_KEY: z.string().optional().default(''),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default('whsec_test_session11_default_dev_secret'),
+
+  // Session 12 — QuickBooks Online. When QBO_CLIENT_ID is missing the stub
+  // provider drives the entire accounting flow so dev can exercise the full
+  // code path (OAuth, sync, webhooks, mapping) without real Intuit creds.
+  QBO_CLIENT_ID: z.string().optional().default(''),
+  QBO_CLIENT_SECRET: z.string().optional().default(''),
+  QBO_REDIRECT_URI: z.string().optional().default(''),
+  QBO_SANDBOX: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+  /** 32+ chars; AES-256-GCM key for accounting_connections token columns. */
+  QBO_TOKEN_ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'QBO_TOKEN_ENCRYPTION_KEY must be 32+ chars')
+    .default('change-me-qbo-token-encryption-key-please-rotate-in-prod'),
+  /** Intuit's "Verifier Token" for webhook signature verification. */
+  QBO_WEBHOOK_VERIFIER_TOKEN: z
+    .string()
+    .optional()
+    .default('verifier-token-session12-default-dev-value'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

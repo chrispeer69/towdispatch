@@ -20,3 +20,4 @@ export * from './maps-provider';
 export * from './tracking';
 export * from './billing';
 export * from './stripe-payments';
+export * from './accounting';
