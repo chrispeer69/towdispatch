@@ -1,0 +1,7 @@
+{{productName}}
+
+Your scheduled report "{{reportName}}" ({{reportTitle}}) is ready.
+
+Download {{format}}: {{downloadUrl}}
+
+The link expires in 24 hours. Re-run the schedule to refresh.

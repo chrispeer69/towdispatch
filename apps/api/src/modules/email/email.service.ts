@@ -282,6 +282,24 @@ export class EmailService {
         acceptUrl: opts.acceptUrl,
         declineUrl: opts.declineUrl,
         magicLinkExpiresFormatted: opts.magicLinkExpiresFormatted,
+
+  async sendScheduledReport(opts: {
+    to: string;
+    reportName: string;
+    reportTitle: string;
+    downloadUrl: string;
+    format: 'csv' | 'pdf';
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Scheduled report: ${opts.reportName}`,
+      template: 'scheduled-report',
+      variables: {
+        ...this.brand(),
+        reportName: opts.reportName,
+        reportTitle: opts.reportTitle,
+        downloadUrl: opts.downloadUrl,
+        format: opts.format.toUpperCase(),
       },
     });
   }
