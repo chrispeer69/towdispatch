@@ -1,4 +1,4 @@
-import type { KpiTile } from '@towcommand/shared';
+import type { KpiTile } from '@ustowdispatch/shared';
 
 /**
  * KpiRow — uniform 4-6 column tile strip used at the top of every report

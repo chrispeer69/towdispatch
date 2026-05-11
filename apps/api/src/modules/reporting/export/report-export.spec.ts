@@ -1,4 +1,4 @@
-import type { ReportId } from '@towcommand/shared';
+import type { ReportId } from '@ustowdispatch/shared';
 import { describe, expect, it } from 'vitest';
 import type { ReportDetail } from '../reporting.types.js';
 import { ReportExportService } from './report-export.service.js';

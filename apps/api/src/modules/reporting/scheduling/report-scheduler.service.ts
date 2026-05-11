@@ -17,9 +17,9 @@ import {
   type OnModuleDestroy,
   type OnModuleInit,
 } from '@nestjs/common';
-import { reportSchedules, savedReports } from '@towcommand/db';
-import type { ReportId } from '@towcommand/shared';
-import { reportTitles } from '@towcommand/shared';
+import { reportSchedules, savedReports } from '@ustowdispatch/db';
+import type { ReportId } from '@ustowdispatch/shared';
+import { reportTitles } from '@ustowdispatch/shared';
 import { eq } from 'drizzle-orm';
 import type { Pool } from 'pg';
 import { ADMIN_POOL } from '../../../database/database.tokens.js';

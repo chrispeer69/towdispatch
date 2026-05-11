@@ -8,7 +8,7 @@
 import { ApiError } from '@/lib/api/client';
 import { fetchReportIndex, fetchReportSummary } from '@/lib/api/reporting';
 import { requireUser } from '@/lib/auth/session';
-import type { KpiTile, ReportId, ReportSummaryDto } from '@towcommand/shared';
+import type { KpiTile, ReportId, ReportSummaryDto } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
 export const metadata = { title: 'Reports — TowCommand' };

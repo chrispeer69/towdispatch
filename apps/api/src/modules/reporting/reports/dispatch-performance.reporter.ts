@@ -12,8 +12,8 @@
  * Per-dispatcher breakdown is a live join against jobs+users (small cardinality).
  */
 import { Injectable } from '@nestjs/common';
-import { jobs } from '@towcommand/db';
-import type { ReportId } from '@towcommand/shared';
+import { jobs } from '@ustowdispatch/db';
+import type { ReportId } from '@ustowdispatch/shared';
 import { and, gte, isNull, lte, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../../database/tenant-aware-db.service.js';
 import { resolveWindow } from '../reporting-window.js';

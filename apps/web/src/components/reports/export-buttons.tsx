@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReportId } from '@towcommand/shared';
+import type { ReportId } from '@ustowdispatch/shared';
 import { useState } from 'react';
 
 /**

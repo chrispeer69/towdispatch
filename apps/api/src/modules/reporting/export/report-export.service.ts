@@ -13,9 +13,9 @@
  */
 import { Buffer } from 'node:buffer';
 import { Inject, Injectable } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
-import type { ReportId, StorageProvider } from '@towcommand/shared';
-import { reportTitles } from '@towcommand/shared';
+import { uuidv7 } from '@ustowdispatch/db';
+import type { ReportId, StorageProvider } from '@ustowdispatch/shared';
+import { reportTitles } from '@ustowdispatch/shared';
 import { stringify as csvStringify } from 'csv-stringify/sync';
 import PDFDocument from 'pdfkit';
 import { STORAGE_PROVIDER } from '../../storage/storage.module.js';

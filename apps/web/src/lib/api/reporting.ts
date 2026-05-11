@@ -11,7 +11,7 @@ import type {
   ReportSummaryDto,
   SavedReportDto,
   UpdateSavedReportPayload,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { apiServer, apiServerBff } from './client';
 
 export interface ReportIndexCard {

@@ -12,7 +12,7 @@
  * on create/update so the poller picks it up.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { reportSchedules, savedReports, uuidv7 } from '@towcommand/db';
+import { reportSchedules, savedReports, uuidv7 } from '@ustowdispatch/db';
 import type {
   CreateSavedReportPayload,
   ReportExportFormat,
@@ -20,7 +20,7 @@ import type {
   ReportScheduleCadence,
   SavedReportDto,
   UpdateSavedReportPayload,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../../database/tenant-aware-db.service.js';
 import type { AuthCtx } from '../reporting.types.js';
@@ -143,7 +143,18 @@ export class SavedReportsService {
           });
         }
       }
-      return this.get(ctx, id);
+
+      // Re-read inside the SAME transaction so the just-committed schedule
+      // change is visible. Calling this.get(ctx, id) here would open a fresh
+      // tx that can't see our uncommitted writes.
+      const fresh = await tx.query.savedReports.findFirst({
+        where: and(eq(savedReports.id, id), isNull(savedReports.deletedAt)),
+      });
+      if (!fresh) throw new NotFoundException('Saved report not found after update');
+      const sched = await tx.query.reportSchedules.findFirst({
+        where: eq(reportSchedules.savedReportId, id),
+      });
+      return toDto(fresh, sched ?? null);
     });
   }
 

@@ -12,7 +12,7 @@
  *   - Hold-vehicle aging: active recurring_billing_schedules over 60 days.
  */
 import { Injectable } from '@nestjs/common';
-import type { ReportId } from '@towcommand/shared';
+import type { ReportId } from '@ustowdispatch/shared';
 import { sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../../database/tenant-aware-db.service.js';
 import type {

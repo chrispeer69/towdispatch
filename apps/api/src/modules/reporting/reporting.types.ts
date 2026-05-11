@@ -1,7 +1,7 @@
 /**
  * Internal types for the Reporting & Analytics module (Session 14).
  *
- * Kept apart from the wire schemas in @towcommand/shared so we can let the
+ * Kept apart from the wire schemas in @ustowdispatch/shared so we can let the
  * report implementations return strongly-typed intermediates without forcing
  * every shape to round-trip through zod. The controller maps the internal
  * shape to the public DTO.
@@ -13,7 +13,7 @@ import type {
   ReportFiltersBase,
   ReportId,
   TimeSeriesPoint,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 
 export interface AuthCtx {
   tenantId: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import type { BreakdownPoint, TimeSeriesPoint } from '@towcommand/shared';
+import type { BreakdownPoint, TimeSeriesPoint } from '@ustowdispatch/shared';
 import {
   Bar,
   BarChart,

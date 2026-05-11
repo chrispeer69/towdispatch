@@ -10,7 +10,7 @@
  * fromDate. For comparison='prior_year' we shift back 365 days. comparison='none'
  * leaves the comparison fields null.
  */
-import type { ReportComparison, ReportFiltersBase } from '@towcommand/shared';
+import type { ReportComparison, ReportFiltersBase } from '@ustowdispatch/shared';
 import type { ResolvedReportWindow } from './reporting.types.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;

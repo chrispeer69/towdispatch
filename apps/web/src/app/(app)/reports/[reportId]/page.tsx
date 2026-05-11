@@ -24,7 +24,7 @@ import {
   type ReportId,
   reportShortDescriptions,
   reportTitles,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';

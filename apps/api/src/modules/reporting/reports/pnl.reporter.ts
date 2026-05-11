@@ -18,7 +18,7 @@
  * delivery; the fuel/depreciation numbers swap in when those modules land.
  */
 import { Injectable } from '@nestjs/common';
-import type { ReportId } from '@towcommand/shared';
+import type { ReportId } from '@ustowdispatch/shared';
 import { sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../../database/tenant-aware-db.service.js';
 import { resolveWindow } from '../reporting-window.js';

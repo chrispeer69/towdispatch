@@ -9,7 +9,7 @@
  *   weekly  — next Monday 08:00 UTC after the anchor.
  *   monthly — first day of the next month, 08:00 UTC.
  */
-import type { ReportScheduleCadence } from '@towcommand/shared';
+import type { ReportScheduleCadence } from '@ustowdispatch/shared';
 
 const RUN_HOUR_UTC = 8;
 

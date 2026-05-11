@@ -1,4 +1,4 @@
-import { ROLES } from '@towcommand/shared';
+import { ROLES } from '@ustowdispatch/shared';
 import { describe, expect, it } from 'vitest';
 import { rolesForReport } from './report-rbac.js';
 

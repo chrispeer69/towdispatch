@@ -11,8 +11,8 @@
  *   - Bookkeep report_runs for the audit log.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { drivers, reportRuns, uuidv7 } from '@towcommand/db';
-import type { ReportDetailDto, ReportId, ReportSummaryDto } from '@towcommand/shared';
+import { drivers, reportRuns, uuidv7 } from '@ustowdispatch/db';
+import type { ReportDetailDto, ReportId, ReportSummaryDto } from '@ustowdispatch/shared';
 import { and, eq } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { ReportingCacheService } from './reporting-cache.service.js';

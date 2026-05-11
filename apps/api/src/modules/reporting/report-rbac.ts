@@ -15,7 +15,7 @@
  *                  saved-reports CRUD (which auditors don't hit per the
  *                  controller route allowlist).
  */
-import { ROLES, type ReportId, type Role } from '@towcommand/shared';
+import { ROLES, type ReportId, type Role } from '@ustowdispatch/shared';
 
 const ALL: Role[] = [
   ROLES.OWNER,

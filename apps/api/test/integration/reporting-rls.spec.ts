@@ -10,7 +10,7 @@
  * (tenants/users/tracking_links). Per-module RLS tests keep the failure mode
  * specific so a regression points at the actual policy that broke.
  */
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

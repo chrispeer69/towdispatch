@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReportId, ReportScheduleCadence } from '@towcommand/shared';
+import type { ReportId, ReportScheduleCadence } from '@ustowdispatch/shared';
 import { useState } from 'react';
 
 /**
