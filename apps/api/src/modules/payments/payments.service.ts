@@ -29,6 +29,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { customers, invoices, payments, tenants, uuidv7 } from '@towcommand/db';
 import {
@@ -46,6 +47,7 @@ import type { Logger } from 'pino';
 import { ConfigService } from '../../config/config.service.js';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { TransactionRunner } from '../../database/transaction-runner.service.js';
+import { AccountingService } from '../accounting/accounting.service.js';
 import { InvoicesService } from '../billing/invoices.service.js';
 import { PAYMENT_PROVIDER } from './payments.tokens.js';
 import type { PaymentProvider, WebhookEvent } from './provider.js';
@@ -78,8 +80,19 @@ export class PaymentsService {
     private readonly invoicesService: InvoicesService,
     private readonly config: ConfigService,
     @Inject(PAYMENT_PROVIDER) private readonly provider: PaymentProvider,
+    @Optional() private readonly accounting: AccountingService | null = null,
   ) {
     this.logger = config.logger.child({ component: 'payments' });
+  }
+
+  private notifyAccountingPayment(tenantId: string, paymentId: string): void {
+    if (!this.accounting) return;
+    this.accounting.enqueuePaymentSync(tenantId, paymentId).catch(() => {});
+  }
+
+  private notifyAccountingRefund(tenantId: string, paymentId: string): void {
+    if (!this.accounting) return;
+    this.accounting.enqueueRefundSync(tenantId, paymentId).catch(() => {});
   }
 
   // =====================================================================
@@ -587,6 +600,16 @@ export class PaymentsService {
         });
       }
       await this.invoicesService.recomputeTotals(tx, tenant.id, original.invoiceId);
+      // Also enqueue a refund-sync. The refund row id is what we know; the
+      // sync handler looks it up + emits a RefundReceipt to QBO.
+      const refundRow = await tx.query.payments.findFirst({
+        where: and(
+          eq(payments.tenantId, tenant.id),
+          eq(payments.stripeRefundId, refund.externalId),
+          isNull(payments.deletedAt),
+        ),
+      });
+      if (refundRow) this.notifyAccountingRefund(tenant.id, refundRow.id);
       return { ok: true as const, refundedCents: refund.amountCents, refundId: refund.externalId };
     });
   }
@@ -741,6 +764,16 @@ export class PaymentsService {
         }
 
         await this.invoicesService.recomputeTotals(tx, tenantId, invoiceId);
+
+        // Session 12: enqueue accounting sync for the now-cleared payment.
+        const synced = await tx.query.payments.findFirst({
+          where: and(
+            eq(payments.tenantId, tenantId),
+            eq(payments.stripePaymentIntentId, piId),
+            isNull(payments.deletedAt),
+          ),
+        });
+        if (synced) this.notifyAccountingPayment(tenantId, synced.id);
       },
     );
   }

@@ -7,6 +7,7 @@ import { ConfigModule } from './config/config.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { IntegrationsModule } from './integrations/integrations.module.js';
 import { NotificationModule } from './integrations/notification/notification.module.js';
+import { AccountingModule } from './modules/accounting/accounting.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
@@ -50,6 +51,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     TrackingModule,
     BillingModule,
     PaymentsModule,
+    AccountingModule,
     HealthModule,
   ],
   providers: [

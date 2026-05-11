@@ -23,6 +23,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
   accounts,
@@ -67,6 +68,7 @@ import {
 } from '@towcommand/shared';
 import { and, asc, desc, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
+import { AccountingService } from '../accounting/accounting.service.js';
 import {
   billingAddressFromAccount,
   billingAddressFromCustomer,
@@ -90,7 +92,27 @@ interface CallerContext {
 
 @Injectable()
 export class InvoicesService {
-  constructor(private readonly db: TenantAwareDb) {}
+  constructor(
+    private readonly db: TenantAwareDb,
+    @Optional() private readonly accounting: AccountingService | null = null,
+  ) {}
+
+  private notifyInvoiceMutated(tenantId: string, invoiceId: string): void {
+    // @Optional inject — when AccountingModule isn't loaded (rare; only in
+    // narrow unit tests) the call is a no-op. Errors here must not break the
+    // calling invoice flow, so swallow + log via the caller's logger if any.
+    if (!this.accounting) return;
+    this.accounting.enqueueInvoiceSync(tenantId, invoiceId).catch(() => {
+      /* engine has its own retry — best-effort enqueue */
+    });
+  }
+
+  private notifyPaymentRecorded(tenantId: string, paymentId: string): void {
+    if (!this.accounting) return;
+    this.accounting.enqueuePaymentSync(tenantId, paymentId).catch(() => {
+      /* swallow — engine will surface failures via sync_jobs */
+    });
+  }
 
   // =====================================================================
   // Invoice CRUD
@@ -462,7 +484,9 @@ export class InvoicesService {
           updatedAt: new Date(),
         })
         .where(eq(invoices.id, invoiceId));
-      return this.assembleWithDetails(tx, invoiceId);
+      const result = await this.assembleWithDetails(tx, invoiceId);
+      this.notifyInvoiceMutated(ctx.tenantId, invoiceId);
+      return result;
     });
   }
 
@@ -571,6 +595,16 @@ export class InvoicesService {
 
       await this.recomputeTotals(tx, ctx.tenantId, inv.id);
       const final = await this.assembleWithDetails(tx, inv.id);
+      // Refunds in Session 11 are recorded as negative payments. Route those
+      // through the refund queue; everything else is a positive payment sync.
+      if (payRow.amountCents < 0) {
+        if (this.accounting) {
+          this.accounting.enqueueRefundSync(ctx.tenantId, payRow.id).catch(() => {});
+        }
+      } else {
+        this.notifyPaymentRecorded(ctx.tenantId, payRow.id);
+      }
+      this.notifyInvoiceMutated(ctx.tenantId, inv.id);
       return { payment: paymentToDto(payRow), invoice: final };
     });
   }
