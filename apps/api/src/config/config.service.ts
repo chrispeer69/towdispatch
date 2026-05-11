@@ -541,11 +541,31 @@ export class ConfigService {
       endpoint: this.config.S3_ENDPOINT,
       forcePathStyle: this.config.S3_FORCE_PATH_STYLE,
       configured: !!bucket && !!region,
+    };
+  }
   get notifications(): {
-    sendgrid: { apiKey: string; fromEmail: string; fromName: string; verificationKey: string; configured: boolean };
-    mailgun: { apiKey: string; domain: string; fromEmail: string; region: 'us' | 'eu'; configured: boolean };
+    sendgrid: {
+      apiKey: string;
+      fromEmail: string;
+      fromName: string;
+      verificationKey: string;
+      configured: boolean;
+    };
+    mailgun: {
+      apiKey: string;
+      domain: string;
+      fromEmail: string;
+      region: 'us' | 'eu';
+      configured: boolean;
+    };
     fcm: { projectId: string; clientEmail: string; privateKey: string; configured: boolean };
-    apns: { keyId: string; teamId: string; bundleId: string; privateKey: string; configured: boolean };
+    apns: {
+      keyId: string;
+      teamId: string;
+      bundleId: string;
+      privateKey: string;
+      configured: boolean;
+    };
     webhookSecretKey: string;
     rateLimits: { smsHourly: number; emailHourly: number; pushHourly: number };
     deadLetterRetentionDays: number;

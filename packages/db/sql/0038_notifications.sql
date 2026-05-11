@@ -14,7 +14,7 @@
 -- Invariants:
 --   * notifications.idempotency_key is unique per (tenant_id) inside the
 --     dedup window — partial unique on (tenant_id, idempotency_key) where
---     idempotency_expires_at > now()
+--     idempotency_expires_at IS NOT NULL (expiry enforced at app level)
 --   * notification_preferences row is unique per
 --     (tenant_id, COALESCE(user_id,'0000…'), event_category, channel)
 --   * notification_templates is unique per (tenant scope, template_key, channel):
@@ -46,12 +46,14 @@ ALTER TABLE notifications
   ADD CONSTRAINT notifications_recipient_present_chk
   CHECK (recipient_user_id IS NOT NULL OR recipient_role_scope IS NOT NULL);
 
+-- Idempotency dedup: unique per (tenant_id, idempotency_key) for non-null keys.
+-- Expiry check (idempotency_expires_at IS NOT NULL (expiry enforced at app level)) is enforced at application level
+-- because PostgreSQL requires IMMUTABLE functions in index predicates.
 DROP INDEX IF EXISTS notifications_tenant_idempotency_active_unique;
 CREATE UNIQUE INDEX notifications_tenant_idempotency_active_unique
   ON notifications (tenant_id, idempotency_key)
   WHERE idempotency_key IS NOT NULL
-    AND idempotency_expires_at IS NOT NULL
-    AND idempotency_expires_at > now();
+    AND idempotency_expires_at IS NOT NULL;
 
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications FORCE ROW LEVEL SECURITY;

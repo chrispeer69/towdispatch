@@ -43,6 +43,7 @@ import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { OpsModule } from './modules/ops/ops.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { PublicApiModule } from './modules/public-api/public-api.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
@@ -115,6 +116,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     DashboardModule,
     ReportingModule,
     AdminModule,
+    NotificationsModule,
     HealthModule,
     DebugModule,
     AdminModule,

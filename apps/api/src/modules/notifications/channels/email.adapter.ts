@@ -140,17 +140,14 @@ export class EmailAdapter implements ChannelAdapter {
       form.set('v:notification_id', input.notificationId);
       form.set('v:delivery_id', input.deliveryId);
       const auth = Buffer.from(`api:${n.apiKey}`).toString('base64');
-      const res = await fetch(
-        `${base}/v3/${encodeURIComponent(n.domain)}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Basic ${auth}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: form.toString(),
+      const res = await fetch(`${base}/v3/${encodeURIComponent(n.domain)}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-      );
+        body: form.toString(),
+      });
       if (res.status < 200 || res.status >= 300) {
         const text = await res.text().catch(() => '');
         return {
@@ -180,18 +177,19 @@ export class EmailAdapter implements ChannelAdapter {
   private async sendSmtp(input: ChannelSendInput): Promise<ChannelSendResult> {
     // Dev fallback — just write through the existing nodemailer transport.
     // We don't re-render here; the body/subject are already rendered.
-    const ok = await this.smtp.sendRawEmail({
-      to: input.targetAddress,
-      subject: input.renderedSubject ?? '(no subject)',
-      html: input.renderedBody,
-      text: input.renderedBodyPlain ?? input.renderedBody.replace(/<[^>]*>/g, ''),
-    });
-    if (!ok) {
+    try {
+      await this.smtp.sendRawEmail({
+        to: input.targetAddress,
+        subject: input.renderedSubject ?? '(no subject)',
+        html: input.renderedBody,
+        text: input.renderedBodyPlain ?? input.renderedBody.replace(/<[^>]*>/g, ''),
+      });
+    } catch (err) {
       return {
         status: 'failed',
         providerMessageId: null,
         providerName: 'smtp',
-        error: 'smtp send failed',
+        error: err instanceof Error ? err.message : 'smtp send failed',
       };
     }
     return { status: 'sent', providerMessageId: null, providerName: 'smtp' };
