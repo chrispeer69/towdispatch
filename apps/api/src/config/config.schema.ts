@@ -434,6 +434,50 @@ export const configSchema = z.object({
   AI_DISPATCH_WEIGHT_UTILIZATION: z.coerce.number().int().min(0).default(10),
   // Default number of candidates surfaced per job (top N).
   AI_DISPATCH_RECOMMENDATION_LIMIT: z.coerce.number().int().min(1).max(20).default(3),
+  // ===== Session 15 — Notifications =====
+  SENDGRID_FROM_EMAIL: z.string().optional().default(''),
+  SENDGRID_FROM_NAME: z.string().optional().default('TowCommand Pro'),
+  SENDGRID_WEBHOOK_VERIFICATION_KEY: z.string().optional().default(''),
+
+  // Mailgun (announcement / marketing — separate sender reputation).
+  MAILGUN_API_KEY: z.string().optional().default(''),
+  MAILGUN_DOMAIN: z.string().optional().default(''),
+  MAILGUN_FROM_EMAIL: z.string().optional().default(''),
+  MAILGUN_REGION: z.enum(['us', 'eu']).default('us'),
+
+  // FCM (Firebase Cloud Messaging — Android push + APNs via Firebase).
+  FCM_PROJECT_ID: z.string().optional().default(''),
+  FCM_CLIENT_EMAIL: z.string().optional().default(''),
+  /** Service-account private key. Newlines allowed via \n escape. */
+  FCM_PRIVATE_KEY: z.string().optional().default(''),
+
+  // APNs direct (inactive until iOS Session 6; adapter is plumbed).
+  APNS_KEY_ID: z.string().optional().default(''),
+  APNS_TEAM_ID: z.string().optional().default(''),
+  APNS_BUNDLE_ID: z.string().optional().default('com.towcommand.driver'),
+  APNS_PRIVATE_KEY: z.string().optional().default(''),
+
+  // Webhook outbound — encryption key for shared secrets stored at rest.
+  WEBHOOK_SECRET_ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'WEBHOOK_SECRET_ENCRYPTION_KEY must be 32+ chars')
+    .default('change-me-webhook-secret-encryption-key-please-rotate'),
+
+  // Per-tenant rate ceilings — overridable via tenant.settings.notifications.
+  NOTIFY_SMS_HOURLY_LIMIT: z.coerce.number().int().min(1).default(1000),
+  NOTIFY_EMAIL_HOURLY_LIMIT: z.coerce.number().int().min(1).default(5000),
+  NOTIFY_PUSH_HOURLY_LIMIT: z.coerce.number().int().min(1).default(10_000),
+
+  // Retention window for dead-letter rows. The sweep cron prunes older.
+  NOTIFY_DEAD_LETTER_RETENTION_DAYS: z.coerce.number().int().min(1).max(365).default(30),
+
+  // Queue concurrency per channel. Tuned for a single API worker; scale via
+  // replicas, not by jacking these up — Twilio/SendGrid have their own caps.
+  NOTIFY_PUSH_CONCURRENCY: z.coerce.number().int().min(1).max(64).default(16),
+  NOTIFY_SMS_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(8),
+  NOTIFY_EMAIL_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(8),
+  NOTIFY_WEBHOOK_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(8),
+  NOTIFY_IN_APP_CONCURRENCY: z.coerce.number().int().min(1).max(64).default(16),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

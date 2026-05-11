@@ -57,3 +57,4 @@ export * from './tenant-branding';
 export * from './customer-portal';
 // Auction & Remarketing Marketplace (Session 33) — listings, bids, bidders.
 export * from './auction';
+export * from './notifications';
