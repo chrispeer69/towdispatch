@@ -220,6 +220,31 @@ export class EmailService implements OnModuleInit {
     });
   }
 
+  // ----- Session 14: scheduled report delivery -----
+
+  async sendScheduledReportEmail(opts: {
+    to: string;
+    reportName: string;
+    downloadUrl: string;
+    fileName: string;
+    sizeBytes: number;
+    expiresAt: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `[${BRAND.productName}] ${opts.reportName} — scheduled report`,
+      template: 'scheduled-report',
+      variables: {
+        ...this.brand(),
+        reportName: opts.reportName,
+        downloadUrl: opts.downloadUrl,
+        fileName: opts.fileName,
+        sizeBytes: opts.sizeBytes,
+        expiresAt: opts.expiresAt,
+      },
+    });
+  }
+
   private async send(args: SendArgs): Promise<void> {
     const { html, text } = this.renderer.render(args.template, args.variables);
     try {

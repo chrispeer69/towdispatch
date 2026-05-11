@@ -13,6 +13,7 @@ import {
   Navigation,
   PhoneCall,
   Radio,
+  BarChart3,
   Receipt,
   Settings,
   ShieldCheck,
@@ -125,7 +126,15 @@ const SECTIONS: NavSection[] = [
   },
   {
     label: 'Finance',
-    items: [{ label: 'Accounting', href: null, icon: Calculator, disabled: true }],
+    items: [
+      { label: 'Accounting', href: null, icon: Calculator, disabled: true },
+      {
+        label: 'Reports',
+        href: '/reports',
+        icon: BarChart3,
+        match: (p) => p.startsWith('/reports'),
+      },
+    ],
   },
   {
     label: 'Integrations',

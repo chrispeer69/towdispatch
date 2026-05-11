@@ -23,3 +23,4 @@ export * from './stripe-events';
 export * from './accounting-connections';
 export * from './account-mappings';
 export * from './sync-jobs';
+export * from './saved-reports';

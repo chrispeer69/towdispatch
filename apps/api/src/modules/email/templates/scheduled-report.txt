@@ -1,0 +1,9 @@
+Scheduled report
+
+Your scheduled report "{{reportName}}" is ready.
+
+Download: {{downloadUrl}}
+File: {{fileName}} ({{sizeBytes}} bytes)
+Link expires: {{expiresAt}}
+
+— {{productName}}
