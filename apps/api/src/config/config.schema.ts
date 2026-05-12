@@ -56,6 +56,34 @@ export const configSchema = z.object({
   SENTRY_DSN: z.string().optional().default(''),
   SENTRY_ENVIRONMENT: z.string().default('development'),
 
+  // Observability thresholds.
+  SLOW_QUERY_THRESHOLD_MS: z.coerce.number().int().min(0).default(250),
+  SLOW_ENDPOINT_THRESHOLD_MS: z.coerce.number().int().min(0).default(1000),
+
+  // Release tag stamped on every Sentry event. Set by CI from the git SHA.
+  RELEASE_TAG: z.string().optional().default('dev'),
+
+  // Web frontend security/observability. Compression threshold in bytes.
+  COMPRESSION_MIN_BYTES: z.coerce.number().int().min(0).default(1024),
+
+  // CSP allow-list (comma-separated origins) for connect-src, script-src,
+  // img-src, frame-src. Defaults cover Stripe, Mapbox, Sentry CDN; founder
+  // sets these in prod env. See SESSION_17A_REPORT.md for the rationale.
+  CSP_CONNECT_SRC: z
+    .string()
+    .default('https://api.stripe.com,https://api.mapbox.com,https://*.ingest.sentry.io'),
+  CSP_SCRIPT_SRC: z.string().default('https://js.stripe.com'),
+  CSP_IMG_SRC: z
+    .string()
+    .default('https://*.mapbox.com,https://*.tile.openstreetmap.org,data:,blob:'),
+  CSP_FRAME_SRC: z.string().default('https://js.stripe.com,https://hooks.stripe.com'),
+
+  // Datadog optional alternate to Sentry. Placeholder — actual init wires
+  // up if DD_API_KEY is non-empty. Default off.
+  DD_API_KEY: z.string().optional().default(''),
+  DD_ENV: z.string().default('development'),
+  DD_SERVICE: z.string().default('towcommand-api'),
+
   // Notification provider — Twilio if creds are set, stub otherwise. The
   // config service derives `notification.activeProviderId` from these.
   TWILIO_ACCOUNT_SID: z.string().optional().default(''),

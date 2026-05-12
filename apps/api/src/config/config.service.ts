@@ -176,6 +176,48 @@ export class ConfigService {
     };
   }
 
+  get sentryDsn(): string {
+    return this.config.SENTRY_DSN;
+  }
+  get releaseTag(): string {
+    return this.config.RELEASE_TAG;
+  }
+  get slowQueryThresholdMs(): number {
+    return this.config.SLOW_QUERY_THRESHOLD_MS;
+  }
+  get slowEndpointThresholdMs(): number {
+    return this.config.SLOW_ENDPOINT_THRESHOLD_MS;
+  }
+  get compressionMinBytes(): number {
+    return this.config.COMPRESSION_MIN_BYTES;
+  }
+  get csp(): {
+    connectSrc: string[];
+    scriptSrc: string[];
+    imgSrc: string[];
+    frameSrc: string[];
+  } {
+    const split = (s: string): string[] =>
+      s
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean);
+    return {
+      connectSrc: split(this.config.CSP_CONNECT_SRC),
+      scriptSrc: split(this.config.CSP_SCRIPT_SRC),
+      imgSrc: split(this.config.CSP_IMG_SRC),
+      frameSrc: split(this.config.CSP_FRAME_SRC),
+    };
+  }
+  get datadog(): { apiKey: string; env: string; service: string; configured: boolean } {
+    return {
+      apiKey: this.config.DD_API_KEY,
+      env: this.config.DD_ENV,
+      service: this.config.DD_SERVICE,
+      configured: !!this.config.DD_API_KEY,
+    };
+  }
+
   get rateLimits(): {
     burstTtl: number;
     burstLimit: number;

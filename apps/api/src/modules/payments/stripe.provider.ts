@@ -108,7 +108,6 @@ export class StripePaymentProvider implements PaymentProvider {
     const params: Stripe.PaymentIntentCreateParams = {
       amount: input.amountCents,
       currency: input.currency.toLowerCase(),
-      description: input.description,
       metadata: {
         tenantId: input.tenantId,
         invoiceId: input.invoiceId,
@@ -120,6 +119,7 @@ export class StripePaymentProvider implements PaymentProvider {
       transfer_data: { destination: input.connectedAccountId },
       on_behalf_of: input.connectedAccountId,
     };
+    if (input.description) params.description = input.description;
     if (input.applicationFeeCents && input.applicationFeeCents > 0) {
       params.application_fee_amount = input.applicationFeeCents;
     }
@@ -178,7 +178,9 @@ export class StripePaymentProvider implements PaymentProvider {
       payment_intent: input.paymentIntentId,
     };
     if (input.amountCents !== undefined) params.amount = input.amountCents;
-    if (input.reason) params.reason = input.reason;
+    if (input.reason && input.reason !== 'expired_uncaptured_charge') {
+      params.reason = input.reason;
+    }
     const r = await this.client.refunds.create(params, {
       stripeAccount: input.connectedAccountId,
     });
@@ -193,18 +195,18 @@ export class StripePaymentProvider implements PaymentProvider {
   // ----------------- Customers / saved methods -----------------
 
   async createCustomer(input: CreateCustomerInput): Promise<{ externalId: string }> {
-    const c = await this.client.customers.create(
-      {
-        name: input.name,
-        email: input.email,
-        phone: input.phone,
-        metadata: {
-          tenantId: input.tenantId,
-          ...(input.metadata ?? {}),
-        },
+    const customerParams: Stripe.CustomerCreateParams = {
+      name: input.name,
+      metadata: {
+        tenantId: input.tenantId,
+        ...(input.metadata ?? {}),
       },
-      { stripeAccount: input.connectedAccountId },
-    );
+    };
+    if (input.email) customerParams.email = input.email;
+    if (input.phone) customerParams.phone = input.phone;
+    const c = await this.client.customers.create(customerParams, {
+      stripeAccount: input.connectedAccountId,
+    });
     return { externalId: c.id };
   }
 

@@ -6,14 +6,31 @@
  *   - TenantAwareDb: a request-scoped Drizzle client that opens a transaction,
  *     calls SET LOCAL with the request's tenant_id and user_id, and exposes
  *     the bound transaction handle for the duration of the request.
+ *
+ * Slow-query logging: when ObservabilityModule is loaded ahead of this
+ * module, PoolBinder subscribes to APP_POOL.connect and wraps every fresh
+ * PoolClient.query so calls past the threshold log at WARN. ADMIN_POOL is
+ * left untouched — it's an ops escape hatch, not a request path.
  */
-import { Global, Module } from '@nestjs/common';
+import { Global, Inject, Injectable, Module, type OnModuleInit } from '@nestjs/common';
 import pg from 'pg';
 const { Pool } = pg;
+import { SlowQueryService } from '../common/observability/slow-query.service.js';
 import { ConfigService } from '../config/config.service.js';
 import { ADMIN_POOL, APP_POOL } from './database.tokens.js';
 import { TenantAwareDb } from './tenant-aware-db.service.js';
 import { TransactionRunner } from './transaction-runner.service.js';
+
+@Injectable()
+class PoolBinder implements OnModuleInit {
+  constructor(
+    @Inject(APP_POOL) private readonly appPool: pg.Pool,
+    private readonly slowQuery: SlowQueryService,
+  ) {}
+  onModuleInit(): void {
+    this.appPool.on('connect', (client) => this.slowQuery.wrapClient(client));
+  }
+}
 
 @Global()
 @Module({
@@ -44,6 +61,7 @@ import { TransactionRunner } from './transaction-runner.service.js';
     },
     TenantAwareDb,
     TransactionRunner,
+    PoolBinder,
   ],
   exports: [APP_POOL, ADMIN_POOL, TenantAwareDb, TransactionRunner],
 })

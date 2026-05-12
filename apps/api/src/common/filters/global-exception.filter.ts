@@ -16,10 +16,14 @@ import { ERROR_CODES, type ProblemDetails } from '@towcommand/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from 'pino';
 import { ZodError } from 'zod';
+import type { SentryService } from '../observability/sentry.service.js';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly sentry?: SentryService,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -71,6 +75,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         { err: exception, requestId, path: req.url, method: req.method },
         'Unhandled exception',
       );
+      this.sentry?.captureException(exception, {
+        requestId,
+        tenantId: req.requestContext?.tenantId,
+        userId: req.requestContext?.userId,
+      });
     } else {
       this.logger.error({ exception, requestId }, 'Unhandled non-Error exception');
     }

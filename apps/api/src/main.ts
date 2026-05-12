@@ -9,6 +9,7 @@
  * orchestrator restart us than to start in a half-broken state.
  */
 import 'reflect-metadata';
+import compress from '@fastify/compress';
 import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import { NestFactory } from '@nestjs/core';
@@ -18,6 +19,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
 import { registerRawBodyJsonParser } from './common/middleware/raw-body.middleware.js';
 import { registerRequestContext } from './common/middleware/request-context.middleware.js';
+import { SentryService } from './common/observability/sentry.service.js';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
 import { ConfigService } from './config/config.service.js';
 import { DispatchGateway } from './modules/dispatch/dispatch.gateway.js';
@@ -42,18 +44,54 @@ async function bootstrap(): Promise<void> {
 
   registerRequestContext(app.getHttpAdapter().getInstance());
 
+  const csp = config.csp;
   await app.register(helmet, {
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        // 'unsafe-inline' on script is unavoidable for Stripe.js iframes; the
+        // strict CSP for our own scripts lives on the web frontend where we
+        // can guarantee bundling discipline.
+        scriptSrc: ["'self'", ...csp.scriptSrc],
+        connectSrc: ["'self'", ...csp.connectSrc],
+        imgSrc: ["'self'", ...csp.imgSrc],
+        frameSrc: ["'self'", ...csp.frameSrc],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    crossOriginResourcePolicy: { policy: 'same-origin' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    hsts: {
+      maxAge: 31_536_000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: { action: 'deny' },
+    noSniff: true,
+    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
   });
   await app.register(cookie, {});
+  await app.register(compress, {
+    global: true,
+    threshold: config.compressionMinBytes,
+    encodings: ['br', 'gzip', 'deflate'],
+  });
 
   app.enableCors({
     origin: config.corsOrigins,
     credentials: true,
   });
 
+  const sentry = app.get(SentryService);
   app.useGlobalPipes(new ZodValidationPipe());
-  app.useGlobalFilters(new GlobalExceptionFilter(config.logger));
+  app.useGlobalFilters(new GlobalExceptionFilter(config.logger, sentry));
   app.useGlobalInterceptors(new LoggingInterceptor(config.logger));
 
   app.enableShutdownHooks();

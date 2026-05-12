@@ -348,12 +348,12 @@ export class InvoicesService {
     ctx: CallerContext,
     invoiceId: string,
     patch: {
-      customerId?: string | null;
-      accountId?: string | null;
-      terms?: InvoiceTerms;
-      notes?: string | null;
-      internalNotes?: string | null;
-      billingAddress?: InvoiceBillingAddress;
+      customerId?: string | null | undefined;
+      accountId?: string | null | undefined;
+      terms?: InvoiceTerms | undefined;
+      notes?: string | null | undefined;
+      internalNotes?: string | null | undefined;
+      billingAddress?: InvoiceBillingAddress | undefined;
     },
   ): Promise<InvoiceWithDetailsDto> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
