@@ -503,7 +503,7 @@ export function IntakeClient(): JSX.Element {
           <Field label="Phone">
             <Input
               autoFocus
-              tabIndex="0"
+              tabIndex={0}
               data-testid="intake-phone"
               placeholder="555-555-0100"
               value={form.phone}
@@ -516,7 +516,7 @@ export function IntakeClient(): JSX.Element {
           </Field>
           <Field label="Name">
             <Input
-              tabIndex="0"
+              tabIndex={0}
               data-testid="intake-customer-name"
               placeholder="Customer name"
               value={form.customerName}
@@ -528,7 +528,7 @@ export function IntakeClient(): JSX.Element {
           </Field>
           <Field label="Email" required>
             <Input
-              tabIndex="0"
+              tabIndex={0}
               type="email"
               placeholder="customer@example.com"
               data-testid="intake-customer-email"
@@ -560,7 +560,7 @@ export function IntakeClient(): JSX.Element {
             <div className="col-span-2 space-y-1.5">
               <Label>Plate</Label>
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 data-testid="intake-plate"
                 placeholder="Plate"
                 value={form.plate}
@@ -573,7 +573,7 @@ export function IntakeClient(): JSX.Element {
             <div className="space-y-1.5">
               <Label>State</Label>
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="OH"
                 maxLength={2}
                 value={form.plateState}
@@ -589,7 +589,7 @@ export function IntakeClient(): JSX.Element {
           ) : null}
           <Field label="VIN" required>
             <Input
-              tabIndex="0"
+              tabIndex={0}
               placeholder="17 characters, A-Z (no I/O/Q) and digits"
               maxLength={17}
               value={form.vin}
@@ -617,7 +617,7 @@ export function IntakeClient(): JSX.Element {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Year">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 type="number"
                 inputMode="numeric"
                 placeholder="2018"
@@ -627,7 +627,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Color">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="Blue"
                 value={form.color}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('color', e.target.value)}
@@ -635,7 +635,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Make">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="Honda"
                 value={form.make}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('make', e.target.value)}
@@ -643,7 +643,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Model">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="Civic"
                 value={form.model}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('model', e.target.value)}
@@ -652,7 +652,7 @@ export function IntakeClient(): JSX.Element {
           </div>
           <Field label="Class">
             <select
-              tabIndex="0"
+              tabIndex={0}
               value={form.vehicleClass}
               onChange={(e) => update('vehicleClass', e.target.value as FormState['vehicleClass'])}
               className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
@@ -666,7 +666,7 @@ export function IntakeClient(): JSX.Element {
           </Field>
           <Field label="Special instructions">
             <textarea
-              tabIndex="0"
+              tabIndex={0}
               value={form.specialInstructions}
               onChange={(e) => update('specialInstructions', e.target.value)}
               rows={2}
@@ -702,7 +702,7 @@ export function IntakeClient(): JSX.Element {
 
           <Field label="Pickup">
             <Input
-              tabIndex="0"
+              tabIndex={0}
               data-testid="intake-pickup-address"
               placeholder="Address or landmark"
               value={form.pickupAddress}
@@ -712,14 +712,14 @@ export function IntakeClient(): JSX.Element {
             />
             <div className="mt-2 grid grid-cols-3 gap-2">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="Lat"
                 inputMode="decimal"
                 value={form.pickupLat}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('pickupLat', e.target.value)}
               />
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="Lng"
                 inputMode="decimal"
                 value={form.pickupLng}
@@ -741,7 +741,7 @@ export function IntakeClient(): JSX.Element {
           form.serviceType === 'recovery' ? (
             <Field label="Dropoff">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 data-testid="intake-dropoff-address"
                 placeholder="Where the vehicle is going"
                 value={form.dropoffAddress}
@@ -751,7 +751,7 @@ export function IntakeClient(): JSX.Element {
               />
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Input
-                  tabIndex="0"
+                  tabIndex={0}
                   placeholder="Lat"
                   inputMode="decimal"
                   value={form.dropoffLat}
@@ -760,7 +760,7 @@ export function IntakeClient(): JSX.Element {
                   }
                 />
                 <Input
-                  tabIndex="0"
+                  tabIndex={0}
                   placeholder="Lng"
                   inputMode="decimal"
                   value={form.dropoffLng}
@@ -775,7 +775,7 @@ export function IntakeClient(): JSX.Element {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Authorized by">
               <select
-                tabIndex="0"
+                tabIndex={0}
                 value={form.authorizedBy}
                 onChange={(e) => update('authorizedBy', e.target.value as JobAuthorizedBy)}
                 className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
@@ -789,7 +789,7 @@ export function IntakeClient(): JSX.Element {
             </Field>
             <Field label="Authorized name">
               <Input
-                tabIndex="0"
+                tabIndex={0}
                 placeholder="Optional"
                 value={form.authorizedByName}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -803,7 +803,7 @@ export function IntakeClient(): JSX.Element {
 
           <Field label="Notes">
             <textarea
-              tabIndex="0"
+              tabIndex={0}
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
               rows={2}
@@ -835,7 +835,7 @@ export function IntakeClient(): JSX.Element {
           <Button
             type="submit"
             name="dispatch-submit"
-            tabIndex="0"
+            tabIndex={0}
             disabled={dispatchDisabled}
             data-testid="intake-dispatch"
             aria-disabled={dispatchDisabled}

@@ -68,7 +68,8 @@ export class JobImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (byExternal.rowCount && byExternal.rowCount > 0) {
-      const id = byExternal.rows[0]?.id;
+      const id = byExternal.rows[0]?.id ?? null;
+      if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
       await ctx.client.query(
         `UPDATE jobs SET
             status = $2,
@@ -170,7 +171,7 @@ export class JobImporter extends BaseImporter {
       `SELECT id FROM ${table} WHERE tenant_id=$1 AND external_source='towbook' AND external_id=$2 LIMIT 1`,
       [ctx.tenantId, externalId],
     );
-    return r.rowCount && r.rowCount > 0 ? r.rows[0]?.id : null;
+    return r.rowCount && r.rowCount > 0 ? (r.rows[0]?.id ?? null) : null;
   }
 
   private async allocateJobNumber(ctx: ImportContext, isoTimestamp: string): Promise<string> {

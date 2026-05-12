@@ -50,7 +50,10 @@ export class CustomerImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (existingByExternal.rowCount && existingByExternal.rowCount > 0) {
-      const id = existingByExternal.rows[0]?.id;
+      const id = existingByExternal.rows[0]?.id ?? null;
+      if (!id) {
+        return { action: 'error', externalId, errorMessage: 'dedup row vanished mid-query' };
+      }
       await ctx.client.query(
         `UPDATE customers SET
             name = COALESCE(NULLIF($2, ''), name),

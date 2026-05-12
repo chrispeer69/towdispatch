@@ -63,7 +63,14 @@ export class AttachmentImporter extends BaseImporter {
         errorMessage: `attachment references unimported job ${jobExt}`,
       };
     }
-    const jobId = jobR.rows[0]?.id;
+    const jobId = jobR.rows[0]?.id ?? null;
+    if (!jobId) {
+      return {
+        action: 'error',
+        externalId: filename,
+        errorMessage: `attachment references unimported job ${jobExt}`,
+      };
+    }
 
     const bytes = this._attachmentBytes.get(filename.toLowerCase());
     if (!bytes) {
@@ -82,7 +89,11 @@ export class AttachmentImporter extends BaseImporter {
       [ctx.tenantId, jobId, filename],
     );
     if (existing.rowCount && existing.rowCount > 0) {
-      return { action: 'skip_dedup', externalId: filename, towcommandId: existing.rows[0]?.id };
+      return {
+        action: 'skip_dedup',
+        externalId: filename,
+        towcommandId: existing.rows[0]?.id ?? null,
+      };
     }
 
     if (ctx.mode === 'dry_run') {

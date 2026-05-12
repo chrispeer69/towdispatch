@@ -54,7 +54,7 @@ describeIfDb('Towbook import integration', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: `/import/runs?mode=dry_run&tenantId=${session.tenantId}`,
+      url: `/import/runs?mode=dry_run&tenantId=${session.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });
@@ -87,7 +87,7 @@ describeIfDb('Towbook import integration', () => {
     });
     const res = await app.inject({
       method: 'POST',
-      url: `/import/runs?mode=live&tenantId=${session.tenantId}`,
+      url: `/import/runs?mode=live&tenantId=${session.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });
@@ -126,13 +126,13 @@ describeIfDb('Towbook import integration', () => {
 
     await app.inject({
       method: 'POST',
-      url: `/import/runs?mode=live&tenantId=${session.tenantId}`,
+      url: `/import/runs?mode=live&tenantId=${session.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });
     await app.inject({
       method: 'POST',
-      url: `/import/runs?mode=live&tenantId=${session.tenantId}`,
+      url: `/import/runs?mode=live&tenantId=${session.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });
@@ -156,13 +156,13 @@ describeIfDb('Towbook import integration', () => {
     });
     await app.inject({
       method: 'POST',
-      url: `/import/runs?mode=live&tenantId=${session.tenantId}`,
+      url: `/import/runs?mode=live&tenantId=${session.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });
     const res = await app.inject({
       method: 'POST',
-      url: `/import/reconcile?tenantId=${session.tenantId}`,
+      url: `/import/reconcile?tenantId=${session.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });
@@ -185,7 +185,7 @@ describeIfDb('Towbook import integration', () => {
     });
     const res = await app.inject({
       method: 'POST',
-      url: `/import/runs?mode=live&tenantId=${attacker.tenantId}`,
+      url: `/import/runs?mode=live&tenantId=${attacker.tenant.id}`,
       headers: { ...auth(session.accessToken), 'content-type': 'application/zip' },
       payload: bundle,
     });

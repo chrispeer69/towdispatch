@@ -47,8 +47,8 @@ export class InvoiceImporter extends BaseImporter {
         [ctx.tenantId, jobExt],
       );
       if (r.rowCount && r.rowCount > 0) {
-        jobId = r.rows[0]?.id;
-        customerId = r.rows[0]?.customer_id;
+        jobId = r.rows[0]?.id ?? null;
+        customerId = r.rows[0]?.customer_id ?? null;
       } else {
         return { action: 'error', externalId, errorMessage: `unresolved job ${jobExt}` };
       }
@@ -59,7 +59,8 @@ export class InvoiceImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (byExternal.rowCount && byExternal.rowCount > 0) {
-      const id = byExternal.rows[0]?.id;
+      const id = byExternal.rows[0]?.id ?? null;
+      if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
       await ctx.client.query(
         `UPDATE invoices SET
             status = $2,

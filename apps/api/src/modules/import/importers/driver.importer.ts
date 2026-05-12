@@ -42,7 +42,8 @@ export class DriverImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (byExternal.rowCount && byExternal.rowCount > 0) {
-      const id = byExternal.rows[0]?.id;
+      const id = byExternal.rows[0]?.id ?? null;
+      if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
       await ctx.client.query(
         `UPDATE drivers SET
             first_name = COALESCE(NULLIF($2, ''), first_name),
@@ -82,7 +83,8 @@ export class DriverImporter extends BaseImporter {
         [ctx.tenantId, phone],
       );
       if (byPhone.rowCount && byPhone.rowCount > 0) {
-        const id = byPhone.rows[0]?.id;
+        const id = byPhone.rows[0]?.id ?? null;
+        if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
         await ctx.client.query(
           `UPDATE drivers SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],
@@ -96,7 +98,8 @@ export class DriverImporter extends BaseImporter {
         [ctx.tenantId, email],
       );
       if (byEmail.rowCount && byEmail.rowCount > 0) {
-        const id = byEmail.rows[0]?.id;
+        const id = byEmail.rows[0]?.id ?? null;
+        if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
         await ctx.client.query(
           `UPDATE drivers SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],

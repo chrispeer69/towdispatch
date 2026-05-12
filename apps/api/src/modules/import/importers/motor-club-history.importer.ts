@@ -43,8 +43,11 @@ export class MotorClubHistoryImporter extends BaseImporter {
       [ctx.tenantId, jobId, network, caseId],
     );
     if (dedup.rowCount && dedup.rowCount > 0) {
-      const id = dedup.rows[0]?.id;
-      return { action: 'skip_dedup', externalId: caseId ?? jobExt, towcommandId: id };
+      return {
+        action: 'skip_dedup',
+        externalId: caseId ?? jobExt,
+        towcommandId: dedup.rows[0]?.id ?? null,
+      };
     }
 
     const id = uuidv7();

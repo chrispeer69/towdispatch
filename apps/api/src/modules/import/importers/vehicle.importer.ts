@@ -38,7 +38,7 @@ export class VehicleImporter extends BaseImporter {
         [ctx.tenantId, customerExternal],
       );
       if (r.rowCount && r.rowCount > 0) {
-        customerId = r.rows[0]?.id;
+        customerId = r.rows[0]?.id ?? null;
       } else {
         return {
           action: 'error',
@@ -54,7 +54,8 @@ export class VehicleImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (existingByExternal.rowCount && existingByExternal.rowCount > 0) {
-      const id = existingByExternal.rows[0]?.id;
+      const id = existingByExternal.rows[0]?.id ?? null;
+      if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
       await ctx.client.query(
         `UPDATE vehicles SET
             vin = COALESCE(NULLIF($2, ''), vin),
@@ -88,7 +89,8 @@ export class VehicleImporter extends BaseImporter {
         [ctx.tenantId, vin],
       );
       if (byVin.rowCount && byVin.rowCount > 0) {
-        const id = byVin.rows[0]?.id;
+        const id = byVin.rows[0]?.id ?? null;
+        if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
         await ctx.client.query(
           `UPDATE vehicles SET external_source='towbook', external_id=$2, updated_at = now() WHERE id=$1`,
           [id, externalId],
@@ -102,7 +104,8 @@ export class VehicleImporter extends BaseImporter {
         [ctx.tenantId, plate, plateState],
       );
       if (byPlate.rowCount && byPlate.rowCount > 0) {
-        const id = byPlate.rows[0]?.id;
+        const id = byPlate.rows[0]?.id ?? null;
+        if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
         await ctx.client.query(
           `UPDATE vehicles SET external_source='towbook', external_id=$2, updated_at = now() WHERE id=$1`,
           [id, externalId],

@@ -48,8 +48,7 @@ export class PaymentImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (byExternal.rowCount && byExternal.rowCount > 0) {
-      const id = byExternal.rows[0]?.id;
-      return { action: 'skip_dedup', externalId, towcommandId: id };
+      return { action: 'skip_dedup', externalId, towcommandId: byExternal.rows[0]?.id ?? null };
     }
 
     const id = uuidv7();

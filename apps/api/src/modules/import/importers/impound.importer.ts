@@ -42,7 +42,7 @@ export class ImpoundImporter extends BaseImporter {
         `SELECT id FROM vehicles WHERE tenant_id=$1 AND external_source='towbook' AND external_id=$2 LIMIT 1`,
         [ctx.tenantId, vehicleExt],
       );
-      if (r.rowCount && r.rowCount > 0) vehicleId = r.rows[0]?.id;
+      if (r.rowCount && r.rowCount > 0) vehicleId = r.rows[0]?.id ?? null;
       else return { action: 'error', externalId, errorMessage: `unresolved vehicle ${vehicleExt}` };
     }
 
@@ -51,8 +51,7 @@ export class ImpoundImporter extends BaseImporter {
       [ctx.tenantId, `impound:${externalId}`],
     );
     if (dedup.rowCount && dedup.rowCount > 0) {
-      const id = dedup.rows[0]?.id;
-      return { action: 'skip_dedup', externalId, towcommandId: id };
+      return { action: 'skip_dedup', externalId, towcommandId: dedup.rows[0]?.id ?? null };
     }
 
     const id = uuidv7();

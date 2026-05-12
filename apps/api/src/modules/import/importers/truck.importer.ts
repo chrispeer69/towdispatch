@@ -33,7 +33,8 @@ export class TruckImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (byExternal.rowCount && byExternal.rowCount > 0) {
-      const id = byExternal.rows[0]?.id;
+      const id = byExternal.rows[0]?.id ?? null;
+      if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
       await ctx.client.query(
         `UPDATE trucks SET
             unit_number = COALESCE(NULLIF($2, ''), unit_number),
@@ -69,7 +70,8 @@ export class TruckImporter extends BaseImporter {
         [ctx.tenantId, vin],
       );
       if (byVin.rowCount && byVin.rowCount > 0) {
-        const id = byVin.rows[0]?.id;
+        const id = byVin.rows[0]?.id ?? null;
+        if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
         await ctx.client.query(
           `UPDATE trucks SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],
@@ -83,7 +85,8 @@ export class TruckImporter extends BaseImporter {
         [ctx.tenantId, unitNumber],
       );
       if (byUnit.rowCount && byUnit.rowCount > 0) {
-        const id = byUnit.rows[0]?.id;
+        const id = byUnit.rows[0]?.id ?? null;
+        if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
         await ctx.client.query(
           `UPDATE trucks SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],

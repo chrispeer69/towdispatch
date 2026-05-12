@@ -27,11 +27,12 @@ export function InvoiceActionsClient({ invoice }: Props): JSX.Element {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/billing/${path}`, {
+      const init: RequestInit = {
         method,
         headers: { 'content-type': 'application/json' },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-      });
+      };
+      if (body !== undefined) init.body = JSON.stringify(body);
+      const res = await fetch(`/api/billing/${path}`, init);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `Request failed: ${res.status}`);
