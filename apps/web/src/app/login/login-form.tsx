@@ -4,26 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 /**
- * Login flow handles three branches the API might return:
- *   - authenticated → push to /dashboard
+ * Login flow handles four branches the API might return:
+ *   - authenticated         → push to /dashboard
  *   - needs_tenant_selection → render a tenant picker, then re-submit with slug
- *   - mfa_required → render TOTP input, then call /api/auth/mfa-login
+ *   - mfa_required          → redirect to /auth/mfa/challenge (token is in an
+ *                              httpOnly cookie set by the BFF, not in JS)
+ *   - mfa_setup_required    → redirect to /auth/mfa/enroll (same cookie idea)
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  type LoginPayload,
-  type LoginResponse,
-  type TenantSelectionDto,
-  loginSchema,
-} from '@towcommand/shared';
+import { type LoginPayload, type TenantSelectionDto, loginSchema } from '@towcommand/shared';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-interface MfaState {
-  mfaToken: string;
-}
+type LoginApiResponse =
+  | { status: 'authenticated'; user: unknown; tenant: unknown }
+  | { status: 'needs_tenant_selection'; tenants: TenantSelectionDto[] }
+  | { status: 'mfa_required' }
+  | { status: 'mfa_setup_required'; role: string }
+  | { code?: string; message?: string };
 
 export function LoginForm(): JSX.Element {
   const router = useRouter();
@@ -31,7 +31,6 @@ export function LoginForm(): JSX.Element {
   const next = params?.get('next') ?? '/dashboard';
   const [error, setError] = useState<string | null>(null);
   const [tenantOptions, setTenantOptions] = useState<TenantSelectionDto[] | null>(null);
-  const [mfa, setMfa] = useState<MfaState | null>(null);
   const [pendingPayload, setPendingPayload] = useState<LoginPayload | null>(null);
 
   const {
@@ -51,32 +50,33 @@ export function LoginForm(): JSX.Element {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = (await res.json().catch(() => null)) as
-      | (LoginResponse & { code?: string })
-      | { message?: string }
-      | null;
+    const data = (await res.json().catch(() => null)) as LoginApiResponse | null;
     if (!res.ok) {
-      setError(
-        (data && 'message' in data && data.message) ||
-          'Could not sign in. Check your email and password.',
-      );
+      const msg =
+        data && 'message' in data && data.message
+          ? data.message
+          : 'Could not sign in. Check your email and password.';
+      setError(msg);
       return;
     }
-    if (!data) return;
+    if (!data || !('status' in data)) return;
 
-    if ('status' in data && data.status === 'authenticated') {
+    if (data.status === 'authenticated') {
       router.push(next);
       router.refresh();
       return;
     }
-    if ('status' in data && data.status === 'needs_tenant_selection') {
+    if (data.status === 'needs_tenant_selection') {
       setTenantOptions(data.tenants);
       setPendingPayload(payload);
       return;
     }
-    if ('status' in data && data.status === 'mfa_required') {
-      setMfa({ mfaToken: data.mfaToken });
-      setPendingPayload(payload);
+    if (data.status === 'mfa_required') {
+      router.push(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
+      return;
+    }
+    if (data.status === 'mfa_setup_required') {
+      router.push(`/auth/mfa/enroll?next=${encodeURIComponent(next)}`);
       return;
     }
   }
@@ -84,27 +84,6 @@ export function LoginForm(): JSX.Element {
   async function pickTenant(slug: string): Promise<void> {
     if (!pendingPayload) return;
     await submitLogin({ ...pendingPayload, tenantSlug: slug });
-  }
-
-  async function submitMfa(totpCode: string): Promise<void> {
-    if (!mfa) return;
-    setError(null);
-    const res = await fetch('/api/auth/mfa-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mfaToken: mfa.mfaToken, totpCode }),
-    });
-    const data = (await res.json().catch(() => null)) as { message?: string } | null;
-    if (!res.ok) {
-      setError(data?.message ?? 'Invalid TOTP code.');
-      return;
-    }
-    router.push(next);
-    router.refresh();
-  }
-
-  if (mfa) {
-    return <MfaPanel onSubmit={submitMfa} error={error} />;
   }
 
   if (tenantOptions) {
@@ -232,49 +211,5 @@ function TenantPicker({
         ← Use a different email
       </button>
     </div>
-  );
-}
-
-function MfaPanel({
-  onSubmit,
-  error,
-}: {
-  onSubmit: (code: string) => Promise<void>;
-  error: string | null;
-}): JSX.Element {
-  const [code, setCode] = useState('');
-  const [pending, setPending] = useState(false);
-  return (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setPending(true);
-        await onSubmit(code);
-        setPending(false);
-      }}
-      className="space-y-4"
-    >
-      <p className="text-sm text-text-secondary">
-        Two-factor required. Open your authenticator and enter the 6-digit code.
-      </p>
-      <Input
-        autoFocus
-        inputMode="numeric"
-        pattern="[0-9]*"
-        maxLength={6}
-        value={code}
-        onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
-        placeholder="123456"
-        className="text-center font-mono text-lg tracking-[0.4em]"
-      />
-      {error ? (
-        <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-          {error}
-        </div>
-      ) : null}
-      <Button type="submit" size="lg" className="w-full" disabled={pending || code.length !== 6}>
-        {pending ? 'Verifying…' : 'Verify and sign in'}
-      </Button>
-    </form>
   );
 }

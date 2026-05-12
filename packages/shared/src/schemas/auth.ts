@@ -68,25 +68,48 @@ export const resetPasswordSchema = z.object({
 export type ResetPasswordPayload = z.infer<typeof resetPasswordSchema>;
 
 // ---------- MFA ----------
-export const mfaVerifySetupSchema = z.object({
+/**
+ * Either a 6-digit TOTP from the authenticator app, or one of the 10
+ * recovery codes shown once at enrollment. Recovery codes are
+ * 10-character lowercase alphanumeric chunks (see backend totp.service).
+ */
+const mfaCodeSchema = z
+  .string()
+  .min(6)
+  .max(40)
+  .transform((s) =>
+    s
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, ''),
+  );
+export const mfaSetupRequestSchema = z.object({
+  setupToken: z.string().min(1).max(2048),
+});
+export type MfaSetupRequest = z.infer<typeof mfaSetupRequestSchema>;
+
+export const mfaVerifyEnrollmentSchema = z.object({
+  setupToken: z.string().min(1).max(2048),
   totpCode: z.string().regex(/^\d{6}$/, '6-digit code required'),
 });
-export type MfaVerifySetupPayload = z.infer<typeof mfaVerifySetupSchema>;
+export type MfaVerifyEnrollmentPayload = z.infer<typeof mfaVerifyEnrollmentSchema>;
+
+export const mfaChallengeSchema = z.object({
+  challengeToken: z.string().min(1).max(2048),
+  code: mfaCodeSchema,
+});
+export type MfaChallengePayload = z.infer<typeof mfaChallengeSchema>;
 
 export const mfaDisableSchema = z.object({
   password: z.string().min(1).max(128),
 });
 export type MfaDisablePayload = z.infer<typeof mfaDisableSchema>;
 
-export const mfaLoginSchema = z.object({
-  mfaToken: z.string().min(1).max(512),
-  totpCode: z.string().regex(/^\d{6}$/, '6-digit code required'),
-});
-export type MfaLoginPayload = z.infer<typeof mfaLoginSchema>;
-
 export const mfaSetupResponseSchema = z.object({
   otpAuthUrl: z.string().min(1),
   secret: z.string().min(1),
+  qrCodeDataUrl: z.string().min(1),
+  recoveryCodes: z.array(z.string().min(8)).length(10),
 });
 export type MfaSetupResponse = z.infer<typeof mfaSetupResponseSchema>;
 
@@ -158,7 +181,7 @@ export type TenantSelectionResponse = z.infer<typeof tenantSelectionResponseSche
 
 export const mfaRequiredResponseSchema = z.object({
   status: z.literal('mfa_required'),
-  mfaToken: z.string(),
+  challengeToken: z.string(),
 });
 export type MfaRequiredResponse = z.infer<typeof mfaRequiredResponseSchema>;
 

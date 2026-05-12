@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 /**
  * users live inside a tenant. tenant_id is RESTRICT on delete because
  * orphaning users would silently widen RLS visibility.
@@ -54,6 +55,10 @@ export const users = pgTable(
 
     totpSecretEncrypted: text('totp_secret_encrypted'),
     mfaEnabled: boolean('mfa_enabled').notNull().default(false),
+    mfaEnrolledAt: timestamp('mfa_enrolled_at', { withTimezone: true }),
+    mfaRecoveryCodes: text('mfa_recovery_codes').array().notNull().default(sql`'{}'::text[]`),
+    mfaFailedAttempts: integer('mfa_failed_attempts').notNull().default(0),
+    mfaLockedUntil: timestamp('mfa_locked_until', { withTimezone: true }),
 
     failedLoginCount: integer('failed_login_count').notNull().default(0),
     lockedUntil: timestamp('locked_until', { withTimezone: true }),

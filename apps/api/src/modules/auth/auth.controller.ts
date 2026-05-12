@@ -2,8 +2,10 @@
  * Auth endpoints.
  *
  *   POST /auth/signup                     public  → tenant + owner, tokens
- *   POST /auth/login                      public  → tokens | tenant pick | mfa
- *   POST /auth/mfa/login                  public  → tokens after TOTP
+ *   POST /auth/login                      public  → tokens | tenant pick | mfa_required | mfa_setup_required
+ *   POST /auth/mfa/setup                  public  → provisions a TOTP secret + 10 recovery codes given a setupToken
+ *   POST /auth/mfa/verify                 public  → completes enrollment (setupToken + TOTP) and returns full session tokens
+ *   POST /auth/mfa/challenge              public  → exchanges challengeToken + TOTP|recovery code for session tokens
  *   POST /auth/refresh                    public  → rotated tokens
  *   POST /auth/logout                     auth    → revoke caller's session
  *   POST /auth/forgot-password            public  → always 200
@@ -11,8 +13,6 @@
  *   POST /auth/verify-email               public  → toggles emailVerifiedAt
  *   POST /auth/resend-verification        auth    → re-sends verification email
  *   GET  /auth/me                         auth    → user + tenant + permissions
- *   POST /auth/mfa/setup                  auth    → otp_auth_url + secret
- *   POST /auth/mfa/verify-setup           auth    → activates MFA after a TOTP
  *   POST /auth/mfa/disable                auth    → requires current password
  */
 import { Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
@@ -24,10 +24,11 @@ import {
   type LoginResponse,
   type LogoutPayload,
   type MeResponse,
+  type MfaChallengePayload,
   type MfaDisablePayload,
-  type MfaLoginPayload,
+  type MfaSetupRequest,
   type MfaSetupResponse,
-  type MfaVerifySetupPayload,
+  type MfaVerifyEnrollmentPayload,
   type RefreshPayload,
   type ResetPasswordPayload,
   type SignupPayload,
@@ -35,9 +36,10 @@ import {
   forgotPasswordSchema,
   loginSchema,
   logoutSchema,
+  mfaChallengeSchema,
   mfaDisableSchema,
-  mfaLoginSchema,
-  mfaVerifySetupSchema,
+  mfaSetupRequestSchema,
+  mfaVerifyEnrollmentSchema,
   refreshSchema,
   resetPasswordSchema,
   signupSchema,
@@ -80,15 +82,38 @@ export class AuthController {
     return this.auth.login(body, this.meta(req));
   }
 
+  // MFA — enrollment. Both endpoints are Public because the caller has not yet
+  // received an access token; the setupToken from /auth/login proves the
+  // password challenge already passed. Throttling is keyed on the IP via
+  // @nestjs/throttler defaults.
+  @Public()
+  @Throttle({ burst: { limit: 5, ttl: seconds(60) } })
+  @Post('mfa/setup')
+  @HttpCode(HttpStatus.OK)
+  async mfaSetup(@ZodBody(mfaSetupRequestSchema) body: MfaSetupRequest): Promise<MfaSetupResponse> {
+    return this.auth.mfaSetupWithToken(body.setupToken);
+  }
+
   @Public()
   @Throttle({ burst: { limit: 10, ttl: seconds(60) } })
-  @Post('mfa/login')
+  @Post('mfa/verify')
   @HttpCode(HttpStatus.OK)
-  async mfaLogin(
-    @ZodBody(mfaLoginSchema) body: MfaLoginPayload,
+  async mfaVerify(
+    @ZodBody(mfaVerifyEnrollmentSchema) body: MfaVerifyEnrollmentPayload,
     @Req() req: FastifyRequest,
   ): Promise<AuthenticatedResponse> {
-    return this.auth.mfaLogin(body, this.meta(req));
+    return this.auth.mfaVerifyEnrollment(body, this.meta(req));
+  }
+
+  @Public()
+  @Throttle({ burst: { limit: 10, ttl: seconds(60) } })
+  @Post('mfa/challenge')
+  @HttpCode(HttpStatus.OK)
+  async mfaChallenge(
+    @ZodBody(mfaChallengeSchema) body: MfaChallengePayload,
+    @Req() req: FastifyRequest,
+  ): Promise<AuthenticatedResponse> {
+    return this.auth.mfaChallenge(body, this.meta(req));
   }
 
   @Public()
@@ -170,24 +195,6 @@ export class AuthController {
       userId: user.id,
       role: user.role,
     });
-  }
-
-  @Post('mfa/setup')
-  @HttpCode(HttpStatus.OK)
-  async mfaSetup(@CurrentUser() user: AuthedUser): Promise<MfaSetupResponse> {
-    return this.auth.mfaSetup({ tenantId: user.tenantId, userId: user.id, role: user.role });
-  }
-
-  @Post('mfa/verify-setup')
-  @HttpCode(HttpStatus.OK)
-  async mfaVerifySetup(
-    @CurrentUser() user: AuthedUser,
-    @ZodBody(mfaVerifySetupSchema) body: MfaVerifySetupPayload,
-  ): Promise<{ enabled: true }> {
-    return this.auth.mfaVerifySetup(
-      { tenantId: user.tenantId, userId: user.id, role: user.role },
-      body,
-    );
   }
 
   @Post('mfa/disable')

@@ -1,3 +1,4 @@
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
@@ -22,9 +23,9 @@ import {
   type LoginPayload,
   type LoginResponse,
   type MeResponse,
-  type MfaLoginPayload,
+  type MfaChallengePayload,
   type MfaSetupResponse,
-  type MfaVerifySetupPayload,
+  type MfaVerifyEnrollmentPayload,
   ROLES,
   type ResetPasswordPayload,
   type SignupPayload,
@@ -53,6 +54,16 @@ const FORGOT_RATE_LIMIT = 3;
 const FORGOT_RATE_TTL_SECONDS = 60 * 60;
 const RESEND_VERIFY_RATE_LIMIT = 3;
 const RESEND_VERIFY_RATE_TTL_SECONDS = 60 * 60;
+// MFA challenge / verify-enrollment: 5 failures in 15m → lock 15m. The
+// counter is on the user row (mfa_failed_attempts) so a determined
+// attacker can't reset it by switching IPs; it clears on the next
+// successful MFA verification.
+const MFA_MAX_FAILED_ATTEMPTS = 5;
+const MFA_LOCKOUT_MINUTES = 15;
+const RECOVERY_CODE_COUNT = 10;
+// 10 lowercase chars, base32-style alphabet (no 0/1/o/l confusion). We
+// display it as two 5-char groups separated by a dash for readability.
+const RECOVERY_CODE_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789';
 
 export interface AuthRequestMeta {
   ipAddress?: string | null | undefined;
@@ -287,12 +298,12 @@ export class AuthService {
     });
 
     if (candidate.user.mfaEnabled) {
-      const mfaToken = await this.jwt.signMfaChallenge({
+      const challengeToken = await this.jwt.signMfaChallenge({
         sub: candidate.user.id,
         tid: candidate.user.tenantId,
         role: candidate.user.role,
       });
-      return { status: 'mfa_required', mfaToken };
+      return { status: 'mfa_required', challengeToken };
     }
 
     // MFA enforcement gate: OWNER and ADMIN cannot ride without MFA. They
@@ -332,12 +343,20 @@ export class AuthService {
   }
 
   // ===========================================================================
-  // MFA LOGIN
+  // MFA CHALLENGE — called by enrolled users at login time. Accepts either
+  // the 6-digit TOTP code from the authenticator app, OR one of the 10
+  // single-use recovery codes shown at enrollment. Failed attempts increment
+  // mfa_failed_attempts; at MFA_MAX_FAILED_ATTEMPTS the account's MFA path
+  // is locked for MFA_LOCKOUT_MINUTES (the password lockout is a separate
+  // counter and is unaffected).
   // ===========================================================================
-  async mfaLogin(input: MfaLoginPayload, meta: AuthRequestMeta): Promise<AuthenticatedResponse> {
+  async mfaChallenge(
+    input: MfaChallengePayload,
+    meta: AuthRequestMeta,
+  ): Promise<AuthenticatedResponse> {
     let claims: Awaited<ReturnType<JwtService['verifyMfaChallenge']>>;
     try {
-      claims = await this.jwt.verifyMfaChallenge(input.mfaToken);
+      claims = await this.jwt.verifyMfaChallenge(input.challengeToken);
     } catch {
       throw new UnauthorizedException({
         code: ERROR_CODES.TOKEN_INVALID,
@@ -364,14 +383,23 @@ export class AuthService {
       });
     }
 
-    const secret = this.totp.decrypt(found.user.totpSecretEncrypted);
-    if (!this.totp.verify(secret, input.totpCode)) {
-      throw new UnauthorizedException({
-        code: ERROR_CODES.MFA_INVALID_CODE,
-        message: 'Invalid TOTP code',
+    if (found.user.mfaLockedUntil && found.user.mfaLockedUntil > new Date()) {
+      throw new ForbiddenException({
+        code: ERROR_CODES.ACCOUNT_LOCKED,
+        message: 'Too many failed MFA attempts. Try again in a few minutes.',
       });
     }
 
+    const accepted = await this.tryMfaCode(found.user, input.code);
+    if (!accepted) {
+      await this.recordMfaFailure(found.user.id);
+      throw new UnauthorizedException({
+        code: ERROR_CODES.MFA_INVALID_CODE,
+        message: 'Invalid TOTP or recovery code',
+      });
+    }
+
+    await this.clearMfaFailures(found.user.id);
     const tokens = await this.issueTokens(
       {
         tenantId: found.user.tenantId,
@@ -773,25 +801,52 @@ export class AuthService {
   }
 
   // ===========================================================================
-  // MFA SETUP
+  // MFA ENROLLMENT (token-driven, runs BEFORE the user has a full session)
+  //
+  // The user just logged in with email + password and the API answered with
+  // status=mfa_setup_required + a short-lived setupToken. They are not yet
+  // authenticated. /auth/mfa/setup accepts that setupToken and provisions
+  // the secret + recovery codes; /auth/mfa/verify accepts the same token
+  // plus a TOTP code, marks the user enrolled, and finally hands out
+  // access/refresh tokens.
+  //
+  // This is the only place we mint recovery codes. They are shown to the
+  // user exactly once (verify-step displays the panel before letting the
+  // user move on), then stored only as sha256 hashes.
   // ===========================================================================
-  async mfaSetup(ctx: SessionUserContext): Promise<MfaSetupResponse> {
+  async mfaSetupWithToken(setupToken: string): Promise<MfaSetupResponse> {
+    const claims = await this.verifyMfaSetupTokenOrThrow(setupToken);
+
     const secret = this.totp.generateSecret();
-    const account = await this.admin.runAsAdmin({}, async (db) => {
-      const user = await db.query.users.findFirst({ where: eq(users.id, ctx.userId) });
+    const recoveryCodes = generateRecoveryCodes(RECOVERY_CODE_COUNT);
+
+    const account = await this.admin.runAsAdmin({ actorUserId: claims.sub }, async (db) => {
+      const user = await db.query.users.findFirst({
+        where: and(eq(users.id, claims.sub), isNull(users.deletedAt)),
+      });
       if (!user) {
         throw new UnauthorizedException({
           code: ERROR_CODES.UNAUTHORIZED,
-          message: 'User not found',
+          message: 'User no longer exists',
+        });
+      }
+      if (user.mfaEnabled) {
+        throw new ConflictException({
+          code: ERROR_CODES.CONFLICT,
+          message: 'MFA is already enrolled for this account',
         });
       }
       const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, user.tenantId) });
       const issuer = `TowCommand:${tenant?.slug ?? 'app'}`;
-      // Stash the secret encrypted so verify-setup can confirm the code came
-      // from the same provisioning. mfa_enabled stays false until verify-setup.
       await db
         .update(users)
-        .set({ totpSecretEncrypted: this.totp.encrypt(secret), updatedAt: new Date() })
+        .set({
+          totpSecretEncrypted: this.totp.encrypt(secret),
+          mfaRecoveryCodes: recoveryCodes.map((c) => hashToken(c)),
+          mfaFailedAttempts: 0,
+          mfaLockedUntil: null,
+          updatedAt: new Date(),
+        })
         .where(eq(users.id, user.id));
       return { email: user.email, issuer };
     });
@@ -801,34 +856,101 @@ export class AuthService {
       issuer: account.issuer,
       secret,
     });
-    return { otpAuthUrl, secret };
+    const qrCodeDataUrl = await this.totp.buildQrDataUrl(otpAuthUrl);
+    return {
+      otpAuthUrl,
+      secret,
+      qrCodeDataUrl,
+      // recoveryCodes are formatted "abcde-12345" for the user; the schema
+      // accepts either form (with or without dash) on submission.
+      recoveryCodes: recoveryCodes.map(formatRecoveryCode),
+    };
   }
 
-  async mfaVerifySetup(
-    ctx: SessionUserContext,
-    input: MfaVerifySetupPayload,
-  ): Promise<{ enabled: true }> {
-    return this.admin.runAsAdmin({ actorUserId: ctx.userId }, async (db) => {
-      const user = await db.query.users.findFirst({ where: eq(users.id, ctx.userId) });
+  async mfaVerifyEnrollment(
+    input: MfaVerifyEnrollmentPayload,
+    meta: AuthRequestMeta,
+  ): Promise<AuthenticatedResponse> {
+    const claims = await this.verifyMfaSetupTokenOrThrow(input.setupToken);
+
+    const result = await this.admin.runAsAdmin({ actorUserId: claims.sub }, async (db) => {
+      const user = await db.query.users.findFirst({
+        where: and(eq(users.id, claims.sub), isNull(users.deletedAt)),
+      });
       if (!user || !user.totpSecretEncrypted) {
         throw new BadRequestException({
           code: ERROR_CODES.BAD_REQUEST,
-          message: 'No MFA setup in progress',
+          message: 'No MFA setup in progress. Restart enrollment.',
+        });
+      }
+      if (user.mfaLockedUntil && user.mfaLockedUntil > new Date()) {
+        throw new ForbiddenException({
+          code: ERROR_CODES.ACCOUNT_LOCKED,
+          message: 'Too many failed MFA attempts. Try again in a few minutes.',
         });
       }
       const secret = this.totp.decrypt(user.totpSecretEncrypted);
       if (!this.totp.verify(secret, input.totpCode)) {
-        throw new BadRequestException({
-          code: ERROR_CODES.MFA_INVALID_CODE,
-          message: 'Invalid TOTP code',
+        // Inline failure handling — the outer transaction would roll back if
+        // we threw, so update via a follow-up runAsAdmin call below instead.
+        return { kind: 'invalid' as const };
+      }
+      const tenant = await db.query.tenants.findFirst({
+        where: and(eq(tenants.id, user.tenantId), isNull(tenants.deletedAt)),
+      });
+      if (!tenant || tenant.status !== 'active') {
+        throw new ForbiddenException({
+          code: ERROR_CODES.UNAUTHORIZED,
+          message: 'Tenant is no longer active',
         });
       }
+      const now = new Date();
       await db
         .update(users)
-        .set({ mfaEnabled: true, updatedAt: new Date() })
+        .set({
+          mfaEnabled: true,
+          mfaEnrolledAt: now,
+          mfaFailedAttempts: 0,
+          mfaLockedUntil: null,
+          updatedAt: now,
+        })
         .where(eq(users.id, user.id));
-      return { enabled: true };
+      return { kind: 'ok' as const, user: { ...user, mfaEnabled: true }, tenant };
     });
+
+    if (result.kind === 'invalid') {
+      await this.recordMfaFailure(claims.sub);
+      throw new BadRequestException({
+        code: ERROR_CODES.MFA_INVALID_CODE,
+        message: 'Invalid TOTP code. Try again.',
+      });
+    }
+
+    const tokens = await this.issueTokens(
+      { tenantId: result.user.tenantId, userId: result.user.id, role: result.user.role },
+      meta,
+      null,
+    );
+    return {
+      status: 'authenticated',
+      user: this.toUserDto(result.user),
+      tenant: this.toTenantDto(result.tenant),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
+    };
+  }
+
+  private async verifyMfaSetupTokenOrThrow(token: string): Promise<{ sub: string; tid: string }> {
+    try {
+      const claims = await this.jwt.verifyMfaSetupRequired(token);
+      return { sub: claims.sub, tid: claims.tid };
+    } catch {
+      throw new UnauthorizedException({
+        code: ERROR_CODES.TOKEN_INVALID,
+        message: 'Setup token is invalid or expired. Sign in again to restart enrollment.',
+      });
+    }
   }
 
   async mfaDisable(ctx: SessionUserContext, plainPassword: string): Promise<{ enabled: false }> {
@@ -925,6 +1047,70 @@ export class AuthService {
       refreshToken,
       expiresIn: this.jwt.accessTtlSeconds(),
     };
+  }
+
+  // ---------------------------------------------------------------------------
+  // MFA helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Tries the supplied code against the user's TOTP secret first, then against
+   * the recovery-code set. If a recovery code matches, it is consumed (removed
+   * from the array) before returning true. Returns false on no match.
+   */
+  private async tryMfaCode(user: typeof users.$inferSelect, code: string): Promise<boolean> {
+    if (!user.totpSecretEncrypted) return false;
+    // TOTP: 6 digits, fast path.
+    if (/^\d{6}$/.test(code)) {
+      const secret = this.totp.decrypt(user.totpSecretEncrypted);
+      if (this.totp.verify(secret, code)) return true;
+    }
+    // Recovery code: compare sha256(normalized) against the stored hash array.
+    // Each match consumes the code so it can never be reused.
+    const submittedHash = hashToken(code);
+    const stored = user.mfaRecoveryCodes ?? [];
+    let matched = false;
+    const remaining: string[] = [];
+    for (const h of stored) {
+      if (!matched && constantTimeHexEqual(h, submittedHash)) {
+        matched = true;
+        continue;
+      }
+      remaining.push(h);
+    }
+    if (!matched) return false;
+    await this.admin.runAsAdmin({ actorUserId: user.id }, async (db) => {
+      await db
+        .update(users)
+        .set({ mfaRecoveryCodes: remaining, updatedAt: new Date() })
+        .where(eq(users.id, user.id));
+    });
+    return true;
+  }
+
+  private async recordMfaFailure(userId: string): Promise<void> {
+    await this.admin.runAsAdmin({ actorUserId: userId }, async (db) => {
+      const u = await db.query.users.findFirst({ where: eq(users.id, userId) });
+      if (!u) return;
+      const next = (u.mfaFailedAttempts ?? 0) + 1;
+      const lockUntil =
+        next >= MFA_MAX_FAILED_ATTEMPTS
+          ? new Date(Date.now() + MFA_LOCKOUT_MINUTES * 60 * 1000)
+          : (u.mfaLockedUntil ?? null);
+      await db
+        .update(users)
+        .set({ mfaFailedAttempts: next, mfaLockedUntil: lockUntil, updatedAt: new Date() })
+        .where(eq(users.id, userId));
+    });
+  }
+
+  private async clearMfaFailures(userId: string): Promise<void> {
+    await this.admin.runAsAdmin({ actorUserId: userId }, async (db) => {
+      await db
+        .update(users)
+        .set({ mfaFailedAttempts: 0, mfaLockedUntil: null, updatedAt: new Date() })
+        .where(eq(users.id, userId));
+    });
   }
 
   private async recordFailedLogin(
@@ -1026,3 +1212,43 @@ function permissionsForRole(role: string): string[] {
 
 // Drizzle exports `sql` here only so importers don't tree-shake-strip it.
 void sql;
+
+/**
+ * Generates `count` recovery codes. Each is 10 lowercase chars drawn from a
+ * Crockford-style base32 alphabet (no 0/1/o/l confusion). Returned without
+ * dashes — formatting for display happens in formatRecoveryCode.
+ */
+function generateRecoveryCodes(count: number): string[] {
+  const out: string[] = [];
+  const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
+  const seen = new Set<string>();
+  while (out.length < count) {
+    const buf = randomBytes(10);
+    let code = '';
+    for (let i = 0; i < 10; i += 1) {
+      // Cast forced because TS noUncheckedIndexedAccess flags buf[i] as
+      // possibly undefined despite the bounded loop. Buffer indexing is
+      // always defined for i < length.
+      const b = buf[i] as number;
+      code += alphabet[b % alphabet.length];
+    }
+    if (seen.has(code)) continue;
+    seen.add(code);
+    out.push(code);
+  }
+  return out;
+}
+
+function formatRecoveryCode(raw: string): string {
+  if (raw.length !== 10) return raw;
+  return `${raw.slice(0, 5)}-${raw.slice(5)}`;
+}
+
+function constantTimeHexEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  try {
+    return timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+  } catch {
+    return false;
+  }
+}
