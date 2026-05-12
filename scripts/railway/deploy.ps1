@@ -135,19 +135,42 @@ if (-not $redisExists) {
 }
 
 # ---------------------------------------------------------------------
-# 4. Create backend + web services
+# 4. Create backend + web services - GitHub-source-linked.
+#
+# Why GitHub source instead of `railway up`: this machine's TLS stack
+# corrupts the large multipart upload that `up` performs (BadRecordMac
+# fatal alerts mid-stream). Linking the service to the GitHub repo
+# bypasses local upload entirely - Railway pulls from
+# github.com/chrispeer69/towcommand and builds in their datacenter.
+#
+# We delete and recreate any existing "empty" services because Railway
+# CLI v4 has no command to convert an empty service into a repo-linked
+# one; that conversion is GraphQL-only via the dashboard. Delete +
+# recreate is the cleanest CLI path. Variables get cleared, but step 5
+# re-pushes them.
 # ---------------------------------------------------------------------
-Write-Host "==> 4. Ensure backend + web services exist" -ForegroundColor Cyan
-if ($existingServices -notcontains $backend) {
-  Invoke-Railway -Args @('add', '--service', $backend, '--json') | Out-Null
-} else {
-  Write-Host "    $backend service already present, skipping" -ForegroundColor DarkGreen
+$githubRepo = 'chrispeer69/towcommand'
+
+function Ensure-RepoLinkedService {
+  param([string]$Name)
+  # If the service exists, delete it (we can't tell from the CLI whether
+  # it's already repo-linked, so we always recreate).
+  if ($existingServices -contains $Name) {
+    Write-Host "    deleting existing $Name service to re-link to GitHub" -ForegroundColor Yellow
+    $del = Invoke-Railway -Args @('service', 'delete', '--service', $Name, '--yes')
+    if ($del.Exit -ne 0) {
+      Write-Host "    WARN: delete returned non-zero ($($del.Exit)); continuing" -ForegroundColor Yellow
+    }
+  }
+  $add = Invoke-Railway -Args @('add', '--service', $Name, '--repo', $githubRepo, '--json')
+  if ($add.Exit -ne 0) {
+    throw "Failed to create $Name service linked to $githubRepo. Output: $($add.Output)"
+  }
 }
-if ($existingServices -notcontains $web) {
-  Invoke-Railway -Args @('add', '--service', $web, '--json') | Out-Null
-} else {
-  Write-Host "    $web service already present, skipping" -ForegroundColor DarkGreen
-}
+
+Write-Host "==> 4. (Re)create backend + web as GitHub-linked services" -ForegroundColor Cyan
+Ensure-RepoLinkedService -Name $backend
+Ensure-RepoLinkedService -Name $web
 
 # ---------------------------------------------------------------------
 # 5. Push env vars. --skip-deploys + explicit --service per call.
@@ -219,35 +242,40 @@ Set-EnvFile -Service $backend -Path 'scripts/railway/backend.env'
 Set-EnvFile -Service $web     -Path 'scripts/railway/web.env'
 
 # ---------------------------------------------------------------------
-# 6. Deploy. Done BEFORE domains because Railway sometimes rejects
-#    `domain` calls on a service that has never been built (the rejection
-#    surfaces as a spurious "Unauthorized" rather than a useful error).
-#    `railway up` is also the step most prone to transient TLS errors on
-#    Windows - retry on BadRecordMac / forcibly-closed-connection.
+# 6. Trigger initial build. Repo-linked services start building the
+#    moment they're created (Railway watches the repo's default branch).
+#    `railway redeploy` here is a no-op safety net in case the auto-build
+#    didn't fire.
 # ---------------------------------------------------------------------
-Write-Host "==> 6. Deploy backend" -ForegroundColor Cyan
-Invoke-RailwayWithRetry -Args @('up', '--service', $backend, '--detach') | Out-Null
-
-Write-Host "==> 7. Deploy web" -ForegroundColor Cyan
-Invoke-RailwayWithRetry -Args @('up', '--service', $web, '--detach') | Out-Null
+Write-Host "==> 6. Nudge initial builds (Railway should be building already)" -ForegroundColor Cyan
+Invoke-Railway -Args @('redeploy', '--service', $backend, '--yes') | Out-Null
+Invoke-Railway -Args @('redeploy', '--service', $web, '--yes') | Out-Null
 
 # ---------------------------------------------------------------------
-# 8. Custom domains. With deploys in flight, the services exist on
-#    Railway's side and the domain endpoint stops returning "Unauthorized".
+# 7. Custom domains. Generate Railway-provided URLs as a baseline; the
+#    custom hostnames (api/app.towcommand.cloud) need DNS + a paid plan
+#    so we'll surface their status but not hard-fail if rejected.
 # ---------------------------------------------------------------------
-Write-Host "==> 8. Attach custom domains" -ForegroundColor Cyan
-Invoke-RailwayWithRetry -Args @('domain', '--service', $backend, 'api.towcommand.cloud') | Out-Null
-Invoke-RailwayWithRetry -Args @('domain', '--service', $web,     'app.towcommand.cloud') | Out-Null
+Write-Host "==> 7. Generate Railway URLs + attempt custom domains" -ForegroundColor Cyan
+Invoke-Railway -Args @('domain', '--service', $backend) | Out-Null
+Invoke-Railway -Args @('domain', '--service', $web) | Out-Null
+$customBackend = Invoke-Railway -Args @('domain', '--service', $backend, 'api.towcommand.cloud')
+$customWeb     = Invoke-Railway -Args @('domain', '--service', $web,     'app.towcommand.cloud')
+if ($customBackend.Exit -ne 0 -or $customWeb.Exit -ne 0) {
+  Write-Host "    NOTE: custom domain attach failed (likely plan-tier or DNS gate)." -ForegroundColor Yellow
+  Write-Host "          Add api.towcommand.cloud and app.towcommand.cloud manually in:" -ForegroundColor Yellow
+  Write-Host "          https://railway.com/dashboard -> $projectName -> service -> Settings -> Networking" -ForegroundColor Yellow
+}
 
 # ---------------------------------------------------------------------
-# 9. Snapshot for the deploy report
+# 8. Snapshot for the deploy report
 # ---------------------------------------------------------------------
-Write-Host "==> 9. Snapshot deploy status" -ForegroundColor Cyan
+Write-Host "==> 8. Snapshot deploy status" -ForegroundColor Cyan
 $finalStatus = (Invoke-Railway -Args @('service', 'list', '--json') -Quiet).Output
 $finalStatus | Out-File scripts/railway/.deploy-status.json -Encoding utf8
 
 Write-Host ""
-Write-Host "DONE. Watch builds at https://railway.app/dashboard" -ForegroundColor Green
+Write-Host "DONE. Watch builds at https://railway.com/dashboard" -ForegroundColor Green
 Write-Host "  Backend health (once green):  https://api.towcommand.cloud/health" -ForegroundColor Green
 Write-Host "  Web (once green):             https://app.towcommand.cloud" -ForegroundColor Green
 Write-Host ""
