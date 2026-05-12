@@ -8,6 +8,15 @@ public enum OutboxAction: Codable, Equatable, Sendable {
     case transition(jobId: String, to: JobStatus, reason: String?, attemptedAt: Date)
     case cancel(jobId: String, reason: String, attemptedAt: Date)
     case uploadPhoto(jobId: String, photo: PhotoUploadRequest, attemptedAt: Date)
+
+    // Session 6.1
+    case submitDvir(payload: CreateDvirPayload, attemptedAt: Date)
+    case uploadFleetDocument(payload: UploadDocumentRequest, attemptedAt: Date)
+    case startShift(driverId: String, truckId: String?, attemptedAt: Date)
+    case endShift(shiftId: String, attemptedAt: Date)
+    case updateShiftStatus(shiftId: String, status: DriverShiftStatus, attemptedAt: Date)
+    case updateShiftLocation(shiftId: String, lat: Double, lng: Double, attemptedAt: Date)
+    case sendChatMessage(message: ChatMessage, attemptedAt: Date)
 }
 
 public struct OutboxItem: Codable, Equatable, Identifiable, Sendable {

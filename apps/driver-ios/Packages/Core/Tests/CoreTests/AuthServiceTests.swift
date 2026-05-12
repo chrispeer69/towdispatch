@@ -57,4 +57,16 @@ private actor FakeAPI: TowCommandAPI {
     func transition(jobId: String, to: JobStatus, reason: String?) async throws -> Job { fatalError() }
     func cancel(jobId: String, reason: String) async throws -> Job { fatalError() }
     func uploadJobPhoto(jobId: String, photo: PhotoUploadRequest) async throws -> PhotoUploadResponse { fatalError() }
+    func submitDvir(_ body: CreateDvirPayload) async throws -> Dvir { fatalError() }
+    func listDvirs(driverId: String?, truckId: String?) async throws -> [Dvir] { [] }
+    func uploadDocument(_ body: UploadDocumentRequest) async throws -> FleetDocument { fatalError() }
+    func listDocuments(ownerType: DocumentOwnerType?, ownerId: String?) async throws -> [FleetDocument] { [] }
+    func listExpirations() async throws -> ExpirationsResponse { fatalError() }
+    func driverTrucks(driverId: String) async throws -> [DriverTruckAssignment] { [] }
+    func startShift(driverId: String, truckId: String?) async throws -> DriverShift { fatalError() }
+    func endShift(shiftId: String) async throws -> DriverShift { fatalError() }
+    func updateShiftStatus(shiftId: String, status: DriverShiftStatus) async throws -> DriverShift { fatalError() }
+    func updateShiftLocation(shiftId: String, lat: Double, lng: Double) async throws -> DriverShift { fatalError() }
+    func sendChatMessage(_ body: SendChatMessageRequest) async throws -> ChatMessage { fatalError() }
+    func listChatMessages(jobId: String) async throws -> [ChatMessage] { [] }
 }

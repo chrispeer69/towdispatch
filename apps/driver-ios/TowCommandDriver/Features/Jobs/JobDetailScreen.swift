@@ -200,6 +200,20 @@ struct JobDetailScreen: View {
                     .clipShape(RoundedRectangle(cornerRadius: TCMetrics.cornerRadius))
                 }
                 .tcTapTarget()
+                NavigationLink {
+                    ChatScreen(jobId: my.job.id)
+                } label: {
+                    HStack {
+                        Image(systemName: "message.fill")
+                        Text("Chat with Dispatcher")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .foregroundStyle(.white)
+                    .background(TCColor.surfaceMuted)
+                    .clipShape(RoundedRectangle(cornerRadius: TCMetrics.cornerRadius))
+                }
+                .tcTapTarget()
                 TCPrimaryButton("Cancel Job", isDestructive: true) {
                     vm.showCancelDialog = true
                 }

@@ -50,7 +50,16 @@ final class OutboxTests: XCTestCase {
 private extension OutboxAction {
     var attemptedAt: Date {
         switch self {
-        case .transition(_, _, _, let d), .cancel(_, _, let d), .uploadPhoto(_, _, let d):
+        case .transition(_, _, _, let d),
+             .cancel(_, _, let d),
+             .uploadPhoto(_, _, let d),
+             .submitDvir(_, let d),
+             .uploadFleetDocument(_, let d),
+             .startShift(_, _, let d),
+             .endShift(_, let d),
+             .updateShiftStatus(_, _, let d),
+             .updateShiftLocation(_, _, _, let d),
+             .sendChatMessage(_, let d):
             return d
         }
     }

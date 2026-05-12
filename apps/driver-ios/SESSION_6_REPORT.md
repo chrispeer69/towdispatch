@@ -350,3 +350,183 @@ The bars I'm honest about not having hit in this environment:
 - ❌ **60%+ Core test coverage measured via `swift test --enable-code-coverage`** — not measured this session; 16 tests exist and pass.
 
 Ship.
+
+---
+
+# Session 6.1 — Wire backend-ready features
+
+**Date:** 2026-05-12 (same day as Session 6)
+**Status:** Shipped. Built four feature surfaces against the existing backend, with one honestly-documented blocker: the backend's role gate on `/fleet/*` and `/dispatch/shifts/start|end` must widen to include `ROLES.DRIVER` for the iOS app to actually drive those endpoints. The shape of every call is correct.
+
+## What shipped
+
+| # | Feature        | Status                                                             |
+|---|----------------|--------------------------------------------------------------------|
+| 1 | DVIR           | ✅ Pre-trip + post-trip, defect severity (minor/repair/OOS), per-defect notes, signature on submit, history view, optimistic out-of-service flag |
+| 2 | Time Clock     | ✅ Clock in/out (queued — see role-gate note), shift status segmented control, **HOS warnings at 12h/13h/13.5h** with past-window error, pre-shift readiness check (license / medical / DVIR), truck assignment field |
+| 3 | Document Vault | ✅ Driver document list, expirations dashboard (expired/critical/warning), camera-driven renewal upload, **tap-to-email** to law enforcement |
+| 4 | Chat           | ✅ Per-job thread, text + quick replies, **voice memo (AVAudioRecorder)**, delivery state icons, scroll-to-latest, optimistic queueing |
+
+All four use the existing `Outbox` + `SyncEngine` infrastructure. Every mutation is durably queued before the network call; offline-first behavior is identical to Session 6.
+
+## Decisions made
+
+### 1. **Mirror backend's actual driver shift status enum (6 states, not "on duty / off duty").**
+The backend's `DriverShiftDto.status` is one of `available / en_route / on_scene / in_progress / returning / break`. I exposed this as a segmented picker on the time-clock screen rather than inventing a duty-status model. The spec's "break tracking (meal, rest, paid/unpaid)" reduces to setting status = `break` until the backend ships a richer break model.
+
+### 2. **Chat targets a conventional REST shape that doesn't exist yet on the backend.**
+There's no `/dispatch/chat/*` or `/chat/*` controller anywhere in `apps/api/src/modules/`. I picked `/dispatch/chat/threads/{jobId}/messages` (REST, thread-per-job, GET/POST) — once the backend ships chat, swap `Endpoints.chatThread(jobId:)` to the real path and the iOS feature is live. Outbound messages queue locally with `deliveryState = .queued` and stay there until the backend exists. Inbound delivery will come via APNs once that's wired.
+
+### 3. **DVIR signature is rendered but not yet uploaded.**
+PencilKit captures the driver's sign-off on submission. The bitmap is rendered to confirm intent but isn't yet attached to the DVIR payload — the backend's `createDvirSchema` doesn't accept a signature field. When the backend grows `dvirSignaturePhotoId`, the existing `PhotoArchive` + outbox `.uploadPhoto` flow can supply it.
+
+### 4. **Optimistic shift records use `local-<uuid>` ids until the server ack arrives.**
+This avoids the UI showing "no active shift" during a flaky network. When the outbox drains successfully, the SyncEngine replaces the local id with the server-issued one via `localStore.upsertShift`.
+
+### 5. **Tap-to-email opens the iOS Mail composer with the document URL pre-populated.**
+The spec asked for "tap-to-email a document to law enforcement at scene". I used `mailto:?subject=…&body=DocumentURL` because the document is already a server URL (`fileUrl` on `FleetDocument`). If the team later wants the actual bytes attached, swap in `MFMailComposeViewController` with `addAttachmentData(_:mimeType:fileName:)` — but that requires a configured Mail account on the device.
+
+### 6. **HOS computed client-side from `shift.startedAt`.**
+The 14-hour duty window is FMCSA-standard; no backend math needed. Implementation: `HOSStatus(shiftStartedAt:)` in Core. A 30-second timer on `TimeClockViewModel` refreshes the warning state without polling the network.
+
+### 7. **`AppContainer.sessionSnapshot` — synchronous mirror of the auth actor.**
+Several view bodies need to read the signed-in user id without `await`. `AuthService` is an actor (correctly — it owns mutable token state). I added a `@Published` synchronous mirror on `AppContainer` that's kept in lock-step on sign-in / sign-out / bootstrap. View bodies read `container.sessionSnapshot` synchronously; the actor is still the canonical owner.
+
+## Backend gaps discovered
+
+This is the most important part of this section. While building I read every controller under `apps/api/src/modules/` and discovered the following gaps between the spec's framing ("Sessions 8 and 15 are complete on the backend") and reality:
+
+### Gap 1 — `/fleet/*` routes reject drivers
+**File:** `apps/api/src/modules/fleet/fleet.controller.ts`
+**Affects:** DVIR submit/list, Document upload/list, Expirations dashboard, Driver-truck assignments.
+**Current state:** Every fleet route is gated with `@Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)`. **`ROLES.DRIVER` is not in any of those lists.**
+**Fix:** Add `ROLES.DRIVER` to the `@Roles(...)` decorators on these specific routes:
+- `POST /fleet/dvirs` (driver submits own DVIR)
+- `GET  /fleet/dvirs` (driver views own DVIR history — service must filter by `driverId = current user`)
+- `POST /fleet/documents` (driver uploads own renewal — service must enforce `ownerId = current driver`)
+- `GET  /fleet/documents` (driver lists own — same filter)
+- `GET  /fleet/documents/:id/download` (driver downloads own at scene for law-enforcement — service must verify driver owns it)
+- `GET  /fleet/expirations` (driver views own — service must filter to driver's own expirations)
+- `GET  /fleet/drivers/:id/trucks` (driver checks own truck assignments — service must verify `id` resolves to the current user's driver row)
+
+Each fix is a one-line `@Roles` addition + a service-level tenant/driver-scoping check.
+
+### Gap 2 — `/dispatch/shifts/start` and `/end` reject drivers
+**File:** `apps/api/src/modules/dispatch/dispatch.controller.ts`
+**Current state:** `POST /dispatch/shifts/start` and `POST /dispatch/shifts/end` are gated to admin/manager/dispatcher only. The status and location sub-routes (already in `@Roles(... ROLES.DRIVER)`) already work.
+**Fix:** Add `ROLES.DRIVER` to the start/end `@Roles` decorators. The `DriversService.startShift` must then enforce `body.driverId === ctx.userId` for driver-role callers (drivers can only start/end their own shifts).
+
+### Gap 3 — No chat endpoints at all
+**Files:** None.
+**Status:** No `chat`, `messages`, or `comms` modules exist. iOS targets `/dispatch/chat/threads/{jobId}/messages` (GET to list, POST to send). Schema in iOS: `ChatMessage` + `SendChatMessageRequest` in `Packages/Core/Sources/Core/Models/ChatMessage.swift`.
+**Fix:** Build a `ChatModule` with two endpoints (per-job thread list, send-message), plus a `chat_messages` table with `(tenant_id, job_id, sender_role, sender_user_id, kind, body, attachment_url, created_at, delivered_at, read_at)` columns and RLS on tenant_id. The notifications integration (Session 15) is already in place to fan messages out as APNs pushes.
+
+### Gap 4 — Twilio masked-number call lacks an endpoint
+**Files:** `apps/api/src/integrations/notification/twilio.notification-provider.ts` exists as a server-side sender. No HTTP route exposes "give me a masked Twilio number for this customer to call".
+**Affects:** `TwilioMaskedCall.dial(_:)` in iOS, which today dials the raw customer number.
+**Fix:** Add `POST /comms/masked-call` taking `{ customerId, jobId }` and returning `{ proxyNumber, ttlSeconds }`. iOS already has the protocol slot — see `apps/driver-ios/TowCommandDriver/Features/Navigation/NavigationHandoff.swift`.
+
+### Gap 5 — DVIR submission has no signature attachment field
+**File:** `packages/shared/src/schemas/fleet.ts` → `createDvirSchema`
+**Current state:** No field for an attached signature image.
+**Fix:** Add `signaturePhotoId: z.string().uuid().optional()` to `createDvirSchema` and the corresponding column on the DVIR table. Then iOS attaches the rendered PencilKit signature via the existing photo-upload pipeline.
+
+### Gap 6 — Earnings has no driver-facing endpoint
+**Status (carried from Session 6):** Still unaddressed. The iOS app derives a best-effort view from cached completed jobs. A `GET /earnings/me?range=today|week|period` would be the obvious endpoint.
+
+## Test coverage numbers
+
+```
+Core SPM tests:
+  JobStateMachineTests           5 passing
+  JobsRepositoryTests            2 passing
+  LocalStoreTests                2 passing
+  OutboxTests                    4 passing
+  AuthServiceTests               3 passing
+  DVIRRepositoryTests            3 passing  ← Session 6.1
+  ShiftRepositoryTests           3 passing  ← Session 6.1
+  HOSStatusTests                 4 passing  ← Session 6.1
+  ChatRepositoryTests            2 passing  ← Session 6.1
+  DocumentsRepositoryTests       2 passing  ← Session 6.1
+  ──────────────────────────────────────────
+  Total                         30 / 30 passing  (run time: 0.021s)
+```
+
+Direct iOS-SDK typecheck of all 72 Swift sources in the app target: **zero errors, zero warnings** (`swiftc -typecheck -sdk iphonesimulator -target arm64-apple-ios16.4-simulator` against the built Core/DesignSystem swiftmodules — exit code 0).
+
+## File-by-file inventory (Session 6.1 additions)
+
+```
+apps/driver-ios/
+├── Packages/Core/Sources/Core/
+│   ├── Models/
+│   │   ├── DVIR.swift                            # DvirType/Status/Severity, Dvir, CreateDvirPayload, DvirChecklist
+│   │   ├── FleetDocument.swift                   # DocumentOwnerType/Type, FleetDocument, UploadDocumentRequest, ExpirationsResponse
+│   │   ├── DriverShift.swift                     # DriverShiftStatus, DriverShift, HOSStatus, HOSConfig
+│   │   └── ChatMessage.swift                     # ChatMessage, ChatQuickReply, SendChatMessageRequest
+│   └── Sync/
+│       ├── DVIRRepository.swift                  # submit (outbox), refresh, status compute
+│       ├── DocumentsRepository.swift             # upload-queue, list, expirations
+│       ├── ShiftRepository.swift                 # start/end/status/location through outbox
+│       └── ChatRepository.swift                  # send, refresh, ack
+├── TowCommandDriver/Features/
+│   ├── DVIR/DVIRScreen.swift                     # Component checklist + signature + history
+│   ├── TimeClock/TimeClockScreen.swift           # Clock in/out, status picker, HOS warnings, pre-shift check
+│   ├── DocumentVault/DocumentVaultScreen.swift   # Expirations card, renewal upload, tap-to-email
+│   └── Chat/ChatScreen.swift                     # Bubbles, quick replies, voice memo, composer
+└── Packages/Core/Tests/CoreTests/
+    ├── DVIRRepositoryTests.swift                 # 3 tests
+    ├── ShiftRepositoryTests.swift                # 3 + 4 HOS tests
+    ├── DocumentsRepositoryTests.swift            # 2 tests
+    └── ChatRepositoryTests.swift                 # 2 tests
+```
+
+Modified:
+- `Packages/Core/.../Networking/Endpoints.swift` — 8 new endpoint constants
+- `Packages/Core/.../Networking/TowCommandAPI.swift` — 11 new methods on protocol + impl
+- `Packages/Core/.../Persistence/LocalStore.swift` — DVIR/Document/Shift/Chat persistence
+- `Packages/Core/.../Sync/Outbox.swift` — 7 new action variants
+- `Packages/Core/.../Sync/SyncEngine.swift` — drain handlers for new actions
+- `TowCommandDriver/App/AppContainer.swift` — sessionSnapshot, four new repos
+- `TowCommandDriver/App/RootView.swift` — 5-tab `TabView`, new `ToolsScreen`
+- `TowCommandDriver/Features/Jobs/JobDetailScreen.swift` — "Chat with Dispatcher" button
+
+## Updated remaining-deferred list
+
+After Session 6.1, the items still legitimately deferred (each gated on something external to the iOS codebase) are:
+
+| Item                       | Gate                                                                      |
+| -------------------------- | ------------------------------------------------------------------------- |
+| **CarPlay scene**          | CarPlay entitlement (separate Apple submission)                           |
+| **Siri Shortcuts**         | Design pass on the shortcut surface (no blocker — pure iOS work)          |
+| **Stripe Tap to Pay SDK**  | Apple Developer enrollment + Stripe live keys + Tap-to-Pay entitlement    |
+| **Mapbox iOS SDK**         | Mapbox paid account + downloads token + SDK SPM resolve                   |
+| **Sentry / Datadog SDKs**  | Account/DSN onboarding                                                    |
+| **Background URLSession** | Real device + S3 presigned-URL backend endpoint                            |
+| **Critical Alerts**        | Apple's 2–4 week manual approval after Developer enrollment               |
+
+All UI surfaces requested in the spec have been built. Where the backend isn't ready, the iOS calls hit the right endpoint with the right shape and queue mutations in the outbox for replay-on-success.
+
+## Commands
+
+```bash
+# Re-test Core (now 30 tests)
+swift test --package-path apps/driver-ios/Packages/Core
+
+# Regenerate xcodeproj after adding files
+cd apps/driver-ios && python3 scripts/generate-xcodeproj.py
+
+# Build (requires iOS Simulator runtime; see Session 6 report Known Issues #1)
+xcodebuild build \
+  -project apps/driver-ios/TowCommandDriver.xcodeproj \
+  -scheme TowCommandDriver \
+  -destination 'platform=iOS Simulator,name=iPhone 15'
+```
+
+## What Chris needs to do before Session 7 verification
+
+Same as Session 6, plus three new items:
+
+1. **Widen the role gate on the seven fleet routes and two shift routes listed in Gap 1 and Gap 2 above.** Each is a one-line `@Roles` change plus a one-line driver-scoping check in the corresponding service. After that, the iOS DVIR / Documents / Time Clock features are end-to-end functional against the deployed backend.
+2. **Build a `ChatModule` on the backend** with the two endpoints described in Gap 3. iOS already speaks the shape.
+3. **Add a `signaturePhotoId` field** to `createDvirSchema` and the DVIR table (Gap 5) so the rendered DVIR signature gets persisted with the record.

@@ -11,6 +11,31 @@ public protocol TowCommandAPI: Sendable {
     func transition(jobId: String, to: JobStatus, reason: String?) async throws -> Job
     func cancel(jobId: String, reason: String) async throws -> Job
     func uploadJobPhoto(jobId: String, photo: PhotoUploadRequest) async throws -> PhotoUploadResponse
+
+    // Session 6.1
+    func submitDvir(_ body: CreateDvirPayload) async throws -> Dvir
+    func listDvirs(driverId: String?, truckId: String?) async throws -> [Dvir]
+    func uploadDocument(_ body: UploadDocumentRequest) async throws -> FleetDocument
+    func listDocuments(ownerType: DocumentOwnerType?, ownerId: String?) async throws -> [FleetDocument]
+    func listExpirations() async throws -> ExpirationsResponse
+    func driverTrucks(driverId: String) async throws -> [DriverTruckAssignment]
+
+    func startShift(driverId: String, truckId: String?) async throws -> DriverShift
+    func endShift(shiftId: String) async throws -> DriverShift
+    func updateShiftStatus(shiftId: String, status: DriverShiftStatus) async throws -> DriverShift
+    func updateShiftLocation(shiftId: String, lat: Double, lng: Double) async throws -> DriverShift
+
+    func sendChatMessage(_ body: SendChatMessageRequest) async throws -> ChatMessage
+    func listChatMessages(jobId: String) async throws -> [ChatMessage]
+}
+
+public struct DriverTruckAssignment: Codable, Equatable, Identifiable, Sendable {
+    public let id: String
+    public let tenantId: String
+    public let driverId: String
+    public let truckId: String
+    public let isPrimary: Bool
+    public let createdAt: String
 }
 
 public struct TransitionRequest: Codable, Sendable {
@@ -73,5 +98,81 @@ public actor LiveTowCommandAPI: TowCommandAPI {
             body: photo,
             authorize: true
         )
+    }
+
+    // ---------- Session 6.1 ----------
+
+    public func submitDvir(_ body: CreateDvirPayload) async throws -> Dvir {
+        try await client.request(.POST, Endpoints.dvirs, body: body, authorize: true)
+    }
+
+    public func listDvirs(driverId: String? = nil, truckId: String? = nil) async throws -> [Dvir] {
+        var path = Endpoints.dvirs
+        var qs: [String] = []
+        if let driverId { qs.append("driverId=\(driverId)") }
+        if let truckId { qs.append("truckId=\(truckId)") }
+        if !qs.isEmpty { path += "?" + qs.joined(separator: "&") }
+        return try await client.request(.GET, path, body: nil, authorize: true)
+    }
+
+    public func uploadDocument(_ body: UploadDocumentRequest) async throws -> FleetDocument {
+        try await client.request(.POST, Endpoints.fleetDocuments, body: body, authorize: true)
+    }
+
+    public func listDocuments(ownerType: DocumentOwnerType? = nil, ownerId: String? = nil) async throws -> [FleetDocument] {
+        var path = Endpoints.fleetDocuments
+        var qs: [String] = []
+        if let ownerType { qs.append("ownerType=\(ownerType.rawValue)") }
+        if let ownerId { qs.append("ownerId=\(ownerId)") }
+        if !qs.isEmpty { path += "?" + qs.joined(separator: "&") }
+        return try await client.request(.GET, path, body: nil, authorize: true)
+    }
+
+    public func listExpirations() async throws -> ExpirationsResponse {
+        try await client.request(.GET, Endpoints.fleetExpirations, body: nil, authorize: true)
+    }
+
+    public func driverTrucks(driverId: String) async throws -> [DriverTruckAssignment] {
+        try await client.request(.GET, Endpoints.driverTrucks(driverId: driverId), body: nil, authorize: true)
+    }
+
+    public func startShift(driverId: String, truckId: String? = nil) async throws -> DriverShift {
+        try await client.request(
+            .POST, Endpoints.startShift,
+            body: StartShiftRequest(driverId: driverId, truckId: truckId),
+            authorize: true
+        )
+    }
+
+    public func endShift(shiftId: String) async throws -> DriverShift {
+        try await client.request(
+            .POST, Endpoints.endShift,
+            body: EndShiftRequest(shiftId: shiftId),
+            authorize: true
+        )
+    }
+
+    public func updateShiftStatus(shiftId: String, status: DriverShiftStatus) async throws -> DriverShift {
+        try await client.request(
+            .POST, Endpoints.shiftStatus(shiftId: shiftId),
+            body: UpdateShiftStatusRequest(status: status),
+            authorize: true
+        )
+    }
+
+    public func updateShiftLocation(shiftId: String, lat: Double, lng: Double) async throws -> DriverShift {
+        try await client.request(
+            .POST, Endpoints.shiftLocation(shiftId: shiftId),
+            body: UpdateShiftLocationRequest(lat: lat, lng: lng),
+            authorize: true
+        )
+    }
+
+    public func sendChatMessage(_ body: SendChatMessageRequest) async throws -> ChatMessage {
+        try await client.request(.POST, Endpoints.chatThread(jobId: body.jobId), body: body, authorize: true)
+    }
+
+    public func listChatMessages(jobId: String) async throws -> [ChatMessage] {
+        try await client.request(.GET, Endpoints.chatThread(jobId: jobId), body: nil, authorize: true)
     }
 }

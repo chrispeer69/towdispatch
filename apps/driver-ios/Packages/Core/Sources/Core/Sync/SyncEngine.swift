@@ -40,6 +40,28 @@ public actor SyncEngine {
             try localStore.updateJob(job)
         case .uploadPhoto(let jobId, let photo, _):
             _ = try await api.uploadJobPhoto(jobId: jobId, photo: photo)
+        case .submitDvir(let payload, _):
+            let dvir = try await api.submitDvir(payload)
+            try localStore.upsertDvir(dvir)
+        case .uploadFleetDocument(let payload, _):
+            let doc = try await api.uploadDocument(payload)
+            try localStore.upsertDocument(doc)
+        case .startShift(let driverId, let truckId, _):
+            let shift = try await api.startShift(driverId: driverId, truckId: truckId)
+            try localStore.upsertShift(shift)
+        case .endShift(let shiftId, _):
+            let shift = try await api.endShift(shiftId: shiftId)
+            try localStore.upsertShift(shift)
+        case .updateShiftStatus(let shiftId, let status, _):
+            let shift = try await api.updateShiftStatus(shiftId: shiftId, status: status)
+            try localStore.upsertShift(shift)
+        case .updateShiftLocation(let shiftId, let lat, let lng, _):
+            let shift = try await api.updateShiftLocation(shiftId: shiftId, lat: lat, lng: lng)
+            try localStore.upsertShift(shift)
+        case .sendChatMessage(let message, _):
+            let request = SendChatMessageRequest(message: message)
+            let server = try await api.sendChatMessage(request)
+            try localStore.acknowledgeChatMessage(clientId: message.id, server: server)
         }
     }
 

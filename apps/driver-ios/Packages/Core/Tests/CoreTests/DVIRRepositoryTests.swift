@@ -1,57 +1,48 @@
 import XCTest
 @testable import Core
 
-final class JobsRepositoryTests: XCTestCase {
-    private var storeRoot: URL!
-    private var outboxURL: URL!
-
+final class DVIRRepositoryTests: XCTestCase {
+    private var root: URL!
     override func setUpWithError() throws {
-        storeRoot = FileManager.default.temporaryDirectory
-            .appendingPathComponent("repo-test-\(UUID().uuidString)")
-        outboxURL = storeRoot.appendingPathComponent("outbox.json")
+        root = FileManager.default.temporaryDirectory.appendingPathComponent("dvir-test-\(UUID().uuidString)")
     }
-    override func tearDownWithError() throws { try? FileManager.default.removeItem(at: storeRoot) }
+    override func tearDownWithError() throws { try? FileManager.default.removeItem(at: root) }
 
-    func testTransitionEnqueuesAndUpdatesOptimistically() async throws {
-        let store = try FileLocalStore(root: storeRoot)
-        let outbox = try FileOutbox(fileURL: outboxURL)
-        let api = NoopAPI()
-        let repo = JobsRepository(api: api, localStore: store, outbox: outbox)
-
-        let job = sampleJob(id: "j1", status: .dispatched)
-        try store.saveJobs([MyJob(job: job, customer: nil, vehicle: nil)])
-
-        try await repo.transition(jobId: "j1", to: .enroute)
-        XCTAssertEqual(store.loadJobs().first?.job.status, .enroute)
+    func testSubmitWithNoDefectsIsClean() async throws {
+        let store = try FileLocalStore(root: root)
+        let outbox = try FileOutbox(fileURL: root.appendingPathComponent("outbox.json"))
+        let repo = DVIRRepository(api: NoopAPIForDvir(), localStore: store, outbox: outbox)
+        let dvir = try await repo.submit(.init(driverId: "d1", truckId: "t1", type: .preTrip))
+        XCTAssertEqual(dvir.status, .noDefects)
         XCTAssertEqual(outbox.pending().count, 1)
+        XCTAssertEqual(store.loadDvirs().count, 1)
     }
 
-    func testInvalidTransitionThrows() async throws {
-        let store = try FileLocalStore(root: storeRoot)
-        let outbox = try FileOutbox(fileURL: outboxURL)
-        let api = NoopAPI()
-        let repo = JobsRepository(api: api, localStore: store, outbox: outbox)
-
-        let job = sampleJob(id: "j1", status: .completed)
-        try store.saveJobs([MyJob(job: job, customer: nil, vehicle: nil)])
-
-        do {
-            try await repo.transition(jobId: "j1", to: .enroute)
-            XCTFail("Expected throw")
-        } catch let err as InvalidJobTransitionError {
-            XCTAssertEqual(err.from, .completed)
-            XCTAssertEqual(err.to, .enroute)
-        }
+    func testSubmitWithOOSDefectIsOutOfService() async throws {
+        let store = try FileLocalStore(root: root)
+        let outbox = try FileOutbox(fileURL: root.appendingPathComponent("outbox.json"))
+        let repo = DVIRRepository(api: NoopAPIForDvir(), localStore: store, outbox: outbox)
+        let dvir = try await repo.submit(.init(
+            driverId: "d1", truckId: "t1", type: .preTrip,
+            defects: [DvirDefect(component: "Brakes", severity: .outOfService)]
+        ))
+        XCTAssertEqual(dvir.status, .outOfService)
+        XCTAssertTrue(dvir.isOutOfService)
     }
 
-    private func sampleJob(id: String, status: JobStatus) -> Job {
-        Job(id: id, tenantId: "t1", jobNumber: "TC-001", status: status,
-            serviceType: "tow", pickupAddress: "x", authorizedBy: "stub",
-            createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z")
+    func testSubmitWithMinorDefectsIsMinor() async throws {
+        let store = try FileLocalStore(root: root)
+        let outbox = try FileOutbox(fileURL: root.appendingPathComponent("outbox.json"))
+        let repo = DVIRRepository(api: NoopAPIForDvir(), localStore: store, outbox: outbox)
+        let dvir = try await repo.submit(.init(
+            driverId: "d1", truckId: "t1", type: .preTrip,
+            defects: [DvirDefect(component: "Wipers", severity: .minor)]
+        ))
+        XCTAssertEqual(dvir.status, .minor)
     }
 }
 
-private actor NoopAPI: TowCommandAPI {
+private actor NoopAPIForDvir: TowCommandAPI {
     func login(_ body: LoginRequest) async throws -> LoginResponse { fatalError() }
     func refresh(_ body: RefreshRequest) async throws -> RefreshResponse { fatalError() }
     func logout(_ body: LogoutRequest) async throws {}

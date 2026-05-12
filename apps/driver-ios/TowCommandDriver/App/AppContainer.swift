@@ -16,10 +16,17 @@ final class AppContainer: ObservableObject {
     let api: TowCommandAPI
     let auth: AuthService
     let jobsRepository: JobsRepository
+    let dvirRepository: DVIRRepository
+    let documentsRepository: DocumentsRepository
+    let shiftRepository: ShiftRepository
+    let chatRepository: ChatRepository
     let syncEngine: SyncEngine
     let settings: SettingsStore
 
     @Published var route: AppRoute
+    /// Synchronous mirror of `auth.currentSession()` updated by sign-in /
+    /// sign-out / bootstrap. View bodies read this without `await`.
+    @Published private(set) var sessionSnapshot: AuthSession?
 
     init(config: AppConfig) {
         self.config = config
@@ -59,9 +66,14 @@ final class AppContainer: ObservableObject {
         pendingClient.delegate = auth
 
         self.jobsRepository = JobsRepository(api: api, localStore: localStore, outbox: outbox)
+        self.dvirRepository = DVIRRepository(api: api, localStore: localStore, outbox: outbox)
+        self.documentsRepository = DocumentsRepository(api: api, localStore: localStore, outbox: outbox)
+        self.shiftRepository = ShiftRepository(api: api, localStore: localStore, outbox: outbox)
+        self.chatRepository = ChatRepository(api: api, localStore: localStore, outbox: outbox)
         self.syncEngine = SyncEngine(api: api, outbox: outbox, localStore: localStore)
 
         self.route = .splash
+        self.sessionSnapshot = nil
 
         Task { @MainActor in
             await bootstrapRoute()
@@ -70,7 +82,9 @@ final class AppContainer: ObservableObject {
     }
 
     private func bootstrapRoute() async {
-        if await auth.isSignedIn() {
+        let current = await auth.currentSession()
+        self.sessionSnapshot = current
+        if current != nil {
             self.route = .signedIn
         } else {
             self.route = .signIn
@@ -87,13 +101,15 @@ final class AppContainer: ObservableObject {
     }
 
     func signIn(email: String, password: String) async throws {
-        _ = try await auth.signIn(email: email, password: password)
+        let session = try await auth.signIn(email: email, password: password)
+        self.sessionSnapshot = session
         self.route = .signedIn
         telemetry.event("auth.signin.success", attributes: [:])
     }
 
     func signOut() async {
         await auth.signOut()
+        self.sessionSnapshot = nil
         self.route = .signIn
         telemetry.event("auth.signout", attributes: [:])
     }
