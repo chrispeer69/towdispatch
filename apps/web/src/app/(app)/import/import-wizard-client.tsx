@@ -134,13 +134,21 @@ export function ImportWizardClient({
             </div>
           )}
         </div>
+        <label htmlFor="import-file" className="sr-only">
+          Towbook export bundle (ZIP)
+        </label>
         <input
+          id="import-file"
           type="file"
           accept=".zip,application/zip"
           className="mt-2 block w-full"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
-        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+        {error && (
+          <p role="alert" aria-live="assertive" className="mt-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
       </section>
 
       <section className="rounded-lg border border-border bg-card p-6">

@@ -62,25 +62,54 @@ export function ResetForm(): JSX.Element {
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-4"
+      aria-busy={isSubmitting}
+    >
       <input type="hidden" {...register('token')} />
       <div className="space-y-1.5">
-        <Label>New password</Label>
-        <Input type="password" autoComplete="new-password" {...register('newPassword')} />
+        <Label htmlFor="reset-newpw">New password</Label>
+        <Input
+          id="reset-newpw"
+          type="password"
+          autoComplete="new-password"
+          aria-required="true"
+          aria-invalid={errors.newPassword ? true : undefined}
+          aria-describedby={errors.newPassword ? 'reset-newpw-error' : undefined}
+          {...register('newPassword')}
+        />
         <PasswordStrength value={pw} />
         {errors.newPassword?.message ? (
-          <p className="text-xs text-danger">{errors.newPassword.message}</p>
+          <p id="reset-newpw-error" className="text-xs text-danger">
+            {errors.newPassword.message}
+          </p>
         ) : null}
       </div>
       <div className="space-y-1.5">
-        <Label>Confirm password</Label>
-        <Input type="password" autoComplete="new-password" {...register('confirmPassword')} />
+        <Label htmlFor="reset-confirmpw">Confirm password</Label>
+        <Input
+          id="reset-confirmpw"
+          type="password"
+          autoComplete="new-password"
+          aria-required="true"
+          aria-invalid={errors.confirmPassword ? true : undefined}
+          aria-describedby={errors.confirmPassword ? 'reset-confirmpw-error' : undefined}
+          {...register('confirmPassword')}
+        />
         {errors.confirmPassword?.message ? (
-          <p className="text-xs text-danger">{errors.confirmPassword.message}</p>
+          <p id="reset-confirmpw-error" className="text-xs text-danger">
+            {errors.confirmPassword.message}
+          </p>
         ) : null}
       </div>
       {submitError ? (
-        <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+        >
           {submitError}
         </div>
       ) : null}

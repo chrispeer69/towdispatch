@@ -118,6 +118,7 @@ export function MappingClient({ chart, mappings }: Props): JSX.Element {
                 <td className="py-2">{CATEGORY_LABELS[cat] ?? cat}</td>
                 <td className="py-2">
                   <select
+                    aria-label={`Map ${CATEGORY_LABELS[cat] ?? cat} to external account`}
                     value={m?.externalAccountId ?? ''}
                     onChange={(e) => onSelect(cat, e.target.value)}
                     className="rounded bg-steel border border-border px-2 py-1 font-mono text-xs"
@@ -151,7 +152,7 @@ export function MappingClient({ chart, mappings }: Props): JSX.Element {
         </tbody>
       </table>
       {errorMessage ? (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" aria-live="assertive" className="text-red-400 text-sm">
           {errorMessage}
         </p>
       ) : null}

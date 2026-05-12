@@ -15,13 +15,20 @@ import { Global, Module, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '../../config/config.service.js';
 import { IntegrationRegistry } from '../types.js';
 import { NotificationService } from './notification.service.js';
+import { PushMockController, PushMockService } from './push-mock.service.js';
 import { StubNotificationProvider } from './stub.notification-provider.js';
 import { TwilioNotificationProvider } from './twilio.notification-provider.js';
 
 @Global()
 @Module({
-  providers: [StubNotificationProvider, TwilioNotificationProvider, NotificationService],
-  exports: [NotificationService, StubNotificationProvider],
+  controllers: [PushMockController],
+  providers: [
+    StubNotificationProvider,
+    TwilioNotificationProvider,
+    NotificationService,
+    PushMockService,
+  ],
+  exports: [NotificationService, StubNotificationProvider, PushMockService],
 })
 export class NotificationModule implements OnModuleInit {
   constructor(

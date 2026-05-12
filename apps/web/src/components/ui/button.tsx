@@ -15,7 +15,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-orange text-white hover:bg-orange-light',
+        // Orange-dark (#C44410) on white meets WCAG AA contrast (4.5:1+);
+        // the brand orange (#F05A1A) falls just short (3.19:1) which
+        // Lighthouse flags. Hover lifts to the brand orange so the
+        // pressed/hover state still reads as the canonical brand color.
+        default: 'bg-orange-dark text-white hover:bg-orange',
         secondary:
           'bg-steel-light text-text-primary border border-steel-border hover:border-steel-border-light',
         ghost: 'bg-transparent text-text-primary hover:bg-steel-light',

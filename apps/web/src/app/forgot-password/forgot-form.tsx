@@ -40,10 +40,20 @@ export function ForgotForm(): JSX.Element {
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1.5">
-        <Label>Email</Label>
-        <Input type="email" autoComplete="email" {...register('email')} />
+        <Label htmlFor="forgot-email">Email</Label>
+        <Input
+          id="forgot-email"
+          type="email"
+          autoComplete="email"
+          aria-required="true"
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={errors.email ? 'forgot-email-error' : undefined}
+          {...register('email')}
+        />
         {errors.email?.message ? (
-          <p className="text-xs text-danger">{errors.email.message}</p>
+          <p id="forgot-email-error" className="text-xs text-danger">
+            {errors.email.message}
+          </p>
         ) : null}
       </div>
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>

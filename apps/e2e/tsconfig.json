@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": ["node"],
+    "jsx": "preserve",
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["tests/**/*.ts", "fixtures/**/*.ts", "playwright.config.ts"]
+}

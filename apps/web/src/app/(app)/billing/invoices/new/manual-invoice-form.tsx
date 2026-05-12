@@ -3,6 +3,7 @@
 import { type InvoiceWithDetailsDto, invoiceTermsValues } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface DraftLine {
   description: string;
@@ -72,9 +73,12 @@ export function ManualInvoiceFormClient(): JSX.Element {
         throw new Error(`Create failed: ${res.status} ${await res.text()}`);
       }
       const created = (await res.json()) as InvoiceWithDetailsDto;
+      toast.success('Invoice draft created');
       router.push(`/billing/invoices/${created.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -85,6 +89,7 @@ export function ManualInvoiceFormClient(): JSX.Element {
       className="space-y-4 rounded-lg border border-steel-border bg-steel-mid/40 p-4"
       onSubmit={submit}
       data-testid="manual-invoice-form"
+      aria-busy={busy}
     >
       <div className="grid gap-3 md:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-muted">
@@ -133,6 +138,7 @@ export function ManualInvoiceFormClient(): JSX.Element {
                 value={l.description}
                 onChange={(e) => update(idx, { description: e.target.value })}
                 placeholder="Description"
+                aria-label={`Line ${idx + 1} description`}
                 className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
                 data-testid={`line-desc-${idx}`}
               />
@@ -141,6 +147,7 @@ export function ManualInvoiceFormClient(): JSX.Element {
                 value={l.quantity}
                 onChange={(e) => update(idx, { quantity: e.target.value })}
                 placeholder="Qty"
+                aria-label={`Line ${idx + 1} quantity`}
                 className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
                 data-testid={`line-qty-${idx}`}
               />
@@ -149,6 +156,7 @@ export function ManualInvoiceFormClient(): JSX.Element {
                 value={l.unit}
                 onChange={(e) => update(idx, { unit: e.target.value })}
                 placeholder="unit"
+                aria-label={`Line ${idx + 1} unit`}
                 className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
               />
               <input
@@ -156,12 +164,14 @@ export function ManualInvoiceFormClient(): JSX.Element {
                 value={l.unitPriceDollars}
                 onChange={(e) => update(idx, { unitPriceDollars: e.target.value })}
                 placeholder="0.00"
+                aria-label={`Line ${idx + 1} unit price (dollars)`}
                 className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
                 data-testid={`line-price-${idx}`}
               />
               <button
                 type="button"
                 onClick={() => removeLine(idx)}
+                aria-label={`Remove line ${idx + 1}`}
                 className="rounded-md border border-steel-border px-2 py-1.5 text-xs text-text-secondary"
                 disabled={lines.length === 1}
               >
@@ -198,7 +208,11 @@ export function ManualInvoiceFormClient(): JSX.Element {
         >
           Create draft
         </button>
-        {error ? <span className="text-sm text-red-400">{error}</span> : null}
+        {error ? (
+          <span role="alert" aria-live="assertive" className="text-sm text-red-400">
+            {error}
+          </span>
+        ) : null}
       </div>
     </form>
   );

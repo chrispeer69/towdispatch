@@ -135,6 +135,10 @@ export type AuthTenantDto = z.infer<typeof authTenantDtoSchema>;
  *   - 'needs_tenant_selection': multiple tenants matched the email; client
  *     must re-submit /auth/login with a tenantSlug.
  *   - 'mfa_required': user has MFA enabled; client must call /auth/mfa/login.
+ *   - 'mfa_setup_required': role is OWNER/ADMIN and MFA not enrolled.
+ *     Client must complete enrollment at /settings/security/mfa/enroll
+ *     before tokens are issued. A short-lived enrollment token is
+ *     returned and consumed by /auth/mfa/setup.
  */
 export const authenticatedResponseSchema = z.object({
   status: z.literal('authenticated'),
@@ -158,10 +162,18 @@ export const mfaRequiredResponseSchema = z.object({
 });
 export type MfaRequiredResponse = z.infer<typeof mfaRequiredResponseSchema>;
 
+export const mfaSetupRequiredResponseSchema = z.object({
+  status: z.literal('mfa_setup_required'),
+  setupToken: z.string(),
+  role: z.string(),
+});
+export type MfaSetupRequiredResponse = z.infer<typeof mfaSetupRequiredResponseSchema>;
+
 export const loginResponseSchema = z.discriminatedUnion('status', [
   authenticatedResponseSchema,
   tenantSelectionResponseSchema,
   mfaRequiredResponseSchema,
+  mfaSetupRequiredResponseSchema,
 ]);
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 

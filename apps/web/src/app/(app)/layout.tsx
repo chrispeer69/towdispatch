@@ -28,7 +28,7 @@ export default async function AppLayout({
         <AppSidebar tenant={session.tenant} user={session.user} />
         <div className="flex min-h-screen flex-1 flex-col">
           <AppTopbar />
-          <main className="flex-1 overflow-y-auto bg-steel">
+          <main id="main-content" className="flex-1 overflow-y-auto bg-steel" tabIndex={-1}>
             <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10">{children}</div>
           </main>
         </div>

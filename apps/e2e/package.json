@@ -1,0 +1,23 @@
+{
+  "name": "@towcommand/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:chromium": "playwright test --project=chromium",
+    "test:report": "playwright show-report",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.0",
+    "@playwright/test": "1.49.0",
+    "playwright-lighthouse": "4.0.0",
+    "lighthouse": "12.2.1",
+    "chrome-launcher": "1.1.2",
+    "@towcommand/shared": "workspace:*",
+    "@types/node": "22.9.3",
+    "typescript": "5.6.3"
+  }
+}

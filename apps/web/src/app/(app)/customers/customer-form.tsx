@@ -16,8 +16,10 @@ import {
   customerTypeValues,
 } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface Props {
   mode: 'create' | 'edit';
@@ -67,16 +69,24 @@ export function CustomerForm({ mode, initial }: Props): JSX.Element {
     });
     if (!res.ok) {
       const data = (await res.json().catch(() => null)) as { message?: string } | null;
-      setSubmitError(data?.message ?? 'Save failed. Please try again.');
+      const msg = data?.message ?? 'Save failed. Please try again.';
+      setSubmitError(msg);
+      toast.error(msg);
       return;
     }
     const created = (await res.json()) as CustomerDto;
+    toast.success(mode === 'create' ? 'Customer created' : 'Customer updated');
     router.push(`/customers/${created.id ?? initial?.id}`);
     router.refresh();
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-8"
+      aria-busy={isSubmitting}
+    >
       <Section title="Identity">
         <Field label="Type" error={errors.type?.message}>
           <select
@@ -124,7 +134,11 @@ export function CustomerForm({ mode, initial }: Props): JSX.Element {
       </Section>
 
       {submitError ? (
-        <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+        >
           {submitError}
         </div>
       ) : null}
@@ -169,12 +183,31 @@ function Field({
   hint?: string | undefined;
   children: React.ReactNode;
 }): JSX.Element {
+  const id = React.useId();
+  const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const describedBy = error ? errorId : hint ? hintId : undefined;
+  let enhanced: React.ReactNode = children;
+  if (React.isValidElement(children)) {
+    const extra: Record<string, string | boolean> = { id };
+    if (describedBy) extra['aria-describedby'] = describedBy;
+    if (error) extra['aria-invalid'] = true;
+    enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
+  }
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {hint && !error ? <p className="text-xs text-text-muted">{hint}</p> : null}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      <Label htmlFor={id}>{label}</Label>
+      {enhanced}
+      {hint && !error ? (
+        <p id={hintId} className="text-xs text-text-muted">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={errorId} className="text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

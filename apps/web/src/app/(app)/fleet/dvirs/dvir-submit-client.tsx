@@ -86,8 +86,9 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
       </h2>
       <div className="mt-3 grid gap-3 rounded-[12px] border border-steel-border bg-steel-mid p-4 md:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <Label>Driver</Label>
+          <Label htmlFor="dvir-driver">Driver</Label>
           <select
+            id="dvir-driver"
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             data-testid="dvir-driver-select"
@@ -101,8 +102,9 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <Label>Truck</Label>
+          <Label htmlFor="dvir-truck">Truck</Label>
           <select
+            id="dvir-truck"
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             data-testid="dvir-truck-select"
@@ -116,8 +118,9 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <Label>Type</Label>
+          <Label htmlFor="dvir-type">Type</Label>
           <select
+            id="dvir-type"
             value={type}
             onChange={(e) => setType(e.target.value as (typeof dvirTypeValues)[number])}
             className="rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
@@ -130,8 +133,9 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <Label>Odometer</Label>
+          <Label htmlFor="dvir-odometer">Odometer</Label>
           <Input
+            id="dvir-odometer"
             type="number"
             value={odometer}
             onChange={(e) => setOdometer(e.target.value)}
@@ -157,12 +161,14 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
               <li key={d.uid} className="flex flex-wrap items-center gap-2">
                 <Input
                   placeholder="Component (e.g. Brakes)"
+                  aria-label={`Defect ${i + 1} component`}
                   value={d.component}
                   onChange={(e) => updateDefect(i, { component: e.target.value })}
                   className="flex-1 min-w-[200px]"
                   data-testid={`dvir-defect-component-${i}`}
                 />
                 <select
+                  aria-label={`Defect ${i + 1} severity`}
                   value={d.severity}
                   onChange={(e) =>
                     updateDefect(i, {
@@ -181,6 +187,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
                 <button
                   type="button"
                   onClick={() => removeDefect(i)}
+                  aria-label={`Remove defect ${i + 1}`}
                   className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted hover:text-red-400"
                 >
                   Remove
@@ -198,11 +205,19 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
           >
             Submit DVIR
           </Button>
-          {error ? <span className="ml-3 text-sm text-red-400">{error}</span> : null}
-          {success ? (
-            <span className="ml-3 text-sm text-emerald-300" data-testid="dvir-success">
-              {success}
+          {error ? (
+            <span role="alert" aria-live="assertive" className="ml-3 text-sm text-red-400">
+              {error}
             </span>
+          ) : null}
+          {success ? (
+            <output
+              aria-live="polite"
+              className="ml-3 text-sm text-emerald-300"
+              data-testid="dvir-success"
+            >
+              {success}
+            </output>
           ) : null}
         </div>
       </div>

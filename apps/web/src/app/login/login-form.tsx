@@ -121,12 +121,33 @@ export function LoginForm(): JSX.Element {
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(submitLogin)} className="space-y-5">
-      <Field label="Email" error={errors.email?.message}>
-        <Input type="email" autoComplete="email" {...register('email')} />
+    <form
+      noValidate
+      onSubmit={handleSubmit(submitLogin)}
+      className="space-y-5"
+      aria-busy={isSubmitting}
+    >
+      <Field label="Email" htmlFor="login-email" error={errors.email?.message}>
+        <Input
+          id="login-email"
+          type="email"
+          autoComplete="email"
+          aria-required="true"
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={errors.email ? 'login-email-error' : undefined}
+          {...register('email')}
+        />
       </Field>
-      <Field label="Password" error={errors.password?.message}>
-        <Input type="password" autoComplete="current-password" {...register('password')} />
+      <Field label="Password" htmlFor="login-password" error={errors.password?.message}>
+        <Input
+          id="login-password"
+          type="password"
+          autoComplete="current-password"
+          aria-required="true"
+          aria-invalid={errors.password ? true : undefined}
+          aria-describedby={errors.password ? 'login-password-error' : undefined}
+          {...register('password')}
+        />
       </Field>
       <div className="flex items-center justify-between text-xs">
         <Link
@@ -137,7 +158,11 @@ export function LoginForm(): JSX.Element {
         </Link>
       </div>
       {error ? (
-        <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+        >
           {error}
         </div>
       ) : null}
@@ -150,15 +175,20 @@ export function LoginForm(): JSX.Element {
 
 interface FieldProps {
   label: string;
+  htmlFor?: string;
   error?: string | undefined;
   children: React.ReactNode;
 }
-function Field({ label, error, children }: FieldProps): JSX.Element {
+function Field({ label, htmlFor, error, children }: FieldProps): JSX.Element {
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      {error ? (
+        <p id={htmlFor ? `${htmlFor}-error` : undefined} className="text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -152,7 +152,7 @@ export function PaymentsSettingsClient({ initial }: Props): JSX.Element {
       </section>
 
       {errorMessage ? (
-        <p role="alert" className="text-red-400 text-sm">
+        <p role="alert" aria-live="assertive" className="text-red-400 text-sm">
           {errorMessage}
         </p>
       ) : null}

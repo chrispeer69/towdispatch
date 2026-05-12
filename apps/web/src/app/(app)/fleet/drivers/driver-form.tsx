@@ -13,8 +13,10 @@ import {
   driverEmploymentStatusValues,
 } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface Props {
   mode: 'create' | 'edit';
@@ -65,16 +67,24 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
     });
     if (!res.ok) {
       const data = (await res.json().catch(() => null)) as { message?: string } | null;
-      setSubmitError(data?.message ?? 'Save failed.');
+      const msg = data?.message ?? 'Save failed.';
+      setSubmitError(msg);
+      toast.error(msg);
       return;
     }
     const created = (await res.json()) as DriverDto;
+    toast.success(mode === 'create' ? 'Driver created' : 'Driver updated');
     router.push(`/fleet/drivers/${created.id ?? initial?.id}`);
     router.refresh();
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-8"
+      aria-busy={isSubmitting}
+    >
       <Section title="Identity">
         <Field label="First name" error={errors.firstName?.message}>
           <Input data-testid="driver-first-name" {...register('firstName')} />
@@ -175,7 +185,7 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
       </Section>
 
       {submitError ? (
-        <p className="text-sm text-red-400" role="alert">
+        <p className="text-sm text-red-400" role="alert" aria-live="assertive">
           {submitError}
         </p>
       ) : null}
@@ -213,11 +223,26 @@ function Field({
   error?: string | undefined;
   children: React.ReactNode;
 }): JSX.Element {
+  const id = React.useId();
+  const errorId = `${id}-error`;
+  let enhanced: React.ReactNode = children;
+  if (React.isValidElement(children)) {
+    const extra: Record<string, string | boolean> = { id };
+    if (error) {
+      extra['aria-describedby'] = errorId;
+      extra['aria-invalid'] = true;
+    }
+    enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
+  }
   return (
     <div className="flex flex-col gap-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error ? <p className="text-xs text-red-400">{error}</p> : null}
+      <Label htmlFor={id}>{label}</Label>
+      {enhanced}
+      {error ? (
+        <p id={errorId} className="text-xs text-red-400">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

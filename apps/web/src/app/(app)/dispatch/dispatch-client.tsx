@@ -21,6 +21,7 @@ import {
 import { Inbox, MapPin, Truck, Users } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { type Socket, io as ioClient } from 'socket.io-client';
+import { toast } from 'sonner';
 import { DispatchMap } from './dispatch-map';
 import { type DispatchSnapshot, dispatchReducer, initialState } from './dispatch-state';
 import { TrackingBadge } from './tracking-badge';
@@ -179,17 +180,16 @@ export function DispatchClient({
         });
         if (!res.ok) {
           const body = (await res.json().catch(() => ({}))) as { message?: string };
-          dispatch({
-            type: 'rollback',
-            jobId,
-            reason: body.message ?? 'unassign failed',
-          });
+          const reason = body.message ?? 'unassign failed';
+          dispatch({ type: 'rollback', jobId, reason });
+          toast.error(`Unassign rolled back: ${reason}`);
           return;
         }
         const job = (await res.json()) as JobDto;
         dispatch({ type: 'commit', jobId, job });
       } catch {
         dispatch({ type: 'rollback', jobId, reason: 'network error' });
+        toast.error('Unassign rolled back: network error');
       }
       return;
     }
@@ -220,13 +220,24 @@ export function DispatchClient({
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { message?: string };
-        dispatch({ type: 'rollback', jobId, reason: body.message ?? 'assignment failed' });
+        const reason = body.message ?? 'assignment failed';
+        dispatch({ type: 'rollback', jobId, reason });
+        // 409 indicates the concurrency-conflict path added in 17B (see
+        // apps/api/src/modules/jobs/jobs.service.ts). Show a focused
+        // conflict message so the dispatcher knows to refresh.
+        if (res.status === 409) {
+          toast.error('Already assigned by another dispatcher. Refresh and try again.');
+        } else {
+          toast.error(`Assignment rolled back: ${reason}`);
+        }
         return;
       }
       const job = (await res.json()) as JobDto;
       dispatch({ type: 'commit', jobId, job });
+      toast.success('Job assigned');
     } catch {
       dispatch({ type: 'rollback', jobId, reason: 'network error' });
+      toast.error('Assignment rolled back: network error');
     }
   }
 

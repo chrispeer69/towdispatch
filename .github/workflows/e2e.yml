@@ -1,0 +1,130 @@
+name: E2E
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  e2e:
+    name: Playwright (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: towcommand
+          POSTGRES_PASSWORD: towcommand_dev_pw
+          POSTGRES_DB: towcommand
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://towcommand:towcommand_dev_pw@localhost:5432/towcommand
+      DATABASE_ADMIN_URL: postgres://towcommand:towcommand_dev_pw@localhost:5432/towcommand
+      REDIS_URL: redis://localhost:6379
+      JWT_ACCESS_SECRET: ci-access-secret-with-at-least-32-chars-long
+      JWT_REFRESH_SECRET: ci-refresh-secret-with-at-least-32-chars-long
+      JWT_MFA_SECRET: ci-mfa-secret-with-at-least-32-chars-long
+      TOTP_ENCRYPTION_KEY: ci-totp-encryption-key-32+-chars-long
+      API_E2E_BASE_URL: http://localhost:3601
+      WEB_E2E_BASE_URL: http://localhost:3600
+      NEXT_PUBLIC_API_URL: http://localhost:3601
+      E2E_RUN_REQUIRES_STACK: '1'
+      # Firefox + WebKit run on the main-branch push only.
+      E2E_FULL_BROWSER_MATRIX: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && '1' || '0' }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations
+        run: pnpm --filter @towcommand/db migrate
+
+      - name: Build api
+        run: pnpm --filter @towcommand/api build
+
+      - name: Build web
+        run: pnpm --filter @towcommand/web build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @towcommand/e2e exec playwright install --with-deps chromium
+
+      - name: Start API
+        run: |
+          API_PORT=3601 API_HOST=0.0.0.0 nohup node --env-file=apps/api/.env.example apps/api/dist/apps/api/src/main.js > apps/api/api.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3601/health > /dev/null; then
+              echo "API is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "API failed to start"; cat apps/api/api.log; exit 1
+
+      - name: Start Web
+        run: |
+          cd apps/web
+          PORT=3600 nohup pnpm start > ../../web.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3600/login > /dev/null; then
+              echo "Web is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "Web failed to start"; cat ../../web.log; exit 1
+
+      - name: Run E2E suite (including Lighthouse)
+        run: pnpm --filter @towcommand/e2e test
+        env:
+          NODE_ENV: test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/e2e/playwright-report
+          retention-days: 14
+
+      - name: Upload trace + screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: apps/e2e/test-results
+          retention-days: 14
+
+      - name: Upload API + Web logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: |
+            apps/api/api.log
+            web.log
+          retention-days: 7

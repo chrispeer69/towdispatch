@@ -21,7 +21,8 @@ export interface MfaChallengeClaims extends JWTPayload {
   sub: string;
   tid: string;
   role: string;
-  mfa: true;
+  mfa?: true;
+  mfa_setup?: true;
 }
 
 @Injectable()
@@ -66,6 +67,42 @@ export class JwtService {
       .setAudience(`${this.config.jwt.audience}-mfa`)
       .setExpirationTime('5m')
       .sign(this.mfaKey);
+  }
+
+  /**
+   * Signs an MFA setup token returned when a privileged user (OWNER/ADMIN)
+   * authenticates without having MFA enrolled. The client must complete
+   * /auth/mfa/setup + /auth/mfa/verify-setup before any access tokens are
+   * issued.
+   */
+  async signMfaSetupRequired(claims: {
+    sub: string;
+    tid: string;
+    role: string;
+  }): Promise<string> {
+    return new SignJWT({ ...claims, mfa_setup: true })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(`${this.config.jwt.audience}-mfa-setup`)
+      .setExpirationTime('15m')
+      .sign(this.mfaKey);
+  }
+
+  async verifyMfaSetupRequired(token: string): Promise<MfaChallengeClaims> {
+    const { payload } = await jwtVerify(token, this.mfaKey, {
+      issuer: this.config.jwt.issuer,
+      audience: `${this.config.jwt.audience}-mfa-setup`,
+      algorithms: ['HS256'],
+    });
+    if (
+      payload.mfa_setup !== true ||
+      typeof payload.sub !== 'string' ||
+      typeof payload.tid !== 'string'
+    ) {
+      throw new Error('Invalid MFA setup token');
+    }
+    return payload as MfaChallengeClaims;
   }
 
   async verifyMfaChallenge(token: string): Promise<MfaChallengeClaims> {

@@ -42,6 +42,7 @@ import {
 } from '@towcommand/shared';
 import { CheckCircle2, MapPin, PhoneCall, Truck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import {
   type ChangeEvent,
   type FormEvent,
@@ -881,9 +882,18 @@ function Field({
   required?: boolean;
   children: React.ReactNode;
 }): JSX.Element {
+  const id = React.useId();
+  let enhanced: React.ReactNode = children;
+  if (React.isValidElement(children)) {
+    const existing = children.props as Record<string, unknown> | undefined;
+    const extra: Record<string, string | boolean> = {};
+    if (!existing?.id) extra.id = id;
+    if (required) extra['aria-required'] = true;
+    enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
+  }
   return (
     <div className="space-y-1.5">
-      <Label>
+      <Label htmlFor={id}>
         {label}
         {required ? (
           <span
@@ -895,7 +905,7 @@ function Field({
           </span>
         ) : null}
       </Label>
-      {children}
+      {enhanced}
     </div>
   );
 }

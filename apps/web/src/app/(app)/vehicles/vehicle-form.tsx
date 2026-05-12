@@ -12,8 +12,10 @@ import {
   vehicleClassValues,
 } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface Props {
   mode: 'create' | 'edit';
@@ -80,16 +82,24 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
     });
     if (!res.ok) {
       const data = (await res.json().catch(() => null)) as { message?: string } | null;
-      setSubmitError(data?.message ?? 'Save failed. Please try again.');
+      const msg = data?.message ?? 'Save failed. Please try again.';
+      setSubmitError(msg);
+      toast.error(msg);
       return;
     }
     const result = (await res.json()) as VehicleDto;
+    toast.success(mode === 'create' ? 'Vehicle created' : 'Vehicle updated');
     router.push(`/vehicles/${result.id ?? initial?.id}`);
     router.refresh();
   }
 
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-8"
+      aria-busy={isSubmitting}
+    >
       <Section title="Identification">
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="VIN (17 chars)" error={errors.vin?.message}>
@@ -180,7 +190,11 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
       </Section>
 
       {submitError ? (
-        <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+        >
           {submitError}
         </div>
       ) : null}
@@ -223,11 +237,26 @@ function Field({
   error?: string | undefined;
   children: React.ReactNode;
 }): JSX.Element {
+  const id = React.useId();
+  const errorId = `${id}-error`;
+  let enhanced: React.ReactNode = children;
+  if (React.isValidElement(children)) {
+    const extra: Record<string, string | boolean> = { id };
+    if (error) {
+      extra['aria-describedby'] = errorId;
+      extra['aria-invalid'] = true;
+    }
+    enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
+  }
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      <Label htmlFor={id}>{label}</Label>
+      {enhanced}
+      {error ? (
+        <p id={errorId} className="text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

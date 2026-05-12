@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signupSchema } from '@towcommand/shared';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -160,7 +161,11 @@ export function SignupForm(): JSX.Element {
       </p>
 
       {submitError ? (
-        <div className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+        >
           {submitError}
         </div>
       ) : null}
@@ -180,12 +185,34 @@ interface FieldProps {
 }
 
 function Field({ label, error, hint, children }: FieldProps): JSX.Element {
+  const id = React.useId();
+  const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
+  const describedBy = error ? errorId : hint ? hintId : undefined;
+  // Inject id + aria-describedby + aria-invalid into the single child
+  // input when the child is a valid element. Robust against arrays or
+  // non-element children — those render unchanged.
+  let enhanced: React.ReactNode = children;
+  if (React.isValidElement(children)) {
+    const extra: Record<string, string | boolean> = { id };
+    if (describedBy) extra['aria-describedby'] = describedBy;
+    if (error) extra['aria-invalid'] = true;
+    enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
+  }
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {hint && !error ? <p className="text-xs text-text-muted">{hint}</p> : null}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      <Label htmlFor={id}>{label}</Label>
+      {enhanced}
+      {hint && !error ? (
+        <p id={hintId} className="text-xs text-text-muted">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={errorId} className="text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

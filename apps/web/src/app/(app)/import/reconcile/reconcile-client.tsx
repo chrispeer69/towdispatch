@@ -48,7 +48,11 @@ export function ReconcileClient({ tenantId }: { tenantId: string }): JSX.Element
     <div className="space-y-6">
       <section className="rounded-lg border border-border bg-card p-6">
         <h2 className="mb-2 text-lg font-semibold">Drop a Towbook export</h2>
+        <label htmlFor="reconcile-file" className="sr-only">
+          Towbook export bundle (ZIP)
+        </label>
         <input
+          id="reconcile-file"
           type="file"
           accept=".zip,application/zip"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
@@ -57,7 +61,11 @@ export function ReconcileClient({ tenantId }: { tenantId: string }): JSX.Element
         <Button onClick={run} disabled={!file || busy} className="mt-4">
           {busy ? 'Reconciling…' : 'Run reconciliation'}
         </Button>
-        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+        {error && (
+          <p role="alert" aria-live="assertive" className="mt-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
       </section>
 
       {diffs && (
