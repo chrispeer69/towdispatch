@@ -1,23 +1,30 @@
 # =====================================================================
-# TowCommand — Railway one-shot deploy script.
-# Runs ALL the calls in the deploy plan after you've authenticated.
+# TowCommand - Railway deploy script (idempotent, Railway CLI v4 syntax).
 #
-# Prerequisites (one-time, interactive — cannot be automated from here):
-#   1. winget install Railway.cli   (or: npm i -g @railway/cli)
-#   2. railway login                (opens browser)
-#   3. cd C:\dev\towcommand
-#   4. .\scripts\railway\deploy.ps1
+# Prerequisites:
+#   1. railway login   (one time, interactive, opens a browser)
+#   2. cd C:\dev\towcommand
+#   3. .\scripts\railway\deploy.ps1
 #
-# Script is idempotent: re-running it is safe; it will reuse existing
-# services and just update env vars + redeploy.
+# Re-running is safe: every step skips work that's already done.
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
 
 function Require-Cmd($name) {
   if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
-    throw "Missing required CLI: $name. See header for install instructions."
+    throw "Missing required CLI: $name."
   }
+}
+
+function Try-Cmd {
+  # Run a railway command. Print its output. Don't blow up on non-zero exit —
+  # we treat "already exists" / "already linked" as success and continue.
+  param([Parameter(ValueFromRemainingArguments)] [string[]] $cmd)
+  $joined = ($cmd -join ' ')
+  Write-Host "    $ railway $joined" -ForegroundColor DarkGray
+  & railway @cmd 2>&1 | ForEach-Object { Write-Host "      $_" }
+  return $LASTEXITCODE
 }
 
 Require-Cmd railway
@@ -27,66 +34,134 @@ $repoRoot = (git rev-parse --show-toplevel)
 Set-Location $repoRoot
 
 $projectName = 'towcommand-prod'
-$envName     = 'production'
+$backend     = 'backend'
+$web         = 'web'
 
-Write-Host "==> 1. Create or link Railway project: $projectName" -ForegroundColor Cyan
-$projectInit = railway list 2>&1 | Out-String
-if ($projectInit -notmatch [regex]::Escape($projectName)) {
-  railway init --name $projectName
+# ---------------------------------------------------------------------
+# 1. Link project (skip if already linked to towcommand-prod)
+# ---------------------------------------------------------------------
+Write-Host "==> 1. Link Railway project: $projectName" -ForegroundColor Cyan
+$statusJson = railway status --json 2>&1 | Out-String
+$alreadyLinked = $false
+try {
+  $status = $statusJson | ConvertFrom-Json
+  if ($status.name -eq $projectName) { $alreadyLinked = $true }
+} catch { }
+
+if ($alreadyLinked) {
+  Write-Host "    already linked to $projectName, skipping" -ForegroundColor DarkGreen
 } else {
-  railway link --project $projectName
-}
-
-Write-Host "==> 2. Provision Postgres + Redis plugins" -ForegroundColor Cyan
-railway add --plugin postgres 2>$null
-railway add --plugin redis 2>$null
-
-Write-Host "==> 3. Create + configure backend service" -ForegroundColor Cyan
-railway service create backend 2>$null
-railway service backend
-Get-Content scripts/railway/backend.env | Where-Object { $_ -and $_ -notmatch '^\s*#' } | ForEach-Object {
-  $pair = $_ -split '=', 2
-  if ($pair.Length -eq 2) {
-    railway variables --set "$($pair[0])=$($pair[1])" | Out-Null
+  Try-Cmd link --project $projectName | Out-Null
+  # Verify
+  $statusJson = railway status --json 2>&1 | Out-String
+  try {
+    $status = $statusJson | ConvertFrom-Json
+    if ($status.name -ne $projectName) {
+      throw "Failed to link to $projectName. Got: $($status.name)"
+    }
+  } catch {
+    throw "Failed to read project status after link. CLI returned: $statusJson"
   }
 }
 
-Write-Host "==> 4. Create + configure web service" -ForegroundColor Cyan
-railway service create web 2>$null
-railway service web
-Get-Content scripts/railway/web.env | Where-Object { $_ -and $_ -notmatch '^\s*#' } | ForEach-Object {
-  $pair = $_ -split '=', 2
-  if ($pair.Length -eq 2) {
-    railway variables --set "$($pair[0])=$($pair[1])" | Out-Null
+# ---------------------------------------------------------------------
+# 2. List existing services - used to skip-create where present
+# ---------------------------------------------------------------------
+Write-Host "==> 2. Inventory services" -ForegroundColor Cyan
+$svcListJson = railway service list --json 2>&1 | Out-String
+$existingServices = @()
+try {
+  $svcArr = $svcListJson | ConvertFrom-Json
+  foreach ($s in $svcArr) { $existingServices += $s.name }
+  Write-Host "    existing services: $($existingServices -join ', ')" -ForegroundColor DarkGreen
+} catch {
+  Write-Host "    (could not parse service list; will attempt to create all)" -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------
+# 3. Postgres + Redis databases (idempotent — Railway "add --database"
+#    errors out if already present, which we treat as success)
+# ---------------------------------------------------------------------
+Write-Host "==> 3. Ensure Postgres + Redis are provisioned" -ForegroundColor Cyan
+if ($existingServices -notcontains 'Postgres') {
+  Try-Cmd add --database postgres --json | Out-Null
+} else {
+  Write-Host "    Postgres already present, skipping" -ForegroundColor DarkGreen
+}
+if ($existingServices -notcontains 'Redis') {
+  Try-Cmd add --database redis --json | Out-Null
+} else {
+  Write-Host "    Redis already present, skipping" -ForegroundColor DarkGreen
+}
+
+# ---------------------------------------------------------------------
+# 4. Create backend + web services
+# ---------------------------------------------------------------------
+Write-Host "==> 4. Ensure backend + web services exist" -ForegroundColor Cyan
+if ($existingServices -notcontains $backend) {
+  Try-Cmd add --service $backend --json | Out-Null
+} else {
+  Write-Host "    $backend service already present, skipping" -ForegroundColor DarkGreen
+}
+if ($existingServices -notcontains $web) {
+  Try-Cmd add --service $web --json | Out-Null
+} else {
+  Write-Host "    $web service already present, skipping" -ForegroundColor DarkGreen
+}
+
+# ---------------------------------------------------------------------
+# 5. Push env vars. --skip-deploys keeps Railway from redeploying after
+#    every variable set; we trigger a single explicit deploy at the end.
+# ---------------------------------------------------------------------
+function Set-EnvFile {
+  param([string]$Service, [string]$Path)
+  if (-not (Test-Path $Path)) { throw "Env file not found: $Path" }
+  Write-Host "    -> $Service from $Path" -ForegroundColor DarkGray
+  Get-Content $Path | Where-Object { $_ -and $_ -notmatch '^\s*#' } | ForEach-Object {
+    $line = $_.Trim()
+    if (-not $line) { return }
+    $eq = $line.IndexOf('=')
+    if ($eq -lt 1) { return }
+    $key = $line.Substring(0, $eq).Trim()
+    $val = $line.Substring($eq + 1).Trim()
+    # Variable references like ${{Postgres.DATABASE_URL}} pass through Railway untouched.
+    & railway variables --service $Service --set "$key=$val" --skip-deploys 2>&1 |
+      Where-Object { $_ -match 'Error|error' } |
+      ForEach-Object { Write-Host "        $_" -ForegroundColor Yellow }
   }
 }
 
-Write-Host "==> 5. Deploy backend" -ForegroundColor Cyan
-railway service backend
-railway up --detach
+Write-Host "==> 5. Push env vars to services" -ForegroundColor Cyan
+Set-EnvFile -Service $backend -Path 'scripts/railway/backend.env'
+Set-EnvFile -Service $web     -Path 'scripts/railway/web.env'
 
-Write-Host "==> 6. Deploy web" -ForegroundColor Cyan
-railway service web
-railway up --detach
+# ---------------------------------------------------------------------
+# 6. Custom domains. Railway is idempotent here — calling domain a
+#    second time with the same hostname is a no-op.
+# ---------------------------------------------------------------------
+Write-Host "==> 6. Attach custom domains" -ForegroundColor Cyan
+Try-Cmd domain --service $backend api.towcommand.cloud | Out-Null
+Try-Cmd domain --service $web app.towcommand.cloud | Out-Null
 
-Write-Host "==> 7. Attach custom domains" -ForegroundColor Cyan
-railway service backend
-railway domain api.towcommand.cloud 2>$null
-railway service web
-railway domain app.towcommand.cloud 2>$null
+# ---------------------------------------------------------------------
+# 7. Deploy. --detach so the script doesn't block on log streaming.
+# ---------------------------------------------------------------------
+Write-Host "==> 7. Deploy backend" -ForegroundColor Cyan
+Try-Cmd up --service $backend --detach | Out-Null
 
-Write-Host "==> 8. Capture Railway-provided URLs (fallback)" -ForegroundColor Cyan
-railway service backend
-$backendStatus = railway status --json 2>$null | Out-String
-railway service web
-$webStatus     = railway status --json 2>$null | Out-String
-$backendStatus | Out-File scripts/railway/.deploy-backend-status.json -Encoding utf8
-$webStatus     | Out-File scripts/railway/.deploy-web-status.json -Encoding utf8
+Write-Host "==> 8. Deploy web" -ForegroundColor Cyan
+Try-Cmd up --service $web --detach | Out-Null
+
+# ---------------------------------------------------------------------
+# 9. Capture final status for the report
+# ---------------------------------------------------------------------
+Write-Host "==> 9. Snapshot deploy status" -ForegroundColor Cyan
+$finalStatus = railway service list --json 2>&1 | Out-String
+$finalStatus | Out-File scripts/railway/.deploy-status.json -Encoding utf8
 
 Write-Host ""
-Write-Host "DONE. Check the Railway dashboard for build progress." -ForegroundColor Green
-Write-Host "  Backend health:  https://api.towcommand.cloud/health" -ForegroundColor Green
-Write-Host "  Web:             https://app.towcommand.cloud" -ForegroundColor Green
+Write-Host "DONE. Watch builds at https://railway.app/dashboard" -ForegroundColor Green
+Write-Host "  Backend health (once green):  https://api.towcommand.cloud/health" -ForegroundColor Green
+Write-Host "  Web (once green):             https://app.towcommand.cloud" -ForegroundColor Green
 Write-Host ""
-Write-Host "If custom domains haven't propagated, the Railway URLs in" -ForegroundColor Yellow
-Write-Host "  scripts/railway/.deploy-{backend,web}-status.json work immediately." -ForegroundColor Yellow
+Write-Host "Status snapshot saved to scripts/railway/.deploy-status.json" -ForegroundColor DarkGray
