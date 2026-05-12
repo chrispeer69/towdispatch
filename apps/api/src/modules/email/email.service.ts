@@ -43,6 +43,20 @@ export class EmailService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
+    // SendGrid wins when SENDGRID_API_KEY is set — auto-configures the SMTP
+    // relay so the owner only has to paste one env var in Railway. Otherwise
+    // fall back to the explicit SMTP_* settings (mailhog in dev, anything in
+    // self-hosted deploys).
+    const sendgridKey = this.config.config.SENDGRID_API_KEY;
+    if (sendgridKey) {
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        secure: false,
+        auth: { user: 'apikey', pass: sendgridKey },
+      });
+      return;
+    }
     const { host, port, user, password, secure } = this.config.smtp;
     this.transporter = nodemailer.createTransport({
       host,

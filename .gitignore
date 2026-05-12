@@ -7,6 +7,10 @@ node_modules/
 .env.local
 .env.*.local
 
+# railway deploy artifacts (contain generated secrets — never commit)
+scripts/railway/*.env
+scripts/railway/.railway-project-id
+
 # build outputs
 dist/
 build/

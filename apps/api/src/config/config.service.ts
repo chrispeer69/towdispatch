@@ -45,7 +45,11 @@ export class ConfigService {
     return this.config.NODE_ENV;
   }
   get apiPort(): number {
-    return this.config.API_PORT;
+    // Honor PORT (set by Railway/Render/Fly) only when API_PORT was left at
+    // the default. An explicitly set API_PORT always wins.
+    const explicit = process.env.API_PORT;
+    if (explicit) return this.config.API_PORT;
+    return this.config.PORT ?? this.config.API_PORT;
   }
   get apiHost(): string {
     return this.config.API_HOST;
@@ -62,6 +66,22 @@ export class ConfigService {
       .filter(Boolean);
   }
   get databaseUrl(): string {
+    // If APP_USER_PASSWORD is set, derive an app_user URL from DATABASE_URL
+    // by swapping credentials. This is the path used in managed-Postgres
+    // deployments (Railway/Render/Fly) where the addon hands us a single
+    // superuser URL; migrations use it as-is, runtime swaps in app_user so
+    // RLS is enforced.
+    const pw = this.config.APP_USER_PASSWORD;
+    if (pw && !this.config.DATABASE_URL.includes('app_user:')) {
+      try {
+        const url = new URL(this.config.DATABASE_URL);
+        url.username = 'app_user';
+        url.password = pw;
+        return url.toString();
+      } catch {
+        return this.config.DATABASE_URL;
+      }
+    }
     return this.config.DATABASE_URL;
   }
   get databaseAdminUrl(): string {
@@ -79,10 +99,14 @@ export class ConfigService {
     issuer: string;
     audience: string;
   } {
+    // Domain-separate the access/refresh/mfa secrets from a single JWT_SECRET
+    // so an attacker who somehow obtained a refresh-token forgery oracle
+    // can't trivially mint access tokens. Explicit overrides win when set.
+    const base = this.config.JWT_SECRET;
     return {
-      accessSecret: this.config.JWT_ACCESS_SECRET,
-      refreshSecret: this.config.JWT_REFRESH_SECRET,
-      mfaSecret: this.config.JWT_MFA_SECRET,
+      accessSecret: this.config.JWT_ACCESS_SECRET || `${base}::access`,
+      refreshSecret: this.config.JWT_REFRESH_SECRET || `${base}::refresh`,
+      mfaSecret: this.config.JWT_MFA_SECRET || `${base}::mfa`,
       accessTtl: this.config.JWT_ACCESS_TTL,
       refreshTtl: this.config.JWT_REFRESH_TTL,
       issuer: this.config.JWT_ISSUER,

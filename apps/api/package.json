@@ -7,6 +7,8 @@
     "dev": "node --env-file=.env ./node_modules/vite-node/dist/cli.mjs --watch src/main.ts",
     "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
     "start": "node --env-file=.env dist/apps/api/src/main.js",
+    "start:prod": "node dist/apps/api/src/main.js",
+    "migrate:prod": "pnpm --filter @towcommand/db run migrate",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"

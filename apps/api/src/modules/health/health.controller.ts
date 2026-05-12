@@ -21,6 +21,15 @@ export class HealthController {
     return { status: 'ok', uptimeSeconds: Math.floor(process.uptime()) };
   }
 
+  // Railway and most deployment platforms hit /health by default. Same payload
+  // as /healthz — liveness only, no DB ping, so a slow Postgres doesn't trip
+  // the platform's restart loop.
+  @Public()
+  @Get('health')
+  health(): { status: 'ok'; uptimeSeconds: number } {
+    return { status: 'ok', uptimeSeconds: Math.floor(process.uptime()) };
+  }
+
   @Public()
   @Get('readyz')
   async readiness(): Promise<{ status: 'ok'; checks: { db: 'ok' } }> {

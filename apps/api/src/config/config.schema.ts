@@ -8,7 +8,10 @@ export const configSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 
+  // API_PORT wins when explicitly set; otherwise fall back to PORT (Railway,
+  // Fly, Render, Heroku all set this) and finally to 3001 for dev.
   API_PORT: z.coerce.number().int().min(1).max(65_535).default(3001),
+  PORT: z.coerce.number().int().min(1).max(65_535).optional(),
   API_HOST: z.string().min(1).default('0.0.0.0'),
   API_PUBLIC_URL: z.string().url().default('http://localhost:3001'),
   WEB_PUBLIC_URL: z.string().url().default('http://localhost:3000'),
@@ -17,15 +20,23 @@ export const configSchema = z.object({
   DATABASE_URL: z.string().url(),
   DATABASE_ADMIN_URL: z.string().url().optional(),
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(500).default(20),
+  // When set, the runtime constructs an app_user URL by swapping credentials
+  // on DATABASE_URL. This lets us point DATABASE_URL at Railway's superuser
+  // string (which migrations need) while runtime still connects as a
+  // role that respects RLS. If absent, DATABASE_URL is used verbatim.
+  APP_USER_PASSWORD: z.string().optional(),
+  APP_ADMIN_PASSWORD: z.string().optional(),
 
   REDIS_URL: z.string().url(),
 
-  JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be 32+ chars'),
-  JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must be 32+ chars'),
-  JWT_MFA_SECRET: z
-    .string()
-    .min(32, 'JWT_MFA_SECRET must be 32+ chars')
-    .default('change-me-mfa-challenge-secret-please-rotate-in-prod'),
+  // Single canonical JWT_SECRET (deployment-friendly). Access and refresh
+  // tokens are derived by domain-separating from this one secret via HKDF-
+  // style suffixing in the JWT service. Legacy JWT_ACCESS_SECRET / _REFRESH_
+  // / _MFA_ env vars still work as overrides when explicitly set.
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be 32+ chars'),
+  JWT_ACCESS_SECRET: z.string().optional(),
+  JWT_REFRESH_SECRET: z.string().optional(),
+  JWT_MFA_SECRET: z.string().optional(),
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('30d'),
   JWT_ISSUER: z.string().default('towcommand'),
@@ -46,6 +57,17 @@ export const configSchema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
   SMTP_FROM: z.string().default('TowCommand <no-reply@towcommand.local>'),
+
+  // SendGrid (optional). When set, the email service auto-configures the
+  // nodemailer transporter to relay through smtp.sendgrid.net using "apikey"
+  // as the username and this value as the password. Owner pastes the real key
+  // into Railway after first deploy.
+  SENDGRID_API_KEY: z.string().optional().default(''),
+
+  // Mapbox (optional on the backend — primarily used by the web client).
+  // Accepted here so Railway's env-var sync surface is consistent across
+  // services and a future server-side reverse-geocoder can pick it up.
+  MAPBOX_ACCESS_TOKEN: z.string().optional().default(''),
 
   // Per-IP and per-key rate limits. Burst is short window, sustained is long.
   RATE_LIMIT_BURST_TTL_SECONDS: z.coerce.number().int().min(1).default(60),

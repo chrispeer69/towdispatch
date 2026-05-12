@@ -40,6 +40,7 @@ export interface SignupBody {
 export function ensureTestEnv(): void {
   process.env.NODE_ENV ??= 'test';
   process.env.LOG_LEVEL ??= 'warn';
+  process.env.JWT_SECRET ??= 'test-jwt-secret-with-at-least-32-chars-long';
   process.env.JWT_ACCESS_SECRET ??= 'test-access-secret-with-at-least-32-chars-long';
   process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-with-at-least-32-chars-long';
   process.env.JWT_MFA_SECRET ??= 'test-mfa-secret-with-at-least-32-chars-long';
