@@ -36,5 +36,15 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,md}": ["biome check --write --no-errors-on-unmatched"]
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri": "^3.0.6",
+      "lodash": "^4.17.21",
+      "cookie": "^0.7.0",
+      "send": "^0.19.0",
+      "serve-static": "^1.16.0",
+      "path-to-regexp": "^6.3.0"
+    }
   }
 }
