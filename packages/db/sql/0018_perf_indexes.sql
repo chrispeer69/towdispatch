@@ -88,10 +88,13 @@ CREATE INDEX IF NOT EXISTS driver_shifts_open_p
   WHERE ended_at IS NULL;
 
 -- ---------- driver_truck_assignments ----------
-CREATE INDEX IF NOT EXISTS dta_tenant_driver_started_idx
-  ON driver_truck_assignments (tenant_id, driver_id, started_at DESC);
-CREATE INDEX IF NOT EXISTS dta_tenant_truck_started_idx
-  ON driver_truck_assignments (tenant_id, truck_id, started_at DESC);
+-- This table tracks long-running driver↔truck qualifications, so there is
+-- no started_at — created_at is the canonical "when did this become true"
+-- timestamp. DESC keeps the "latest first" query plan we want.
+CREATE INDEX IF NOT EXISTS dta_tenant_driver_created_idx
+  ON driver_truck_assignments (tenant_id, driver_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS dta_tenant_truck_created_idx
+  ON driver_truck_assignments (tenant_id, truck_id, created_at DESC);
 
 -- ---------- invoices ----------
 CREATE INDEX IF NOT EXISTS invoices_tenant_created_idx
