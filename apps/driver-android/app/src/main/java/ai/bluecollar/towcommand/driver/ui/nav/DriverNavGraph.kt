@@ -5,6 +5,8 @@ import ai.bluecollar.towcommand.driver.ui.earnings.EarningsScreen
 import ai.bluecollar.towcommand.driver.ui.jobdetail.JobDetailScreen
 import ai.bluecollar.towcommand.driver.ui.joblist.JobListScreen
 import ai.bluecollar.towcommand.driver.ui.login.LoginScreen
+import ai.bluecollar.towcommand.driver.ui.mfa.MfaChallengeArgs
+import ai.bluecollar.towcommand.driver.ui.mfa.MfaChallengeScreen
 import ai.bluecollar.towcommand.driver.ui.photo.PhotoCaptureScreen
 import ai.bluecollar.towcommand.driver.ui.profile.ProfileScreen
 import ai.bluecollar.towcommand.driver.ui.signature.SignatureScreen
@@ -26,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 
 object Routes {
     const val LOGIN = "login"
+    const val MFA_CHALLENGE = "auth/mfa-challenge/{${MfaChallengeArgs.CHALLENGE_TOKEN_ARG}}"
     const val JOB_LIST = "jobs"
     const val JOB_DETAIL = "jobs/{jobId}"
     const val PHOTO_CAPTURE = "jobs/{jobId}/photos"
@@ -36,6 +39,14 @@ object Routes {
     fun jobDetail(id: String) = "jobs/$id"
     fun photoCapture(id: String) = "jobs/$id/photos"
     fun signature(id: String) = "jobs/$id/signature"
+
+    /**
+     * The challengeToken is a JWT; it may contain characters Nav3 considers
+     * unsafe in a path segment. The arg type is `StringType` so we URL-encode
+     * the value at the call site.
+     */
+    fun mfaChallenge(challengeToken: String) =
+        "auth/mfa-challenge/${java.net.URLEncoder.encode(challengeToken, "UTF-8")}"
 }
 
 @EntryPoint
@@ -64,6 +75,25 @@ fun DriverNavGraph() {
                     navController.navigate(Routes.JOB_LIST) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
+                },
+                onMfaChallenge = { token ->
+                    navController.navigate(Routes.mfaChallenge(token))
+                },
+            )
+        }
+        composable(
+            Routes.MFA_CHALLENGE,
+            arguments = listOf(
+                navArgument(MfaChallengeArgs.CHALLENGE_TOKEN_ARG) { type = NavType.StringType },
+            ),
+        ) {
+            MfaChallengeScreen(
+                viewModel = hiltViewModel(),
+                onBackToLogin = {
+                    // Pop back to login so the user starts a fresh password
+                    // round-trip. The challenge screen also triggers this on
+                    // session-expired (5-minute token TTL elapsed).
+                    navController.popBackStack(Routes.LOGIN, inclusive = false)
                 },
             )
         }

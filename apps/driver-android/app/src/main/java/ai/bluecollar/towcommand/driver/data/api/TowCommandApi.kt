@@ -7,6 +7,8 @@ import ai.bluecollar.towcommand.driver.data.api.dto.LoginRequest
 import ai.bluecollar.towcommand.driver.data.api.dto.LoginResponse
 import ai.bluecollar.towcommand.driver.data.api.dto.LogoutRequest
 import ai.bluecollar.towcommand.driver.data.api.dto.MeResponse
+import ai.bluecollar.towcommand.driver.data.api.dto.MfaChallengeRequest
+import ai.bluecollar.towcommand.driver.data.api.dto.MfaChallengeResponse
 import ai.bluecollar.towcommand.driver.data.api.dto.MyJobDto
 import ai.bluecollar.towcommand.driver.data.api.dto.PhotoUploadRequest
 import ai.bluecollar.towcommand.driver.data.api.dto.PhotoUploadResponse
@@ -21,6 +23,9 @@ import retrofit2.http.Path
 interface TowCommandApi {
     @POST("/auth/login")
     suspend fun login(@Body body: LoginRequest): LoginResponse
+
+    @POST("/auth/mfa/challenge")
+    suspend fun mfaChallenge(@Body body: MfaChallengeRequest): MfaChallengeResponse
 
     @POST("/auth/refresh")
     suspend fun refresh(@Body body: RefreshRequest): RefreshResponse

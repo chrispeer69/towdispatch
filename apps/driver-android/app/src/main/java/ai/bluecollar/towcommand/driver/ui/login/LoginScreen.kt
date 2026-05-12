@@ -29,10 +29,18 @@ import androidx.compose.ui.unit.dp
 fun LoginScreen(
     viewModel: LoginViewModel,
     onAuthenticated: () -> Unit,
+    onMfaChallenge: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     LaunchedEffect(state.authenticated) {
         if (state.authenticated) onAuthenticated()
+    }
+    LaunchedEffect(state.mfaChallengeToken) {
+        val tok = state.mfaChallengeToken
+        if (tok != null) {
+            onMfaChallenge(tok)
+            viewModel.onMfaNavigated()
+        }
     }
 
     Scaffold { padding ->

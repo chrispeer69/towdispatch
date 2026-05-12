@@ -29,10 +29,15 @@ data class AuthTenantDto(
 )
 
 /**
- * The API returns a discriminated union keyed by `status`. The driver app only
- * cares about the authenticated payload — multi-tenant pick + MFA are
- * out-of-scope for v1. We model the success case and reject the rest at the
- * repository layer.
+ * The API returns a discriminated union keyed by `status`. We keep a single
+ * flat shape with nullable fields rather than a sealed class — the field set
+ * is small and the repository layer fans out on `status` cleanly.
+ *
+ *   - "authenticated"           → user, tenant, accessToken, refreshToken, expiresIn
+ *   - "needs_tenant_selection"  → tenants
+ *   - "mfa_required"            → challengeToken (drives /auth/mfa/challenge)
+ *   - "mfa_setup_required"      → setupToken (drivers don't currently hit this;
+ *                                  the backend gates enrollment to OWNER/ADMIN)
  */
 @Serializable
 data class LoginResponse(
@@ -43,7 +48,36 @@ data class LoginResponse(
     val refreshToken: String? = null,
     val expiresIn: Int? = null,
     val tenants: List<TenantSelectionDto>? = null,
-    val mfaToken: String? = null,
+    val challengeToken: String? = null,
+    val setupToken: String? = null,
+    val role: String? = null,
+)
+
+@Serializable
+data class MfaChallengeRequest(
+    val challengeToken: String,
+    /**
+     * Either the 6-digit TOTP from the user's authenticator app, or one of
+     * the 10 recovery codes shown once at enrollment. The backend strips
+     * whitespace and dashes server-side, so client formatting is
+     * deliberately forgiving.
+     */
+    val code: String,
+)
+
+/**
+ * Same shape as the authenticated branch of /auth/login. We type it
+ * separately for clarity at the call site, but every field maps 1:1 with
+ * `LoginResponse`.
+ */
+@Serializable
+data class MfaChallengeResponse(
+    val status: String,
+    val user: AuthUserDto? = null,
+    val tenant: AuthTenantDto? = null,
+    val accessToken: String? = null,
+    val refreshToken: String? = null,
+    val expiresIn: Int? = null,
 )
 
 @Serializable
