@@ -18,6 +18,7 @@ import { DispatchModule } from './modules/dispatch/dispatch.module.js';
 import { EmailModule } from './modules/email/email.module.js';
 import { FleetModule } from './modules/fleet/fleet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { ImportModule } from './modules/import/import.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
@@ -54,6 +55,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     BillingModule,
     PaymentsModule,
     AccountingModule,
+    ImportModule,
     HealthModule,
   ],
   providers: [

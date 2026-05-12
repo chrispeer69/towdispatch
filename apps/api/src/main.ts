@@ -27,6 +27,9 @@ async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({
     logger: false,
     trustProxy: true,
+    // Default 1 MiB body. The /import/runs route raises this via a
+    // dedicated application/zip parser (registered after init) to accept
+    // bundles up to 2 GiB. See registerImportZipParser below.
     bodyLimit: 1_048_576,
     genReqId: () => crypto.randomUUID(),
   });
@@ -60,6 +63,13 @@ async function bootstrap(): Promise<void> {
   // has wired its parser middleware (which happens during the implicit init).
   await app.init();
   registerRawBodyJsonParser(app.getHttpAdapter().getInstance());
+  // Towbook import bundle parser. Buffers up to 2 GiB of application/zip.
+  const fi = app.getHttpAdapter().getInstance();
+  fi.addContentTypeParser(
+    'application/zip',
+    { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 * 1024 },
+    (_req, body, done) => done(null, body),
+  );
 
   const port = config.apiPort;
   const host = config.apiHost;

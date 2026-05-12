@@ -1,0 +1,200 @@
+{
+  "version": "1.0",
+  "source": "towbook",
+  "_comment": "Maps Towbook CSV column names to the importer's canonical field names. If a real Towbook export uses different headers, edit this file rather than the importer code. Every value is a string array — first-match-wins so multiple aliases are supported per canonical field.",
+  "files": {
+    "customers": {
+      "external_id": ["towbook_id", "id"],
+      "name": ["name", "customer_name"],
+      "phone_primary": ["phone_primary", "phone", "phone1"],
+      "phone_secondary": ["phone_secondary", "phone2", "mobile"],
+      "email": ["email", "email_address"],
+      "street_address": ["street_address", "address", "street"],
+      "city": ["city"],
+      "state": ["state"],
+      "zip": ["zip", "postal_code", "zip_code"],
+      "account_type": ["account_type", "type"],
+      "billing_terms": ["billing_terms", "terms"],
+      "credit_limit": ["credit_limit"],
+      "coi_expiration": ["coi_expiration", "coi_expires"],
+      "created_date": ["created_date", "created_at"]
+    },
+    "vehicles": {
+      "external_id": ["towbook_id", "id"],
+      "customer_towbook_id": ["customer_towbook_id", "customer_id"],
+      "year": ["year"],
+      "make": ["make"],
+      "model": ["model"],
+      "color": ["color"],
+      "plate": ["plate", "license_plate"],
+      "plate_state": ["plate_state", "license_state"],
+      "vin": ["vin"],
+      "notes": ["notes"]
+    },
+    "calls": {
+      "external_id": ["towbook_id", "id", "call_id"],
+      "call_received_at": ["call_received_at", "received_at", "call_time"],
+      "service_type": ["service_type", "service"],
+      "source": ["source"],
+      "network": ["network", "motor_club"],
+      "network_case_id": ["network_case_id", "case_id"],
+      "pickup_address": ["pickup_address", "from_address"],
+      "pickup_lat": ["pickup_lat", "from_lat"],
+      "pickup_lng": ["pickup_lng", "from_lng"],
+      "dropoff_address": ["dropoff_address", "to_address"],
+      "dropoff_lat": ["dropoff_lat", "to_lat"],
+      "dropoff_lng": ["dropoff_lng", "to_lng"],
+      "customer_towbook_id": ["customer_towbook_id", "customer_id"],
+      "vehicle_towbook_id": ["vehicle_towbook_id", "vehicle_id"],
+      "assigned_driver_towbook_id": ["assigned_driver_towbook_id", "driver_id"],
+      "assigned_truck_towbook_id": ["assigned_truck_towbook_id", "truck_id"],
+      "status": ["status", "call_status"],
+      "assigned_at": ["assigned_at"],
+      "en_route_at": ["en_route_at", "enroute_at"],
+      "on_scene_at": ["on_scene_at"],
+      "loaded_at": ["loaded_at"],
+      "in_transit_at": ["in_transit_at"],
+      "dropped_at": ["dropped_at"],
+      "cleared_at": ["cleared_at"],
+      "total_charged": ["total_charged", "total"],
+      "driver_commission": ["driver_commission", "commission"],
+      "notes": ["notes", "call_notes"]
+    },
+    "impounds": {
+      "external_id": ["towbook_id", "id"],
+      "vehicle_towbook_id": ["vehicle_towbook_id", "vehicle_id"],
+      "impound_date": ["impound_date"],
+      "yard_name": ["yard_name", "yard"],
+      "hold_type": ["hold_type"],
+      "daily_rate": ["daily_rate"],
+      "release_date": ["release_date"],
+      "release_reason": ["release_reason"],
+      "personal_property_inventory": ["personal_property_inventory", "inventory"]
+    },
+    "drivers": {
+      "external_id": ["towbook_id", "id"],
+      "name": ["name", "driver_name"],
+      "phone": ["phone"],
+      "email": ["email"],
+      "license_number": ["license_number"],
+      "license_state": ["license_state"],
+      "license_expiration": ["license_expiration"],
+      "medical_card_expiration": ["medical_card_expiration"],
+      "hire_date": ["hire_date"],
+      "termination_date": ["termination_date"]
+    },
+    "trucks": {
+      "external_id": ["towbook_id", "id"],
+      "unit_number": ["unit_number", "unit"],
+      "year": ["year"],
+      "make": ["make"],
+      "model": ["model"],
+      "vin": ["vin"],
+      "plate": ["plate"],
+      "plate_state": ["plate_state"],
+      "gvwr": ["gvwr"],
+      "equipment_type": ["equipment_type", "type"]
+    },
+    "invoices": {
+      "external_id": ["towbook_id", "id"],
+      "job_towbook_id": ["job_towbook_id", "call_id"],
+      "invoice_number": ["invoice_number"],
+      "issued_date": ["issued_date"],
+      "due_date": ["due_date"],
+      "total": ["total"],
+      "balance": ["balance"],
+      "status": ["status"]
+    },
+    "payments": {
+      "external_id": ["towbook_id", "id"],
+      "invoice_towbook_id": ["invoice_towbook_id", "invoice_id"],
+      "received_date": ["received_date", "payment_date"],
+      "amount": ["amount"],
+      "method": ["method", "payment_method"],
+      "reference": ["reference", "check_number"]
+    },
+    "motor_club_history": {
+      "job_towbook_id": ["job_towbook_id", "call_id"],
+      "network": ["network", "motor_club"],
+      "network_case_id": ["network_case_id", "case_id"],
+      "partial_fee_amount": ["partial_fee_amount", "partial_fee"],
+      "partial_fee_reason": ["partial_fee_reason"]
+    },
+    "attachments_manifest": {
+      "towbook_id": ["towbook_id", "call_id"],
+      "filename": ["filename", "file"],
+      "type": ["type", "kind"]
+    }
+  },
+  "value_maps": {
+    "service_type": {
+      "Tow": "tow",
+      "Light Duty Tow": "tow",
+      "Flatbed Tow": "tow",
+      "Heavy Duty Tow": "tow",
+      "Jump Start": "jump_start",
+      "Jumpstart": "jump_start",
+      "Lockout": "lockout",
+      "Tire Change": "tire_change",
+      "Flat Tire": "tire_change",
+      "Fuel Delivery": "fuel",
+      "Fuel": "fuel",
+      "Winch Out": "winch",
+      "Winch": "winch",
+      "Recovery": "recovery",
+      "Impound": "impound"
+    },
+    "status": {
+      "New": "new",
+      "Pending": "new",
+      "Dispatched": "dispatched",
+      "En Route": "enroute",
+      "Enroute": "enroute",
+      "On Scene": "on_scene",
+      "OnScene": "on_scene",
+      "In Progress": "in_progress",
+      "Loaded": "in_progress",
+      "In Transit": "in_progress",
+      "Cleared": "completed",
+      "Completed": "completed",
+      "Closed": "completed",
+      "Cancelled": "cancelled",
+      "Canceled": "cancelled",
+      "GOA": "goa",
+      "Gone On Arrival": "goa"
+    },
+    "account_type": {
+      "Cash": "cash",
+      "Account": "account",
+      "Motor Club": "account",
+      "Commercial": "account"
+    },
+    "payment_method": {
+      "Cash": "cash",
+      "Check": "check",
+      "Credit Card": "card",
+      "Card": "card",
+      "ACH": "ach",
+      "Wire": "ach",
+      "Motor Club": "motor_club"
+    },
+    "network": {
+      "Agero": "agero",
+      "AAA": "aaa",
+      "Allstate": "allstate",
+      "Urgently": "urgently",
+      "Honk": "honk",
+      "Roadside Masters": "roadside_masters",
+      "State Farm": "state_farm",
+      "Geico": "geico",
+      "Progressive": "progressive"
+    },
+    "equipment_type": {
+      "Flatbed": "flatbed",
+      "Wheel Lift": "wheel_lift",
+      "Medium Duty": "medium_duty",
+      "Heavy Duty": "heavy_duty",
+      "Rotator": "rotator"
+    }
+  }
+}
