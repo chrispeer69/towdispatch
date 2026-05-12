@@ -1,15 +1,18 @@
 /**
- * EmailService is the only place we talk to SMTP. AuthService and any future
- * notification path go through one of the typed sender methods so:
- *   - the from-address, brand variables, and template name live in one file
- *   - failures land in a single try/catch with a single log line
- *   - we can swap the transport (mailhog → SES → Postmark) by changing one
- *     factory rather than dozens of call sites
+ * EmailService — single outbound email seam.
  *
- * Errors do NOT abort the auth flow. A failed verification email leaves the
- * user signed up; we surface "resend verification" so they can retry.
+ * Transport selection (decided on first send, never at module load):
+ *   • SENDGRID_API_KEY non-empty  → SendGrid HTTP API via @sendgrid/mail
+ *   • otherwise                   → nodemailer SMTP (mailhog in dev)
+ *
+ * Lazy init avoids the prior bug where the module-load read of SMTP_* env
+ * masked the fact that SENDGRID_API_KEY was set in Railway. Errors are
+ * logged through pino (via ConfigService.logger) with the full SendGrid
+ * response body so deliverability problems are visible in production logs
+ * instead of being swallowed.
  */
-import { Injectable, type OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import sgMail, { type MailDataRequired, type ResponseError } from '@sendgrid/mail';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { ConfigService } from '../../config/config.service.js';
 import { TemplateRenderer } from './template-renderer.service.js';
@@ -33,38 +36,29 @@ interface SendArgs {
   variables: Record<string, unknown>;
 }
 
+export interface SendDiagnostic {
+  ok: boolean;
+  provider: 'sendgrid' | 'smtp';
+  attempts: number;
+  statusCode?: number | undefined;
+  messageId?: string | undefined;
+  errorBody?: unknown;
+  errorMessage?: string | undefined;
+}
+
+const MAX_ATTEMPTS = 3;
+const BACKOFF_BASE_MS = 400;
+
 @Injectable()
-export class EmailService implements OnModuleInit {
-  private transporter!: Transporter;
+export class EmailService {
+  private readonly log = new Logger(EmailService.name);
+  private sgInitialized = false;
+  private smtpTransporter: Transporter | null = null;
 
   constructor(
     private readonly config: ConfigService,
     private readonly renderer: TemplateRenderer,
   ) {}
-
-  onModuleInit(): void {
-    // SendGrid wins when SENDGRID_API_KEY is set — auto-configures the SMTP
-    // relay so the owner only has to paste one env var in Railway. Otherwise
-    // fall back to the explicit SMTP_* settings (mailhog in dev, anything in
-    // self-hosted deploys).
-    const sendgridKey = this.config.config.SENDGRID_API_KEY;
-    if (sendgridKey) {
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.sendgrid.net',
-        port: 587,
-        secure: false,
-        auth: { user: 'apikey', pass: sendgridKey },
-      });
-      return;
-    }
-    const { host, port, user, password, secure } = this.config.smtp;
-    this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      ...(user && password ? { auth: { user, pass: password } } : {}),
-    });
-  }
 
   async sendVerificationEmail(opts: {
     to: string;
@@ -234,25 +228,183 @@ export class EmailService implements OnModuleInit {
     });
   }
 
+  /**
+   * Used by the diagnostic endpoint (POST /admin/email/test). Renders the
+   * email-verification template against canned variables and returns the
+   * full provider response so the operator can see SendGrid's status / body
+   * directly. Failures are returned, NOT thrown.
+   */
+  async sendTestEmail(to: string): Promise<SendDiagnostic> {
+    const subject = `${BRAND.productName} — diagnostic test send`;
+    const { html, text } = this.renderer.render('email-verification', {
+      ...this.brand(),
+      recipientName: 'Diagnostic',
+      tenantName: 'Diagnostic',
+      verifyUrl: `${this.config.webPublicUrl}/verify-email?token=diagnostic`,
+    });
+    return this.attemptSend({ to, subject, html, text, template: 'diagnostic' });
+  }
+
   private async send(args: SendArgs): Promise<void> {
     const { html, text } = this.renderer.render(args.template, args.variables);
-    try {
-      await this.transporter.sendMail({
-        from: this.config.smtp.from,
-        to: args.to,
-        subject: args.subject,
-        html,
-        text,
-      });
-    } catch (err) {
-      // Logging the actual error is the controller's job (it has the request
-      // context). We swallow here so a transient SMTP fault doesn't break the
-      // signup or password-reset flow that triggered the send.
-      const reason = err instanceof Error ? err.message : String(err);
-      process.stderr.write(
-        `[email] send failed template=${args.template} to=${args.to} reason=${reason}\n`,
+    const result = await this.attemptSend({
+      to: args.to,
+      subject: args.subject,
+      html,
+      text,
+      template: args.template,
+    });
+    if (!result.ok) {
+      // We log here and re-throw. Auth-flow callers wrap this in
+      // .catch(() => undefined) so transient failures don't break signup,
+      // but we want the rejection to be visible in any context that does
+      // care (BillingDeliveryService, /admin/email/test, etc.).
+      const err = new Error(
+        `email send failed template=${args.template} provider=${result.provider} status=${result.statusCode ?? 'n/a'} attempts=${result.attempts} reason=${result.errorMessage ?? 'unknown'}`,
+      );
+      throw err;
+    }
+  }
+
+  private async attemptSend(args: {
+    to: string;
+    subject: string;
+    html: string;
+    text: string;
+    template: string;
+  }): Promise<SendDiagnostic> {
+    const provider: 'sendgrid' | 'smtp' = this.config.email.sendgridConfigured
+      ? 'sendgrid'
+      : 'smtp';
+    const from = this.config.email.from;
+
+    this.log.log({
+      msg: 'email send invoked',
+      provider,
+      template: args.template,
+      to: args.to,
+      from,
+      subject: args.subject,
+    });
+
+    let lastErr: ResponseError | Error | null = null;
+    let lastStatus: number | undefined;
+    let lastBody: unknown;
+    let lastMessageId: string | undefined;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        if (provider === 'sendgrid') {
+          this.ensureSendGridInitialized();
+          const msg: MailDataRequired = {
+            to: args.to,
+            from,
+            subject: args.subject,
+            html: args.html,
+            text: args.text,
+          };
+          const [response] = await sgMail.send(msg);
+          const messageId =
+            (response.headers['x-message-id'] as string | undefined) ??
+            (response.headers['X-Message-Id'] as string | undefined);
+          this.log.log({
+            msg: 'email send ok',
+            provider,
+            template: args.template,
+            to: args.to,
+            attempt,
+            statusCode: response.statusCode,
+            messageId,
+          });
+          return {
+            ok: true,
+            provider,
+            attempts: attempt,
+            statusCode: response.statusCode,
+            messageId,
+          };
+        }
+        // SMTP fallback
+        const transporter = this.ensureSmtpTransporter();
+        const info = await transporter.sendMail({
+          from,
+          to: args.to,
+          subject: args.subject,
+          html: args.html,
+          text: args.text,
+        });
+        this.log.log({
+          msg: 'email send ok',
+          provider,
+          template: args.template,
+          to: args.to,
+          attempt,
+          messageId: info.messageId,
+        });
+        return {
+          ok: true,
+          provider,
+          attempts: attempt,
+          messageId: info.messageId,
+        };
+      } catch (err) {
+        const responseErr = err as ResponseError;
+        const status = responseErr?.code;
+        lastStatus = typeof status === 'number' ? status : undefined;
+        lastBody = responseErr?.response?.body ?? null;
+        lastErr = responseErr instanceof Error ? responseErr : new Error(String(responseErr));
+        this.log.error({
+          msg: 'email send error',
+          provider,
+          template: args.template,
+          to: args.to,
+          attempt,
+          statusCode: lastStatus,
+          errorMessage: lastErr.message,
+          errorBody: lastBody,
+        });
+        const retriable = typeof lastStatus === 'number' && lastStatus >= 500;
+        if (!retriable || attempt === MAX_ATTEMPTS) break;
+        const delay = BACKOFF_BASE_MS * 2 ** (attempt - 1);
+        await sleep(delay);
+      }
+    }
+
+    return {
+      ok: false,
+      provider,
+      attempts: MAX_ATTEMPTS,
+      statusCode: lastStatus,
+      messageId: lastMessageId,
+      errorMessage: lastErr?.message,
+      errorBody: lastBody,
+    };
+  }
+
+  private ensureSendGridInitialized(): void {
+    if (this.sgInitialized) return;
+    const apiKey = this.config.email.sendgridApiKey;
+    if (!apiKey) {
+      throw new Error(
+        'SENDGRID_API_KEY is empty at first send — ensureSendGridInitialized should not have been called',
       );
     }
+    sgMail.setApiKey(apiKey);
+    this.sgInitialized = true;
+    this.log.log({ msg: 'sendgrid client initialized', from: this.config.email.from });
+  }
+
+  private ensureSmtpTransporter(): Transporter {
+    if (this.smtpTransporter) return this.smtpTransporter;
+    const { host, port, user, password, secure } = this.config.smtp;
+    this.smtpTransporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      ...(user && password ? { auth: { user, pass: password } } : {}),
+    });
+    this.log.log({ msg: 'smtp transporter initialized', host, port, secure });
+    return this.smtpTransporter;
   }
 
   private urlFor(path: string, query: Record<string, string>): string {
@@ -264,4 +416,8 @@ export class EmailService implements OnModuleInit {
   private brand(): BrandVars {
     return BRAND;
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }

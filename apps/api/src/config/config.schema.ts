@@ -48,6 +48,9 @@ export const configSchema = z.object({
     .min(32, 'TOTP_ENCRYPTION_KEY must be 32+ chars')
     .default('change-me-totp-encryption-key-please-rotate-in-prod'),
 
+  // Legacy SMTP — kept so dev (mailhog) keeps working. Production uses
+  // SendGrid; if SENDGRID_API_KEY is set the EmailService prefers it and the
+  // SMTP_* values are ignored.
   SMTP_HOST: z.string().default('localhost'),
   SMTP_PORT: z.coerce.number().int().min(1).max(65_535).default(1025),
   SMTP_USER: z.string().optional().default(''),
@@ -58,11 +61,16 @@ export const configSchema = z.object({
     .transform((v) => v === 'true'),
   SMTP_FROM: z.string().default('TowCommand <no-reply@towcommand.local>'),
 
-  // SendGrid (optional). When set, the email service auto-configures the
-  // nodemailer transporter to relay through smtp.sendgrid.net using "apikey"
-  // as the username and this value as the password. Owner pastes the real key
-  // into Railway after first deploy.
+  // SendGrid HTTP API. When SENDGRID_API_KEY is non-empty the EmailService
+  // sends via @sendgrid/mail. SENDGRID_FROM overrides SMTP_FROM for SendGrid
+  // sends; if not set, SMTP_FROM is used (must be a verified sender / on an
+  // authenticated domain).
   SENDGRID_API_KEY: z.string().optional().default(''),
+  SENDGRID_FROM: z.string().optional().default(''),
+
+  // One-time bearer token for POST /admin/email/test. Required to invoke the
+  // diagnostic endpoint; if empty the endpoint refuses every request.
+  EMAIL_TEST_TOKEN: z.string().optional().default(''),
 
   // Mapbox (optional on the backend — primarily used by the web client).
   // Accepted here so Railway's env-var sync surface is consistent across

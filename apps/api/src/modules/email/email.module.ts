@@ -6,11 +6,13 @@
  * cached in-memory for the process lifetime.
  */
 import { Global, Module } from '@nestjs/common';
+import { AdminEmailController } from './admin-email.controller.js';
 import { EmailService } from './email.service.js';
 import { TemplateRenderer } from './template-renderer.service.js';
 
 @Global()
 @Module({
+  controllers: [AdminEmailController],
   providers: [EmailService, TemplateRenderer],
   exports: [EmailService],
 })

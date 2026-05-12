@@ -133,6 +133,21 @@ export class ConfigService {
       from: this.config.SMTP_FROM,
     };
   }
+  get email(): {
+    sendgridApiKey: string;
+    sendgridConfigured: boolean;
+    from: string;
+    testToken: string;
+  } {
+    const sendgridApiKey = this.config.SENDGRID_API_KEY;
+    const from = this.config.SENDGRID_FROM || this.config.SMTP_FROM;
+    return {
+      sendgridApiKey,
+      sendgridConfigured: !!sendgridApiKey,
+      from,
+      testToken: this.config.EMAIL_TEST_TOKEN,
+    };
+  }
   get notification(): {
     activeProviderId: 'twilio' | 'stub';
     twilioConfigured: boolean;
