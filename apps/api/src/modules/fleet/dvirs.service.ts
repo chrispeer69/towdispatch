@@ -13,7 +13,7 @@
  *   - Updates the truck's odometer when odometerReading is supplied and is
  *     ahead of the truck's currentOdometer.
  */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { drivers, dvirs, trucks, uuidv7 } from '@towcommand/db';
 import {
   type CreateDvirPayload,
@@ -21,14 +21,17 @@ import {
   type DvirFilters,
   type DvirStatus,
   ERROR_CODES,
+  type Role,
 } from '@towcommand/shared';
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { isDriverRole, resolveDriverIdForUser } from './driver-scope.js';
 import { TrucksService } from './trucks.service.js';
 
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -59,6 +62,14 @@ export class DvirsService {
       if (filters.status) conds.push(eq(dvirs.status, filters.status));
       if (filters.fromDate) conds.push(gte(dvirs.submittedAt, new Date(filters.fromDate)));
       if (filters.toDate) conds.push(lte(dvirs.submittedAt, new Date(filters.toDate)));
+
+      // Drivers see only their own DVIRs — even if they pass a different
+      // driverId in filters, we override (no leaking peers' inspections).
+      if (isDriverRole(ctx.role)) {
+        const selfDriverId = await resolveDriverIdForUser(tx, ctx.userId);
+        conds.push(eq(dvirs.driverId, selfDriverId));
+      }
+
       const rows = await tx.query.dvirs.findMany({
         where: and(...conds),
         orderBy: (t, { desc }) => [desc(t.submittedAt)],
@@ -72,6 +83,17 @@ export class DvirsService {
     const status = DvirsService.rollupStatus(input.defects);
     const id = uuidv7();
     const inserted = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      // Drivers can only submit DVIRs for themselves.
+      if (isDriverRole(ctx.role)) {
+        const selfDriverId = await resolveDriverIdForUser(tx, ctx.userId);
+        if (selfDriverId !== input.driverId) {
+          throw new ForbiddenException({
+            code: ERROR_CODES.FORBIDDEN,
+            message: 'Drivers may only submit DVIRs for themselves',
+          });
+        }
+      }
+
       const [d, t] = await Promise.all([
         tx.query.drivers.findFirst({
           where: and(eq(drivers.id, input.driverId), isNull(drivers.deletedAt)),

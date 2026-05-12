@@ -23,6 +23,7 @@ import {
   type JobDto,
   type JobTransitionPayload,
   ROLES,
+  type Role,
   type StartShiftPayload,
   type TruckDto,
   type UnassignJobPayload,
@@ -65,6 +66,7 @@ const shiftIdSchema = z.object({ id: z.string().uuid() });
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -162,7 +164,7 @@ export class DispatchController {
 
   @Post('shifts/start')
   @HttpCode(HttpStatus.CREATED)
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async startShift(
     @ZodBody(startShiftSchema) body: StartShiftPayload,
     @Req() req: FastifyRequest,
@@ -175,7 +177,7 @@ export class DispatchController {
 
   @Post('shifts/end')
   @HttpCode(HttpStatus.OK)
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async endShift(
     @ZodBody(endShiftSchema) body: EndShiftPayload,
     @Req() req: FastifyRequest,
@@ -252,6 +254,7 @@ export class DispatchController {
     return {
       tenantId: c.tenantId as string,
       userId: c.userId as string,
+      role: c.role as Role | null,
       requestId: c.requestId,
       ipAddress: c.ipAddress,
       userAgent: c.userAgent,

@@ -41,6 +41,7 @@ import {
   type PaginatedDrivers,
   type PaginatedTrucks,
   ROLES,
+  type Role,
   type TruckDto,
   type TruckFilters,
   type UpdateDriverPayload,
@@ -91,6 +92,7 @@ const uploadDocumentSchema = z.object({
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -207,7 +209,7 @@ export class FleetController {
 
   // ---------- driver↔truck assignments ----------
   @Get('drivers/:id/trucks')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async listAssignmentsForDriver(
     @ZodParam(idSchema) params: { id: string },
     @Req() req: FastifyRequest,
@@ -245,7 +247,7 @@ export class FleetController {
 
   // ---------- documents ----------
   @Get('documents')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async listDocuments(
     @ZodQuery(documentFiltersSchema) query: DocumentFilters,
     @Req() req: FastifyRequest,
@@ -254,7 +256,7 @@ export class FleetController {
   }
 
   @Post('documents')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async uploadDocument(
     @ZodBody(uploadDocumentSchema) body: z.infer<typeof uploadDocumentSchema>,
     @Req() req: FastifyRequest,
@@ -285,7 +287,7 @@ export class FleetController {
    * future bug.
    */
   @Get('documents/:id/download')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async downloadDocument(
     @ZodParam(idSchema) params: { id: string },
     @Req() req: FastifyRequest,
@@ -310,7 +312,7 @@ export class FleetController {
 
   // ---------- DVIRs ----------
   @Get('dvirs')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async listDvirs(
     @ZodQuery(dvirFiltersSchema) query: DvirFilters,
     @Req() req: FastifyRequest,
@@ -319,7 +321,7 @@ export class FleetController {
   }
 
   @Post('dvirs')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async submitDvir(
     @ZodBody(createDvirSchema) body: CreateDvirPayload,
     @Req() req: FastifyRequest,
@@ -372,7 +374,7 @@ export class FleetController {
 
   // ---------- Expirations ----------
   @Get('expirations')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.DRIVER)
   async listExpirations(
     @ZodQuery(expirationsFiltersSchema) query: ExpirationsFilters,
     @Req() req: FastifyRequest,
@@ -385,6 +387,7 @@ export class FleetController {
     return {
       tenantId: c.tenantId as string,
       userId: c.userId as string,
+      role: c.role as Role | null,
       requestId: c.requestId,
       ipAddress: c.ipAddress,
       userAgent: c.userAgent,

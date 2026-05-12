@@ -23,13 +23,16 @@ import {
   type ExpirationSeverity,
   type ExpirationsFilters,
   type ExpirationsResponse,
+  type Role,
 } from '@towcommand/shared';
-import { and, isNull } from 'drizzle-orm';
+import { type SQL, and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { isDriverRole, resolveDriverIdForUser, resolveTruckIdsForDriver } from './driver-scope.js';
 
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -61,16 +64,45 @@ export class ExpirationsService {
     const rows: ExpirationRow[] = [];
 
     await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      // Drivers see only their own driver-row expirations + the trucks they
+      // are currently assigned to + documents owned by either. We scope the
+      // queries themselves rather than post-filtering because that keeps the
+      // memory footprint small on large tenants.
+      let driverScopeIds: string[] | null = null;
+      let truckScopeIds: string[] | null = null;
+      if (isDriverRole(ctx.role)) {
+        const driverId = await resolveDriverIdForUser(tx, ctx.userId);
+        const truckIds = await resolveTruckIdsForDriver(tx, driverId);
+        driverScopeIds = [driverId];
+        truckScopeIds = truckIds;
+      }
+
       const driverRows =
         filters.entityType === 'truck'
           ? []
-          : await tx.query.drivers.findMany({ where: isNull(drivers.deletedAt) });
+          : await tx.query.drivers.findMany({
+              where: driverScopeIds
+                ? and(isNull(drivers.deletedAt), inArray(drivers.id, driverScopeIds))
+                : isNull(drivers.deletedAt),
+            });
       const truckRows =
         filters.entityType === 'driver'
           ? []
-          : await tx.query.trucks.findMany({ where: isNull(trucks.deletedAt) });
+          : truckScopeIds !== null
+            ? truckScopeIds.length === 0
+              ? []
+              : await tx.query.trucks.findMany({
+                  where: and(isNull(trucks.deletedAt), inArray(trucks.id, truckScopeIds)),
+                })
+            : await tx.query.trucks.findMany({ where: isNull(trucks.deletedAt) });
       const docRows = await tx.query.documents.findMany({
-        where: and(isNull(documents.deletedAt)),
+        where:
+          driverScopeIds || truckScopeIds
+            ? and(
+                isNull(documents.deletedAt),
+                buildDriverDocScopeFilter(driverScopeIds, truckScopeIds),
+              )
+            : and(isNull(documents.deletedAt)),
       });
 
       const driverName = (d: typeof drivers.$inferSelect): string =>
@@ -191,6 +223,30 @@ export class ExpirationsService {
       userAgent: ctx.userAgent ?? undefined,
     };
   }
+}
+
+/**
+ * Builds the document-scope filter for a driver — match docs whose
+ * (ownerType, ownerId) is in {driver:self} ∪ {truck:any assigned truck}.
+ * When neither side has any ids, returns a guaranteed-false predicate so
+ * the query yields zero rows.
+ */
+function buildDriverDocScopeFilter(
+  driverIds: string[] | null,
+  truckIds: string[] | null,
+): SQL<unknown> {
+  const parts: SQL<unknown>[] = [];
+  if (driverIds && driverIds.length > 0) {
+    const expr = and(eq(documents.ownerType, 'driver'), inArray(documents.ownerId, driverIds));
+    if (expr) parts.push(expr);
+  }
+  if (truckIds && truckIds.length > 0) {
+    const expr = and(eq(documents.ownerType, 'truck'), inArray(documents.ownerId, truckIds));
+    if (expr) parts.push(expr);
+  }
+  if (parts.length === 0) return sql`false`;
+  if (parts.length === 1) return parts[0] as SQL<unknown>;
+  return or(...parts) as SQL<unknown>;
 }
 
 function expirationFromDate(

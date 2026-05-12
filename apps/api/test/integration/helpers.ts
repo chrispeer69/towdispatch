@@ -106,6 +106,9 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM accounting_connections WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          // Session 6.2 chat tables — children before parents.
+          await c.query('DELETE FROM chat_messages WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM chat_threads WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           // Session 8 fleet leaves: dvirs / maintenance / documents /
           // driver_truck_assignments all reference drivers and/or trucks.
           await c.query('DELETE FROM dvirs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);

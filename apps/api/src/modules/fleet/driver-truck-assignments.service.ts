@@ -5,19 +5,27 @@
  * means "this driver is qualified to take this truck out." The fleet UI
  * surfaces assignments on both profile pages.
  */
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { driverTruckAssignments, drivers, trucks, uuidv7 } from '@towcommand/db';
 import {
   type CreateDriverTruckAssignmentPayload,
   type DriverTruckAssignmentDto,
   ERROR_CODES,
+  type Role,
 } from '@towcommand/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { isDriverRole, resolveDriverIdForUser } from './driver-scope.js';
 
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
@@ -36,6 +44,16 @@ export class DriverTruckAssignmentsService {
 
   async listForDriver(ctx: CallerContext, driverId: string): Promise<DriverTruckAssignmentDto[]> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      // Drivers may only enumerate their own truck assignments.
+      if (isDriverRole(ctx.role)) {
+        const selfDriverId = await resolveDriverIdForUser(tx, ctx.userId);
+        if (selfDriverId !== driverId) {
+          throw new ForbiddenException({
+            code: ERROR_CODES.FORBIDDEN,
+            message: 'Drivers may only list their own truck assignments',
+          });
+        }
+      }
       const rows = await tx.query.driverTruckAssignments.findMany({
         where: and(
           eq(driverTruckAssignments.driverId, driverId),
@@ -48,6 +66,19 @@ export class DriverTruckAssignmentsService {
 
   async listForTruck(ctx: CallerContext, truckId: string): Promise<DriverTruckAssignmentDto[]> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      // Drivers should not see "who else drives this truck" — collapse the
+      // result to just their own assignment row, if any.
+      if (isDriverRole(ctx.role)) {
+        const selfDriverId = await resolveDriverIdForUser(tx, ctx.userId);
+        const rows = await tx.query.driverTruckAssignments.findMany({
+          where: and(
+            eq(driverTruckAssignments.truckId, truckId),
+            eq(driverTruckAssignments.driverId, selfDriverId),
+            isNull(driverTruckAssignments.deletedAt),
+          ),
+        });
+        return rows.map(toDto);
+      }
       const rows = await tx.query.driverTruckAssignments.findMany({
         where: and(
           eq(driverTruckAssignments.truckId, truckId),

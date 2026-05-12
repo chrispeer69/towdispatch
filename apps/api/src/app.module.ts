@@ -11,6 +11,7 @@ import { AccountingModule } from './modules/accounting/accounting.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
@@ -46,6 +47,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     DispatchEventsModule,
     JobsModule,
     DispatchModule,
+    ChatModule,
     StorageModule,
     FleetModule,
     TrackingModule,

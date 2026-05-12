@@ -10,7 +10,12 @@
  * seed populates a fleet for the test tenants and the dispatch UI binds
  * against that.
  */
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { driverShifts, drivers, jobs, trucks, uuidv7 } from '@towcommand/db';
 import {
   DISPATCH_EVENTS,
@@ -18,18 +23,35 @@ import {
   type DriverRosterRow,
   type DriverShiftDto,
   ERROR_CODES,
+  ROLES,
+  type Role,
   type TruckDto,
 } from '@towcommand/shared';
 import { and, eq, isNull } from 'drizzle-orm';
-import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { DispatchEventsService } from './dispatch-events.service.js';
 
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
+}
+
+async function resolveSelfDriverId(tx: Tx, userId: string): Promise<string> {
+  const row = await tx.query.drivers.findFirst({
+    where: and(eq(drivers.userId, userId), isNull(drivers.deletedAt)),
+    columns: { id: true },
+  });
+  if (!row) {
+    throw new ForbiddenException({
+      code: ERROR_CODES.FORBIDDEN,
+      message: 'No driver record is linked to this user',
+    });
+  }
+  return row.id;
 }
 
 @Injectable()
@@ -104,6 +126,16 @@ export class DriversService {
     input: { driverId: string; truckId?: string },
   ): Promise<DriverShiftDto> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      // Drivers may only clock themselves on.
+      if (ctx.role === ROLES.DRIVER) {
+        const selfDriverId = await resolveSelfDriverId(tx, ctx.userId);
+        if (selfDriverId !== input.driverId) {
+          throw new ForbiddenException({
+            code: ERROR_CODES.FORBIDDEN,
+            message: 'Drivers may only start their own shift',
+          });
+        }
+      }
       const driver = await tx.query.drivers.findFirst({
         where: and(eq(drivers.id, input.driverId), isNull(drivers.deletedAt)),
       });
@@ -198,6 +230,16 @@ export class DriversService {
           message: 'Shift not found',
         });
       }
+      // Drivers may only clock themselves off — and only their own shift.
+      if (ctx.role === ROLES.DRIVER) {
+        const selfDriverId = await resolveSelfDriverId(tx, ctx.userId);
+        if (selfDriverId !== existing.driverId) {
+          throw new ForbiddenException({
+            code: ERROR_CODES.FORBIDDEN,
+            message: 'Drivers may only end their own shift',
+          });
+        }
+      }
       if (existing.endedAt) {
         throw new ConflictException({
           code: ERROR_CODES.CONFLICT,
@@ -244,6 +286,15 @@ export class DriversService {
           message: 'Active shift not found',
         });
       }
+      if (ctx.role === ROLES.DRIVER) {
+        const selfDriverId = await resolveSelfDriverId(tx, ctx.userId);
+        if (selfDriverId !== existing.driverId) {
+          throw new ForbiddenException({
+            code: ERROR_CODES.FORBIDDEN,
+            message: 'Drivers may only update their own shift',
+          });
+        }
+      }
       const [row] = await tx
         .update(driverShifts)
         .set({ status, updatedAt: new Date() })
@@ -275,6 +326,15 @@ export class DriversService {
           code: ERROR_CODES.NOT_FOUND,
           message: 'Active shift not found',
         });
+      }
+      if (ctx.role === ROLES.DRIVER) {
+        const selfDriverId = await resolveSelfDriverId(tx, ctx.userId);
+        if (selfDriverId !== existing.driverId) {
+          throw new ForbiddenException({
+            code: ERROR_CODES.FORBIDDEN,
+            message: 'Drivers may only update their own shift',
+          });
+        }
       }
       const recordedAt = new Date();
       const [row] = await tx

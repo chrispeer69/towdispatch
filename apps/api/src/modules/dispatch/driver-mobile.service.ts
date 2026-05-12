@@ -19,7 +19,7 @@ import {
   jobs,
   vehicles as vehiclesTable,
 } from '@towcommand/db';
-import { ERROR_CODES, type JobDto, type JobStatus } from '@towcommand/shared';
+import { ERROR_CODES, type JobDto, type JobStatus, type Role } from '@towcommand/shared';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { DocumentsService } from '../fleet/documents.service.js';
@@ -27,6 +27,7 @@ import { DocumentsService } from '../fleet/documents.service.js';
 interface CallerContext {
   tenantId: string;
   userId: string;
+  role: Role | null;
   requestId: string;
   ipAddress: string | null;
   userAgent: string | null;
