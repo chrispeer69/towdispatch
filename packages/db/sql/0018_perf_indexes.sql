@@ -145,8 +145,10 @@ CREATE INDEX IF NOT EXISTS sync_jobs_tenant_status_created_idx
   ON sync_jobs (tenant_id, status, created_at DESC);
 
 -- ---------- stripe_events ----------
-CREATE INDEX IF NOT EXISTS stripe_events_created_idx
-  ON stripe_events (created_at DESC);
+-- stripe_events tracks webhook delivery timing, so the canonical "when"
+-- column is received_at (not created_at — which the table doesn't have).
+CREATE INDEX IF NOT EXISTS stripe_events_received_idx
+  ON stripe_events (received_at DESC);
 
 -- ---------- import_runs / import_run_events ----------
 CREATE INDEX IF NOT EXISTS import_runs_tenant_started_idx
