@@ -64,38 +64,42 @@ $web         = 'web'
 #    separate concerns) which causes `add`/`up` to prompt.
 # ---------------------------------------------------------------------
 Write-Host "==> 1. Link Railway project + environment" -ForegroundColor Cyan
+# Read current link state. The `environment` field in `railway status --json`
+# is unreliable in v4.57 — sometimes the project is linked and the active env
+# is set but the JSON readback returns an empty string. We trust the project
+# name from JSON and trust the exit code of `environment link` for env state.
 $stat = Invoke-Railway -Args @('status', '--json') -Quiet
 $linkedProject = $null
-$linkedEnvironment = $null
 try {
   $statusObj = $stat.Output | ConvertFrom-Json
   $linkedProject = $statusObj.name
-  $linkedEnvironment = $statusObj.environment
 } catch { }
 
-if ($linkedProject -eq $projectName -and $linkedEnvironment -eq $envName) {
-  Write-Host "    already linked: project=$projectName env=$envName" -ForegroundColor DarkGreen
-} else {
-  if ($linkedProject -ne $projectName) {
-    Invoke-Railway -Args @('link', '--project', $projectName, '--environment', $envName) | Out-Null
-  } else {
-    # Project is linked, env is not. Link env only.
-    Invoke-Railway -Args @('environment', 'link', $envName) | Out-Null
+if ($linkedProject -ne $projectName) {
+  $res = Invoke-Railway -Args @('link', '--project', $projectName, '--environment', $envName)
+  if ($res.Exit -ne 0) {
+    throw "Failed to link project ${projectName}: $($res.Output)"
   }
-  # Re-verify
+  # Confirm the project link took. Don't check env here — see comment above.
   $stat = Invoke-Railway -Args @('status', '--json') -Quiet
-  try {
-    $statusObj = $stat.Output | ConvertFrom-Json
-    $linkedProject = $statusObj.name
-    $linkedEnvironment = $statusObj.environment
-  } catch {
-    throw "Failed to read status after link. Output: $($stat.Output)"
+  try { $linkedProject = ($stat.Output | ConvertFrom-Json).name } catch { }
+  if ($linkedProject -ne $projectName) {
+    throw "Project link verification failed. Got: $linkedProject"
   }
-  if ($linkedProject -ne $projectName -or $linkedEnvironment -ne $envName) {
-    throw "Link verification failed. Got project=$linkedProject env=$linkedEnvironment"
-  }
-  Write-Host "    linked: project=$linkedProject env=$linkedEnvironment" -ForegroundColor DarkGreen
 }
+
+# Always (re-)activate the environment. The command is idempotent on the
+# server side and a non-zero exit here is the only signal we can trust for
+# env state, since `railway status --json` doesn't reliably echo it back.
+$envRes = Invoke-Railway -Args @('environment', 'link', $envName)
+if ($envRes.Exit -ne 0) {
+  $combined = "$($envRes.Output)".ToLower()
+  if ($combined -notmatch 'already' -and $combined -notmatch 'activated') {
+    throw "Failed to link environment ${envName}: $($envRes.Output)"
+  }
+  # Non-zero but the CLI said "already" / "activated" -> treat as success.
+}
+Write-Host "    linked: project=$projectName env=$envName (env-link exit=$($envRes.Exit))" -ForegroundColor DarkGreen
 
 # ---------------------------------------------------------------------
 # 2. Inventory services (used to skip-create where already present).
