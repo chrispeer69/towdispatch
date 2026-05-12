@@ -25,11 +25,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3001\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.cloud\"")
             isMinifyEnabled = false
         }
         release {
-            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.ai\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.cloud\"")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
