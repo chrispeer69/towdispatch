@@ -16,7 +16,13 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@towcommand/shared": ["../../packages/shared/src/index.ts"],
+      "@towcommand/shared/*": ["../../packages/shared/src/*"],
+      "@towcommand/db": ["../../packages/db/src/index.ts"],
+      "@towcommand/db/*": ["../../packages/db/src/*"],
+      "@towcommand/ui": ["../../packages/ui/src/index.ts"],
+      "@towcommand/ui/*": ["../../packages/ui/src/*"]
     },
     "allowJs": true
   },
