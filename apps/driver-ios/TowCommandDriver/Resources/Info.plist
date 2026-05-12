@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>TowCommand</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string></string>
+    </dict>
+    <key>UIRequiresFullScreen</key>
+    <true/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UIUserInterfaceStyle</key>
+    <string>Dark</string>
+    <key>NSCameraUsageDescription</key>
+    <string>TowCommand uses the camera to capture pre-tow and post-drop photos, VIN scans, and signatures required for every tow.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>TowCommand uses the microphone for voice memos and hands-free dictation while driving.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>TowCommand needs your location to route you to pickups, auto-advance jobs when you arrive, and tag photos.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Background location lets dispatch see your truck and bill mileage even when the app isn't on screen.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Sign in to TowCommand without typing your password.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Save captured tow photos to your photo library.</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>Loud audible alerts on new jobs, even when your phone is on Bluetooth or in Do Not Disturb.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>location</string>
+        <string>remote-notification</string>
+        <string>fetch</string>
+    </array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>comgooglemaps</string>
+        <string>waze</string>
+    </array>
+    <key>TCConfig</key>
+    <dict>
+        <key>ApiBaseURL</key>
+        <string>http://localhost:3001</string>
+        <key>MapboxAccessToken</key>
+        <string></string>
+        <key>StripePublishableKey</key>
+        <string></string>
+        <key>SentryDSN</key>
+        <string></string>
+        <key>Environment</key>
+        <string>development</string>
+    </dict>
+</dict>
+</plist>

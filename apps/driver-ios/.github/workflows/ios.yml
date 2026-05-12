@@ -1,0 +1,95 @@
+name: iOS Build & Test
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "apps/driver-ios/**"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "apps/driver-ios/**"
+
+jobs:
+  swift-package-tests:
+    runs-on: macos-14
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/driver-ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Test Core package
+        run: swift test --package-path Packages/Core
+
+      - name: Build Core for iOS Simulator triple
+        run: |
+          swift build --package-path Packages/Core \
+            --triple arm64-apple-ios16.4-simulator \
+            -Xswiftc -sdk -Xswiftc "$(xcrun -sdk iphonesimulator --show-sdk-path)"
+
+  xcode-build:
+    runs-on: macos-14
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: apps/driver-ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer || true
+
+      - name: Generate Xcode project
+        run: python3 scripts/generate-xcodeproj.py
+
+      - name: Lint (SwiftLint, non-blocking until installed)
+        run: |
+          if command -v swiftlint > /dev/null; then
+            swiftlint --strict
+          else
+            echo "SwiftLint not installed — install with: brew install swiftlint"
+          fi
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project TowCommandDriver.xcodeproj \
+            -scheme TowCommandDriver \
+            -destination "platform=iOS Simulator,name=iPhone 15" \
+            -configuration Debug | xcpretty || exit 1
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project TowCommandDriver.xcodeproj \
+            -scheme TowCommandDriver \
+            -destination "platform=iOS Simulator,name=iPhone 15" \
+            -configuration Debug | xcpretty || exit 1
+
+  archive:
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    needs: [swift-package-tests, xcode-build]
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: apps/driver-ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Xcode project
+        run: python3 scripts/generate-xcodeproj.py
+      - name: Archive (unsigned smoke)
+        run: |
+          xcodebuild archive \
+            -project TowCommandDriver.xcodeproj \
+            -scheme TowCommandDriver \
+            -configuration Release \
+            -archivePath build/TowCommandDriver.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO | xcpretty || exit 1

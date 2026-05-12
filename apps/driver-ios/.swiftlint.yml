@@ -1,0 +1,28 @@
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - file_length
+  - type_body_length
+  - function_body_length
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - sorted_imports
+  - vertical_whitespace_closing_braces
+
+included:
+  - TowCommandDriver
+  - TowCommandDriverTests
+  - TowCommandDriverUITests
+  - Packages/Core/Sources
+  - Packages/DesignSystem/Sources
+
+excluded:
+  - Packages/Core/.build
+  - Packages/DesignSystem/.build
+  - build
+
+identifier_name:
+  min_length: 1

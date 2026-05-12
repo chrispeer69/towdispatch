@@ -1,0 +1,24 @@
+## Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+
+## SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+## Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output
+
+## Local config
+*.local.xcconfig
+.env
+
+## Generated
+TowCommandDriver.xcodeproj/project.pbxproj.bak
