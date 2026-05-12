@@ -2,115 +2,205 @@
 
 The operating system for the modern towing industry.
 
-A multi-tenant SaaS platform built to serve 10,000+ towing companies and 100M+ dispatched jobs per year.
+A multi-tenant SaaS platform built to serve 10,000+ towing companies and 100M+ dispatched jobs per year. Replaces Towbook + a stack of glue tools with one product: dispatch board, driver app, customer billing, Stripe payments, QuickBooks accounting, and motor-club integration (Agero today, more in Phase 1).
+
+**Phase status:** end of Phase 0. The platform is ready to replace the founder's Towbook subscription. See [`apps/PHASE_0_EXIT_REPORT.md`](apps/PHASE_0_EXIT_REPORT.md) for the cancellation-readiness checklist.
 
 ---
 
-## Quickstart
+## Architecture at a glance
 
-### Prerequisites
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full decision log and invariants.
 
-- **Node.js** 20+
-- **pnpm** 9+ (`corepack enable && corepack prepare pnpm@9.12.3 --activate`)
-- **Docker Desktop** (for Postgres + Redis + Mailhog)
+```
+apps/
+├── api/         NestJS + Fastify backend, Postgres-backed, Redis for socket pub-sub
+├── web/         Next.js 15 App Router frontend (operator console)
+├── driver-ios/  Native iOS driver app (Session 6)
+└── e2e/         Playwright suite that runs in CI on every PR
 
-### 1. Install
+packages/
+├── db/          Drizzle schema + raw SQL (RLS, roles, audit triggers, perf indexes, auth hardening)
+├── shared/      Zod schemas, types, error codes, role constants
+└── ui/          Shared React components (placeholder)
+```
+
+The non-negotiable invariants (enforced in code, tested in CI):
+
+1. **RLS is sacred.** Every tenant table has `FORCE ROW LEVEL SECURITY`. The app connects as `app_user`, not the superuser. Every request runs in a transaction that `SET LOCAL app.current_tenant_id = …` so RLS engages. See `apps/api/test/security/rls-bypass.spec.ts`.
+2. **Audit everything.** Trigger-driven `audit_log` captures before/after state for every INSERT/UPDATE/DELETE on tenant tables.
+3. **Soft delete only.** `deleted_at` everywhere. Hard purge is a separate scheduled job (Phase 1).
+4. **UUIDv7 only.** Sortable, indexable, no exposing internal counts.
+5. **No `any`.** Strict TypeScript, `exactOptionalPropertyTypes: true`.
+6. **All external calls are observable.** Idempotency keys on writes; PII redacted from logs.
+
+---
+
+## Prerequisites
+
+- **Node.js** 22 LTS (any 20+ should work for development)
+- **pnpm** 9 (`corepack enable && corepack prepare pnpm@9 --activate`)
+- **Docker Desktop** (for Postgres + Redis + Mailhog locally)
+- **Postgres** 16 with PostGIS — provided by docker-compose
+
+---
+
+## Local setup (fresh clone → running stack)
 
 ```bash
+# 1. Install deps
 pnpm install
+
+# 2. Bring up infra (Postgres + Redis + Mailhog)
+docker compose up -d
+
+# 3. Copy env templates
 cp .env.example .env
 cp .env.example apps/api/.env
 cp .env.example apps/web/.env.local
-```
 
-### 2. Start infrastructure
+# 4. Apply migrations + seed dev tenants
+pnpm --filter @towcommand/db migrate
+pnpm --filter @towcommand/db seed
 
-```bash
-docker compose up -d
-```
-
-This starts:
-
-- Postgres 16 + PostGIS on `:5432`
-- Redis 7 on `:6379`
-- Mailhog UI on `:8025` (SMTP `:1025`)
-
-### 3. Database setup
-
-```bash
-pnpm db:migrate     # runs Drizzle schema migrations + raw SQL files (extensions, roles, RLS, audit)
-pnpm db:seed        # creates 2 test tenants and 6 users
-```
-
-### 4. Run the dev servers
-
-```bash
+# 5. Run dev servers (API + web in parallel)
 pnpm dev
 ```
 
+URLs:
+
 - API: <http://localhost:3001>
 - Web: <http://localhost:3000>
-- Health: <http://localhost:3001/health>
-- Ready: <http://localhost:3001/ready>
+- Mailhog UI: <http://localhost:8025>
+- Liveness probe: <http://localhost:3001/health>
+- Readiness probe: <http://localhost:3001/ready>
+- Prometheus metrics: <http://localhost:3001/metrics>
 
-### 5. Verify RLS
+Verify the stack is healthy:
 
 ```bash
-pnpm --filter @towcommand/api test test/integration/rls.spec.ts
-```
-
-This runs the cross-tenant integrity test that gates every release.
-
----
-
-## Repo layout
-
-```
-towcommand/
-├── apps/
-│   ├── api/        NestJS + Fastify backend
-│   └── web/        Next.js 15 frontend
-├── packages/
-│   ├── db/         Drizzle schema + raw SQL (RLS, roles, audit triggers)
-│   ├── shared/     Zod schemas, types, constants
-│   └── ui/         Shared React components (placeholder)
-├── docker-compose.yml
-└── ARCHITECTURE.md
+curl -sf http://localhost:3001/ready
+# → {"status":"ok","checks":{"db":"ok","redis":"ok"}}
 ```
 
 ---
 
-## Development scripts
+## Tests
 
-| Command            | Purpose                                                  |
-| ------------------ | -------------------------------------------------------- |
-| `pnpm dev`         | Run API and Web in parallel                              |
-| `pnpm build`       | Build everything                                         |
-| `pnpm typecheck`   | Type-check every workspace                               |
-| `pnpm lint`        | Biome lint                                               |
-| `pnpm format`      | Biome format                                             |
-| `pnpm test`        | Run unit + integration tests across packages             |
-| `pnpm test:e2e`    | Playwright e2e (web)                                     |
-| `pnpm db:generate` | Generate a new Drizzle migration                         |
-| `pnpm db:migrate`  | Apply migrations + raw SQL                               |
-| `pnpm db:seed`     | Idempotent seed                                          |
-| `pnpm db:studio`   | Open Drizzle Studio                                      |
-| `pnpm db:reset`    | Drop and recreate the database (dev only)                |
+```bash
+# Unit + integration (DB-gated specs skip without Postgres)
+pnpm --filter @towcommand/api test
+
+# Web vitest (presentation tests)
+pnpm --filter @towcommand/web test
+
+# Typecheck every workspace
+pnpm typecheck
+
+# Build every workspace
+pnpm build
+```
+
+### E2E (Playwright)
+
+```bash
+# Boot the stack first (docker + api + web running on the e2e ports)
+# Then:
+pnpm --filter @towcommand/e2e exec playwright install chromium
+E2E_RUN_REQUIRES_STACK=1 pnpm --filter @towcommand/e2e test
+```
+
+CI runs the full suite on every PR via `.github/workflows/e2e.yml` — Postgres + Redis service containers, API + web started as background processes, Chromium (+ Firefox + WebKit on master push).
 
 ---
 
-## Architecture
+## Operational scripts
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full set of decisions and invariants.
+Everything in `scripts/`:
 
-The non-negotiables:
+| Script | Purpose |
+|---|---|
+| `scripts/check-migrations.sh` | Validates migration order, naming, and header comments. Run in CI before deploy. |
+| `scripts/check-env.sh` | Warns if required env vars are missing or set to dev placeholders in production. |
+| `scripts/deploy.sh` | Deploy template — Railway by default, AWS dry-run path documented. Idempotent on the same SHA. |
+| `scripts/seed-driver-job.sh` | Seeds a driver + job for the Session 6 walkthrough. |
+| `scripts/verify-*.sh` | Per-session acceptance scripts retained for historical walkthroughs. |
 
-1. **RLS is sacred.** Every tenant table has `FORCE ROW LEVEL SECURITY`. The app connects as a non-superuser; per-request transactions `SET LOCAL app.current_tenant_id`.
-2. **Audit everything.** Trigger-driven `audit_log` capturing before/after state.
-3. **Soft delete only.** `deleted_at` everywhere. Hard purge is a separate scheduled job.
-4. **UUIDv7 only.** Sortable, indexable, no exposing internal counts.
-5. **No `any`.** Strict TypeScript, exact optional property types.
-6. **All external calls are observable.** Idempotency keys on writes.
+---
+
+## Workspace scripts
+
+| Command | Purpose |
+|---|---|
+| `pnpm dev` | Run API + web in parallel |
+| `pnpm build` | Build everything |
+| `pnpm typecheck` | Type-check every workspace |
+| `pnpm lint` | Biome lint |
+| `pnpm format` | Biome format |
+| `pnpm test` | Unit + integration tests across packages |
+| `pnpm --filter @towcommand/e2e test` | Playwright e2e (gated on `E2E_RUN_REQUIRES_STACK=1`) |
+| `pnpm --filter @towcommand/db generate` | Generate a new Drizzle migration |
+| `pnpm --filter @towcommand/db migrate` | Apply migrations + raw SQL |
+| `pnpm --filter @towcommand/db seed` | Idempotent dev seed |
+| `pnpm --filter @towcommand/db studio` | Open Drizzle Studio |
+| `pnpm --filter @towcommand/db reset` | Drop + recreate dev DB (refuses if `NODE_ENV=production`) |
+
+---
+
+## Deploy
+
+Current platform: **Railway**. AWS migration path documented in `docs/runbooks/scaling-event.md` §3.
+
+```bash
+# Dry-run a production deploy from master
+DRY_RUN=1 scripts/deploy.sh production
+
+# Real production deploy (CI does this on master push)
+scripts/deploy.sh production
+```
+
+The deploy script:
+
+1. Runs `check-migrations.sh` + `check-env.sh`
+2. Installs deps, builds api + web
+3. Runs unit + integration tests + typechecks
+4. Applies forward-only migrations
+5. Pushes the new artifact to Railway
+6. Probes `/health` + `/ready` until both return 200 (60s timeout)
+7. Tags the release with the git SHA
+
+---
+
+## Runbooks
+
+Production operating procedures — read **before** something breaks at 2 AM:
+
+| Runbook | When to use |
+|---|---|
+| [`docs/runbooks/incident-response.md`](docs/runbooks/incident-response.md) | Anything labeled SEV-1/2/3 |
+| [`docs/runbooks/database-restore.md`](docs/runbooks/database-restore.md) | Data loss, bad migration, PITR |
+| [`docs/runbooks/tenant-onboarding.md`](docs/runbooks/tenant-onboarding.md) | New customer signs up |
+| [`docs/runbooks/motor-club-down.md`](docs/runbooks/motor-club-down.md) | Agero gateway degraded |
+| [`docs/runbooks/payment-processor-down.md`](docs/runbooks/payment-processor-down.md) | Stripe degraded |
+| [`docs/runbooks/scaling-event.md`](docs/runbooks/scaling-event.md) | Traffic spike, CPU/memory pressure |
+| [`docs/runbooks/security-incident.md`](docs/runbooks/security-incident.md) | Suspected breach, credential compromise |
+| [`docs/runbooks/secrets-rotation.md`](docs/runbooks/secrets-rotation.md) | Routine rotation OR emergency response |
+| [`docs/runbooks/backup-strategy.md`](docs/runbooks/backup-strategy.md) | Backup cadence + retention reference |
+| [`docs/observability.md`](docs/observability.md) | Alert thresholds + dashboard reference |
+
+---
+
+## Session reports (history)
+
+Each session's deliverables and decisions are documented at:
+
+- `apps/api/SESSION_16_REPORT.md` — Towbook importer
+- `apps/api/SESSION_17_REPORT.md` — type cleanup
+- `apps/api/SESSION_17A_REPORT.md` — perf / security / observability
+- `apps/SESSION_17B_REPORT.md` + `apps/SESSION_17B_ADDENDUM.md` — a11y / error states / E2E
+- `apps/SESSION_17C_REPORT.md` — runbooks / deployment / Phase 0 exit
+
+The exit gate: [`apps/PHASE_0_EXIT_REPORT.md`](apps/PHASE_0_EXIT_REPORT.md).
 
 ---
 
