@@ -65,7 +65,7 @@ $web         = 'web'
 # ---------------------------------------------------------------------
 Write-Host "==> 1. Link Railway project + environment" -ForegroundColor Cyan
 # Read current link state. The `environment` field in `railway status --json`
-# is unreliable in v4.57 — sometimes the project is linked and the active env
+# is unreliable in v4.57 - sometimes the project is linked and the active env
 # is set but the JSON readback returns an empty string. We trust the project
 # name from JSON and trust the exit code of `environment link` for env state.
 $stat = Invoke-Railway -Args @('status', '--json') -Quiet
@@ -80,7 +80,7 @@ if ($linkedProject -ne $projectName) {
   if ($res.Exit -ne 0) {
     throw "Failed to link project ${projectName}: $($res.Output)"
   }
-  # Confirm the project link took. Don't check env here — see comment above.
+  # Confirm the project link took. Don't check env here - see comment above.
   $stat = Invoke-Railway -Args @('status', '--json') -Quiet
   try { $linkedProject = ($stat.Output | ConvertFrom-Json).name } catch { }
   if ($linkedProject -ne $projectName) {
@@ -163,6 +163,13 @@ function Set-EnvFile {
     if ($eq -lt 1) { return }
     $key = $line.Substring(0, $eq).Trim()
     $val = $line.Substring($eq + 1).Trim()
+    # Railway rejects KEY= with no value. Skip - owner can paste real values
+    # later in the dashboard. This keeps placeholder rows in the env file as
+    # documentation without breaking the push.
+    if (-not $val) {
+      Write-Host "        . $key (skipped - empty value)" -ForegroundColor DarkGray
+      return
+    }
     $res = Invoke-Railway -Args @(
       'variables', '--service', $Service, '--set', "$key=$val", '--skip-deploys'
     ) -Quiet
@@ -175,25 +182,62 @@ function Set-EnvFile {
   }
 }
 
+function Invoke-RailwayWithRetry {
+  # Wrap Invoke-Railway with retries for transient TLS / connection errors
+  # surfaced by `railway up` and occasionally `railway domain`. Errors like
+  # "BadRecordMac", "connection forcibly closed", and "Unauthorized" right
+  # after a successful whoami are almost always transient.
+  param(
+    [Parameter(Mandatory)] [string[]] $Args,
+    [int] $MaxAttempts = 4,
+    [int] $DelaySeconds = 5
+  )
+  $attempt = 0
+  while ($true) {
+    $attempt++
+    $res = Invoke-Railway -Args $Args
+    if ($res.Exit -eq 0) { return $res }
+    $out = "$($res.Output)"
+    $transient = $out -match 'BadRecordMac' -or `
+                 $out -match 'forcibly closed' -or `
+                 $out -match 'connection error' -or `
+                 $out -match 'timed out' -or `
+                 $out -match 'temporar' -or `
+                 $out -match 'Unauthorized'
+    if (-not $transient -or $attempt -ge $MaxAttempts) {
+      Write-Host "    gave up after $attempt attempt(s)" -ForegroundColor Yellow
+      return $res
+    }
+    Write-Host "    transient error, retry $attempt/$MaxAttempts in ${DelaySeconds}s..." -ForegroundColor Yellow
+    Start-Sleep -Seconds $DelaySeconds
+    $DelaySeconds = [Math]::Min($DelaySeconds * 2, 30)
+  }
+}
+
 Write-Host "==> 5. Push env vars to services" -ForegroundColor Cyan
 Set-EnvFile -Service $backend -Path 'scripts/railway/backend.env'
 Set-EnvFile -Service $web     -Path 'scripts/railway/web.env'
 
 # ---------------------------------------------------------------------
-# 6. Custom domains. railway domain is idempotent on a hostname.
+# 6. Deploy. Done BEFORE domains because Railway sometimes rejects
+#    `domain` calls on a service that has never been built (the rejection
+#    surfaces as a spurious "Unauthorized" rather than a useful error).
+#    `railway up` is also the step most prone to transient TLS errors on
+#    Windows - retry on BadRecordMac / forcibly-closed-connection.
 # ---------------------------------------------------------------------
-Write-Host "==> 6. Attach custom domains" -ForegroundColor Cyan
-Invoke-Railway -Args @('domain', '--service', $backend, 'api.towcommand.cloud') | Out-Null
-Invoke-Railway -Args @('domain', '--service', $web,     'app.towcommand.cloud') | Out-Null
+Write-Host "==> 6. Deploy backend" -ForegroundColor Cyan
+Invoke-RailwayWithRetry -Args @('up', '--service', $backend, '--detach') | Out-Null
+
+Write-Host "==> 7. Deploy web" -ForegroundColor Cyan
+Invoke-RailwayWithRetry -Args @('up', '--service', $web, '--detach') | Out-Null
 
 # ---------------------------------------------------------------------
-# 7. Deploy
+# 8. Custom domains. With deploys in flight, the services exist on
+#    Railway's side and the domain endpoint stops returning "Unauthorized".
 # ---------------------------------------------------------------------
-Write-Host "==> 7. Deploy backend" -ForegroundColor Cyan
-Invoke-Railway -Args @('up', '--service', $backend, '--detach') | Out-Null
-
-Write-Host "==> 8. Deploy web" -ForegroundColor Cyan
-Invoke-Railway -Args @('up', '--service', $web, '--detach') | Out-Null
+Write-Host "==> 8. Attach custom domains" -ForegroundColor Cyan
+Invoke-RailwayWithRetry -Args @('domain', '--service', $backend, 'api.towcommand.cloud') | Out-Null
+Invoke-RailwayWithRetry -Args @('domain', '--service', $web,     'app.towcommand.cloud') | Out-Null
 
 # ---------------------------------------------------------------------
 # 9. Snapshot for the deploy report
