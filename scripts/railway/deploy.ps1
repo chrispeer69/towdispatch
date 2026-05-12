@@ -135,42 +135,24 @@ if (-not $redisExists) {
 }
 
 # ---------------------------------------------------------------------
-# 4. Create backend + web services - GitHub-source-linked.
-#
-# Why GitHub source instead of `railway up`: this machine's TLS stack
-# corrupts the large multipart upload that `up` performs (BadRecordMac
-# fatal alerts mid-stream). Linking the service to the GitHub repo
-# bypasses local upload entirely - Railway pulls from
-# github.com/chrispeer69/towcommand and builds in their datacenter.
-#
-# We delete and recreate any existing "empty" services because Railway
-# CLI v4 has no command to convert an empty service into a repo-linked
-# one; that conversion is GraphQL-only via the dashboard. Delete +
-# recreate is the cleanest CLI path. Variables get cleared, but step 5
-# re-pushes them.
+# 4. Ensure backend + web services exist (empty). GitHub source linking
+#    happens via the dashboard (one-time, ~30s) because Railway CLI's
+#    --repo flag returns Unauthorized until the user has connected
+#    GitHub in their Railway account settings, and there's no CLI to do
+#    that. After dashboard wiring, every push to master rebuilds
+#    automatically via the Dockerfiles in apps/{api,web}/Dockerfile.
 # ---------------------------------------------------------------------
-$githubRepo = 'chrispeer69/towcommand'
-
-function Ensure-RepoLinkedService {
-  param([string]$Name)
-  # If the service exists, delete it (we can't tell from the CLI whether
-  # it's already repo-linked, so we always recreate).
-  if ($existingServices -contains $Name) {
-    Write-Host "    deleting existing $Name service to re-link to GitHub" -ForegroundColor Yellow
-    $del = Invoke-Railway -Args @('service', 'delete', '--service', $Name, '--yes')
-    if ($del.Exit -ne 0) {
-      Write-Host "    WARN: delete returned non-zero ($($del.Exit)); continuing" -ForegroundColor Yellow
-    }
-  }
-  $add = Invoke-Railway -Args @('add', '--service', $Name, '--repo', $githubRepo, '--json')
-  if ($add.Exit -ne 0) {
-    throw "Failed to create $Name service linked to $githubRepo. Output: $($add.Output)"
-  }
+Write-Host "==> 4. Ensure backend + web services exist" -ForegroundColor Cyan
+if ($existingServices -notcontains $backend) {
+  Invoke-Railway -Args @('add', '--service', $backend, '--json') | Out-Null
+} else {
+  Write-Host "    $backend service already present, skipping" -ForegroundColor DarkGreen
 }
-
-Write-Host "==> 4. (Re)create backend + web as GitHub-linked services" -ForegroundColor Cyan
-Ensure-RepoLinkedService -Name $backend
-Ensure-RepoLinkedService -Name $web
+if ($existingServices -notcontains $web) {
+  Invoke-Railway -Args @('add', '--service', $web, '--json') | Out-Null
+} else {
+  Write-Host "    $web service already present, skipping" -ForegroundColor DarkGreen
+}
 
 # ---------------------------------------------------------------------
 # 5. Push env vars. --skip-deploys + explicit --service per call.
@@ -242,41 +224,36 @@ Set-EnvFile -Service $backend -Path 'scripts/railway/backend.env'
 Set-EnvFile -Service $web     -Path 'scripts/railway/web.env'
 
 # ---------------------------------------------------------------------
-# 6. Trigger initial build. Repo-linked services start building the
-#    moment they're created (Railway watches the repo's default branch).
-#    `railway redeploy` here is a no-op safety net in case the auto-build
-#    didn't fire.
+# 6. Generate Railway-provided domains (fallback URLs).
+#    Custom domains (api/app.towcommand.cloud) require dashboard setup
+#    AND a paid plan, so we generate the .up.railway.app URLs the CLI
+#    can issue without those gates - they work the instant GitHub
+#    source linking is done in the dashboard.
 # ---------------------------------------------------------------------
-Write-Host "==> 6. Nudge initial builds (Railway should be building already)" -ForegroundColor Cyan
-Invoke-Railway -Args @('redeploy', '--service', $backend, '--yes') | Out-Null
-Invoke-Railway -Args @('redeploy', '--service', $web, '--yes') | Out-Null
-
-# ---------------------------------------------------------------------
-# 7. Custom domains. Generate Railway-provided URLs as a baseline; the
-#    custom hostnames (api/app.towcommand.cloud) need DNS + a paid plan
-#    so we'll surface their status but not hard-fail if rejected.
-# ---------------------------------------------------------------------
-Write-Host "==> 7. Generate Railway URLs + attempt custom domains" -ForegroundColor Cyan
+Write-Host "==> 6. Generate Railway-provided URLs" -ForegroundColor Cyan
 Invoke-Railway -Args @('domain', '--service', $backend) | Out-Null
 Invoke-Railway -Args @('domain', '--service', $web) | Out-Null
-$customBackend = Invoke-Railway -Args @('domain', '--service', $backend, 'api.towcommand.cloud')
-$customWeb     = Invoke-Railway -Args @('domain', '--service', $web,     'app.towcommand.cloud')
-if ($customBackend.Exit -ne 0 -or $customWeb.Exit -ne 0) {
-  Write-Host "    NOTE: custom domain attach failed (likely plan-tier or DNS gate)." -ForegroundColor Yellow
-  Write-Host "          Add api.towcommand.cloud and app.towcommand.cloud manually in:" -ForegroundColor Yellow
-  Write-Host "          https://railway.com/dashboard -> $projectName -> service -> Settings -> Networking" -ForegroundColor Yellow
-}
 
 # ---------------------------------------------------------------------
-# 8. Snapshot for the deploy report
+# 7. Snapshot for the deploy report
 # ---------------------------------------------------------------------
-Write-Host "==> 8. Snapshot deploy status" -ForegroundColor Cyan
+Write-Host "==> 7. Snapshot deploy status" -ForegroundColor Cyan
 $finalStatus = (Invoke-Railway -Args @('service', 'list', '--json') -Quiet).Output
 $finalStatus | Out-File scripts/railway/.deploy-status.json -Encoding utf8
 
 Write-Host ""
-Write-Host "DONE. Watch builds at https://railway.com/dashboard" -ForegroundColor Green
-Write-Host "  Backend health (once green):  https://api.towcommand.cloud/health" -ForegroundColor Green
-Write-Host "  Web (once green):             https://app.towcommand.cloud" -ForegroundColor Green
+Write-Host "================ NEXT STEPS (one-time, dashboard) =================" -ForegroundColor Green
+Write-Host "1. Open https://railway.com/dashboard -> towcommand-prod" -ForegroundColor Green
+Write-Host "2. For BOTH 'backend' and 'web' services:" -ForegroundColor Green
+Write-Host "     Settings -> Source -> Connect Repo" -ForegroundColor Green
+Write-Host "     Repo: chrispeer69/towcommand     Branch: master" -ForegroundColor Green
+Write-Host "     (Railway will auto-detect apps/{api,web}/railway.toml)" -ForegroundColor Green
+Write-Host "3. For custom domains (paid plan required):" -ForegroundColor Green
+Write-Host "     backend -> Settings -> Networking -> Custom Domain ->" -ForegroundColor Green
+Write-Host "         api.towcommand.cloud" -ForegroundColor Green
+Write-Host "     web -> Settings -> Networking -> Custom Domain ->" -ForegroundColor Green
+Write-Host "         app.towcommand.cloud" -ForegroundColor Green
+Write-Host "===================================================================" -ForegroundColor Green
 Write-Host ""
+Write-Host "Once GitHub is linked the first build runs immediately." -ForegroundColor Green
 Write-Host "Status snapshot saved to scripts/railway/.deploy-status.json" -ForegroundColor DarkGray
