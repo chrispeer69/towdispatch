@@ -4,12 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 /**
- * Login flow handles four branches the API might return:
- *   - authenticated         → push to /dashboard
- *   - needs_tenant_selection → render a tenant picker, then re-submit with slug
- *   - mfa_required          → redirect to /auth/mfa/challenge (token is in an
- *                              httpOnly cookie set by the BFF, not in JS)
- *   - mfa_setup_required    → redirect to /auth/mfa/enroll (same cookie idea)
+ * Login flow. With MFA_LOGIN_GATE_ENABLED=false on the API the backend
+ * only returns `authenticated` or `needs_tenant_selection`. The
+ * `mfa_required` / `mfa_setup_required` BFF routes and /auth/mfa/* pages
+ * are left in the repo but are no longer reachable from this form — flip
+ * MFA_LOGIN_GATE_ENABLED on the API to re-wire them.
  */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type LoginPayload, type TenantSelectionDto, loginSchema } from '@towcommand/shared';
@@ -21,8 +20,6 @@ import { useForm } from 'react-hook-form';
 type LoginApiResponse =
   | { status: 'authenticated'; user: unknown; tenant: unknown }
   | { status: 'needs_tenant_selection'; tenants: TenantSelectionDto[] }
-  | { status: 'mfa_required' }
-  | { status: 'mfa_setup_required'; role: string }
   | { code?: string; message?: string };
 
 export function LoginForm(): JSX.Element {
@@ -69,14 +66,6 @@ export function LoginForm(): JSX.Element {
     if (data.status === 'needs_tenant_selection') {
       setTenantOptions(data.tenants);
       setPendingPayload(payload);
-      return;
-    }
-    if (data.status === 'mfa_required') {
-      router.push(`/auth/mfa/challenge?next=${encodeURIComponent(next)}`);
-      return;
-    }
-    if (data.status === 'mfa_setup_required') {
-      router.push(`/auth/mfa/enroll?next=${encodeURIComponent(next)}`);
       return;
     }
   }
