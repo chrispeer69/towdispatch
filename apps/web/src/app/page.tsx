@@ -1,5 +1,6 @@
 import { Wordmark } from '@/components/brand/wordmark';
 import { buttonVariants } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -21,12 +22,15 @@ export default function LandingPage(): JSX.Element {
             Tow<span className="text-orange">Command</span> Pro
           </span>
         </div>
-        <Link
-          href="/login"
-          className="text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/login"
+            className="text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
+          >
+            Sign in
+          </Link>
+        </div>
       </header>
 
       <section className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 pb-16 text-center md:px-10">

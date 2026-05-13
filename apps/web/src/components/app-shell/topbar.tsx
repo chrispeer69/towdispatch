@@ -1,5 +1,6 @@
 'use client';
 
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Bell, HelpCircle, Search } from 'lucide-react';
 import { useUser } from './session-provider';
 
@@ -22,6 +23,7 @@ export function AppTopbar(): JSX.Element {
             className="w-56 bg-transparent text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
           />
         </div>
+        <ThemeToggle />
         <button
           type="button"
           aria-label="Help"
