@@ -252,3 +252,56 @@ export const intakeResultSchema = z.object({
   rateQuote: rateQuoteSchema,
 });
 export type IntakeResultDto = z.infer<typeof intakeResultSchema>;
+
+export const jobListFiltersSchema = z.object({
+  status: z.enum(jobStatusValues).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  perPage: z.coerce.number().int().min(1).max(200).default(50),
+});
+export type JobListFilters = z.infer<typeof jobListFiltersSchema>;
+
+/**
+ * Row shape for the /jobs list page — flattens the most commonly-displayed
+ * fields from the customer, vehicle, and assigned driver onto the job so the
+ * table can render without per-row follow-up fetches.
+ */
+export const jobListItemSchema = z.object({
+  id: z.string().uuid(),
+  jobNumber: z.string(),
+  status: z.enum(jobStatusValues),
+  serviceType: z.enum(jobServiceTypeValues),
+  pickupAddress: z.string(),
+  createdAt: z.string().datetime(),
+  customer: z
+    .object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+    .nullable(),
+  vehicle: z
+    .object({
+      id: z.string().uuid(),
+      year: z.number().int().nullable(),
+      make: z.string().nullable(),
+      model: z.string().nullable(),
+      plate: z.string().nullable(),
+      plateState: z.string().nullable(),
+    })
+    .nullable(),
+  driver: z
+    .object({
+      id: z.string().uuid(),
+      firstName: z.string(),
+      lastName: z.string(),
+    })
+    .nullable(),
+});
+export type JobListItemDto = z.infer<typeof jobListItemSchema>;
+
+export const paginatedJobsSchema = z.object({
+  data: z.array(jobListItemSchema),
+  page: z.number().int().positive(),
+  perPage: z.number().int().positive(),
+  total: z.number().int().nonnegative(),
+});
+export type PaginatedJobs = z.infer<typeof paginatedJobsSchema>;

@@ -1,10 +1,14 @@
-import { fetchPayments, formatMoneyCents } from '@/lib/api/billing';
+import { type PaymentListResponse, fetchPayments, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
 import { paymentMethodLabel } from '@towcommand/shared';
 
 export const metadata = { title: 'Payments — TowCommand' };
 
+const EMPTY_PAYMENTS: PaymentListResponse = { data: [], total: 0 };
+
 export default async function PaymentsPage(): Promise<JSX.Element> {
-  const list = await fetchPayments({ limit: '100' });
+  const result = await tryFetch(() => fetchPayments({ limit: '100' }));
+  const list = result.data ?? EMPTY_PAYMENTS;
   return (
     <div className="space-y-4">
       <header>

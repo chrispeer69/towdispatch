@@ -297,30 +297,36 @@ export class AuthService {
         .where(eq(users.id, candidate.user.id));
     });
 
-    if (candidate.user.mfaEnabled) {
-      const challengeToken = await this.jwt.signMfaChallenge({
-        sub: candidate.user.id,
-        tid: candidate.user.tenantId,
-        role: candidate.user.role,
-      });
-      return { status: 'mfa_required', challengeToken };
-    }
+    // MFA on the login path is gated by MFA_LOGIN_GATE_ENABLED (default
+    // false). When the flag is off, valid credentials produce tokens
+    // immediately — no `mfa_required`, no `mfa_setup_required`. The
+    // /auth/mfa/* endpoints remain mounted for future re-enable. Flip
+    // MFA_LOGIN_GATE_ENABLED=true to bring back the wall + challenge.
+    if (this.config.mfaLoginGateEnabled) {
+      if (candidate.user.mfaEnabled) {
+        const challengeToken = await this.jwt.signMfaChallenge({
+          sub: candidate.user.id,
+          tid: candidate.user.tenantId,
+          role: candidate.user.role,
+        });
+        return { status: 'mfa_required', challengeToken };
+      }
 
-    // MFA enforcement gate: OWNER and ADMIN cannot ride without MFA. They
-    // get a short-lived setup token instead of access tokens; the client
-    // (web app at /settings/security/mfa/enroll, mobile app at the
-    // enrollment screen) must call /auth/mfa/setup + verify-setup to
-    // complete enrollment, then re-login.
-    if (
-      (candidate.user.role === ROLES.OWNER || candidate.user.role === ROLES.ADMIN) &&
-      !candidate.user.mfaEnabled
-    ) {
-      const setupToken = await this.jwt.signMfaSetupRequired({
-        sub: candidate.user.id,
-        tid: candidate.user.tenantId,
-        role: candidate.user.role,
-      });
-      return { status: 'mfa_setup_required', setupToken, role: candidate.user.role };
+      // MFA enforcement gate: OWNER and ADMIN cannot ride without MFA. They
+      // get a short-lived setup token instead of access tokens; the client
+      // must call /auth/mfa/setup + verify-setup to complete enrollment,
+      // then re-login.
+      if (
+        (candidate.user.role === ROLES.OWNER || candidate.user.role === ROLES.ADMIN) &&
+        !candidate.user.mfaEnabled
+      ) {
+        const setupToken = await this.jwt.signMfaSetupRequired({
+          sub: candidate.user.id,
+          tid: candidate.user.tenantId,
+          role: candidate.user.role,
+        });
+        return { status: 'mfa_setup_required', setupToken, role: candidate.user.role };
+      }
     }
 
     const tokens = await this.issueTokens(

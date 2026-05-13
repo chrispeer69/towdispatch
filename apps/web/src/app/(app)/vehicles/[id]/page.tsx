@@ -1,4 +1,4 @@
-import { ApiError } from '@/lib/api/client';
+import { tryFetch } from '@/lib/api/client';
 import { fetchVehicle } from '@/lib/api/resources';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -19,13 +19,11 @@ export default async function VehicleDetailPage({ params }: Props): Promise<JSX.
   // we don't bubble the API's "validation_failed" up as a 500.
   if (!UUID_RX.test(id)) notFound();
 
-  let vehicle: Awaited<ReturnType<typeof fetchVehicle>>;
-  try {
-    vehicle = await fetchVehicle(id);
-  } catch (err) {
-    if (err instanceof ApiError && (err.status === 404 || err.status === 400)) notFound();
-    throw err;
-  }
+  // tryFetch returns 4xx as data; treat any of them (400/401/403/404) the
+  // same — the operator can't reach this record, so 404 the page.
+  const result = await tryFetch(() => fetchVehicle(id));
+  if (!result.data) notFound();
+  const vehicle = result.data;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">

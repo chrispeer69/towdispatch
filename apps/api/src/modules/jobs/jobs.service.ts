@@ -43,11 +43,14 @@ import {
   ERROR_CODES,
   type IntakeResultDto,
   type JobDto,
+  type JobListFilters,
+  type JobListItemDto,
   type JobStatus,
+  type PaginatedJobs,
   type QuotePreviewPayload,
   type RateQuote,
 } from '@towcommand/shared';
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
@@ -74,6 +77,87 @@ export class JobsService {
     private readonly rateEngine: RateEngineService,
     private readonly events: DispatchEventsService,
   ) {}
+
+  /**
+   * Paginated list backing the /jobs index page. Joins customer name, the
+   * vehicle's year/make/model/plate, and the assigned driver's name in one
+   * round trip so the list view doesn't fan out to per-row fetches.
+   * Sort is fixed (createdAt DESC) — v1 has no per-column sorting.
+   */
+  async list(ctx: CallerContext, filters: JobListFilters): Promise<PaginatedJobs> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const conds = [isNull(jobs.deletedAt)];
+      if (filters.status) conds.push(eq(jobs.status, filters.status));
+      const whereExpr = and(...conds);
+
+      const countRow = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(jobs)
+        .where(whereExpr);
+      const total = countRow[0]?.count ?? 0;
+
+      const rows = await tx
+        .select({
+          id: jobs.id,
+          jobNumber: jobs.jobNumber,
+          status: jobs.status,
+          serviceType: jobs.serviceType,
+          pickupAddress: jobs.pickupAddress,
+          createdAt: jobs.createdAt,
+          customerId: customers.id,
+          customerName: customers.name,
+          vehicleId: vehicles.id,
+          vehicleYear: vehicles.year,
+          vehicleMake: vehicles.make,
+          vehicleModel: vehicles.model,
+          vehiclePlate: vehicles.plate,
+          vehiclePlateState: vehicles.plateState,
+          driverId: drivers.id,
+          driverFirstName: drivers.firstName,
+          driverLastName: drivers.lastName,
+        })
+        .from(jobs)
+        .leftJoin(customers, eq(jobs.customerId, customers.id))
+        .leftJoin(vehicles, eq(jobs.vehicleId, vehicles.id))
+        .leftJoin(drivers, eq(jobs.assignedDriverId, drivers.id))
+        .where(whereExpr)
+        .orderBy(desc(jobs.createdAt))
+        .limit(filters.perPage)
+        .offset((filters.page - 1) * filters.perPage);
+
+      const data: JobListItemDto[] = rows.map((r) => ({
+        id: r.id,
+        jobNumber: r.jobNumber,
+        status: r.status,
+        serviceType: r.serviceType,
+        pickupAddress: r.pickupAddress,
+        createdAt: r.createdAt.toISOString(),
+        customer:
+          r.customerId && r.customerName ? { id: r.customerId, name: r.customerName } : null,
+        vehicle: r.vehicleId
+          ? {
+              id: r.vehicleId,
+              year: r.vehicleYear ?? null,
+              make: r.vehicleMake ?? null,
+              model: r.vehicleModel ?? null,
+              plate: r.vehiclePlate ?? null,
+              plateState: r.vehiclePlateState ?? null,
+            }
+          : null,
+        driver:
+          r.driverId && r.driverFirstName && r.driverLastName
+            ? { id: r.driverId, firstName: r.driverFirstName, lastName: r.driverLastName }
+            : null,
+      }));
+
+      return {
+        data,
+        page: filters.page,
+        perPage: filters.perPage,
+        total,
+      };
+    });
+  }
 
   async quotePreview(ctx: CallerContext, input: QuotePreviewPayload): Promise<RateQuote> {
     return this.rateEngine.quote({

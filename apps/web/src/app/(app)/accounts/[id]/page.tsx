@@ -1,5 +1,8 @@
+import { tryFetch } from '@/lib/api/client';
 import { fetchAccount, fetchCustomers } from '@/lib/api/resources';
+import type { PaginatedCustomers } from '@towcommand/shared';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { AccountForm } from '../account-form';
 
 interface Props {
@@ -8,12 +11,20 @@ interface Props {
 
 export const metadata = { title: 'Account — TowCommand' };
 
+const EMPTY_CUSTOMERS: PaginatedCustomers = { data: [], total: 0, page: 1, perPage: 100 };
+
 export default async function AccountDetailPage({ params }: Props): Promise<JSX.Element> {
   const { id } = await params;
-  const [account, linked] = await Promise.all([
-    fetchAccount(id),
-    fetchCustomers({ accountId: id, perPage: '100' }),
+  const [accountRes, linkedRes] = await Promise.all([
+    tryFetch(() => fetchAccount(id)),
+    tryFetch(() => fetchCustomers({ accountId: id, perPage: '100' })),
   ]);
+  // Treat 401/403/404 on the primary resource the same: from the operator's
+  // point of view the record is unreachable, so 404 instead of crashing the
+  // shell or showing a confusing detail page with empty data.
+  if (!accountRes.data) notFound();
+  const account = accountRes.data;
+  const linked = linkedRes.data ?? EMPTY_CUSTOMERS;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header className="space-y-1">

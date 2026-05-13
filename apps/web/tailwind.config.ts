@@ -1,7 +1,10 @@
 /**
- * TowCommand brand tokens are LOCKED. They are mirrored as Tailwind theme
- * tokens here AND as CSS custom properties in src/app/globals.css. Always
- * change both at the same time, and only with explicit brand sign-off.
+ * TowCommand brand tokens. The DARK palette is LOCKED — values live as HSL
+ * channels in src/app/globals.css under the `.dark` selector. The `:root`
+ * (light) palette is a new addition that ships with the theme toggle. The
+ * tokens consumed here read from CSS variables so all `bg-steel`,
+ * `text-text-primary`, etc. classes flip automatically when the theme is
+ * toggled.
  */
 import type { Config } from 'tailwindcss';
 import animate from 'tailwindcss-animate';
@@ -20,30 +23,30 @@ const config: Config = {
     extend: {
       colors: {
         orange: {
-          DEFAULT: '#F05A1A',
-          dark: '#C44410',
-          light: '#FF7A3D',
+          DEFAULT: 'hsl(var(--orange) / <alpha-value>)',
+          dark: 'hsl(var(--orange-dark) / <alpha-value>)',
+          light: 'hsl(var(--orange-light) / <alpha-value>)',
         },
         steel: {
-          DEFAULT: '#1A1E2A',
-          mid: '#252A38',
-          light: '#2E3447',
-          border: '#3A4158',
-          'border-light': '#4A5270',
+          DEFAULT: 'hsl(var(--steel) / <alpha-value>)',
+          mid: 'hsl(var(--steel-mid) / <alpha-value>)',
+          light: 'hsl(var(--steel-light) / <alpha-value>)',
+          border: 'hsl(var(--steel-border) / <alpha-value>)',
+          'border-light': 'hsl(var(--steel-border-light) / <alpha-value>)',
         },
         text: {
-          primary: '#F0EDE8',
-          secondary: '#9CA3B5',
-          muted: '#626882',
+          primary: 'hsl(var(--text-primary) / <alpha-value>)',
+          secondary: 'hsl(var(--text-secondary) / <alpha-value>)',
+          muted: 'hsl(var(--text-muted) / <alpha-value>)',
         },
-        ok: '#22C55E',
-        warn: '#EAB308',
-        danger: '#EF4444',
-        info: '#3B82F6',
-        violet: '#A855F7',
+        ok: 'hsl(var(--green) / <alpha-value>)',
+        warn: 'hsl(var(--yellow) / <alpha-value>)',
+        danger: 'hsl(var(--red) / <alpha-value>)',
+        info: 'hsl(var(--blue) / <alpha-value>)',
+        violet: 'hsl(var(--purple) / <alpha-value>)',
       },
       backgroundColor: {
-        'orange-glow': 'rgba(240,90,26,0.15)',
+        'orange-glow': 'var(--orange-glow-rgba)',
       },
       fontFamily: {
         sans: ['var(--font-barlow)', 'system-ui', 'sans-serif'],
@@ -55,7 +58,7 @@ const config: Config = {
         lg: '14px',
       },
       boxShadow: {
-        'orange-glow': '0 0 0 4px rgba(240,90,26,0.15)',
+        'orange-glow': '0 0 0 4px var(--orange-glow-rgba)',
       },
       keyframes: {
         'fade-in-up': {

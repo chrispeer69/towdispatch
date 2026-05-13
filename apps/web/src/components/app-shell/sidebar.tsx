@@ -22,9 +22,8 @@ import {
 } from 'lucide-react';
 /**
  * 240px-wide left sidebar. Pulls the active path from `usePathname()` so the
- * matching pill highlights when on that route. Disabled items (jobs, drivers,
- * fleet, invoices, accounting, email settings) are visually present but not
- * navigable until their respective sessions ship.
+ * matching pill highlights when on that route. The only remaining disabled
+ * item is Email Settings — no settings UI exists yet.
  *
  * Per-item accentColor: ECOSYSTEM tabs (CONVINI, FleetCommand, FleetGuard Pro)
  * each get a brand color used for the icon at all times, the text + 3px
@@ -83,7 +82,12 @@ const SECTIONS: NavSection[] = [
         match: (p) => p.startsWith('/intake'),
       },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Tow Jobs', href: null, icon: Truck, disabled: true },
+      {
+        label: 'Tow Jobs',
+        href: '/jobs',
+        icon: Truck,
+        match: (p) => p.startsWith('/jobs'),
+      },
       {
         label: 'Live Dispatch',
         href: '/dispatch',
@@ -96,7 +100,12 @@ const SECTIONS: NavSection[] = [
         icon: CarFront,
         match: (p) => p.startsWith('/fleet'),
       },
-      { label: 'Drivers', href: null, icon: Users, disabled: true },
+      {
+        label: 'Drivers',
+        href: '/fleet/drivers',
+        icon: Users,
+        match: (p) => p.startsWith('/fleet/drivers'),
+      },
     ],
   },
   {
@@ -125,7 +134,14 @@ const SECTIONS: NavSection[] = [
   },
   {
     label: 'Finance',
-    items: [{ label: 'Accounting', href: null, icon: Calculator, disabled: true }],
+    items: [
+      {
+        label: 'Accounting',
+        href: '/accounting/settings',
+        icon: Calculator,
+        match: (p) => p.startsWith('/accounting'),
+      },
+    ],
   },
   {
     label: 'Integrations',

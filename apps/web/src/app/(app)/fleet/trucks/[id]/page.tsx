@@ -1,3 +1,4 @@
+import { tryFetch } from '@/lib/api/client';
 import {
   fetchDocuments,
   fetchDvirs,
@@ -7,6 +8,7 @@ import {
   fetchTruckSchedules,
 } from '@/lib/api/fleet';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { TruckForm } from '../truck-form';
 import { TruckDocumentsSection } from './truck-documents-section';
 
@@ -16,14 +18,16 @@ interface Props {
 
 export default async function TruckDetailPage({ params }: Props): Promise<JSX.Element> {
   const { id } = await params;
-  const [truck, schedules, records, dvirs, drivers, docs] = await Promise.all([
-    fetchTruck(id),
+  const [truckRes, schedules, records, dvirs, drivers, docs] = await Promise.all([
+    tryFetch(() => fetchTruck(id)),
     fetchTruckSchedules(id).catch(() => []),
     fetchTruckRecords(id).catch(() => []),
     fetchDvirs({ truckId: id }).catch(() => []),
     fetchTruckDrivers(id).catch(() => []),
     fetchDocuments({ ownerType: 'truck', ownerId: id }).catch(() => []),
   ]);
+  if (!truckRes.data) notFound();
+  const truck = truckRes.data;
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">

@@ -4,17 +4,20 @@ import {
   type CreateJobIntakePayload,
   type IntakeResultDto,
   type JobDto,
+  type JobListFilters,
+  type PaginatedJobs,
   type QuotePreviewPayload,
   ROLES,
   type RateQuote,
   cancelJobSchema,
   createJobIntakeSchema,
+  jobListFiltersSchema,
   quotePreviewSchema,
 } from '@towcommand/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';
-import { ZodBody, ZodParam } from '../../common/decorators/zod.decorator.js';
+import { ZodBody, ZodParam, ZodQuery } from '../../common/decorators/zod.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { JobsService } from './jobs.service.js';
 
@@ -24,6 +27,20 @@ const idSchema = z.object({ id: z.string().uuid() });
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobs: JobsService) {}
+
+  /**
+   * Paginated list for the /jobs index page. Read-only roles can view —
+   * accounting/managers need this to audit work. Sorted by createdAt DESC;
+   * pagination is offset-based (v1 size: ≤200/page).
+   */
+  @Get()
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.ACCOUNTING)
+  async list(
+    @ZodQuery(jobListFiltersSchema) query: JobListFilters,
+    @Req() req: FastifyRequest,
+  ): Promise<PaginatedJobs> {
+    return this.jobs.list(this.callerCtx(req), query);
+  }
 
   /**
    * Live rate-quote preview used by the call-intake screen. Anyone with

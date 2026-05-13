@@ -18,13 +18,6 @@ data class LoginUiState(
     val submitting: Boolean = false,
     val error: String? = null,
     val authenticated: Boolean = false,
-    /**
-     * Set when the server answers `mfa_required`. The Compose layer observes
-     * this and navigates to the challenge screen, carrying the JWT as a nav
-     * arg. We null it back out so back-navigation doesn't re-trigger the
-     * jump.
-     */
-    val mfaChallengeToken: String? = null,
 )
 
 @HiltViewModel
@@ -51,16 +44,14 @@ class LoginViewModel @Inject constructor(
                     _state.update { it.copy(submitting = false, authenticated = true) }
                 is LoginResult.Failure ->
                     _state.update { it.copy(submitting = false, error = res.message) }
-                is LoginResult.MfaRequired ->
-                    _state.update { it.copy(submitting = false, mfaChallengeToken = res.challengeToken) }
                 LoginResult.NeedsTenantSelection ->
-                    _state.update { it.copy(submitting = false, error = "Multiple tenants — contact your dispatcher") }
+                    _state.update {
+                        it.copy(
+                            submitting = false,
+                            error = "Multiple tenants — contact your dispatcher",
+                        )
+                    }
             }
         }
-    }
-
-    /** Called once the navigation event has been consumed so we don't loop. */
-    fun onMfaNavigated() {
-        _state.update { it.copy(mfaChallengeToken = null) }
     }
 }

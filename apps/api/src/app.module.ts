@@ -15,6 +15,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
+import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
 import { EmailModule } from './modules/email/email.module.js';
@@ -60,6 +61,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     PaymentsModule,
     AccountingModule,
     ImportModule,
+    DashboardModule,
     HealthModule,
   ],
   providers: [

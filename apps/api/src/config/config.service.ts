@@ -116,6 +116,9 @@ export class ConfigService {
   get totpEncryptionKey(): string {
     return this.config.TOTP_ENCRYPTION_KEY;
   }
+  get mfaLoginGateEnabled(): boolean {
+    return this.config.MFA_LOGIN_GATE_ENABLED;
+  }
   get smtp(): {
     host: string;
     port: number;

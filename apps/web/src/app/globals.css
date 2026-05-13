@@ -3,35 +3,52 @@
 @tailwind utilities;
 
 /*
- * Brand tokens — LOCKED. Mirrored in tailwind.config.ts. Change both or
- * neither.
+ * Brand tokens — DARK is the canonical TowCommand palette and is LOCKED.
+ * Mirrored in tailwind.config.ts. Change the dark values only with brand
+ * sign-off.
+ *
+ * Variables hold HSL channels (no `hsl()` wrapper) so Tailwind can produce
+ * `hsl(var(--token) / <alpha-value>)` — that lets `bg-steel/30` etc. keep
+ * working under the theme.
+ *
+ * Defaults live under `:root` (light theme). `.dark` (set by next-themes,
+ * which we initialize to "dark") overrides them with the LOCKED brand
+ * values. Brand accents (orange + status colors) are shared across modes.
  */
 :root {
-  --orange: #f05a1a;
-  --orange-dark: #c44410;
-  --orange-light: #ff7a3d;
-  --orange-glow: rgba(240, 90, 26, 0.15);
+  /* Shared accents (locked). */
+  --orange: 18 88% 53%;
+  --orange-dark: 19 85% 42%;
+  --orange-light: 18 100% 62%;
 
-  --steel: #1a1e2a;
-  --steel-mid: #252a38;
-  --steel-light: #2e3447;
-  --steel-border: #3a4158;
-  --steel-border-light: #4a5270;
+  --green: 142 71% 45%;
+  --yellow: 46 95% 47%;
+  --red: 0 84% 60%;
+  --blue: 217 91% 60%;
+  --purple: 269 91% 65%;
 
-  --text-primary: #f0ede8;
-  --text-secondary: #9ca3b5;
-  --text-muted: #626882;
+  /* Glow tint (rgba — alpha included; same brand orange in both modes). */
+  --orange-glow-rgba: rgba(240, 90, 26, 0.15);
+  --orange-glow-radial-rgba: rgba(240, 90, 26, 0.18);
 
-  --green: #22c55e;
-  --yellow: #eab308;
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --purple: #a855f7;
+  /* Light-theme surface + text. */
+  --steel: 36 25% 96%;
+  --steel-mid: 0 0% 100%;
+  --steel-light: 36 18% 94%;
+  --steel-border: 220 14% 85%;
+  --steel-border-light: 220 14% 92%;
+
+  --text-primary: 225 24% 13%;
+  --text-secondary: 225 14% 35%;
+  --text-muted: 225 14% 55%;
+
+  /* Grid stroke for .bg-grid. */
+  --grid-stroke-rgba: rgba(120, 120, 140, 0.08);
 
   --radius: 10px;
   --radius-lg: 14px;
 
-  /* shadcn-ui semantic tokens, mapped onto our palette. */
+  /* shadcn-ui semantic tokens mapped onto the palette. */
   --background: var(--steel);
   --foreground: var(--text-primary);
   --card: var(--steel-mid);
@@ -39,18 +56,33 @@
   --popover: var(--steel-mid);
   --popover-foreground: var(--text-primary);
   --primary: var(--orange);
-  --primary-foreground: #ffffff;
+  --primary-foreground: 0 0% 100%;
   --secondary: var(--steel-light);
   --secondary-foreground: var(--text-primary);
   --muted: var(--steel-light);
   --muted-foreground: var(--text-secondary);
-  --accent: var(--orange-glow);
+  --accent: var(--orange);
   --accent-foreground: var(--orange-light);
   --destructive: var(--red);
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: 0 0% 100%;
   --border: var(--steel-border);
   --input: var(--steel-border);
   --ring: var(--orange);
+}
+
+.dark {
+  /* LOCKED brand palette — dark theme. */
+  --steel: 225 24% 13%;
+  --steel-mid: 225 21% 18%;
+  --steel-light: 225 21% 23%;
+  --steel-border: 225 21% 29%;
+  --steel-border-light: 225 21% 37%;
+
+  --text-primary: 36 18% 92%;
+  --text-secondary: 222 14% 66%;
+  --text-muted: 225 14% 45%;
+
+  --grid-stroke-rgba: rgba(74, 82, 112, 0.08);
 }
 
 * {
@@ -60,8 +92,8 @@
 
 html,
 body {
-  background: var(--steel);
-  color: var(--text-primary);
+  background: hsl(var(--steel));
+  color: hsl(var(--text-primary));
   font-family: var(--font-barlow), system-ui, sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
@@ -70,8 +102,8 @@ body {
 
 /* Subtle dispatch-room grid for landing surfaces. */
 .bg-grid {
-  background-image: linear-gradient(rgba(74, 82, 112, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(74, 82, 112, 0.08) 1px, transparent 1px);
+  background-image: linear-gradient(var(--grid-stroke-rgba) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-stroke-rgba) 1px, transparent 1px);
   background-size: 40px 40px;
   background-position: -1px -1px;
 }
@@ -79,7 +111,7 @@ body {
 .bg-orange-glow-radial {
   background: radial-gradient(
     ellipse at center,
-    rgba(240, 90, 26, 0.18) 0%,
+    var(--orange-glow-radial-rgba) 0%,
     rgba(240, 90, 26, 0) 60%
   );
 }

@@ -1,4 +1,5 @@
-import { fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
+import { type InvoiceListResponse, fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
 import { invoiceStatusLabel, invoiceStatusValues } from '@towcommand/shared';
 import Link from 'next/link';
 
@@ -11,18 +12,23 @@ interface SearchParams {
   offset?: string;
 }
 
+const EMPTY_INVOICES: InvoiceListResponse = { data: [], total: 0, limit: 50, offset: 0 };
+
 export default async function InvoicesPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  const list = await fetchInvoices({
-    status: params.status,
-    search: params.search,
-    limit: params.limit ?? '50',
-    offset: params.offset ?? '0',
-  });
+  const result = await tryFetch(() =>
+    fetchInvoices({
+      status: params.status,
+      search: params.search,
+      limit: params.limit ?? '50',
+      offset: params.offset ?? '0',
+    }),
+  );
+  const list = result.data ?? EMPTY_INVOICES;
 
   return (
     <div className="space-y-6">

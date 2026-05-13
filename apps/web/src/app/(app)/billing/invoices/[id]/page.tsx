@@ -1,6 +1,8 @@
 import { fetchInvoice, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
 import { invoiceStatusLabel, invoiceTypeLabel, paymentMethodLabel } from '@towcommand/shared';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { InvoiceActionsClient } from './invoice-actions-client';
 
 export const metadata = { title: 'Invoice — TowCommand' };
@@ -11,7 +13,10 @@ export default async function InvoiceDetailPage({
   params: Promise<{ id: string }>;
 }): Promise<JSX.Element> {
   const { id } = await params;
-  const invoice = await fetchInvoice(id);
+  const result = await tryFetch(() => fetchInvoice(id));
+  // 401/403/404 are all "you can't see this invoice" from the operator's view.
+  if (!result.data) notFound();
+  const invoice = result.data;
 
   return (
     <div className="space-y-6">

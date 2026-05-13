@@ -1,5 +1,6 @@
 package ai.bluecollar.towcommand.driver.ui.login
 
+import ai.bluecollar.towcommand.driver.ui.common.PasswordTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,25 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
     onAuthenticated: () -> Unit,
-    onMfaChallenge: (String) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     LaunchedEffect(state.authenticated) {
         if (state.authenticated) onAuthenticated()
-    }
-    LaunchedEffect(state.mfaChallengeToken) {
-        val tok = state.mfaChallengeToken
-        if (tok != null) {
-            onMfaChallenge(tok)
-            viewModel.onMfaNavigated()
-        }
     }
 
     Scaffold { padding ->
@@ -49,7 +41,11 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("TowCommand Driver", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "TowCommand Driver",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
             Spacer(Modifier.height(8.dp))
             Text("Sign in", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(24.dp))
@@ -59,18 +55,19 @@ fun LoginScreen(
                 onValueChange = viewModel::onEmailChange,
                 label = { Text("Email") },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next,
+                ),
                 modifier = Modifier.fillMaxWidth(0.9f),
             )
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
+            PasswordTextField(
                 value = state.password,
                 onValueChange = viewModel::onPasswordChange,
-                label = { Text("Password") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth(0.9f),
+                imeAction = ImeAction.Done,
+                isError = state.error != null,
             )
             state.error?.let {
                 Spacer(Modifier.height(12.dp))
@@ -82,8 +79,11 @@ fun LoginScreen(
                 enabled = !state.submitting,
                 modifier = Modifier.fillMaxWidth(0.9f).height(56.dp),
             ) {
-                if (state.submitting) CircularProgressIndicator(modifier = Modifier.height(20.dp))
-                else Text("Sign in", style = MaterialTheme.typography.titleMedium)
+                if (state.submitting) {
+                    CircularProgressIndicator(modifier = Modifier.height(20.dp))
+                } else {
+                    Text("Sign in", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }

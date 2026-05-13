@@ -4,6 +4,7 @@
  * The grid + radial backgrounds match the landing page so the brand carries
  * across the whole gate.
  */
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -32,12 +33,15 @@ export function AuthShell({ title, subtitle, footer, children }: AuthShellProps)
             Tow<span className="text-orange">Command</span> Pro
           </span>
         </Link>
-        <Link
-          href="/"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text-secondary"
-        >
-          ← Home
-        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text-secondary"
+          >
+            ← Home
+          </Link>
+        </div>
       </header>
 
       <section className="relative z-10 flex flex-1 items-start justify-center px-4 pb-16 pt-8 md:items-center md:pt-0">

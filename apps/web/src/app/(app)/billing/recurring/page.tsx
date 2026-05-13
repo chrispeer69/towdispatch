@@ -1,9 +1,11 @@
 import { fetchRecurringSchedules, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
 
 export const metadata = { title: 'Recurring billing — TowCommand' };
 
 export default async function RecurringPage(): Promise<JSX.Element> {
-  const schedules = await fetchRecurringSchedules();
+  const result = await tryFetch(() => fetchRecurringSchedules());
+  const schedules = result.data ?? [];
   return (
     <div className="space-y-4">
       <header>

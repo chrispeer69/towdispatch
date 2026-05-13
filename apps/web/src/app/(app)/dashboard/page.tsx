@@ -1,8 +1,13 @@
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { ApiError, apiServer } from '@/lib/api/client';
 import { requireUser } from '@/lib/auth/session';
+import { cn } from '@/lib/utils';
+import type { JobServiceType, JobStatus } from '@towcommand/shared';
 import { ArrowUpRight, Clock, type LucideIcon, Plus, Truck, Users, Wallet } from 'lucide-react';
+import Link from 'next/link';
 
 export const metadata = { title: 'Dashboard — TowCommand' };
+export const dynamic = 'force-dynamic';
 
 interface KpiCardProps {
   label: string;
@@ -10,6 +15,23 @@ interface KpiCardProps {
   delta?: string;
   icon: LucideIcon;
   tone?: 'orange' | 'blue' | 'green' | 'violet';
+}
+
+interface DashboardRecentActivityItem {
+  id: string;
+  jobNumber: string;
+  customerName: string | null;
+  serviceType: JobServiceType;
+  status: JobStatus;
+  createdAt: string;
+}
+
+interface DashboardOverviewDto {
+  activeCalls: number;
+  driversOnDuty: number;
+  todaysRevenueCents: number;
+  avgEtaMinutes: number | null;
+  recentActivity: DashboardRecentActivityItem[];
 }
 
 function KpiCard({ label, value, delta, icon: Icon, tone = 'orange' }: KpiCardProps): JSX.Element {
@@ -41,6 +63,42 @@ function KpiCard({ label, value, delta, icon: Icon, tone = 'orange' }: KpiCardPr
   );
 }
 
+const currencyFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+
+const STATUS_LABEL: Record<JobStatus, string> = {
+  new: 'New',
+  dispatched: 'Dispatched',
+  enroute: 'En route',
+  on_scene: 'On scene',
+  in_progress: 'In progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  goa: 'GOA',
+};
+
+const SERVICE_LABEL: Record<JobServiceType, string> = {
+  tow: 'Tow',
+  jump_start: 'Jump start',
+  lockout: 'Lockout',
+  tire_change: 'Tire change',
+  fuel: 'Fuel',
+  winch: 'Winch',
+  recovery: 'Recovery',
+  impound: 'Impound',
+  other: 'Other',
+};
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export default async function DashboardPage(): Promise<JSX.Element> {
   const session = await requireUser();
   const today = new Date().toLocaleDateString(undefined, {
@@ -48,6 +106,30 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     month: 'long',
     day: 'numeric',
   });
+
+  // Read-only snapshot. Mirrors the dispatch page pattern: server component
+  // calls apiServer, swallows 401/403 (requireUser already gated this path)
+  // and renders a zeroed dashboard if upstream is unreachable so the shell
+  // never blanks out on a transient failure.
+  let overview: DashboardOverviewDto = {
+    activeCalls: 0,
+    driversOnDuty: 0,
+    todaysRevenueCents: 0,
+    avgEtaMinutes: null,
+    recentActivity: [],
+  };
+  try {
+    overview = await apiServer<DashboardOverviewDto>('/dashboard/overview');
+  } catch (err) {
+    if (!(err instanceof ApiError) || (err.status !== 401 && err.status !== 403)) {
+      throw err;
+    }
+  }
+
+  const activeCallsValue = String(overview.activeCalls);
+  const driversValue = String(overview.driversOnDuty);
+  const revenueValue = currencyFormatter.format(overview.todaysRevenueCents / 100);
+  const etaValue = overview.avgEtaMinutes === null ? '— min' : `${overview.avgEtaMinutes} min`;
 
   return (
     <div className="space-y-6">
@@ -71,10 +153,22 @@ export default async function DashboardPage(): Promise<JSX.Element> {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Active Calls" value="0" delta="—" icon={Truck} tone="orange" />
-        <KpiCard label="Drivers On Duty" value="0" delta="—" icon={Users} tone="blue" />
-        <KpiCard label="Today's Revenue" value="$0" delta="—" icon={Wallet} tone="green" />
-        <KpiCard label="Avg ETA" value="— min" delta="—" icon={Clock} tone="violet" />
+        <KpiCard
+          label="Active Calls"
+          value={activeCallsValue}
+          delta="—"
+          icon={Truck}
+          tone="orange"
+        />
+        <KpiCard label="Drivers On Duty" value={driversValue} delta="—" icon={Users} tone="blue" />
+        <KpiCard
+          label="Today's Revenue"
+          value={revenueValue}
+          delta="—"
+          icon={Wallet}
+          tone="green"
+        />
+        <KpiCard label="Avg ETA" value={etaValue} delta="—" icon={Clock} tone="violet" />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
@@ -87,15 +181,39 @@ export default async function DashboardPage(): Promise<JSX.Element> {
               Live feed
             </span>
           </div>
-          <div className="mt-6 flex h-44 flex-col items-center justify-center rounded-[10px] border border-dashed border-steel-border bg-steel-light/20 text-center">
-            <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
-              Your first job will show here.
-            </p>
-            <p className="mt-1 max-w-md text-sm text-text-secondary">
-              Welcome aboard — once dispatch starts assigning calls, this feed lights up in real
-              time.
-            </p>
-          </div>
+          {overview.recentActivity.length === 0 ? (
+            <div className="mt-6 flex h-44 flex-col items-center justify-center rounded-[10px] border border-dashed border-steel-border bg-steel-light/20 text-center">
+              <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+                Your first job will show here.
+              </p>
+              <p className="mt-1 max-w-md text-sm text-text-secondary">
+                Welcome aboard — once dispatch starts assigning calls, this feed lights up in real
+                time.
+              </p>
+            </div>
+          ) : (
+            <ul className="mt-6 divide-y divide-steel-border rounded-[10px] border border-steel-border bg-steel-light/10">
+              {overview.recentActivity.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+                >
+                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-muted">
+                    {formatTime(item.createdAt)}
+                  </span>
+                  <span className="flex-1 truncate font-medium text-text-primary">
+                    {item.customerName ?? 'Unknown customer'}
+                  </span>
+                  <span className="text-xs text-text-secondary">
+                    {SERVICE_LABEL[item.serviceType]}
+                  </span>
+                  <span className="rounded-full border border-steel-border bg-steel-mid px-2 py-0.5 text-[11px] uppercase tracking-[0.14em] text-text-secondary">
+                    {STATUS_LABEL[item.status]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="rounded-[14px] border border-steel-border bg-steel-mid p-5">
@@ -105,31 +223,40 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           <p className="mt-1 text-xs text-text-secondary">Get the day moving.</p>
           <ul className="mt-5 space-y-3">
             <li>
-              <Button variant="default" className="w-full justify-between" disabled>
+              <Link
+                href="/intake"
+                className={cn(buttonVariants({ variant: 'default' }), 'w-full justify-between')}
+              >
                 <span className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
                   New call
                 </span>
                 <ArrowUpRight className="h-4 w-4" />
-              </Button>
+              </Link>
             </li>
             <li>
-              <Button variant="secondary" className="w-full justify-between" disabled>
+              <Link
+                href="/fleet/drivers/new"
+                className={cn(buttonVariants({ variant: 'secondary' }), 'w-full justify-between')}
+              >
                 <span className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   Add driver
                 </span>
                 <ArrowUpRight className="h-4 w-4" />
-              </Button>
+              </Link>
             </li>
             <li>
-              <Button variant="secondary" className="w-full justify-between" disabled>
+              <Link
+                href="/customers/new"
+                className={cn(buttonVariants({ variant: 'secondary' }), 'w-full justify-between')}
+              >
                 <span className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
                   Add customer
                 </span>
                 <ArrowUpRight className="h-4 w-4" />
-              </Button>
+              </Link>
             </li>
           </ul>
           <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
