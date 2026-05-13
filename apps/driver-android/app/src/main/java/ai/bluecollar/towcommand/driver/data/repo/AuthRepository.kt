@@ -14,15 +14,6 @@ import javax.inject.Singleton
 
 sealed class LoginResult {
     data class Success(val role: String) : LoginResult()
-
-    /**
-     * The user has MFA enrolled. The `challengeToken` is a short-lived JWT
-     * the server uses to bind the in-progress login to the eventual
-     * /auth/mfa/challenge call — we carry it forward to the challenge screen
-     * rather than dropping it.
-     */
-    data class MfaRequired(val challengeToken: String) : LoginResult()
-
     data object NeedsTenantSelection : LoginResult()
     data class Failure(val message: String) : LoginResult()
 }
@@ -70,14 +61,14 @@ class AuthRepository @Inject constructor(
                     )
                     LoginResult.Success(user.role)
                 }
-                "mfa_required" -> {
-                    val token = res.challengeToken
-                        ?: return LoginResult.Failure("Missing MFA challenge token")
-                    LoginResult.MfaRequired(token)
-                }
                 "needs_tenant_selection" -> LoginResult.NeedsTenantSelection
+                // MFA login is disabled on the backend (MFA_LOGIN_GATE_ENABLED=false).
+                // The branches below are dormant guards in case it is ever
+                // flipped back on without an app update — surface a clear
+                // message instead of crashing the parser.
+                "mfa_required",
                 "mfa_setup_required" -> LoginResult.Failure(
-                    "MFA enrollment must be completed on the web app first.",
+                    "MFA is not supported in this version of the driver app.",
                 )
                 else -> LoginResult.Failure("Unexpected response status: ${res.status}")
             }
