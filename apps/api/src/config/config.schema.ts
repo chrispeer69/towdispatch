@@ -43,10 +43,21 @@ export const configSchema = z.object({
   JWT_AUDIENCE: z.string().default('towcommand-api'),
 
   // 32-byte hex/base64; used to AES-256-GCM-encrypt user TOTP secrets at rest.
+  // Kept even when MFA_LOGIN_GATE_ENABLED is false — the column on `users` is
+  // not dropped, so the key must still be valid to allow future re-enable.
   TOTP_ENCRYPTION_KEY: z
     .string()
     .min(32, 'TOTP_ENCRYPTION_KEY must be 32+ chars')
     .default('change-me-totp-encryption-key-please-rotate-in-prod'),
+
+  // Master gate for MFA on the login path. When false (default), POST
+  // /auth/login never returns `mfa_required` or `mfa_setup_required` — it
+  // issues tokens on a valid email+password. The /auth/mfa/* endpoints
+  // remain mounted but are dormant. Flip to "true" to re-enable the wall.
+  MFA_LOGIN_GATE_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 
   // Legacy SMTP — kept so dev (mailhog) keeps working. Production uses
   // SendGrid; if SENDGRID_API_KEY is set the EmailService prefers it and the
