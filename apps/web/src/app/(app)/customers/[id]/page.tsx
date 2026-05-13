@@ -1,5 +1,7 @@
+import { tryFetch } from '@/lib/api/client';
 import { fetchCustomer } from '@/lib/api/resources';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { CustomerForm } from '../customer-form';
 import { CustomerVehiclesSection } from './customer-vehicles-section';
 
@@ -11,7 +13,10 @@ export const metadata = { title: 'Customer — TowCommand' };
 
 export default async function CustomerDetailPage({ params }: Props): Promise<JSX.Element> {
   const { id } = await params;
-  const customer = await fetchCustomer(id);
+  const result = await tryFetch(() => fetchCustomer(id));
+  // 401/403/404 — unreachable resource, 404 the operator out.
+  if (!result.data) notFound();
+  const customer = result.data;
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header className="space-y-1">

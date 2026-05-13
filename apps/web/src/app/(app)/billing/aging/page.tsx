@@ -1,9 +1,28 @@
 import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
+import type { AgingResponse } from '@towcommand/shared';
 
 export const metadata = { title: 'A/R aging — TowCommand' };
 
+function emptyAging(): AgingResponse {
+  return {
+    asOf: new Date().toISOString(),
+    totals: {
+      currentDueCents: 0,
+      bucket1To30Cents: 0,
+      bucket31To60Cents: 0,
+      bucket61To90Cents: 0,
+      bucket91PlusCents: 0,
+      totalCents: 0,
+      invoiceCount: 0,
+    },
+    rows: [],
+  };
+}
+
 export default async function AgingPage(): Promise<JSX.Element> {
-  const aging = await fetchAging({});
+  const result = await tryFetch(() => fetchAging({}));
+  const aging = result.data ?? emptyAging();
   return (
     <div className="space-y-4">
       <header>

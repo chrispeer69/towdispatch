@@ -1,9 +1,14 @@
+import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
+import type { PaginatedAccounts } from '@towcommand/shared';
 
 export const metadata = { title: 'Statements — TowCommand' };
 
+const EMPTY_ACCOUNTS: PaginatedAccounts = { data: [], total: 0, page: 1, perPage: 100 };
+
 export default async function StatementsPage(): Promise<JSX.Element> {
-  const accounts = await fetchAccounts({ perPage: '100' });
+  const result = await tryFetch(() => fetchAccounts({ perPage: '100' }));
+  const accounts = result.data ?? EMPTY_ACCOUNTS;
   return (
     <div className="space-y-4">
       <header>

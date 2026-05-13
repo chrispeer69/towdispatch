@@ -1,11 +1,16 @@
+import { tryFetch } from '@/lib/api/client';
 import { fetchExpirations } from '@/lib/api/fleet';
 import { cn } from '@/lib/utils';
-import type { ExpirationRow } from '@towcommand/shared';
+import type { ExpirationRow, ExpirationsResponse } from '@towcommand/shared';
 
 interface SearchParams {
   windowDays?: string;
   kind?: string;
   entityType?: string;
+}
+
+function emptyExpirations(windowDays: number): ExpirationsResponse {
+  return { windowDays, expired: [], critical: [], warning: [] };
 }
 
 export default async function ExpirationsPage({
@@ -14,11 +19,15 @@ export default async function ExpirationsPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  const data = await fetchExpirations({
-    windowDays: params.windowDays ?? '30',
-    kind: params.kind,
-    entityType: params.entityType,
-  });
+  const windowDays = Number(params.windowDays ?? '30');
+  const result = await tryFetch(() =>
+    fetchExpirations({
+      windowDays: params.windowDays ?? '30',
+      kind: params.kind,
+      entityType: params.entityType,
+    }),
+  );
+  const data = result.data ?? emptyExpirations(Number.isFinite(windowDays) ? windowDays : 30);
   return (
     <div className="space-y-6">
       <p className="text-sm text-text-secondary">

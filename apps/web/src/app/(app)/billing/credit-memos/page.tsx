@@ -1,9 +1,11 @@
 import { fetchCreditMemos, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
 
 export const metadata = { title: 'Credit memos — TowCommand' };
 
 export default async function CreditMemosPage(): Promise<JSX.Element> {
-  const memos = await fetchCreditMemos();
+  const result = await tryFetch(() => fetchCreditMemos());
+  const memos = result.data ?? [];
   return (
     <div className="space-y-4">
       <header>

@@ -1,22 +1,31 @@
 /**
  * Server-side fetch wrappers.
  *
- * Two functions, picked by where you're calling from:
+ * Two access modes — read-only (apiServer*) vs BFF refresh-on-401 (apiServerBff*) —
+ * and two error modes — non-throwing safe (default for server-component data
+ * loading) vs throwing (legacy / mutation paths that want to fail loud).
  *
- *   apiServer    — read-only context safe. Reads the access cookie, attaches
- *                  it as Bearer auth, and returns the response or throws an
- *                  ApiError. NEVER writes cookies. On a 401 the caller decides
- *                  what to do (server components: redirect to /login).
+ *   apiServerSafe    — read-only context safe. Returns { data, error } so a
+ *                      single 401/403 from one endpoint cannot crash the host
+ *                      page render. ApiError is still thrown for 5xx, network
+ *                      failures, and malformed JSON (genuinely unexpected).
  *
- *   apiServerBff — for use INSIDE Next.js Route Handlers (`/api/*`). Layers a
- *                  refresh-on-401 retry on top of apiServer: if the API answers
- *                  401, swap in the refresh token, call /auth/refresh,
- *                  rotate the cookies, and retry once. Cookie writes are only
- *                  allowed in route handlers / server actions, so this MUST
- *                  NOT be invoked from a server-component render path.
+ *   apiServer        — same as apiServerSafe but unwraps and throws on any
+ *                      ApiError. Use this in route handlers, server actions,
+ *                      and form mutations where any non-2xx should surface
+ *                      as an exception. Server components should generally
+ *                      prefer apiServerSafe (or tryFetch around a typed
+ *                      fetcher).
+ *
+ *   apiServerBff*    — for use INSIDE Next.js Route Handlers (`/api/*`). Layers
+ *                      a refresh-on-401 retry on top: if the API answers 401,
+ *                      swap in the refresh token, call /auth/refresh, rotate
+ *                      the cookies, and retry once. Cookie writes are only
+ *                      allowed in route handlers / server actions, so this
+ *                      MUST NOT be invoked from a server-component render path.
  *
  * Why the split: Next.js 15 forbids cookies().set() during a server-component
- * render. Calling apiServerBff from a layout/page would crash. Splitting the
+ * render. Calling apiServerBff* from a layout/page would crash. Splitting the
  * surface makes the two contexts impossible to confuse.
  */
 import {
@@ -39,6 +48,14 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Discriminated result returned by the safe variants. On success, data is
+ * populated and error is null; on a 4xx the error is structured and data is
+ * null. 5xx / network / parse failures still throw — those are genuine
+ * unexpected errors and the (app)/error.tsx boundary catches them.
+ */
+export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiError };
+
 const apiBase = (): string =>
   process.env.NEXT_PUBLIC_API_URL ?? process.env.API_PUBLIC_URL ?? 'http://localhost:3001';
 
@@ -52,14 +69,17 @@ interface RequestOpts<TBody> {
 }
 
 /**
- * Read-only API call. Safe in any server context (layouts, pages, route
- * handlers). On non-2xx, throws ApiError — server components catch a 401 and
- * decide whether to redirect.
+ * Read-only API call, non-throwing variant. Server-component safe.
+ *
+ * A 4xx response is returned as `{ data: null, error: ApiError }` so the host
+ * page can degrade gracefully (sidebar prefetches, missing-scope endpoints,
+ * not-yet-connected integrations). 5xx, network errors, and malformed JSON
+ * still throw — those are unexpected and should hit the error boundary.
  */
-export async function apiServer<TResponse, TBody = unknown>(
+export async function apiServerSafe<TResponse, TBody = unknown>(
   path: string,
   opts: RequestOpts<TBody> = {},
-): Promise<TResponse> {
+): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
   const accessToken = authenticated ? await readAccessToken() : null;
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
@@ -73,19 +93,31 @@ export async function apiServer<TResponse, TBody = unknown>(
     init.body = JSON.stringify(opts.body);
   }
   const res = await fetch(url, init);
-  return parseResponse<TResponse>(res);
+  return parseResponseSafe<TResponse>(res);
 }
 
 /**
- * BFF-only API call. Identical to apiServer except that, on 401, it tries the
- * refresh-token rotation and retries once. ONLY safe in Next.js Route
- * Handlers — calling this from a server component will crash with
- * "Cookies can only be modified in a Server Action or Route Handler".
+ * Read-only API call, throwing variant. Wraps apiServerSafe and unwraps the
+ * result, throwing the ApiError on any 4xx. Use this in route handlers,
+ * server actions, or any path that explicitly wants to fail loud.
  */
-export async function apiServerBff<TResponse, TBody = unknown>(
+export async function apiServer<TResponse, TBody = unknown>(
   path: string,
   opts: RequestOpts<TBody> = {},
 ): Promise<TResponse> {
+  const result = await apiServerSafe<TResponse, TBody>(path, opts);
+  if (result.error) throw result.error;
+  return result.data;
+}
+
+/**
+ * BFF-only API call, non-throwing variant. Same refresh-on-401 retry behavior
+ * as apiServerBff. ONLY safe in Next.js Route Handlers.
+ */
+export async function apiServerBffSafe<TResponse, TBody = unknown>(
+  path: string,
+  opts: RequestOpts<TBody> = {},
+): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
   let accessToken = authenticated ? await readAccessToken() : null;
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
@@ -108,7 +140,22 @@ export async function apiServerBff<TResponse, TBody = unknown>(
       res = await fetch(url, buildInit(accessToken));
     }
   }
-  return parseResponse<TResponse>(res);
+  return parseResponseSafe<TResponse>(res);
+}
+
+/**
+ * BFF-only API call, throwing variant. Identical to apiServer except that, on
+ * 401, it tries the refresh-token rotation and retries once. ONLY safe in
+ * Next.js Route Handlers — calling this from a server component will crash
+ * with "Cookies can only be modified in a Server Action or Route Handler".
+ */
+export async function apiServerBff<TResponse, TBody = unknown>(
+  path: string,
+  opts: RequestOpts<TBody> = {},
+): Promise<TResponse> {
+  const result = await apiServerBffSafe<TResponse, TBody>(path, opts);
+  if (result.error) throw result.error;
+  return result.data;
 }
 
 function buildHeaders(accessToken: string | null, hasBody: boolean): HeadersInit {
@@ -118,19 +165,58 @@ function buildHeaders(accessToken: string | null, hasBody: boolean): HeadersInit
   return headers;
 }
 
-async function parseResponse<T>(res: Response): Promise<T> {
+async function parseResponseSafe<T>(res: Response): Promise<ApiResult<T>> {
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as {
       code?: string;
       message?: string;
       errors?: unknown;
     } | null;
-    const code = body?.code ?? 'request_failed';
+    const code = body?.code ?? (res.status === 401 ? 'unauthorized' : 'request_failed');
     const message = body?.message ?? `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, code, message, body?.errors);
+    const error = new ApiError(res.status, code, message, body?.errors);
+    // 5xx is "something is broken" — let the error boundary catch it. 4xx is
+    // an expected outcome of business state (no scope, not connected, not
+    // found) and is returned as data.
+    if (res.status >= 500) throw error;
+    return { data: null, error };
   }
-  if (res.status === 204) return undefined as unknown as T;
-  return (await res.json()) as T;
+  if (res.status === 204) return { data: undefined as unknown as T, error: null };
+  try {
+    const data = (await res.json()) as T;
+    return { data, error: null };
+  } catch (err) {
+    // Malformed JSON on a 2xx — genuinely unexpected, fall through to boundary.
+    throw new ApiError(res.status, 'malformed_response', 'Failed to parse response body', err);
+  }
+}
+
+/**
+ * Convert any throwing typed fetcher (the helpers in lib/api/*.ts) into a
+ * non-throwing ApiResult. Lets server components use the existing typed
+ * surface without inlining try/catch around every call.
+ *
+ * Example:
+ *   const status = await tryFetch(() => fetchAccountingStatus());
+ *   if (status.error) return <NotConnected />;
+ */
+export async function tryFetch<T>(fn: () => Promise<T>): Promise<ApiResult<T>> {
+  try {
+    const data = await fn();
+    return { data, error: null };
+  } catch (err) {
+    if (err instanceof ApiError) {
+      // Same 4xx-vs-5xx split as parseResponseSafe — 5xx falls through.
+      if (err.status >= 500) throw err;
+      return { data: null, error: err };
+    }
+    throw err;
+  }
+}
+
+/** True for ApiError 401/403 — the two statuses callers commonly want to swallow. */
+export function isAuthError(err: unknown): err is ApiError {
+  return err instanceof ApiError && (err.status === 401 || err.status === 403);
 }
 
 /**

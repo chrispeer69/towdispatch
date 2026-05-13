@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
+import { tryFetch } from '@/lib/api/client';
 import { fetchCustomers } from '@/lib/api/resources';
-import type { CustomerType } from '@towcommand/shared';
+import type { CustomerType, PaginatedCustomers } from '@towcommand/shared';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
@@ -12,18 +13,23 @@ interface SearchParams {
   page?: string;
 }
 
+const EMPTY_CUSTOMERS: PaginatedCustomers = { data: [], total: 0, page: 1, perPage: 50 };
+
 export default async function CustomersPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  const initial = await fetchCustomers({
-    q: params.q,
-    type: params.type,
-    page: params.page,
-    perPage: '50',
-  });
+  const result = await tryFetch(() =>
+    fetchCustomers({
+      q: params.q,
+      type: params.type,
+      page: params.page,
+      perPage: '50',
+    }),
+  );
+  const initial = result.data ?? EMPTY_CUSTOMERS;
 
   return (
     <div className="space-y-6">
