@@ -172,6 +172,9 @@ export class ReconciliationService {
       }
     }
 
+    // Tenant scoping is handled by RLS via app.current_tenant_id GUC set in
+    // the caller (reconcile()). Do NOT add WHERE tenant_id=… here — RLS
+    // already filters and the parameter list above is empty.
     const dbRows = await opts.client.query<{
       id: string;
       external_id: string;
@@ -179,7 +182,7 @@ export class ReconciliationService {
     }>(
       `SELECT id, external_id, ${opts.driftFields.join(', ')}
        FROM ${opts.table}
-       WHERE tenant_id=$1 AND external_source='towbook' AND external_id IS NOT NULL`,
+       WHERE external_source='towbook' AND external_id IS NOT NULL`,
       [],
     );
 
