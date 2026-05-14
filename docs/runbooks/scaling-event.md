@@ -31,17 +31,17 @@ http_request_duration_seconds
 db_query_duration_seconds
 ```
 
-Scrape interval: 15s (default Prometheus). Dashboard lives at `https://grafana.towcommand.com/d/api-overview` (Phase 1 prerequisite — see `docs/observability.md`).
+Scrape interval: 15s (default Prometheus). Dashboard lives at `https://grafana.towcommand.cloud/d/api-overview` (Phase 1 prerequisite — see `docs/observability.md`).
 
 ### 1b. Quick CLI signals
 
 ```bash
 # Live request rate (last 60s, per route) — pull from prom-client directly
-curl -sf https://api.towcommand.com/metrics | \
+curl -sf https://api.towcommand.cloud/metrics | \
   awk '/^http_requests_total/ && /200/ {print}' | head -20
 
 # Process resident memory
-curl -sf https://api.towcommand.com/metrics | grep towcommand_api_process_resident_memory_bytes
+curl -sf https://api.towcommand.cloud/metrics | grep towcommand_api_process_resident_memory_bytes
 
 # DB connection pool (run from a host with admin DB access)
 psql "$DATABASE_ADMIN_URL" -c "

@@ -100,7 +100,7 @@ SQL
 For each row, call the retry endpoint:
 
 ```bash
-curl -sS -X POST "https://api.towcommand.com/billing/payments/$PAYMENT_ID/retry" \
+curl -sS -X POST "https://api.towcommand.cloud/billing/payments/$PAYMENT_ID/retry" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 

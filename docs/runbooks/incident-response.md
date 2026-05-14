@@ -27,7 +27,7 @@
 
 ### Status page
 
-A public status page is a **Phase 1 prerequisite** (https://status.towcommand.com on Atlassian Statuspage). Until it lands, communicate via direct email to affected tenants — the per-tenant contact list lives in `SELECT name, owner_email FROM tenants` (queried via the admin pool).
+A public status page is a **Phase 1 prerequisite** (https://status.towcommand.cloud on Atlassian Statuspage). Until it lands, communicate via direct email to affected tenants — the per-tenant contact list lives in `SELECT name, owner_email FROM tenants` (queried via the admin pool).
 
 ---
 
@@ -37,13 +37,13 @@ A public status page is a **Phase 1 prerequisite** (https://status.towcommand.co
 
 ```bash
 # Public probe endpoints (see apps/api/src/common/observability/health-metrics.controller.ts)
-curl -sf https://api.towcommand.com/health
-curl -sf https://api.towcommand.com/ready
-curl -sf https://api.towcommand.com/healthz   # legacy alias
-curl -sf https://api.towcommand.com/readyz    # legacy alias
+curl -sf https://api.towcommand.cloud/health
+curl -sf https://api.towcommand.cloud/ready
+curl -sf https://api.towcommand.cloud/healthz   # legacy alias
+curl -sf https://api.towcommand.cloud/readyz    # legacy alias
 
 # Prometheus scrape — useful to eyeball if the host is up but reporting bad metrics
-curl -s https://api.towcommand.com/metrics | head -40
+curl -s https://api.towcommand.cloud/metrics | head -40
 ```
 
 `/ready` returns 503 if either Postgres or Redis fails its ping. If `/health` returns 200 but `/ready` returns 503, the API process is up but a dependency is down — see §4.
@@ -92,7 +92,7 @@ WHERE created_at > now() - interval '1 hour'
 GROUP BY network;"
 
 # In-memory stub outbox (dev / staging — production replaces this with the real provider)
-curl -sf https://api.towcommand.com/motor-club/agero/_test/outbox | jq 'length'
+curl -sf https://api.towcommand.cloud/motor-club/agero/_test/outbox | jq 'length'
 ```
 
 Threshold: > 1000 pending in a single network in a 5-minute window pages oncall (see `docs/observability.md`).

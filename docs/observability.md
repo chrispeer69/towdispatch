@@ -20,7 +20,7 @@ Log storage today: Railway retains 7 days of stdout. The audit_log Postgres tabl
 The 17A observability layer exposes a Prometheus endpoint:
 
 ```
-GET https://api.towcommand.com/metrics
+GET https://api.towcommand.cloud/metrics
 ```
 
 Default Node metrics (event-loop lag, GC, memory, FDs) plus the application counters:
@@ -34,7 +34,7 @@ Default Node metrics (event-loop lag, GC, memory, FDs) plus the application coun
 | `auth_lockouts_total` | counter | — |
 | `import_runs_total` | counter | mode, status |
 
-Scrape interval: 15s (default Prometheus / Grafana cloud). Dashboard at `https://grafana.towcommand.com/d/api-overview` (Phase 1 prerequisite).
+Scrape interval: 15s (default Prometheus / Grafana cloud). Dashboard at `https://grafana.towcommand.cloud/d/api-overview` (Phase 1 prerequisite).
 
 ## Traces
 

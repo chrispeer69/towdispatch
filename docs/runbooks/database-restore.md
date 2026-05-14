@@ -137,7 +137,7 @@ pnpm --filter @towcommand/db migrate
 railway service start api
 
 # 6. Verify
-curl -sf https://api.towcommand.com/ready
+curl -sf https://api.towcommand.cloud/ready
 ```
 
 ---

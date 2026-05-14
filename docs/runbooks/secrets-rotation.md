@@ -62,10 +62,10 @@ Verify — old tokens must fail, fresh login must succeed:
 # Old access token: should 401
 OLD_TOKEN='<token-from-pre-rotation-curl>'
 curl -sf -o /dev/null -w '%{http_code}\n' \
-  -H "Authorization: Bearer $OLD_TOKEN" https://api.towcommand.com/auth/me  # → 401
+  -H "Authorization: Bearer $OLD_TOKEN" https://api.towcommand.cloud/auth/me  # → 401
 
 # Fresh login: should 200
-curl -sf -X POST https://api.towcommand.com/auth/login \
+curl -sf -X POST https://api.towcommand.cloud/auth/login \
   -H 'content-type: application/json' \
   -d '{"email":"…","password":"…"}'  # → 200 with new accessToken
 ```
@@ -99,7 +99,7 @@ Verify:
 
 ```bash
 # `/ready` succeeds means the new password works
-curl -sf https://api.towcommand.com/ready
+curl -sf https://api.towcommand.cloud/ready
 ```
 
 ---
@@ -130,7 +130,7 @@ railway env set --service api STRIPE_SECRET_KEY="$NEW_KEY"
 # 3. Restart
 railway service restart api
 # 4. Verify with a test charge in Stripe test mode (separate test key, not rotated)
-curl -sf -X POST https://api.towcommand.com/payments/intents \
+curl -sf -X POST https://api.towcommand.cloud/payments/intents \
   -H "Authorization: Bearer $OWNER_TOKEN" \
   -H 'content-type: application/json' \
   -d '{"invoiceId":"<test-invoice-id>"}'

@@ -12,7 +12,7 @@ Onboards a new towing company onto TowCommand Pro. Run this top-to-bottom; total
 The canonical path is the `/signup` endpoint, which creates a tenant + OWNER user + idempotently triggers verification mail in a single transaction. There is no admin SQL for "create a tenant" because doing so bypasses the integrity guards in `AuthService.signup()` (`apps/api/src/modules/auth/auth.service.ts`).
 
 ```bash
-curl -sS -X POST https://api.towcommand.com/auth/signup \
+curl -sS -X POST https://api.towcommand.cloud/auth/signup \
   -H 'content-type: application/json' \
   -d '{
     "tenantName": "Acme Towing & Recovery, Inc.",
@@ -79,7 +79,7 @@ SQL
 Verify the inbound dispatch path with the stub:
 
 ```bash
-curl -sS -X POST https://api.towcommand.com/motor-club/agero/dispatch \
+curl -sS -X POST https://api.towcommand.cloud/motor-club/agero/dispatch \
   -H 'content-type: application/json' \
   -d "$(cat <<JSON
 {
@@ -105,7 +105,7 @@ Each tenant gets its own Stripe Connect Express account (see Session 11).
 
 ```bash
 # Start onboarding — returns a Stripe-hosted onboarding URL
-curl -sS -X POST https://api.towcommand.com/payments/connect/start \
+curl -sS -X POST https://api.towcommand.cloud/payments/connect/start \
   -H "Authorization: Bearer $TENANT_OWNER_ACCESS_TOKEN" \
   -H 'content-type: application/json'
 ```
@@ -115,7 +115,7 @@ curl -sS -X POST https://api.towcommand.com/payments/connect/start \
 3. Verify connection:
 
 ```bash
-curl -sS https://api.towcommand.com/payments/connect/status \
+curl -sS https://api.towcommand.cloud/payments/connect/status \
   -H "Authorization: Bearer $TENANT_OWNER_ACCESS_TOKEN"
 # Expect: { "connected": true, "chargesEnabled": true, "payoutsEnabled": true }
 ```
@@ -128,7 +128,7 @@ If `chargesEnabled=false` after 24 hours: nudge the owner to finish Stripe's ver
 
 QBO connection is per-tenant OAuth (Session 12).
 
-1. Send the tenant owner to `https://app.towcommand.com/accounting` from the web app.
+1. Send the tenant owner to `https://app.towcommand.cloud/accounting` from the web app.
 2. They click "Connect QuickBooks" → completes Intuit OAuth → lands back on the mapping screen.
 3. Owner maps each TowCommand category to a QBO Chart-of-Accounts entry:
    - **Tow revenue** → QBO income account (typically "Towing Income")
@@ -142,7 +142,7 @@ The mapping UI is at `/accounting/mapping`. Required mappings are flagged; sync 
 4. Trigger a backfill sync:
 
 ```bash
-curl -sS -X POST https://api.towcommand.com/accounting/sync/manual \
+curl -sS -X POST https://api.towcommand.cloud/accounting/sync/manual \
   -H "Authorization: Bearer $TENANT_OWNER_ACCESS_TOKEN"
 ```
 
@@ -197,7 +197,7 @@ The test seeds two synthetic tenants and verifies cross-tenant access fails on e
 
 ```bash
 # As the new tenant's OWNER
-NEW_TOKEN=$(curl -sS -X POST https://api.towcommand.com/auth/login \
+NEW_TOKEN=$(curl -sS -X POST https://api.towcommand.cloud/auth/login \
   -H 'content-type: application/json' \
   -d '{"email":"jane@acme-towing.com","password":"..."}' | jq -r .accessToken)
 
@@ -205,7 +205,7 @@ NEW_TOKEN=$(curl -sS -X POST https://api.towcommand.com/auth/login \
 # know exists in tenant-002, e.g. Auto Lyft, from your seed data)
 curl -sS -o /dev/null -w '%{http_code}\n' \
   -H "Authorization: Bearer $NEW_TOKEN" \
-  https://api.towcommand.com/customers/<auto-lyft-customer-id>
+  https://api.towcommand.cloud/customers/<auto-lyft-customer-id>
 ```
 
 **Must return 404.** Not 403, not 200. If 200 — STOP, this is a SEV-1, see `docs/runbooks/security-incident.md`.
@@ -217,7 +217,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' \
 The new tenant owner walks through this checklist on the onboarding call:
 
 ```
-[ ] Log in at https://app.towcommand.com — lands on dashboard
+[ ] Log in at https://app.towcommand.cloud — lands on dashboard
 [ ] Click "Settings → Users", invite a dispatcher (sends verification email)
 [ ] Click "Fleet → Drivers", create a driver
 [ ] Click "Fleet → Trucks", create a truck
