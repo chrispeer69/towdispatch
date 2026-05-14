@@ -45,25 +45,29 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { ApiError, apiServer } from '../api/client';
+import { getRequestId } from '../debug/request-id';
 
 export const getOptionalUser = cache(async (): Promise<MeResponse | null> => {
   // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
+  const rid = getRequestId();
   // eslint-disable-next-line no-console
-  console.error('[FLEET_DEBUG] getOptionalUser /auth/me request start');
+  console.error(`[FLEET_DEBUG rid=${rid}] getOptionalUser /auth/me request start`);
   try {
     const me = await apiServer<MeResponse>('/auth/me', { cache: 'no-store' });
     // eslint-disable-next-line no-console
-    console.error(`[FLEET_DEBUG] getOptionalUser /auth/me OK userId=${me.user.id}`);
+    console.error(`[FLEET_DEBUG rid=${rid}] getOptionalUser /auth/me OK userId=${me.user.id}`);
     return me;
   } catch (err) {
     if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
       // eslint-disable-next-line no-console
-      console.error(`[FLEET_DEBUG] getOptionalUser /auth/me ${err.status} → returning null`);
+      console.error(
+        `[FLEET_DEBUG rid=${rid}] getOptionalUser /auth/me ${err.status} → returning null`,
+      );
       return null;
     }
     // eslint-disable-next-line no-console
     console.error(
-      `[FLEET_DEBUG] getOptionalUser /auth/me threw type=${err instanceof ApiError ? `ApiError(${err.status})` : typeof err} msg=${(err as Error)?.message ?? '?'}`,
+      `[FLEET_DEBUG rid=${rid}] getOptionalUser /auth/me threw type=${err instanceof ApiError ? `ApiError(${err.status})` : typeof err} msg=${(err as Error)?.message ?? '?'}`,
     );
     throw err;
   }
@@ -78,7 +82,9 @@ export async function requireUser(): Promise<MeResponse> {
     const h = await headers();
     const path = h.get('x-current-path') ?? '/dashboard';
     // eslint-disable-next-line no-console
-    console.error(`[FLEET_DEBUG] requireUser null → redirect(/login?next=${path})`);
+    console.error(
+      `[FLEET_DEBUG rid=${getRequestId()}] requireUser null → redirect(/login?next=${path})`,
+    );
     redirect(`/login?next=${encodeURIComponent(path)}`);
   }
   return me;

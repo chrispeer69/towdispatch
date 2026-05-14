@@ -2,6 +2,7 @@ import { SessionProvider } from '@/components/app-shell/session-provider';
 import { AppSidebar } from '@/components/app-shell/sidebar';
 import { AppTopbar } from '@/components/app-shell/topbar';
 import { requireUser } from '@/lib/auth/session';
+import { getRequestId } from '@/lib/debug/request-id';
 import type { MeResponse } from '@towcommand/shared';
 /**
  * Authenticated app shell.
@@ -24,6 +25,7 @@ export default async function AppLayout({
   children: ReactNode;
 }): Promise<JSX.Element> {
   // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
+  const rid = getRequestId();
   const h = await headers();
   const c = await cookies();
   const path = h.get('x-current-path') ?? '(no x-current-path header)';
@@ -36,7 +38,7 @@ export default async function AppLayout({
       .join(',') || '(none)';
   // eslint-disable-next-line no-console
   console.error(
-    `[FLEET_DEBUG] (app)/layout enter path=${path} referer=${referer} cookies=[${cookieNames}] ua="${ua}"`,
+    `[FLEET_DEBUG rid=${rid}] (app)/layout enter path=${path} referer=${referer} cookies=[${cookieNames}] ua="${ua}"`,
   );
   let session: MeResponse;
   try {
@@ -44,13 +46,13 @@ export default async function AppLayout({
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(
-      `[FLEET_DEBUG] (app)/layout requireUser threw type=${(err as { digest?: string })?.digest ?? typeof err} msg=${(err as Error)?.message ?? '?'} path=${path}`,
+      `[FLEET_DEBUG rid=${rid}] (app)/layout requireUser threw type=${(err as { digest?: string })?.digest ?? typeof err} msg=${(err as Error)?.message ?? '?'} path=${path}`,
     );
     throw err;
   }
   // eslint-disable-next-line no-console
   console.error(
-    `[FLEET_DEBUG] (app)/layout requireUser OK userId=${session.user.id} tenantId=${session.tenant.id} path=${path}`,
+    `[FLEET_DEBUG rid=${rid}] (app)/layout requireUser OK userId=${session.user.id} tenantId=${session.tenant.id} path=${path}`,
   );
   return (
     <SessionProvider value={session}>

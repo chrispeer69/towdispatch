@@ -1,4 +1,6 @@
 import { getOptionalUser } from '@/lib/auth/session';
+import { getRequestId } from '@/lib/debug/request-id';
+import type { MeResponse } from '@towcommand/shared';
 import { FleetTabs } from './fleet-tabs';
 
 export const metadata = { title: 'Fleet — TowCommand' };
@@ -23,14 +25,36 @@ export default async function FleetLayout({
   children: React.ReactNode;
 }): Promise<JSX.Element> {
   // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
+  const rid = getRequestId();
   // eslint-disable-next-line no-console
-  console.error('[FLEET_DEBUG] fleet/layout enter');
-  const session = await getOptionalUser();
+  console.error(`[FLEET_DEBUG rid=${rid}] fleet/layout enter`);
+  let session: MeResponse | null;
+  try {
+    session = await getOptionalUser();
+    // eslint-disable-next-line no-console
+    console.error(
+      `[FLEET_DEBUG rid=${rid}] fleet/layout getOptionalUser resolved=${session ? `userId=${session.user.id}` : 'null'}`,
+    );
+  } catch (err) {
+    const e = err as {
+      constructor?: { name?: string };
+      message?: string;
+      digest?: string;
+      stack?: string;
+    };
+    // eslint-disable-next-line no-console
+    console.error(
+      `[FLEET_DEBUG rid=${rid}] fleet/layout getOptionalUser THREW type=${e?.constructor?.name ?? typeof err} digest=${e?.digest ?? '-'} msg=${e?.message ?? '?'} stack=${e?.stack?.split('\n').slice(0, 3).join(' | ') ?? '-'}`,
+    );
+    throw err;
+  }
+  if (!session) {
+    // eslint-disable-next-line no-console
+    console.error(`[FLEET_DEBUG rid=${rid}] fleet/layout returning empty fragment (no session)`);
+    return <></>;
+  }
   // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG] fleet/layout getOptionalUser=${session ? `userId=${session.user.id}` : 'null'}`,
-  );
-  if (!session) return <></>;
+  console.error(`[FLEET_DEBUG rid=${rid}] fleet/layout returning JSX with FleetTabs+children`);
   return (
     <div className="space-y-6">
       <header>

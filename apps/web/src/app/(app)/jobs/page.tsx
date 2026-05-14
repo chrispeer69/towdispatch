@@ -1,4 +1,5 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
+import { getRequestId } from '@/lib/debug/request-id';
 import type { JobListItemDto, JobServiceType, JobStatus, PaginatedJobs } from '@towcommand/shared';
 import Link from 'next/link';
 import type { JSX } from 'react';
@@ -64,8 +65,9 @@ export default async function JobsPage({
 }): Promise<JSX.Element> {
   // [FLEET_DEBUG] — temporary diagnostic for comparison vs the fleet routes.
   // Revert when the fleet bounce is fixed.
+  const rid = getRequestId();
   // eslint-disable-next-line no-console
-  console.error('[FLEET_DEBUG] jobs/page enter (working-route comparison)');
+  console.error(`[FLEET_DEBUG rid=${rid}] jobs/page enter (working-route comparison)`);
   const params = await searchParams;
   const parsedPage = Number(params.page);
   const page = Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
@@ -77,7 +79,7 @@ export default async function JobsPage({
   );
   // eslint-disable-next-line no-console
   console.error(
-    `[FLEET_DEBUG] jobs/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status}`}`,
+    `[FLEET_DEBUG rid=${rid}] jobs/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status}`}`,
   );
   const list: PaginatedJobs = result.data ?? { data: [], page, perPage: PER_PAGE, total: 0 };
 

@@ -35,6 +35,7 @@ import {
   readRefreshToken,
   setSessionCookies,
 } from '../auth/cookies';
+import { getRequestId } from '../debug/request-id';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -92,7 +93,17 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
   }
+  // [FLEET_DEBUG] — temporary. Logs every server-side fetch so we can diff
+  // /auth/me (works) against /jobs (401) and prove whether they're sending
+  // the same Authorization bytes to the same host.
+  const rid = getRequestId();
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG rid=${rid}] apiServerSafe → ${init.method} ${url} hasAuth=${!!accessToken} tokenPrefix=${accessToken ? accessToken.slice(0, 12) : 'none'}`,
+  );
   const res = await fetch(url, init);
+  // eslint-disable-next-line no-console
+  console.error(`[FLEET_DEBUG rid=${rid}] apiServerSafe ← ${res.status} ${init.method} ${url}`);
   return parseResponseSafe<TResponse>(res);
 }
 

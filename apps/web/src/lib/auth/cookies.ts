@@ -5,6 +5,7 @@
  * dashboard works behind a Stripe-style external redirect.
  */
 import { cookies } from 'next/headers';
+import { getRequestId } from '../debug/request-id';
 
 export const ACCESS_COOKIE = 'tc_at';
 export const REFRESH_COOKIE = 'tc_rt';
@@ -54,7 +55,16 @@ export async function clearSessionCookies(): Promise<void> {
 
 export async function readAccessToken(): Promise<string | null> {
   const store = await cookies();
-  return store.get(ACCESS_COOKIE)?.value ?? null;
+  const value = store.get(ACCESS_COOKIE)?.value ?? null;
+  // [FLEET_DEBUG] — temporary correlator. Logs first 12 chars only so we can
+  // diff "did call A and call B read the same access token?" without leaking
+  // the full JWT to logs. Remove together with the rest of [FLEET_DEBUG].
+  const rid = getRequestId();
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG rid=${rid}] readAccessToken=${value ? `${value.slice(0, 12)}…(len=${value.length})` : 'null'}`,
+  );
+  return value;
 }
 
 export async function readRefreshToken(): Promise<string | null> {
