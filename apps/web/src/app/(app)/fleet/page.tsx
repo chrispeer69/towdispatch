@@ -1,5 +1,5 @@
-import { tracedRedirect } from '@/lib/debug/redirect-trace';
+import { redirect } from 'next/navigation';
 
 export default function FleetIndexPage(): never {
-  tracedRedirect('/fleet/trucks', 'fleet-index-page:hardcoded');
+  redirect('/fleet/trucks');
 }

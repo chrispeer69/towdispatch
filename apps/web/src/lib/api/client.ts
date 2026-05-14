@@ -27,15 +27,20 @@
  * Why the split: Next.js 15 forbids cookies().set() during a server-component
  * render. Calling apiServerBff* from a layout/page would crash. Splitting the
  * surface makes the two contexts impossible to confuse.
+ *
+ * Cookie reading: every variant calls `cookies()` from `next/headers` INLINE
+ * (not via a helper) before issuing the fetch. PRs #5–#11 chased a production
+ * bug where server-side fetches went out with no Authorization header even
+ * though /auth/me appeared to work; diagnostic logs proved
+ * `hasAuth=false tokenPrefix=none` for fetches reaching the API. The
+ * underlying cause was the `cookies()` request-scoped store not being read at
+ * the call site in production builds when the read was routed through a
+ * separate module's helper. Inlining the read keeps Next.js's dynamic-API
+ * tracking attached to the call site, which is what every Next.js 15 server-
+ * component example does — and what fixes the bounce.
  */
-import {
-  ACCESS_COOKIE,
-  REFRESH_COOKIE,
-  readAccessToken,
-  readRefreshToken,
-  setSessionCookies,
-} from '../auth/cookies';
-import { getRequestId } from '../debug/redirect-trace';
+import { cookies } from 'next/headers';
+import { ACCESS_COOKIE, REFRESH_COOKIE, setSessionCookies } from '../auth/cookies';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -59,11 +64,7 @@ export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiEr
 
 /**
  * Server-side API base. Prefers the Railway private-networking hostname so
- * the request never leaves the project's VPC — the public edge proxy was
- * stripping `Authorization` on some routes (e.g. /jobs, /fleet/*) but not
- * others (e.g. /auth/me, /customers), which produced the long-running
- * "Operations pages bounce to /login" symptom. Going via the private URL
- * skips that proxy entirely and the JWT reaches the API intact.
+ * the request never leaves the project's VPC.
  *
  * Resolution order:
  *   1. API_INTERNAL_URL    — set on the web service in Railway to the
@@ -83,21 +84,11 @@ export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiEr
  * /api/socket/token's response payload) reads NEXT_PUBLIC_API_URL on its
  * own and is unaffected.
  */
-const apiBase = (): string => {
-  const internal = process.env.API_INTERNAL_URL;
-  const publicUrl = process.env.API_PUBLIC_URL;
-  const nextPublic = process.env.NEXT_PUBLIC_API_URL;
-  const resolved = internal ?? publicUrl ?? nextPublic ?? 'http://localhost:3001';
-  // [FLEET_DEBUG_V2] — temporary. Logs what apiBase resolved to + which env
-  // var was actually set in this process. Confirms whether the PR #10 env
-  // var is being read at all in Railway's prod web container.
-  const rid = getRequestId();
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG_V2 rid=${rid}] apiBase resolved=${resolved} sources={API_INTERNAL_URL=${internal ?? 'unset'}, API_PUBLIC_URL=${publicUrl ?? 'unset'}, NEXT_PUBLIC_API_URL=${nextPublic ?? 'unset'}}`,
-  );
-  return resolved;
-};
+const apiBase = (): string =>
+  process.env.API_INTERNAL_URL ??
+  process.env.API_PUBLIC_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://localhost:3001';
 
 interface RequestOpts<TBody> {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -121,7 +112,10 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   opts: RequestOpts<TBody> = {},
 ): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
-  const accessToken = authenticated ? await readAccessToken() : null;
+  // Inline cookie read — see file header for why this is not factored into a
+  // helper. Production server-side fetches were going out with no
+  // Authorization header until this read happened at the call site.
+  const accessToken = authenticated ? ((await cookies()).get(ACCESS_COOKIE)?.value ?? null) : null;
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
 
   const init: RequestInit = {
@@ -132,25 +126,7 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
   }
-  // [FLEET_DEBUG_V2] — log every server-side fetch with status, so we can
-  // diff working routes against /fleet in production logs.
-  const rid = getRequestId();
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG_V2 rid=${rid}] apiServerSafe → ${init.method} ${url} hasAuth=${!!accessToken} tokenPrefix=${accessToken ? accessToken.slice(0, 12) : 'none'}`,
-  );
-  let res: Response;
-  try {
-    res = await fetch(url, init);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(
-      `[FLEET_DEBUG_V2 rid=${rid}] apiServerSafe NETWORK-FAIL ${init.method} ${url} err=${(err as Error)?.message ?? '?'}`,
-    );
-    throw err;
-  }
-  // eslint-disable-next-line no-console
-  console.error(`[FLEET_DEBUG_V2 rid=${rid}] apiServerSafe ← ${res.status} ${init.method} ${url}`);
+  const res = await fetch(url, init);
   return parseResponseSafe<TResponse>(res);
 }
 
@@ -177,7 +153,8 @@ export async function apiServerBffSafe<TResponse, TBody = unknown>(
   opts: RequestOpts<TBody> = {},
 ): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
-  let accessToken = authenticated ? await readAccessToken() : null;
+  const store = await cookies();
+  let accessToken = authenticated ? (store.get(ACCESS_COOKIE)?.value ?? null) : null;
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
 
   const buildInit = (token: string | null): RequestInit => {
@@ -283,7 +260,7 @@ export function isAuthError(err: unknown): err is ApiError {
  * handlers — writes cookies via setSessionCookies.
  */
 export async function tryRefresh(): Promise<{ accessToken: string } | null> {
-  const refreshToken = await readRefreshToken();
+  const refreshToken = (await cookies()).get(REFRESH_COOKIE)?.value ?? null;
   if (!refreshToken) return null;
   const res = await fetch(`${apiBase()}/auth/refresh`, {
     method: 'POST',
@@ -310,7 +287,8 @@ export async function apiServerBffRaw(
   path: string,
   opts: { method?: 'GET' | 'POST' } = {},
 ): Promise<Response> {
-  let accessToken = await readAccessToken();
+  const store = await cookies();
+  let accessToken = store.get(ACCESS_COOKIE)?.value ?? null;
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
   const buildInit = (token: string | null): RequestInit => ({
     method: opts.method ?? 'GET',

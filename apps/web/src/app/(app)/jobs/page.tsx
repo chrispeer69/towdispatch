@@ -1,5 +1,4 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
-import { getRequestId } from '@/lib/debug/redirect-trace';
 import type { JobListItemDto, JobServiceType, JobStatus, PaginatedJobs } from '@towcommand/shared';
 import Link from 'next/link';
 import type { JSX } from 'react';
@@ -63,10 +62,6 @@ export default async function JobsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
-  // [FLEET_DEBUG_V2] — working-route comparison.
-  const rid = getRequestId();
-  // eslint-disable-next-line no-console
-  console.error(`[FLEET_DEBUG_V2 rid=${rid}] jobs/page enter (working comparison)`);
   const params = await searchParams;
   const parsedPage = Number(params.page);
   const page = Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
@@ -75,10 +70,6 @@ export default async function JobsPage({
   // 401/403 as data so this page never races the layout's redirect.
   const result = await tryFetch(() =>
     apiServer<PaginatedJobs>(`/jobs?page=${page}&perPage=${PER_PAGE}`),
-  );
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG_V2 rid=${rid}] jobs/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status} code=${result.error?.code} msg=${result.error?.message}`}`,
   );
   const list: PaginatedJobs = result.data ?? { data: [], page, perPage: PER_PAGE, total: 0 };
 
