@@ -192,10 +192,15 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-steel-border bg-steel-mid md:flex">
       <div className="flex items-center gap-3 border-b border-steel-border px-5 py-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange shadow-orange-glow">
-          <span className="font-condensed text-lg font-extrabold text-white">T</span>
+          <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
+            UTD
+          </span>
         </div>
-        <span className="font-condensed text-base font-extrabold uppercase tracking-wide">
-          Tow<span className="text-orange">Command</span>
+        <span className="font-condensed text-base leading-none tracking-tight">
+          <span className="font-medium">
+            US <span className="text-orange">Tow</span>{' '}
+          </span>
+          <span className="font-extrabold italic uppercase">Dispatch</span>
         </span>
       </div>
 
