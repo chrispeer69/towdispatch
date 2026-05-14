@@ -13,7 +13,7 @@ import {
   tenants,
   users,
   uuidv7,
-} from '@towcommand/db';
+} from '@ustowdispatch/db';
 import {
   type AuthTenantDto,
   type AuthUserDto,
@@ -31,7 +31,7 @@ import {
   type SignupPayload,
   type TenantSelectionDto,
   type VerifyEmailPayload,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { type JWTPayload, SignJWT, jwtVerify } from 'jose';
 import { ConfigService } from '../../config/config.service.js';
@@ -843,7 +843,7 @@ export class AuthService {
         });
       }
       const tenant = await db.query.tenants.findFirst({ where: eq(tenants.id, user.tenantId) });
-      const issuer = `TowCommand:${tenant?.slug ?? 'app'}`;
+      const issuer = `US Tow DISPATCH:${tenant?.slug ?? 'app'}`;
       await db
         .update(users)
         .set({

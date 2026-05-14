@@ -51,7 +51,7 @@ final class JobsRepositoryTests: XCTestCase {
     }
 }
 
-private actor NoopAPI: TowCommandAPI {
+private actor NoopAPI: USTowDispatchAPI {
     func login(_ body: LoginRequest) async throws -> LoginResponse { fatalError() }
     func refresh(_ body: RefreshRequest) async throws -> RefreshResponse { fatalError() }
     func logout(_ body: LogoutRequest) async throws {}

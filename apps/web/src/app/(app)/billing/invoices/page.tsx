@@ -1,9 +1,9 @@
 import { type InvoiceListResponse, fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
-import { invoiceStatusLabel, invoiceStatusValues } from '@towcommand/shared';
+import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'Invoices — TowCommand' };
+export const metadata = { title: 'Invoices — US Tow DISPATCH' };
 
 interface SearchParams {
   status?: string;

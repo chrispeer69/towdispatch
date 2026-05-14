@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_USER: towcommand
-          POSTGRES_PASSWORD: towcommand_dev_pw
-          POSTGRES_DB: towcommand
+          POSTGRES_USER: ustowdispatch
+          POSTGRES_PASSWORD: ustowdispatch_dev_pw
+          POSTGRES_DB: ustowdispatch
         ports:
           - 5432:5432
         options: >-
@@ -36,9 +36,10 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgres://towcommand:towcommand_dev_pw@localhost:5432/towcommand
-      DATABASE_ADMIN_URL: postgres://towcommand:towcommand_dev_pw@localhost:5432/towcommand
+      DATABASE_URL: postgres://ustowdispatch:ustowdispatch_dev_pw@localhost:5432/ustowdispatch
+      DATABASE_ADMIN_URL: postgres://ustowdispatch:ustowdispatch_dev_pw@localhost:5432/ustowdispatch
       REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-jwt-secret-with-at-least-32-characters-long
       JWT_ACCESS_SECRET: ci-access-secret-with-at-least-32-chars-long
       JWT_REFRESH_SECRET: ci-refresh-secret-with-at-least-32-chars-long
       JWT_MFA_SECRET: ci-mfa-secret-with-at-least-32-chars-long
@@ -53,8 +54,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -64,20 +63,20 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply migrations
-        run: pnpm --filter @towcommand/db migrate
+        run: pnpm --filter @ustowdispatch/db migrate
 
       - name: Build api
-        run: pnpm --filter @towcommand/api build
+        run: pnpm --filter @ustowdispatch/api build
 
       - name: Build web
-        run: pnpm --filter @towcommand/web build
+        run: pnpm --filter @ustowdispatch/web build
 
       - name: Install Playwright browsers
-        run: pnpm --filter @towcommand/e2e exec playwright install --with-deps chromium
+        run: pnpm --filter @ustowdispatch/e2e exec playwright install --with-deps chromium
 
       - name: Start API
         run: |
-          API_PORT=3601 API_HOST=0.0.0.0 nohup node --env-file=apps/api/.env.example apps/api/dist/apps/api/src/main.js > apps/api/api.log 2>&1 &
+          API_PORT=3601 API_HOST=0.0.0.0 nohup node apps/api/dist/apps/api/src/main.js > apps/api/api.log 2>&1 &
           for i in $(seq 1 30); do
             if curl -sf http://localhost:3601/health > /dev/null; then
               echo "API is up"; exit 0
@@ -99,7 +98,7 @@ jobs:
           echo "Web failed to start"; cat ../../web.log; exit 1
 
       - name: Run E2E suite (including Lighthouse)
-        run: pnpm --filter @towcommand/e2e test
+        run: pnpm --filter @ustowdispatch/e2e test
         env:
           NODE_ENV: test
 

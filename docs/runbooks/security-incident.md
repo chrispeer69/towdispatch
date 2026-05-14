@@ -137,7 +137,7 @@ SQL
 | Audience | Channel | When |
 |---|---|---|
 | Founder | Phone + SMS + email | Immediately on any §1 signal |
-| Affected tenant owners | Email from `security@towcommand.com` | After containment, before public statement |
+| Affected tenant owners | Email from `security@ustowdispatch.com` | After containment, before public statement |
 | Public | Status page + blog post | After scope is known (typically 24–72 hours) |
 | Regulators | Email per applicable law | Per §6 |
 
@@ -174,12 +174,12 @@ Triggers depend on what was accessed:
 Drafted with placeholder fields; legal review required before sending in any real incident.
 
 ```
-SUBJECT: Important security notice from TowCommand Pro
+SUBJECT: Important security notice from US Tow DISPATCH
 
 [Tenant Owner Name],
 
 We are writing to inform you of a security incident that affected
-TowCommand Pro on [DATE]. We discovered [SCOPE] and contained it within
+US Tow DISPATCH on [DATE]. We discovered [SCOPE] and contained it within
 [DURATION].
 
 What happened:
@@ -192,15 +192,15 @@ What we did:
 [specific containment steps — revoked sessions, rotated secrets, etc.]
 
 What you should do:
-- Review your TowCommand activity log for the past 30 days.
+- Review your US Tow DISPATCH activity log for the past 30 days.
 - If you re-use passwords across services (you shouldn't!), change them.
-- Watch for phishing attempts using your TowCommand-associated email.
+- Watch for phishing attempts using your US Tow DISPATCH-associated email.
 
 What we are doing going forward:
 [concrete improvements; do not promise anything you won't actually do]
 
 We take this seriously and we are sorry. If you have questions, reach
-us at security@towcommand.com or call [phone].
+us at security@ustowdispatch.com or call [phone].
 
 — Chris Peer, Founder
 ```
@@ -235,11 +235,11 @@ COPY (
 # Tar + upload to a write-once bucket
 tar czf /tmp/incident-$(date -u +%F).tar.gz /tmp/*.csv
 aws s3 cp /tmp/incident-$(date -u +%F).tar.gz \
-  s3://towcommand-incidents/$(date -u +%F)/$(uuidgen).tar.gz \
+  s3://ustowdispatch-incidents/$(date -u +%F)/$(uuidgen).tar.gz \
   --acl bucket-owner-full-control
 ```
 
-The `towcommand-incidents` bucket is configured with object lock + 7-year retention (Phase 1 prerequisite). Files retained per legal hold.
+The `ustowdispatch-incidents` bucket is configured with object lock + 7-year retention (Phase 1 prerequisite). Files retained per legal hold.
 
 ---
 

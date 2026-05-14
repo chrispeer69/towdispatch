@@ -1,6 +1,6 @@
 import { AccountForm } from '../account-form';
 
-export const metadata = { title: 'New account — TowCommand' };
+export const metadata = { title: 'New account — US Tow DISPATCH' };
 
 export default function NewAccountPage(): JSX.Element {
   return (

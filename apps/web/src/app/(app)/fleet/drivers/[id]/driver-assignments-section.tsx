@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import type { DriverTruckAssignmentDto, TruckDto } from '@towcommand/shared';
+import type { DriverTruckAssignmentDto, TruckDto } from '@ustowdispatch/shared';
 import { useState } from 'react';
 
 interface Props {

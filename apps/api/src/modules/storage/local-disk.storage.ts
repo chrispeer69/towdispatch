@@ -11,8 +11,8 @@
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, normalize, sep } from 'node:path';
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
-import type { StorageProvider, StoragePutInput, StoredObject } from '@towcommand/shared';
+import { uuidv7 } from '@ustowdispatch/db';
+import type { StorageProvider, StoragePutInput, StoredObject } from '@ustowdispatch/shared';
 
 const TENANT_PREFIX = 'tenants';
 

@@ -29,7 +29,7 @@ export default defineConfig({
   // Redis since they're isolated by tenant_id at the data layer.
   webServer: [
     {
-      command: 'pnpm --filter @towcommand/api run dev',
+      command: 'pnpm --filter @ustowdispatch/api run dev',
       url: `${apiURL}/auth/me`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

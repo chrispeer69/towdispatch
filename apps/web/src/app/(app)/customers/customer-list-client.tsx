@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { CustomerType, PaginatedCustomers } from '@towcommand/shared';
+import type { CustomerType, PaginatedCustomers } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 

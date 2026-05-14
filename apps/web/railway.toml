@@ -1,4 +1,4 @@
-# Railway service config for the TowCommand web app (Next.js).
+# Railway service config for the US Tow DISPATCH web app (Next.js).
 #
 # Dashboard settings for this service:
 #   Root Directory  = / (repo root)
@@ -10,7 +10,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/web/Dockerfile"
 
 [deploy]
-startCommand = "pnpm --filter @towcommand/web run start:prod"
+startCommand = "pnpm --filter @ustowdispatch/web run start:prod"
 healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"

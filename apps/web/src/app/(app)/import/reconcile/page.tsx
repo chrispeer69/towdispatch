@@ -1,12 +1,15 @@
-import { requireUser } from '@/lib/auth/session';
-import { ROLES } from '@towcommand/shared';
+import { getOptionalUser } from '@/lib/auth/session';
+import { ROLES } from '@ustowdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ReconcileClient } from './reconcile-client';
 
-export const metadata = { title: 'Reconcile — TowCommand' };
+export const metadata = { title: 'Reconcile — US Tow DISPATCH' };
 
 export default async function ReconcilePage(): Promise<JSX.Element> {
-  const me = await requireUser();
+  // Auth gating is owned by (app)/layout.tsx — see /import/page.tsx for the
+  // rationale on using the non-throwing variant here.
+  const me = await getOptionalUser();
+  if (!me) return <div className="space-y-6" />;
   if (me.user.role !== ROLES.OWNER && me.user.role !== ROLES.ADMIN) {
     redirect('/dashboard');
   }

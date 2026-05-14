@@ -6,7 +6,7 @@
  * (NOT bundled — PCI SAQ A) and renders Stripe Elements against the
  * client_secret returned by the API.
  */
-import type { PublicPaymentView } from '@towcommand/shared';
+import type { PublicPaymentView } from '@ustowdispatch/shared';
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 import { PayClient } from './pay-client';

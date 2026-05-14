@@ -1,11 +1,11 @@
 import Foundation
 
 public actor ShiftRepository {
-    private let api: TowCommandAPI
+    private let api: USTowDispatchAPI
     private let localStore: LocalStore
     private let outbox: Outbox
 
-    public init(api: TowCommandAPI, localStore: LocalStore, outbox: Outbox) {
+    public init(api: USTowDispatchAPI, localStore: LocalStore, outbox: Outbox) {
         self.api = api
         self.localStore = localStore
         self.outbox = outbox

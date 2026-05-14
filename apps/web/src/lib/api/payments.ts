@@ -8,7 +8,7 @@ import type {
   PayLinkDto,
   PaymentIntentDto,
   StripeConnectStatusDto,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { apiServer } from './client';
 
 export async function fetchConnectStatus(): Promise<StripeConnectStatusDto> {

@@ -30,7 +30,7 @@ public protocol LocalStore: Sendable {
 
 public final class FileLocalStore: LocalStore, @unchecked Sendable {
     private let root: URL
-    private let queue = DispatchQueue(label: "com.towcommand.driver.LocalStore", attributes: .concurrent)
+    private let queue = DispatchQueue(label: "com.ustowdispatch.driver.LocalStore", attributes: .concurrent)
 
     public init(root: URL) throws {
         self.root = root

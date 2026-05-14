@@ -434,8 +434,8 @@ describeIfDb('Auth integration', () => {
     })
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setIssuedAt()
-      .setIssuer(process.env.JWT_ISSUER ?? 'towcommand')
-      .setAudience(process.env.JWT_AUDIENCE ?? 'towcommand-api')
+      .setIssuer(process.env.JWT_ISSUER ?? 'ustowdispatch')
+      .setAudience(process.env.JWT_AUDIENCE ?? 'ustowdispatch-api')
       .setExpirationTime('5m')
       .sign(accessSecret);
 

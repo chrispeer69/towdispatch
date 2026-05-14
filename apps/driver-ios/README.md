@@ -1,6 +1,6 @@
-# TowCommand Driver (iOS)
+# US Tow DISPATCH Driver (iOS)
 
-Native iOS driver app for TowCommand Pro. SwiftUI + Combine + async/await, MVVM with feature-foldered modular monolith. Offline-first via a SQLite outbox (today: file-backed; GRDB swap planned — see [`SESSION_6_REPORT.md`](SESSION_6_REPORT.md)).
+Native iOS driver app for US Tow DISPATCH. SwiftUI + Combine + async/await, MVVM with feature-foldered modular monolith. Offline-first via a SQLite outbox (today: file-backed; GRDB swap planned — see [`SESSION_6_REPORT.md`](SESSION_6_REPORT.md)).
 
 Min iOS: **16.4** (Stripe Tap to Pay on iPhone floor).
 Min Xcode: **15.3**, tested on **Xcode 26.4**.
@@ -119,7 +119,7 @@ Then pull-to-refresh the **Queue** tab in the running app.
 ## Backend contract
 
 The iOS app mirrors the Android client's API surface
-([`apps/driver-android/.../TowCommandApi.kt`](../driver-android/app/src/main/java/ai/bluecollar/towcommand/driver/data/api/TowCommandApi.kt))
+([`apps/driver-android/.../UsTowDispatchApi.kt`](../driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/data/api/UsTowDispatchApi.kt))
 — that's the source of truth. The endpoints in use are:
 
 ```
@@ -136,7 +136,7 @@ POST /dispatch/jobs/{id}/photos
 
 If the backend grows new routes for payments / DVIR / earnings / chat, add
 them in `Packages/Core/Sources/Core/Networking/Endpoints.swift` and the
-matching client method in `TowCommandAPI.swift`.
+matching client method in `USTowDispatchAPI.swift`.
 
 ## What ships in Session 6
 

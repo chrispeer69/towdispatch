@@ -1,4 +1,4 @@
-import type { MeResponse } from '@towcommand/shared';
+import type { MeResponse } from '@ustowdispatch/shared';
 import { headers } from 'next/headers';
 /**
  * Server-side session loaders.
@@ -30,18 +30,30 @@ import { headers } from 'next/headers';
  * gracefully. The `/auth/me` redirect below is the single chokepoint that
  * decides "you need a new session" — do not replicate this redirect logic in
  * feature pages.
+ *
+ * Request-scoped dedupe — the `(app)/` layout calls requireUser() and so do
+ * several feature pages that need session data (dashboard, intake, import).
+ * Without dedupe that's two HTTP round trips to `/auth/me` per render: the
+ * layout's succeeds, then if the second one happens to flake — load balancer
+ * blip, JWT clock-skew on the rotation boundary, anything — the page-level
+ * requireUser() redirects to /login even though the layout streamed a fully
+ * authenticated shell first. The user sees the page paint briefly and then
+ * bounce. React.cache() collapses both calls into one per request: same
+ * answer for layout and page, single redirect chokepoint, identical /auth/me
+ * traffic to the read-once Customers/Accounts pages that never showed the bug.
  */
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 import { ApiError, apiServer } from '../api/client';
 
-export async function getOptionalUser(): Promise<MeResponse | null> {
+export const getOptionalUser = cache(async (): Promise<MeResponse | null> => {
   try {
     return await apiServer<MeResponse>('/auth/me', { cache: 'no-store' });
   } catch (err) {
     if (err instanceof ApiError && (err.status === 401 || err.status === 403)) return null;
     throw err;
   }
-}
+});
 
 export async function requireUser(): Promise<MeResponse> {
   const me = await getOptionalUser();

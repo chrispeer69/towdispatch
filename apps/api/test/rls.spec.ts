@@ -1,4 +1,4 @@
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import argon2 from 'argon2';
 import { Pool } from 'pg';
 /**

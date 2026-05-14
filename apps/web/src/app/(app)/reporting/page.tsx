@@ -5,11 +5,10 @@
  * tracking summary is the only tile here. We keep the page so the link
  * is real and the URL is bookmarkable.
  */
-import { ApiError, apiServer } from '@/lib/api/client';
-import { requireUser } from '@/lib/auth/session';
+import { apiServer, tryFetch } from '@/lib/api/client';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Reporting — TowCommand' };
+export const metadata = { title: 'Reporting — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface TrackingReport {
@@ -24,14 +23,11 @@ interface TrackingReport {
 }
 
 export default async function ReportingPage(): Promise<JSX.Element> {
-  await requireUser();
-  let report: TrackingReport | null = null;
-  try {
-    report = await apiServer<TrackingReport>('/tracking/reporting/summary');
-  } catch (err) {
-    // Fall through to a graceful empty state on auth/server failure.
-    if (!(err instanceof ApiError)) throw err;
-  }
+  // Auth is enforced by (app)/layout.tsx. tryFetch surfaces a per-feature
+  // 401/403 as data so a missing-scope endpoint can't redirect this page out
+  // from under the layout's already-authenticated shell.
+  const result = await tryFetch(() => apiServer<TrackingReport>('/tracking/reporting/summary'));
+  const report: TrackingReport | null = result.data;
 
   return (
     <div className="space-y-6">

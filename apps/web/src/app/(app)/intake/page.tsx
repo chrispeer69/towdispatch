@@ -1,19 +1,20 @@
-import { requireUser } from '@/lib/auth/session';
+import { getOptionalUser } from '@/lib/auth/session';
 import { IntakeClient } from './intake-client';
 
-export const metadata = { title: 'Call Intake — TowCommand' };
+export const metadata = { title: 'Call Intake — US Tow DISPATCH' };
 
 /**
  * /intake — the call-intake screen.
  *
- * Server component thinly wraps the client form. We pull the user only to
- * run requireUser() (auth gate) and pass the tenant name into the title.
- * Everything interactive lives in IntakeClient because the form is
- * heavily interactive (debounced rate quote, autocomplete, optimistic
- * existing-customer/vehicle badges).
+ * Server component thinly wraps the client form. Auth gating lives in the
+ * (app)/ layout — we read the session here only to surface the tenant name,
+ * using the non-throwing getOptionalUser() so a transient /auth/me flake
+ * cannot redirect this page out from under a layout that already streamed an
+ * authenticated shell. See lib/auth/session.ts for the chokepoint.
  */
 export default async function IntakePage(): Promise<JSX.Element> {
-  const session = await requireUser();
+  const session = await getOptionalUser();
+  const tenantName = session?.tenant.name ?? '';
   return (
     <div className="space-y-5">
       <header className="flex items-end justify-between">
@@ -22,7 +23,7 @@ export default async function IntakePage(): Promise<JSX.Element> {
             Call Intake
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Phone-first capture · {session.tenant.name}
+            Phone-first capture{tenantName ? ` · ${tenantName}` : ''}
           </p>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">

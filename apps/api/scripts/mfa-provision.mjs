@@ -10,7 +10,7 @@ import { authenticator } from 'otplib';
 
 const WEB = process.env.MFA_E2E_WEB ?? 'https://web-production-7e5b.up.railway.app';
 const slug = `dev-${Math.random().toString(36).slice(2, 8)}`;
-const email = `dev-${Math.random().toString(36).slice(2, 8)}@towcommand.dev`;
+const email = `dev-${Math.random().toString(36).slice(2, 8)}@ustowdispatch.dev`;
 const password = 'DriverDev1!Long-Enough';
 
 const jar = new Map();
@@ -60,7 +60,8 @@ await post('/api/auth/signup', {
 jar.clear();
 
 const login1 = await post('/api/auth/login', { email, password });
-if (login1.status !== 'mfa_setup_required') throw new Error(`unexpected: ${JSON.stringify(login1)}`);
+if (login1.status !== 'mfa_setup_required')
+  throw new Error(`unexpected: ${JSON.stringify(login1)}`);
 
 const setup = await post('/api/auth/mfa/setup');
 const totp1 = authenticator.generate(setup.secret);

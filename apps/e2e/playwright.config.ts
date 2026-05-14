@@ -1,5 +1,5 @@
 /**
- * Playwright config for the dedicated @towcommand/e2e package.
+ * Playwright config for the dedicated @ustowdispatch/e2e package.
  *
  * The existing apps/web/e2e/ smoke suite stays put — it covers in-tree
  * walkthroughs (intake, dispatch, fleet) tied to specific session
@@ -13,7 +13,7 @@
  *                       Playwright spawn the web + api dev servers itself.
  *   E2E_RUN_REQUIRES_STACK — set to "1" to actually start the test run;
  *                       otherwise tests skip with a helpful message so
- *                       `pnpm --filter @towcommand/e2e test` is safe to
+ *                       `pnpm --filter @ustowdispatch/e2e test` is safe to
  *                       run on developer machines without docker.
  */
 import { defineConfig, devices } from '@playwright/test';

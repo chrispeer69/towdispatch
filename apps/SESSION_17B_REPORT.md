@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-12
 **Branch:** `master`
-**Status:** Shipped. Accessibility foundations, error / loading / empty-state primitives, and the E2E test package are in. The web app has skip-link navigation, a route-level error boundary, branded 404 / 403 / 500 pages, an offline banner, and a `@towcommand/e2e` package with all 10 spec'd test slots wired (real flows where the stack supports them now; deferred-with-reason placeholders for the legs that block on integrations that haven't shipped yet).
+**Status:** Shipped. Accessibility foundations, error / loading / empty-state primitives, and the E2E test package are in. The web app has skip-link navigation, a route-level error boundary, branded 404 / 403 / 500 pages, an offline banner, and a `@ustowdispatch/e2e` package with all 10 spec'd test slots wired (real flows where the stack supports them now; deferred-with-reason placeholders for the legs that block on integrations that haven't shipped yet).
 
 ## TL;DR
 
@@ -73,7 +73,7 @@ The 17A `GlobalExceptionFilter` already emits the exact shape the spec calls for
 
 ```jsonc
 {
-  "type": "https://errors.towcommand.com/VALIDATION_FAILED",
+  "type": "https://errors.ustowdispatch.com/VALIDATION_FAILED",
   "title": "Validation Failed",
   "status": 400,
   "code": "VALIDATION_FAILED",
@@ -107,12 +107,12 @@ No production dependencies added.
 
 1. **`apps/e2e/` rather than expanding `apps/web/e2e/`.** The spec is explicit: "Create apps/e2e/ as a new package." The existing `apps/web/e2e/` suite (Session 6+ session-walkthrough specs) stays put — it covers in-tree acceptance demos tied to specific session reviews. The new `apps/e2e/` package owns the user-journey suite that runs in CI on every PR. Different audiences, different cadences, different ownership.
 2. **`test.skip` over `it.skip` over `describe.skip` for deferred tests.** Each deferred test has a one-line reason that prints in the runner output. This keeps the matrix visible — the runner reports "10 tests, 5 skipped" rather than "5 tests" — so the gap is obvious in CI.
-3. **Skip-if-no-stack gate via env var.** `E2E_RUN_REQUIRES_STACK=1` opts in. Without it, every test skips immediately so `pnpm --filter @towcommand/e2e test` is safe to run on a fresh clone without docker. CI sets the env var; developers without docker get useful behavior; developers with docker run the same command and get the live suite. This was the same pattern the API integration tests use (`skipIfNoDb`); reusing it keeps mental model consistent.
+3. **Skip-if-no-stack gate via env var.** `E2E_RUN_REQUIRES_STACK=1` opts in. Without it, every test skips immediately so `pnpm --filter @ustowdispatch/e2e test` is safe to run on a fresh clone without docker. CI sets the env var; developers without docker get useful behavior; developers with docker run the same command and get the live suite. This was the same pattern the API integration tests use (`skipIfNoDb`); reusing it keeps mental model consistent.
 4. **Skeleton primitives over a vendor library.** `@radix-ui/react-skeleton` and similar exist but bring weight + a third-party theming surface. A 60-line file in `components/ui/skeleton.tsx` gives us full design-token alignment, no transitive risk, and exact accessibility semantics (`role="status"` + `aria-busy`). Same calculus for the empty state component.
 5. **`ErrorBoundary` as a class component, not `@sentry/react`.** Sentry's React SDK adds another 80 KB to the bundle. Since 17A already wires Sentry at the API tier and the `error-boundary.tsx` `console.error` path will be picked up by the browser Sentry SDK when we wire it in 17C, going framework-native here is cheaper. Sentry React stays a Phase-1 add.
 6. **Web unit tests for the new components deferred.** The web vitest config is `environment: 'node'` and adding React Testing Library + jsdom is a heavyweight install for value the E2E + axe pass already covers. The components are presentational and their behavior is asserted via E2E-009 (axe) and the existing per-page Playwright walkthroughs. Filed for 17C.
 7. **Pre-existing web error pages co-exist with the new ones.** `apps/web/src/app/login/page.tsx` from 17A already added the `Suspense`/`force-dynamic` fix. The new `not-found.tsx` / `forbidden/page.tsx` / `global-error.tsx` slot in alongside without changing anything else. `next build` confirms `/forbidden` renders static (193 B chunk).
-8. **CI workflow file added but not pre-validated.** `.github/workflows/e2e.yml` is the spec'd workflow. It assumes a `@towcommand/db migrate` script and a `playwright install` step both work — they do based on the package.json + the migration files. It will be exercised by the next PR opened against this branch.
+8. **CI workflow file added but not pre-validated.** `.github/workflows/e2e.yml` is the spec'd workflow. It assumes a `@ustowdispatch/db migrate` script and a `playwright install` step both work — they do based on the package.json + the migration files. It will be exercised by the next PR opened against this branch.
 
 ## Pre-existing UX issues found
 
@@ -136,13 +136,13 @@ No production dependencies added.
 ## Verification log
 
 ```
-$ pnpm --filter @towcommand/api build       ✓ zero errors
-$ pnpm --filter @towcommand/api typecheck   ✓ zero errors
-$ pnpm --filter @towcommand/api test        ✓ 138 passed | 18 skipped (DB-gated)
-$ pnpm --filter @towcommand/web build       ✓ Compiled successfully (60 routes)
-$ pnpm --filter @towcommand/web typecheck   ✓ zero errors
-$ pnpm --filter @towcommand/e2e typecheck   ✓ zero errors
-$ pnpm --filter @towcommand/e2e test        ✓ 10 skipped (stack-gated; CI flips the gate)
+$ pnpm --filter @ustowdispatch/api build       ✓ zero errors
+$ pnpm --filter @ustowdispatch/api typecheck   ✓ zero errors
+$ pnpm --filter @ustowdispatch/api test        ✓ 138 passed | 18 skipped (DB-gated)
+$ pnpm --filter @ustowdispatch/web build       ✓ Compiled successfully (60 routes)
+$ pnpm --filter @ustowdispatch/web typecheck   ✓ zero errors
+$ pnpm --filter @ustowdispatch/e2e typecheck   ✓ zero errors
+$ pnpm --filter @ustowdispatch/e2e test        ✓ 10 skipped (stack-gated; CI flips the gate)
 ```
 
 ## Phase 0 hardening progress

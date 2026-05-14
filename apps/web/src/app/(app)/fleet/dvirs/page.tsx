@@ -1,12 +1,22 @@
+import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers, fetchDvirs, fetchTrucks } from '@/lib/api/fleet';
+import type { PaginatedDrivers, PaginatedTrucks } from '@ustowdispatch/shared';
 import { DvirSubmitClient } from './dvir-submit-client';
 
+const EMPTY_TRUCKS: PaginatedTrucks = { data: [], total: 0, page: 1, perPage: 200 };
+const EMPTY_DRIVERS: PaginatedDrivers = { data: [], total: 0, page: 1, perPage: 200 };
+
 export default async function DvirsPage(): Promise<JSX.Element> {
-  const [dvirs, trucks, drivers] = await Promise.all([
-    fetchDvirs().catch(() => []),
-    fetchTrucks({ perPage: '200' }).catch(() => ({ data: [], total: 0, page: 1, perPage: 200 })),
-    fetchDrivers({ perPage: '200' }).catch(() => ({ data: [], total: 0, page: 1, perPage: 200 })),
+  // tryFetch surfaces per-feature 401/403 as data (no redirect) and lets 5xx
+  // hit the error boundary. Matches the pattern PR #6 standardized.
+  const [dvirsRes, trucksRes, driversRes] = await Promise.all([
+    tryFetch(() => fetchDvirs()),
+    tryFetch(() => fetchTrucks({ perPage: '200' })),
+    tryFetch(() => fetchDrivers({ perPage: '200' })),
   ]);
+  const dvirs = dvirsRes.data ?? [];
+  const trucks = trucksRes.data ?? EMPTY_TRUCKS;
+  const drivers = driversRes.data ?? EMPTY_DRIVERS;
   return (
     <div className="space-y-6">
       <DvirSubmitClient trucks={trucks.data} drivers={drivers.data} />

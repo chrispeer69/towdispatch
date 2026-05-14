@@ -6,7 +6,7 @@
  * session will fall through to an external VIN-decode provider.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { customerVehicles, customers, uuidv7, vehicles } from '@towcommand/db';
+import { customerVehicles, customers, uuidv7, vehicles } from '@ustowdispatch/db';
 import {
   type CreateVehiclePayload,
   ERROR_CODES,
@@ -17,7 +17,7 @@ import {
   type VehicleLookupQuery,
   type VehicleSearchQuery,
   type VehicleWithCustomersDto,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

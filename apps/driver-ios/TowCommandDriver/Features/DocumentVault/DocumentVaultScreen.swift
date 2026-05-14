@@ -189,8 +189,8 @@ enum DocumentEmailHelper {
     /// Opens the default mail composer with the document URL pre-attached.
     /// Used by drivers at scene to send proof to law enforcement / insurance.
     static func email(doc: FleetDocument) {
-        let subject = "TowCommand Document: \(doc.docType.displayName)"
-        let body = "Document URL: \(doc.fileUrl)\n\nSent from TowCommand Driver."
+        let subject = "US Tow DISPATCH Document: \(doc.docType.displayName)"
+        let body = "Document URL: \(doc.fileUrl)\n\nSent from US Tow DISPATCH Driver."
         let encoded = "mailto:?subject=\(subject.urlEncoded)&body=\(body.urlEncoded)"
         if let url = URL(string: encoded) {
             UIApplication.shared.open(url)

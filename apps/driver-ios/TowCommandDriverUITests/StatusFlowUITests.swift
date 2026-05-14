@@ -10,7 +10,7 @@ final class StatusFlowUITests: XCTestCase {
     func testAppLaunchesAndShowsLogin() {
         let app = XCUIApplication()
         app.launch()
-        XCTAssertTrue(app.staticTexts["TowCommand"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["US Tow DISPATCH"].waitForExistence(timeout: 5))
     }
 
     /// Skipped until backend seeding script can run in CI.

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
  * user manually edits the slug, we stop syncing to avoid clobbering it.
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signupSchema } from '@towcommand/shared';
+import { signupSchema } from '@ustowdispatch/shared';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -109,7 +109,7 @@ export function SignupForm(): JSX.Element {
         hint="Lowercase letters, numbers, hyphens. This is your workspace URL."
       >
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-muted">towcommand.app/</span>
+          <span className="font-mono text-xs text-text-muted">ustowdispatch.app/</span>
           <Input
             className="flex-1"
             placeholder="acme-towing"

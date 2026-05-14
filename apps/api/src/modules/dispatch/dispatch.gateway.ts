@@ -14,7 +14,7 @@ import type { AddressInfo } from 'node:net';
  */
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { accessTokenClaimsSchema } from '@towcommand/shared';
+import { accessTokenClaimsSchema } from '@ustowdispatch/shared';
 import type { Redis } from 'ioredis';
 import { Server, type Socket } from 'socket.io';
 import { ConfigService } from '../../config/config.service.js';

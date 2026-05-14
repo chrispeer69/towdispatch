@@ -1,7 +1,7 @@
 import { fetchCreditMemos, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 
-export const metadata = { title: 'Credit memos — TowCommand' };
+export const metadata = { title: 'Credit memos — US Tow DISPATCH' };
 
 export default async function CreditMemosPage(): Promise<JSX.Element> {
   const result = await tryFetch(() => fetchCreditMemos());

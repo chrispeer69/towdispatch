@@ -1,6 +1,6 @@
 import { CustomerForm } from '../customer-form';
 
-export const metadata = { title: 'New customer — TowCommand' };
+export const metadata = { title: 'New customer — US Tow DISPATCH' };
 
 export default function NewCustomerPage(): JSX.Element {
   return (

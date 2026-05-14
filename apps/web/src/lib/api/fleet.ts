@@ -16,7 +16,7 @@ import type {
   PaginatedDrivers,
   PaginatedTrucks,
   TruckDto,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { apiServer } from './client';
 
 const qs = (q: Record<string, string | undefined>): string => {

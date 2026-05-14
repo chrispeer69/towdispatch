@@ -168,7 +168,7 @@ I did **not** measure cold start, photo capture latency, or signature capture la
 - Photo capture: `AVCaptureSession.startRunning()` runs on a `userInitiated` queue; the shutter→`fileDataRepresentation()` path is single-shot with no chained re-encoding. JPEG export at 85% happens before the queue (so the upload queue write is the dominant cost). Should be well under 3s.
 - Signature: PencilKit is native and renders at 60+fps with no measurable input lag in any past project. The `drawing.image(from:scale:)` call is the only blocking work and runs in well under 100ms for a 1024x320 bitmap.
 
-**Action item for Session 7:** add `Telemetry.event("app.cold_start_ms", attributes: ["duration": ...])` instrumentation in `TowCommandDriverApp.body` and `Telemetry.event("photo.capture_ms", ...)` in `CameraCaptureViewController.photoOutput`. The protocol's already in place.
+**Action item for Session 7:** add `Telemetry.event("app.cold_start_ms", attributes: ["duration": ...])` instrumentation in `UsTowDispatchDriverApp.body` and `Telemetry.event("photo.capture_ms", ...)` in `CameraCaptureViewController.photoOutput`. The protocol's already in place.
 
 ---
 
@@ -214,7 +214,7 @@ Requires `APP_STORE_CONNECT_API_KEY_PATH`, `APP_STORE_CONNECT_API_KEY_ID`, `APP_
 ```bash
 # 1. Start the backend
 docker compose up -d
-pnpm --filter @towcommand/api dev
+pnpm --filter @ustowdispatch/api dev
 
 # 2. Launch the app
 open apps/driver-ios/TowCommandDriver.xcodeproj
@@ -247,7 +247,7 @@ DRIVER_EMAIL=driver@demo.test DRIVER_PASSWORD=password \
 
 5. **Mapbox account** — sign up, generate a downloads token and a public access token. Drop both into `TowCommandDriver/Resources/Info.plist` `TCConfig` and `MAPBOX_DOWNLOADS_TOKEN` in CI for SPM resolve.
 
-6. **Stripe account in payments mode** — Stripe Tap to Pay live key, plus configure the Connect / Direct flow with the TowCommand backend.
+6. **Stripe account in payments mode** — Stripe Tap to Pay live key, plus configure the Connect / Direct flow with the US Tow DISPATCH backend.
 
 7. **Sentry account / project** — DSN goes into `TCConfig.SentryDSN`.
 
@@ -279,7 +279,7 @@ apps/driver-ios/
 │   ├── Networking/APIClient.swift           # URLSession actor with 401 refresh
 │   ├── Networking/APIError.swift
 │   ├── Networking/Endpoints.swift           # 9 endpoints mirroring Android
-│   ├── Networking/TowCommandAPI.swift       # High-level wrapper
+│   ├── Networking/USTowDispatchAPI.swift       # High-level wrapper
 │   ├── Observability/Telemetry.swift        # Protocol + OSLog default
 │   ├── Persistence/LocalStore.swift         # JSON-file backed, GRDB-swap-ready
 │   ├── Persistence/PhotoArchive.swift       # Full-res local retention
@@ -296,7 +296,7 @@ apps/driver-ios/
 │   ├── Components/TCCard.swift              # TCCard, TCStatusBadge
 │   └── Components/TCPrimaryButton.swift     # TCPrimaryButton, TCSecondaryButton
 ├── TowCommandDriver/App/
-│   ├── TowCommandDriverApp.swift            # @main
+│   ├── UsTowDispatchDriverApp.swift            # @main
 │   ├── AppContainer.swift                   # Composition root, @StateObject
 │   ├── RootView.swift                       # Splash / SignIn / TabView routing
 │   ├── SettingsStore.swift                  # @AppStorage-backed user prefs
@@ -483,7 +483,7 @@ apps/driver-ios/
 
 Modified:
 - `Packages/Core/.../Networking/Endpoints.swift` — 8 new endpoint constants
-- `Packages/Core/.../Networking/TowCommandAPI.swift` — 11 new methods on protocol + impl
+- `Packages/Core/.../Networking/USTowDispatchAPI.swift` — 11 new methods on protocol + impl
 - `Packages/Core/.../Persistence/LocalStore.swift` — DVIR/Document/Shift/Chat persistence
 - `Packages/Core/.../Sync/Outbox.swift` — 7 new action variants
 - `Packages/Core/.../Sync/SyncEngine.swift` — drain handlers for new actions

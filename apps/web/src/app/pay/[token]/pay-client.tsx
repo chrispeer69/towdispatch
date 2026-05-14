@@ -9,7 +9,7 @@
  * account id is passed via the `stripeAccount` option to Stripe.js so the
  * payment intent is confirmed on the connected account, not the platform.
  */
-import type { PublicPaymentView } from '@towcommand/shared';
+import type { PublicPaymentView } from '@ustowdispatch/shared';
 import { type JSX, useEffect, useRef, useState } from 'react';
 
 declare global {

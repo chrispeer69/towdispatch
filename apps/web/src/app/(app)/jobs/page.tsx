@@ -1,10 +1,14 @@
-import { ApiError, apiServer } from '@/lib/api/client';
-import { requireUser } from '@/lib/auth/session';
-import type { JobListItemDto, JobServiceType, JobStatus, PaginatedJobs } from '@towcommand/shared';
+import { apiServer, tryFetch } from '@/lib/api/client';
+import type {
+  JobListItemDto,
+  JobServiceType,
+  JobStatus,
+  PaginatedJobs,
+} from '@ustowdispatch/shared';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Tow Jobs — TowCommand' };
+export const metadata = { title: 'Tow Jobs — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_LABEL: Record<JobStatus, string> = {
@@ -63,19 +67,16 @@ export default async function JobsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
-  await requireUser();
   const params = await searchParams;
   const parsedPage = Number(params.page);
   const page = Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
 
-  let list: PaginatedJobs = { data: [], page, perPage: PER_PAGE, total: 0 };
-  try {
-    list = await apiServer<PaginatedJobs>(`/jobs?page=${page}&perPage=${PER_PAGE}`);
-  } catch (err) {
-    if (!(err instanceof ApiError) || (err.status !== 401 && err.status !== 403)) {
-      throw err;
-    }
-  }
+  // Auth is enforced by (app)/layout.tsx. tryFetch surfaces a per-feature
+  // 401/403 as data so this page never races the layout's redirect.
+  const result = await tryFetch(() =>
+    apiServer<PaginatedJobs>(`/jobs?page=${page}&perPage=${PER_PAGE}`),
+  );
+  const list: PaginatedJobs = result.data ?? { data: [], page, perPage: PER_PAGE, total: 0 };
 
   const totalPages = Math.max(1, Math.ceil(list.total / list.perPage));
   const hasPrev = list.page > 1;

@@ -36,7 +36,7 @@ import {
   payments,
   syncJobs,
   uuidv7,
-} from '@towcommand/db';
+} from '@ustowdispatch/db';
 import {
   type AccountMappingDto,
   type AccountMappingsResponse,
@@ -49,7 +49,7 @@ import {
   type RetrySyncResponse,
   type SyncJobDto,
   type SyncStatusResponse,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq } from 'drizzle-orm';
 import type { Logger } from 'pino';
 import { ConfigService } from '../../config/config.service.js';
@@ -506,7 +506,7 @@ export class AccountingService implements OnModuleInit {
         const entityType = mapEntityType(change.entityName);
         if (!entityType) continue;
         // Webhook entityId is QBO's id (a string), but our sync_jobs.entity_id
-        // is uuid (TowCommand's id). For pulls triggered by webhook we don't
+        // is uuid (US Tow DISPATCH's id). For pulls triggered by webhook we don't
         // yet know the internal id; store a placeholder so the engine can
         // record the touch (handler updates last_sync_at). We use uuidv7 to
         // keep the row unique.

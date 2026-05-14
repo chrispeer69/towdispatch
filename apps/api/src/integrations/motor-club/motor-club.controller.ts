@@ -11,7 +11,7 @@
  * check so E2E can drive it without a real signing key.
  */
 import { BadRequestException, Body, Controller, Get, Post } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { TransactionRunner } from '../../database/transaction-runner.service.js';
 import { AgeroStubProvider } from './agero-stub.provider.js';

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
- * Brand tokens — DARK is the canonical TowCommand palette and is LOCKED.
+ * Brand tokens — DARK is the canonical US Tow DISPATCH palette and is LOCKED.
  * Mirrored in tailwind.config.ts. Change the dark values only with brand
  * sign-off.
  *

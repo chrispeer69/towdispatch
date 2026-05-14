@@ -10,7 +10,7 @@
  * vendor creds to spin up a working stack. Same pattern as our Maps stub.
  */
 import { Injectable, Logger } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import type {
   NotificationCredentials,
   NotificationProvider,
@@ -40,7 +40,7 @@ export class StubNotificationProvider implements NotificationProvider {
   readonly descriptor = {
     id: 'stub',
     displayName: 'Stub (dev only)',
-    vendor: 'towcommand-internal',
+    vendor: 'ustowdispatch-internal',
     capabilities: ['sms', 'email', 'push', 'voice'],
   } as const;
 

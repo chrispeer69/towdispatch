@@ -3,10 +3,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 /**
  * ReconciliationService — diffs a Towbook export bundle against what's
- * currently in TowCommand for a given tenant. Returns three buckets:
+ * currently in US Tow DISPATCH for a given tenant. Returns three buckets:
  *
- *   missing  — rows in the bundle, NOT in TowCommand
- *   orphaned — rows in TowCommand with external_source='towbook' that are
+ *   missing  — rows in the bundle, NOT in US Tow DISPATCH
+ *   orphaned — rows in US Tow DISPATCH with external_source='towbook' that are
  *              NOT in the current bundle (deleted-in-Towbook candidates)
  *   drift    — rows present in both with field mismatches (we name the
  *              columns that differ)

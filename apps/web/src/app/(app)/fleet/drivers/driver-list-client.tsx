@@ -6,7 +6,7 @@ import {
   type DriverEmploymentStatus,
   type PaginatedDrivers,
   driverEmploymentStatusValues,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -30,9 +30,17 @@ export function DriverListClient({ initial, initialQuery }: Props): JSX.Element 
       if (q) params.set('q', q);
       if (empStatus) params.set('employmentStatus', empStatus);
       params.set('perPage', '50');
+      // Guard against the BFF returning a 4xx/5xx error body. The /api/fleet/*
+      // BFF returns `{ code, message, errors }` on failure — assigning that
+      // shape to `data` would make the next render crash on `data.data.length`
+      // and trip the error boundary with "Something went wrong". Mirrors the
+      // CustomerListClient pattern.
       void fetch(`/api/fleet/drivers?${params.toString()}`)
-        .then((r) => r.json())
-        .then((j: PaginatedDrivers) => setData(j))
+        .then(async (r) => {
+          if (!r.ok) return;
+          const j = (await r.json()) as PaginatedDrivers;
+          setData(j);
+        })
         .catch(() => {});
     }, 300);
     return () => {

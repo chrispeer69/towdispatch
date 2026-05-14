@@ -1,7 +1,7 @@
 # Session 8 — Fleet & Driver Management Walkthrough
 
 Click-by-click verification for COO review. Run against a fresh dev DB
-(`pnpm --filter @towcommand/db reset && pnpm --filter @towcommand/db migrate && pnpm --filter @towcommand/db seed`)
+(`pnpm --filter @ustowdispatch/db reset && pnpm --filter @ustowdispatch/db migrate && pnpm --filter @ustowdispatch/db seed`)
 and a logged-in `owner@acme.test` session.
 
 ---

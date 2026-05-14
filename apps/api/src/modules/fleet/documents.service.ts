@@ -8,7 +8,7 @@
  * pull the file.
  */
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { documents, jobs, uuidv7 } from '@towcommand/db';
+import { documents, jobs, uuidv7 } from '@ustowdispatch/db';
 import {
   type DocumentDto,
   type DocumentFilters,
@@ -17,7 +17,7 @@ import {
   ERROR_CODES,
   type Role,
   type StorageProvider,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, inArray, isNull, or } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { StorageAccessDenied } from '../storage/local-disk.storage.js';

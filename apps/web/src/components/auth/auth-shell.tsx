@@ -30,7 +30,7 @@ export function AuthShell({ title, subtitle, footer, children }: AuthShellProps)
             <span className="font-condensed text-lg font-extrabold text-white">T</span>
           </div>
           <span className="font-condensed text-base font-extrabold uppercase tracking-wide">
-            Tow<span className="text-orange">Command</span> Pro
+            US <span className="text-orange">Tow</span> Dispatch
           </span>
         </Link>
         <div className="flex items-center gap-3">

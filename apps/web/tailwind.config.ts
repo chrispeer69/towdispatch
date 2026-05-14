@@ -1,5 +1,5 @@
 /**
- * TowCommand brand tokens. The DARK palette is LOCKED — values live as HSL
+ * US Tow DISPATCH brand tokens. The DARK palette is LOCKED — values live as HSL
  * channels in src/app/globals.css under the `.dark` selector. The `:root`
  * (light) palette is a new addition that ships with the theme toggle. The
  * tokens consumed here read from CSS variables so all `bg-steel`,
