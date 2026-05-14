@@ -2,27 +2,13 @@ import { ConnectivityBanner } from '@/components/connectivity-banner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemedToaster } from '@/components/themed-toaster';
 import type { Metadata, Viewport } from 'next';
-import { Barlow, Barlow_Condensed, IBM_Plex_Mono } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 
-const barlow = Barlow({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-barlow',
-  display: 'swap',
-});
-
-const barlowCondensed = Barlow_Condensed({
-  subsets: ['latin'],
-  weight: ['600', '700', '800'],
-  variable: '--font-barlow-condensed',
-  display: 'swap',
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-plex-mono',
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -45,11 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <html
-      lang="en"
-      className={`${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className="bg-steel text-text-primary antialiased">
         <ThemeProvider>
           {/* Skip link — first focusable element on every page so keyboard

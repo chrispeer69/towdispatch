@@ -1,10 +1,20 @@
 /**
- * US Tow DISPATCH brand tokens. The DARK palette is LOCKED — values live as HSL
- * channels in src/app/globals.css under the `.dark` selector. The `:root`
- * (light) palette is a new addition that ships with the theme toggle. The
- * tokens consumed here read from CSS variables so all `bg-steel`,
- * `text-text-primary`, etc. classes flip automatically when the theme is
- * toggled.
+ * US Tow DISPATCH design tokens v1.
+ *
+ * NEW role-named groups (`brand`, `bg`, `text.*-on-*`, `status`) are the
+ * canonical surface for the v1 design system. Values live as HSL channels
+ * in src/app/globals.css and are sampled from sibling product TowGrade
+ * (www.towgrade.com) for cross-product visual consistency.
+ *
+ * LEGACY hue-named groups (`orange`, `steel`, and the flat `ok/warn/danger`
+ * status set) are left in place and unchanged so existing utility classes
+ * (`bg-orange`, `text-text-primary`, `bg-steel`, etc.) keep rendering the
+ * previous palette. A follow-up PR will sweep components onto the new
+ * role-named tokens; this config ships the tokens only.
+ *
+ * Single-font typography: every `font-*` family points to Inter so existing
+ * `font-condensed` / `font-mono` class usage stays compiling and just
+ * renders Inter at the requested weight.
  */
 import type { Config } from 'tailwindcss';
 import animate from 'tailwindcss-animate';
@@ -22,6 +32,25 @@ const config: Config = {
     },
     extend: {
       colors: {
+        brand: {
+          primary: 'hsl(var(--brand-primary) / <alpha-value>)',
+          'primary-hover': 'hsl(var(--brand-primary-hover) / <alpha-value>)',
+          'primary-text': 'hsl(var(--brand-primary-text) / <alpha-value>)',
+        },
+        bg: {
+          base: 'hsl(var(--bg-base) / <alpha-value>)',
+          surface: 'hsl(var(--bg-surface) / <alpha-value>)',
+          marketing: 'hsl(var(--bg-marketing) / <alpha-value>)',
+          section: 'hsl(var(--bg-section) / <alpha-value>)',
+        },
+        status: {
+          success: 'hsl(var(--status-success) / <alpha-value>)',
+          warning: 'hsl(var(--status-warning) / <alpha-value>)',
+          danger: 'hsl(var(--status-danger) / <alpha-value>)',
+        },
+        // Legacy hue-named groups — unchanged so existing components keep
+        // rendering the prior palette until they're swept onto the new
+        // role-named tokens above.
         orange: {
           DEFAULT: 'hsl(var(--orange) / <alpha-value>)',
           dark: 'hsl(var(--orange-dark) / <alpha-value>)',
@@ -38,6 +67,10 @@ const config: Config = {
           primary: 'hsl(var(--text-primary) / <alpha-value>)',
           secondary: 'hsl(var(--text-secondary) / <alpha-value>)',
           muted: 'hsl(var(--text-muted) / <alpha-value>)',
+          'primary-on-dark': 'hsl(var(--text-primary-on-dark) / <alpha-value>)',
+          'secondary-on-dark': 'hsl(var(--text-secondary-on-dark) / <alpha-value>)',
+          'primary-on-light': 'hsl(var(--text-primary-on-light) / <alpha-value>)',
+          'secondary-on-light': 'hsl(var(--text-secondary-on-light) / <alpha-value>)',
         },
         ok: 'hsl(var(--green) / <alpha-value>)',
         warn: 'hsl(var(--yellow) / <alpha-value>)',
@@ -49,9 +82,9 @@ const config: Config = {
         'orange-glow': 'var(--orange-glow-rgba)',
       },
       fontFamily: {
-        sans: ['var(--font-barlow)', 'system-ui', 'sans-serif'],
-        condensed: ['var(--font-barlow-condensed)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-plex-mono)', 'ui-monospace', 'monospace'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        condensed: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-inter)', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         DEFAULT: '10px',
