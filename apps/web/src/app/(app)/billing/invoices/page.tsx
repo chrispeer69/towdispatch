@@ -1,9 +1,9 @@
-import { type InvoiceListResponse, fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
+﻿import { type InvoiceListResponse, fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'Invoices — US Tow DISPATCH' };
+export const metadata = { title: 'Invoices â€” US Tow DISPATCH' };
 
 interface SearchParams {
   status?: string;
@@ -34,7 +34,7 @@ export default async function InvoicesPage({
     <div className="space-y-6">
       <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+          <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Invoices
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
@@ -71,7 +71,7 @@ export default async function InvoicesPage({
             type="text"
             name="search"
             defaultValue={params.search ?? ''}
-            placeholder="invoice # or notes…"
+            placeholder="invoice # or notesâ€¦"
             className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
           />
         </label>
@@ -124,10 +124,10 @@ export default async function InvoicesPage({
                 </td>
                 <td className="px-4 py-2 text-text-secondary">{inv.invoiceType}</td>
                 <td className="px-4 py-2 text-text-secondary">
-                  {inv.issuedAt ? inv.issuedAt.slice(0, 10) : '—'}
+                  {inv.issuedAt ? inv.issuedAt.slice(0, 10) : 'â€”'}
                 </td>
                 <td className="px-4 py-2 text-text-secondary">
-                  {inv.dueAt ? inv.dueAt.slice(0, 10) : '—'}
+                  {inv.dueAt ? inv.dueAt.slice(0, 10) : 'â€”'}
                 </td>
                 <td className="px-4 py-2 text-right font-mono">
                   {formatMoneyCents(inv.totalCents)}

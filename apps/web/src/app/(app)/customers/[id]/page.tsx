@@ -25,7 +25,7 @@ export default async function CustomerDetailPage({ params }: Props): Promise<JSX
             ← All customers
           </Link>
         </p>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           {customer.name}
         </h1>
         <p className="text-sm text-text-secondary">

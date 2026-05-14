@@ -1,8 +1,8 @@
-import { tryFetch } from '@/lib/api/client';
+﻿import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
 import type { PaginatedAccounts } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'Statements — US Tow DISPATCH' };
+export const metadata = { title: 'Statements â€” US Tow DISPATCH' };
 
 const EMPTY_ACCOUNTS: PaginatedAccounts = { data: [], total: 0, page: 1, perPage: 100 };
 
@@ -12,7 +12,7 @@ export default async function StatementsPage(): Promise<JSX.Element> {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           Statements
         </h1>
         <p className="mt-1 text-sm text-text-secondary">

@@ -1,12 +1,12 @@
-import { getOptionalUser } from '@/lib/auth/session';
+﻿import { getOptionalUser } from '@/lib/auth/session';
 import { ROLES } from '@ustowdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ReconcileClient } from './reconcile-client';
 
-export const metadata = { title: 'Reconcile — US Tow DISPATCH' };
+export const metadata = { title: 'Reconcile â€” US Tow DISPATCH' };
 
 export default async function ReconcilePage(): Promise<JSX.Element> {
-  // Auth gating is owned by (app)/layout.tsx — see /import/page.tsx for the
+  // Auth gating is owned by (app)/layout.tsx â€” see /import/page.tsx for the
   // rationale on using the non-throwing variant here.
   const me = await getOptionalUser();
   if (!me) return <div className="space-y-6" />;
@@ -16,12 +16,12 @@ export default async function ReconcilePage(): Promise<JSX.Element> {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+        <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
           Towbook Reconciliation
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Diff a Towbook export against what we have. Drop the same bundle you'd import — you'll get
-          missing / orphaned / drift counts back. Cancel Towbook when both missing and drift are
+          Diff a Towbook export against what we have. Drop the same bundle you'd import â€” you'll
+          get missing / orphaned / drift counts back. Cancel Towbook when both missing and drift are
           zero.
         </p>
       </header>
