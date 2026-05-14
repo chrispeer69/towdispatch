@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 /**
  * Sub-nav for the /fleet shell. Sits below the page title on every fleet
@@ -26,6 +27,12 @@ const TABS: Array<{ href: string; label: string; match: (p: string) => boolean }
 
 export function FleetTabs(): JSX.Element {
   const pathname = usePathname() ?? '';
+  // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
+  useEffect(() => {
+    console.error(
+      `[FLEET_DEBUG] FleetTabs mount path=${pathname} cookieLen=${typeof document !== 'undefined' ? document.cookie.length : 'n/a'} href=${typeof window !== 'undefined' ? window.location.href : 'n/a'}`,
+    );
+  }, [pathname]);
   return (
     <nav
       className="flex flex-wrap gap-1.5 border-b border-steel-border pb-3"
