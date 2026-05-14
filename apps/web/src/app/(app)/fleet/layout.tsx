@@ -22,7 +22,14 @@ export default async function FleetLayout({
 }: {
   children: React.ReactNode;
 }): Promise<JSX.Element> {
+  // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
+  // eslint-disable-next-line no-console
+  console.error('[FLEET_DEBUG] fleet/layout enter');
   const session = await getOptionalUser();
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG] fleet/layout getOptionalUser=${session ? `userId=${session.user.id}` : 'null'}`,
+  );
   if (!session) return <></>;
   return (
     <div className="space-y-6">

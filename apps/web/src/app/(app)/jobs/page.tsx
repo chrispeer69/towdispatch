@@ -62,6 +62,10 @@ export default async function JobsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
+  // [FLEET_DEBUG] — temporary diagnostic for comparison vs the fleet routes.
+  // Revert when the fleet bounce is fixed.
+  // eslint-disable-next-line no-console
+  console.error('[FLEET_DEBUG] jobs/page enter (working-route comparison)');
   const params = await searchParams;
   const parsedPage = Number(params.page);
   const page = Number.isFinite(parsedPage) && parsedPage >= 1 ? Math.floor(parsedPage) : 1;
@@ -70,6 +74,10 @@ export default async function JobsPage({
   // 401/403 as data so this page never races the layout's redirect.
   const result = await tryFetch(() =>
     apiServer<PaginatedJobs>(`/jobs?page=${page}&perPage=${PER_PAGE}`),
+  );
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG] jobs/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status}`}`,
   );
   const list: PaginatedJobs = result.data ?? { data: [], page, perPage: PER_PAGE, total: 0 };
 
