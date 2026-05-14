@@ -1,6 +1,6 @@
 import { buttonVariants } from '@/components/ui/button';
-import { ApiError, apiServer } from '@/lib/api/client';
-import { requireUser } from '@/lib/auth/session';
+import { apiServer, tryFetch } from '@/lib/api/client';
+import { getOptionalUser } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
 import type { JobServiceType, JobStatus } from '@towcommand/shared';
 import { ArrowUpRight, Clock, type LucideIcon, Plus, Truck, Users, Wallet } from 'lucide-react';
@@ -100,31 +100,29 @@ function formatTime(iso: string): string {
 }
 
 export default async function DashboardPage(): Promise<JSX.Element> {
-  const session = await requireUser();
+  // Auth gating is enforced by (app)/layout.tsx. getOptionalUser is the
+  // non-throwing variant — a transient /auth/me flake here cannot redirect us
+  // out from under a layout that already streamed an authenticated shell.
+  const session = await getOptionalUser();
   const today = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   });
 
-  // Read-only snapshot. Mirrors the dispatch page pattern: server component
-  // calls apiServer, swallows 401/403 (requireUser already gated this path)
-  // and renders a zeroed dashboard if upstream is unreachable so the shell
-  // never blanks out on a transient failure.
-  let overview: DashboardOverviewDto = {
+  // Read-only snapshot. tryFetch surfaces a per-feature 401/403 as data so a
+  // missing-scope endpoint can't crash the render. Real session-expiry is
+  // handled exclusively by requireUser() in the (app)/ layout.
+  const overviewResult = await tryFetch(() =>
+    apiServer<DashboardOverviewDto>('/dashboard/overview'),
+  );
+  const overview: DashboardOverviewDto = overviewResult.data ?? {
     activeCalls: 0,
     driversOnDuty: 0,
     todaysRevenueCents: 0,
     avgEtaMinutes: null,
     recentActivity: [],
   };
-  try {
-    overview = await apiServer<DashboardOverviewDto>('/dashboard/overview');
-  } catch (err) {
-    if (!(err instanceof ApiError) || (err.status !== 401 && err.status !== 403)) {
-      throw err;
-    }
-  }
 
   const activeCallsValue = String(overview.activeCalls);
   const driversValue = String(overview.driversOnDuty);
@@ -139,10 +137,11 @@ export default async function DashboardPage(): Promise<JSX.Element> {
             Operations Overview
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            {today} · {session.tenant.name}
+            {today}
+            {session ? ` · ${session.tenant.name}` : ''}
           </p>
         </div>
-        {!session.user.emailVerifiedAt ? (
+        {session && !session.user.emailVerifiedAt ? (
           <a
             href="/verify-email-pending"
             className="rounded-[10px] border border-orange/30 bg-orange/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-orange-light hover:bg-orange/20"
