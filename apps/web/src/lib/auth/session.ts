@@ -42,9 +42,9 @@ import { headers } from 'next/headers';
  * answer for layout and page, single redirect chokepoint, identical /auth/me
  * traffic to the read-once Customers/Accounts pages that never showed the bug.
  */
-import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { ApiError, apiServer } from '../api/client';
+import { tracedRedirect } from '../debug/redirect-trace';
 
 export const getOptionalUser = cache(async (): Promise<MeResponse | null> => {
   try {
@@ -63,7 +63,7 @@ export async function requireUser(): Promise<MeResponse> {
     // pages and are surfaced as data, not as a session-expiry signal.
     const h = await headers();
     const path = h.get('x-current-path') ?? '/dashboard';
-    redirect(`/login?next=${encodeURIComponent(path)}`);
+    tracedRedirect(`/login?next=${encodeURIComponent(path)}`, 'requireUser:auth-me-401');
   }
   return me;
 }

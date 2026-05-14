@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchTrucks } from '@/lib/api/fleet';
+import { getRequestId } from '@/lib/debug/redirect-trace';
 import type { PaginatedTrucks } from '@towcommand/shared';
 import Link from 'next/link';
 import { TruckListClient } from './truck-list-client';
@@ -19,6 +20,10 @@ export default async function TrucksPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
+  // [FLEET_DEBUG_V2]
+  const rid = getRequestId();
+  // eslint-disable-next-line no-console
+  console.error(`[FLEET_DEBUG_V2 rid=${rid}] fleet/trucks/page enter`);
   const params = await searchParams;
   const result = await tryFetch(() =>
     fetchTrucks({
@@ -28,6 +33,10 @@ export default async function TrucksPage({
       equipment: params.equipment,
       perPage: '50',
     }),
+  );
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG_V2 rid=${rid}] fleet/trucks/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status} code=${result.error?.code} msg=${result.error?.message}`}`,
   );
   const initial = result.data ?? EMPTY_TRUCKS;
   return (

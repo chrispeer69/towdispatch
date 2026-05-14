@@ -2,6 +2,8 @@ import { SessionProvider } from '@/components/app-shell/session-provider';
 import { AppSidebar } from '@/components/app-shell/sidebar';
 import { AppTopbar } from '@/components/app-shell/topbar';
 import { requireUser } from '@/lib/auth/session';
+import { getRequestId } from '@/lib/debug/redirect-trace';
+import { headers } from 'next/headers';
 /**
  * Authenticated app shell.
  *
@@ -21,7 +23,19 @@ export default async function AppLayout({
 }: {
   children: ReactNode;
 }): Promise<JSX.Element> {
+  // [FLEET_DEBUG_V2] — log every (app)/ render with rid + incoming path so we
+  // can match server logs against the user's browser session. Revert when
+  // root cause is fixed.
+  const rid = getRequestId();
+  const h = await headers();
+  const path = h.get('x-current-path') ?? '(no x-current-path)';
+  // eslint-disable-next-line no-console
+  console.error(`[FLEET_DEBUG_V2 rid=${rid}] (app)/layout enter path=${path}`);
   const session = await requireUser();
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG_V2 rid=${rid}] (app)/layout requireUser OK userId=${session.user.id} role=${session.user.role}`,
+  );
   return (
     <SessionProvider value={session}>
       <div className="flex min-h-screen bg-steel text-text-primary">

@@ -1,5 +1,4 @@
 import { getOptionalUser } from '@/lib/auth/session';
-import { ROLES } from '@towcommand/shared';
 /**
  * Towbook Import — Session 16.
  *
@@ -16,7 +15,8 @@ import { ROLES } from '@towcommand/shared';
  * out from under the layout's already-authenticated shell. The null branch
  * renders an empty fallback that the layout's redirect supersedes.
  */
-import { redirect } from 'next/navigation';
+import { tracedRedirect } from '@/lib/debug/redirect-trace';
+import { ROLES } from '@towcommand/shared';
 import { ImportWizardClient } from './import-wizard-client';
 
 export const metadata = { title: 'Towbook Import — TowCommand' };
@@ -25,7 +25,7 @@ export default async function ImportPage(): Promise<JSX.Element> {
   const me = await getOptionalUser();
   if (!me) return <div className="space-y-6" />;
   if (me.user.role !== ROLES.OWNER && me.user.role !== ROLES.ADMIN) {
-    redirect('/dashboard');
+    tracedRedirect('/dashboard', 'import-page:role-not-admin');
   }
   return (
     <div className="space-y-6">

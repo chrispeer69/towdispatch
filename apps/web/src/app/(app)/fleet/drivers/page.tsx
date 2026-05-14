@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers } from '@/lib/api/fleet';
+import { getRequestId } from '@/lib/debug/redirect-trace';
 import type { PaginatedDrivers } from '@towcommand/shared';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
@@ -18,6 +19,10 @@ export default async function DriversPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
+  // [FLEET_DEBUG_V2] — capture fleet/drivers/page entry + tryFetch outcome.
+  const rid = getRequestId();
+  // eslint-disable-next-line no-console
+  console.error(`[FLEET_DEBUG_V2 rid=${rid}] fleet/drivers/page enter`);
   const params = await searchParams;
   const result = await tryFetch(() =>
     fetchDrivers({
@@ -26,6 +31,10 @@ export default async function DriversPage({
       cdlClass: params.cdlClass,
       perPage: '50',
     }),
+  );
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG_V2 rid=${rid}] fleet/drivers/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status} code=${result.error?.code} msg=${result.error?.message}`}`,
   );
   const initial = result.data ?? EMPTY_DRIVERS;
   return (
