@@ -56,8 +56,37 @@ export class ApiError extends Error {
  */
 export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiError };
 
+/**
+ * Server-side API base. Prefers the Railway private-networking hostname so
+ * the request never leaves the project's VPC — the public edge proxy was
+ * stripping `Authorization` on some routes (e.g. /jobs, /fleet/*) but not
+ * others (e.g. /auth/me, /customers), which produced the long-running
+ * "Operations pages bounce to /login" symptom. Going via the private URL
+ * skips that proxy entirely and the JWT reaches the API intact.
+ *
+ * Resolution order:
+ *   1. API_INTERNAL_URL    — set on the web service in Railway to the
+ *                            project-private hostname, e.g.
+ *                            http://backend.railway.internal:8080. http://
+ *                            is correct: traffic stays inside the VPC and
+ *                            the internal hostname has no TLS cert.
+ *   2. API_PUBLIC_URL      — server-only override, kept for completeness.
+ *   3. NEXT_PUBLIC_API_URL — last-resort fallback. This var is still the
+ *                            value the BROWSER bundles read (Socket.IO
+ *                            handshake, etc.) — do NOT unset it. Keep it
+ *                            pointed at the public hostname.
+ *   4. localhost:3001      — local dev.
+ *
+ * Only `apiServer*` (server-only) goes through this resolver. Client-side
+ * code that needs to reach the API directly (the Socket.IO handshake in
+ * /api/socket/token's response payload) reads NEXT_PUBLIC_API_URL on its
+ * own and is unaffected.
+ */
 const apiBase = (): string =>
-  process.env.NEXT_PUBLIC_API_URL ?? process.env.API_PUBLIC_URL ?? 'http://localhost:3001';
+  process.env.API_INTERNAL_URL ??
+  process.env.API_PUBLIC_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://localhost:3001';
 
 interface RequestOpts<TBody> {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
