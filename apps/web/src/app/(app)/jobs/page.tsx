@@ -1,4 +1,4 @@
-import { apiServer, tryFetch } from '@/lib/api/client';
+﻿import { apiServer, tryFetch } from '@/lib/api/client';
 import type {
   JobListItemDto,
   JobServiceType,
@@ -8,7 +8,7 @@ import type {
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Tow Jobs — US Tow DISPATCH' };
+export const metadata = { title: 'Tow Jobs â€” US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_LABEL: Record<JobStatus, string> = {
@@ -50,11 +50,11 @@ function formatCreatedAt(iso: string): string {
 }
 
 function vehicleLabel(v: JobListItemDto['vehicle']): string {
-  if (!v) return '—';
+  if (!v) return 'â€”';
   const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ');
   const plate = v.plate ? (v.plateState ? `${v.plate} (${v.plateState})` : v.plate) : '';
-  if (ymm && plate) return `${ymm} · ${plate}`;
-  return ymm || plate || '—';
+  if (ymm && plate) return `${ymm} Â· ${plate}`;
+  return ymm || plate || 'â€”';
 }
 
 function driverLabel(d: JobListItemDto['driver']): string {
@@ -86,11 +86,11 @@ export default async function JobsPage({
     <div className="space-y-6">
       <header className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+          <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Tow Jobs
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            <span data-testid="jobs-total">{list.total}</span> total · newest first
+            <span data-testid="jobs-total">{list.total}</span> total Â· newest first
           </p>
         </div>
       </header>
@@ -144,7 +144,7 @@ export default async function JobsPage({
                       {formatCreatedAt(job.createdAt)}
                     </td>
                     <td className="px-4 py-2 font-medium text-text-primary">
-                      {job.customer?.name ?? '—'}
+                      {job.customer?.name ?? 'â€”'}
                     </td>
                     <td className="px-4 py-2 text-text-secondary">{vehicleLabel(job.vehicle)}</td>
                     <td className="px-4 py-2 text-text-secondary">
@@ -173,11 +173,11 @@ export default async function JobsPage({
                   href={`/jobs?page=${list.page - 1}`}
                   className="rounded-md border border-steel-border px-3 py-1 hover:bg-steel-light/30"
                 >
-                  ← Prev
+                  â† Prev
                 </Link>
               ) : (
                 <span className="cursor-not-allowed rounded-md border border-steel-border px-3 py-1 opacity-50">
-                  ← Prev
+                  â† Prev
                 </span>
               )}
               {hasNext ? (
@@ -185,11 +185,11 @@ export default async function JobsPage({
                   href={`/jobs?page=${list.page + 1}`}
                   className="rounded-md border border-steel-border px-3 py-1 hover:bg-steel-light/30"
                 >
-                  Next →
+                  Next â†’
                 </Link>
               ) : (
                 <span className="cursor-not-allowed rounded-md border border-steel-border px-3 py-1 opacity-50">
-                  Next →
+                  Next â†’
                 </span>
               )}
             </div>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import {
   DndContext,
   type DragEndEvent,
@@ -68,7 +68,7 @@ export function DispatchClient({
           // races the layout's already-authenticated render: if /auth/me hits
           // a transient flake (or the BFF can't refresh) the dispatcher gets
           // bounced off a perfectly valid session. The next server render goes
-          // through requireUser() which is the real chokepoint — let that
+          // through requireUser() which is the real chokepoint â€” let that
           // decide whether the session is dead.
           return;
         }
@@ -127,7 +127,7 @@ export function DispatchClient({
           void refreshBoard();
         });
       } catch {
-        // Best effort — UI continues on the snapshot.
+        // Best effort â€” UI continues on the snapshot.
       }
     }
 
@@ -173,7 +173,7 @@ export function DispatchClient({
     if (!dropTarget) return;
 
     if (dropTarget === QUEUE_DROPPABLE_ID) {
-      // Drop onto the queue → unassign.
+      // Drop onto the queue â†’ unassign.
       dispatch({ type: 'optimistic-unassign', jobId });
       try {
         const res = await fetch(`/api/dispatch/jobs/${jobId}/unassign`, {
@@ -248,7 +248,7 @@ export function DispatchClient({
     <div className="space-y-4" data-testid="dispatch-board">
       <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+          <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Live Dispatch
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
@@ -310,7 +310,7 @@ function ConnectionPill({ connected }: { connected: boolean }): JSX.Element {
       }`}
     >
       <span className={`h-2 w-2 rounded-full ${connected ? 'bg-ok' : 'bg-warn animate-pulse'}`} />
-      {connected ? 'live' : 'connecting…'}
+      {connected ? 'live' : 'connectingâ€¦'}
     </span>
   );
 }
@@ -512,7 +512,7 @@ const SERVICE_TYPE_COLOR: Record<JobServiceType, string> = {
   // from the LOCKED brand palette in tailwind.config.ts (orange / ok / warn /
   // danger / info / violet) so the dispatch board does not introduce a new
   // color system. Distinct serviceTypes that share a slot are grouped by
-  // operational category — heavy/recovery on warn (caution), light maintenance
+  // operational category â€” heavy/recovery on warn (caution), light maintenance
   // on info (informational), money/impound on violet (commercial).
   tow: 'bg-orange/20 text-orange border-orange/40',
   jump_start: 'bg-info/20 text-info border-info/40',

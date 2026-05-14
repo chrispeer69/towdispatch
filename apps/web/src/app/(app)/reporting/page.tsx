@@ -1,5 +1,5 @@
-/**
- * Reporting — Session 9 light tile.
+﻿/**
+ * Reporting â€” Session 9 light tile.
  *
  * Single page for now; full reporting module is a future session. The
  * tracking summary is the only tile here. We keep the page so the link
@@ -8,7 +8,7 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Reporting — US Tow DISPATCH' };
+export const metadata = { title: 'Reporting â€” US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface TrackingReport {
@@ -32,7 +32,7 @@ export default async function ReportingPage(): Promise<JSX.Element> {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+        <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
           Reporting
         </h1>
         <p className="mt-1 text-sm text-text-secondary">Customer tracking and SMS performance.</p>
@@ -56,14 +56,14 @@ export default async function ReportingPage(): Promise<JSX.Element> {
               label="Avg time-to-view"
               value={
                 report.avgTimeToFirstViewSeconds === null
-                  ? '—'
+                  ? 'â€”'
                   : formatSeconds(report.avgTimeToFirstViewSeconds)
               }
             />
             <Stat label="Ratings" value={report.ratingsCount} />
             <Stat
               label="Avg rating"
-              value={report.avgRating === null ? '—' : `${report.avgRating} ★`}
+              value={report.avgRating === null ? 'â€”' : `${report.avgRating} â˜…`}
             />
           </div>
         ) : (

@@ -1,8 +1,8 @@
-import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
+﻿import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import type { AgingResponse } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'A/R aging — US Tow DISPATCH' };
+export const metadata = { title: 'A/R aging â€” US Tow DISPATCH' };
 
 function emptyAging(): AgingResponse {
   return {
@@ -26,7 +26,7 @@ export default async function AgingPage(): Promise<JSX.Element> {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           A/R aging
         </h1>
         <p className="mt-1 text-sm text-text-secondary">As of {aging.asOf.slice(0, 10)}</p>
@@ -69,7 +69,7 @@ export default async function AgingPage(): Promise<JSX.Element> {
           <tbody className="divide-y divide-steel-border">
             {aging.rows.map((r) => (
               <tr key={`${r.accountId ?? r.customerId ?? 'unk'}`}>
-                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? '—'}</td>
+                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? 'â€”'}</td>
                 <td className="px-4 py-2 text-right font-mono">
                   {formatMoneyCents(r.currentDueCents)}
                 </td>

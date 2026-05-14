@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Centered card layout used by every unauthenticated auth screen
  * (signup, login, forgot, reset, verify pending, verify result).
  * The grid + radial backgrounds match the landing page so the brand carries
@@ -44,7 +44,7 @@ export function AuthShell({ title, subtitle, footer, children }: AuthShellProps)
             href="/"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text-secondary"
           >
-            ← Home
+            â† Home
           </Link>
         </div>
       </header>
@@ -52,7 +52,7 @@ export function AuthShell({ title, subtitle, footer, children }: AuthShellProps)
       <section className="relative z-10 flex flex-1 items-start justify-center px-4 pb-16 pt-8 md:items-center md:pt-0">
         <div className="w-full max-w-md">
           <div className="rounded-[14px] border border-steel-border bg-steel-mid/80 p-6 shadow-[0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur md:p-8">
-            <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight">
+            <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight">
               {title}
             </h1>
             {subtitle ? <p className="mt-2 text-sm text-text-secondary">{subtitle}</p> : null}

@@ -33,7 +33,7 @@ export default async function VehicleDetailPage({ params }: Props): Promise<JSX.
             ← Back
           </Link>
         </p>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           {vehicle.year ?? '—'} {vehicle.make ?? ''} {vehicle.model ?? ''}
         </h1>
         <p className="text-sm text-text-secondary">

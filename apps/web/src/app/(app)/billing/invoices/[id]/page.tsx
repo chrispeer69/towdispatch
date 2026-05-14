@@ -26,7 +26,7 @@ export default async function InvoiceDetailPage({
             {invoiceTypeLabel[invoice.invoiceType]}
           </p>
           <h1
-            className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight"
+            className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight"
             data-testid="invoice-title"
           >
             {invoice.invoiceNumber}

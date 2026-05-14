@@ -1,8 +1,8 @@
-import { type PaymentListResponse, fetchPayments, formatMoneyCents } from '@/lib/api/billing';
+﻿import { type PaymentListResponse, fetchPayments, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { paymentMethodLabel } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'Payments — US Tow DISPATCH' };
+export const metadata = { title: 'Payments â€” US Tow DISPATCH' };
 
 const EMPTY_PAYMENTS: PaymentListResponse = { data: [], total: 0 };
 
@@ -12,9 +12,7 @@ export default async function PaymentsPage(): Promise<JSX.Element> {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
-          Payments
-        </h1>
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">Payments</h1>
         <p className="mt-1 text-sm text-text-secondary">{list.total} total</p>
       </header>
       <div className="overflow-hidden rounded-lg border border-steel-border">
@@ -38,7 +36,7 @@ export default async function PaymentsPage(): Promise<JSX.Element> {
                 <td className="px-4 py-2">{p.receivedAt.slice(0, 10)}</td>
                 <td className="px-4 py-2">{paymentMethodLabel[p.paymentMethod]}</td>
                 <td className="px-4 py-2 font-mono text-text-secondary">
-                  {p.referenceNumber ?? '—'}
+                  {p.referenceNumber ?? 'â€”'}
                 </td>
                 <td className="px-4 py-2 text-text-secondary">{p.status}</td>
                 <td className="px-4 py-2 text-right font-mono">

@@ -1,4 +1,4 @@
-import { buttonVariants } from '@/components/ui/button';
+﻿import { buttonVariants } from '@/components/ui/button';
 import { apiServer, tryFetch } from '@/lib/api/client';
 import { getOptionalUser } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
@@ -6,7 +6,7 @@ import type { JobServiceType, JobStatus } from '@ustowdispatch/shared';
 import { ArrowUpRight, Clock, type LucideIcon, Plus, Truck, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
-export const metadata = { title: 'Dashboard — US Tow DISPATCH' };
+export const metadata = { title: 'Dashboard â€” US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface KpiCardProps {
@@ -101,7 +101,7 @@ function formatTime(iso: string): string {
 
 export default async function DashboardPage(): Promise<JSX.Element> {
   // Auth gating is enforced by (app)/layout.tsx. getOptionalUser is the
-  // non-throwing variant — a transient /auth/me flake here cannot redirect us
+  // non-throwing variant â€” a transient /auth/me flake here cannot redirect us
   // out from under a layout that already streamed an authenticated shell.
   const session = await getOptionalUser();
   const today = new Date().toLocaleDateString(undefined, {
@@ -127,18 +127,18 @@ export default async function DashboardPage(): Promise<JSX.Element> {
   const activeCallsValue = String(overview.activeCalls);
   const driversValue = String(overview.driversOnDuty);
   const revenueValue = currencyFormatter.format(overview.todaysRevenueCents / 100);
-  const etaValue = overview.avgEtaMinutes === null ? '— min' : `${overview.avgEtaMinutes} min`;
+  const etaValue = overview.avgEtaMinutes === null ? 'â€” min' : `${overview.avgEtaMinutes} min`;
 
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+          <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Operations Overview
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
             {today}
-            {session ? ` · ${session.tenant.name}` : ''}
+            {session ? ` Â· ${session.tenant.name}` : ''}
           </p>
         </div>
         {session && !session.user.emailVerifiedAt ? (
@@ -146,7 +146,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
             href="/verify-email-pending"
             className="rounded-[10px] border border-orange/30 bg-orange/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-orange-light hover:bg-orange/20"
           >
-            Confirm your email →
+            Confirm your email â†’
           </a>
         ) : null}
       </header>
@@ -155,19 +155,25 @@ export default async function DashboardPage(): Promise<JSX.Element> {
         <KpiCard
           label="Active Calls"
           value={activeCallsValue}
-          delta="—"
+          delta="â€”"
           icon={Truck}
           tone="orange"
         />
-        <KpiCard label="Drivers On Duty" value={driversValue} delta="—" icon={Users} tone="blue" />
+        <KpiCard
+          label="Drivers On Duty"
+          value={driversValue}
+          delta="â€”"
+          icon={Users}
+          tone="blue"
+        />
         <KpiCard
           label="Today's Revenue"
           value={revenueValue}
-          delta="—"
+          delta="â€”"
           icon={Wallet}
           tone="green"
         />
-        <KpiCard label="Avg ETA" value={etaValue} delta="—" icon={Clock} tone="violet" />
+        <KpiCard label="Avg ETA" value={etaValue} delta="â€”" icon={Clock} tone="violet" />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
@@ -186,7 +192,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
                 Your first job will show here.
               </p>
               <p className="mt-1 max-w-md text-sm text-text-secondary">
-                Welcome aboard — once dispatch starts assigning calls, this feed lights up in real
+                Welcome aboard â€” once dispatch starts assigning calls, this feed lights up in real
                 time.
               </p>
             </div>
