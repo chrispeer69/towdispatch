@@ -74,22 +74,38 @@ async function seedTenant(
   }
   const vehicleId = (veh.json() as { id: string }).id;
 
+  // Job creation goes through /jobs/intake (the canonical Phase 0 endpoint).
+  // It expects the customer + vehicle inline; we already created both above
+  // so the intake will dedupe against them by phone/VIN.
   const job = await app.inject({
     method: 'POST',
-    url: '/jobs',
+    url: '/jobs/intake',
     headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
     payload: {
-      customerId,
-      vehicleId,
+      customer: {
+        name: `${suffix} Cust`,
+        phone: `+1310555${Math.floor(Math.random() * 9000 + 1000)}`,
+        email: `cust-${suffix}@spec.test`,
+      },
+      vehicle: {
+        vin: `1HGCM82633A${Math.floor(Math.random() * 900000 + 100000)}`,
+        plate: 'RLS1234',
+        plateState: 'OH',
+        make: 'Honda',
+        model: 'Civic',
+        year: 2018,
+        vehicleClass: 'light_duty',
+      },
       serviceType: 'tow',
-      pickupAddress: '123 Spec St',
+      pickup: { address: '100 Spec St, Columbus OH', lat: 39.9612, lng: -82.9988 },
+      dropoff: { address: '200 Spec St, Columbus OH', lat: 39.9655, lng: -82.9852 },
       authorizedBy: 'customer',
     },
   });
   if (job.statusCode !== 201) {
     throw new Error(`seed job failed: ${job.statusCode} ${job.body}`);
   }
-  const jobId = (job.json() as { id: string }).id;
+  const jobId = (job.json() as { job: { id: string } }).job.id;
 
   return { session, customerId, vehicleId, jobId };
 }
