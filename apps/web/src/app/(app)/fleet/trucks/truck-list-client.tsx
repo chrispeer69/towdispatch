@@ -26,9 +26,17 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
       if (q) params.set('q', q);
       if (status) params.set('status', status);
       params.set('perPage', '50');
+      // Guard against the BFF returning a 4xx/5xx error body. The /api/fleet/*
+      // BFF returns `{ code, message, errors }` on failure — assigning that
+      // shape to `data` would make the next render crash on `data.data.length`
+      // and trip the error boundary with "Something went wrong". Mirrors the
+      // CustomerListClient pattern.
       void fetch(`/api/fleet/trucks?${params.toString()}`)
-        .then((r) => r.json())
-        .then((j: PaginatedTrucks) => setData(j))
+        .then(async (r) => {
+          if (!r.ok) return;
+          const j = (await r.json()) as PaginatedTrucks;
+          setData(j);
+        })
         .catch(() => {});
     }, 300);
     return () => {
