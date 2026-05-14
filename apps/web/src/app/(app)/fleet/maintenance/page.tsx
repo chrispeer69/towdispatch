@@ -1,7 +1,9 @@
+import { tryFetch } from '@/lib/api/client';
 import { fetchDueMaintenance } from '@/lib/api/fleet';
 
 export default async function MaintenancePage(): Promise<JSX.Element> {
-  const due = await fetchDueMaintenance().catch(() => []);
+  const result = await tryFetch(() => fetchDueMaintenance());
+  const due = result.data ?? [];
   return (
     <div className="space-y-4">
       <h2 className="font-condensed text-xl font-extrabold uppercase tracking-tight">Due now</h2>
