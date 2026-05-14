@@ -1,7 +1,7 @@
 import { fetchRecurringSchedules, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 
-export const metadata = { title: 'Recurring billing — TowCommand' };
+export const metadata = { title: 'Recurring billing — US Tow DISPATCH' };
 
 export default async function RecurringPage(): Promise<JSX.Element> {
   const result = await tryFetch(() => fetchRecurringSchedules());

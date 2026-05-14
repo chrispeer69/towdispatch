@@ -1,5 +1,5 @@
 {
-  "name": "@towcommand/api",
+  "name": "@ustowdispatch/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json && node scripts/copy-assets.mjs",
     "start": "node dist/apps/api/src/main.js",
     "start:prod": "node dist/apps/api/src/main.js",
-    "migrate:prod": "pnpm --filter @towcommand/db run migrate",
+    "migrate:prod": "pnpm --filter @ustowdispatch/db run migrate",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -26,8 +26,8 @@
     "@nestjs/throttler": "6.2.1",
     "@sendgrid/mail": "8.1.4",
     "@socket.io/redis-adapter": "8.3.0",
-    "@towcommand/db": "workspace:*",
-    "@towcommand/shared": "workspace:*",
+    "@ustowdispatch/db": "workspace:*",
+    "@ustowdispatch/shared": "workspace:*",
     "argon2": "0.41.1",
     "csv-parse": "5.5.6",
     "drizzle-orm": "0.36.4",

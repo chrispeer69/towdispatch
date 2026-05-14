@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchCustomers } from '@/lib/api/resources';
-import type { CustomerType, PaginatedCustomers } from '@towcommand/shared';
+import type { CustomerType, PaginatedCustomers } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
-export const metadata = { title: 'Customers — TowCommand' };
+export const metadata = { title: 'Customers — US Tow DISPATCH' };
 
 interface SearchParams {
   q?: string;

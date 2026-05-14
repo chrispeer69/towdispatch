@@ -312,7 +312,7 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
 }
 
 // CLI: writes a sample bundle to disk for the founder's manual smoke test.
-//   pnpm --filter @towcommand/api exec tsx scripts/synth-towbook-bundle.ts
+//   pnpm --filter @ustowdispatch/api exec tsx scripts/synth-towbook-bundle.ts
 if (import.meta.url === `file://${process.argv[1]}`) {
   const bundle = buildSyntheticBundle({
     customers: 100,

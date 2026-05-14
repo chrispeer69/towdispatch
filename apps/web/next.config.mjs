@@ -5,7 +5,7 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
-  transpilePackages: ['@towcommand/shared', '@towcommand/db', '@towcommand/ui'],
+  transpilePackages: ['@ustowdispatch/shared', '@ustowdispatch/db', '@ustowdispatch/ui'],
   async headers() {
     return [
       {

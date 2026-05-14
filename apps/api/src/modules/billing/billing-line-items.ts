@@ -12,8 +12,8 @@
  * Money is integer cents in. Quantity is a numeric string out (Postgres
  * NUMERIC). We don't re-derive prices; the rate engine already rounded.
  */
-import type { JobServiceType, RateLineItem, RateQuote } from '@towcommand/shared';
-import type { InvoiceLineItemType } from '@towcommand/shared';
+import type { JobServiceType, RateLineItem, RateQuote } from '@ustowdispatch/shared';
+import type { InvoiceLineItemType } from '@ustowdispatch/shared';
 
 export interface DraftInvoiceLineItem {
   lineNumber: number;

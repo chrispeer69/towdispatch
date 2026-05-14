@@ -13,7 +13,7 @@
 import type { Server as HttpServer } from 'node:http';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import { DISPATCH_EVENTS } from '@towcommand/shared';
+import { DISPATCH_EVENTS } from '@ustowdispatch/shared';
 import { Pool } from 'pg';
 import { type Socket, io as ioClient } from 'socket.io-client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

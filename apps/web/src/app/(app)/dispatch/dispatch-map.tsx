@@ -13,7 +13,7 @@
  * bundle slim — the dispatch board already runs hot, so a 200KB delta is
  * money.
  */
-import type { DriverRosterRow, JobDto } from '@towcommand/shared';
+import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import { AlertTriangle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 

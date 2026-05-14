@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { type DocumentDto, documentTypeValues } from '@towcommand/shared';
+import { type DocumentDto, documentTypeValues } from '@ustowdispatch/shared';
 import { type ChangeEvent, useState } from 'react';
 
 interface Props {

@@ -1,4 +1,4 @@
-# TowCommand Pro — Architecture
+# US Tow DISPATCH — Architecture
 
 This document records the architectural decisions made in the foundational scaffold and the reasoning behind them. Read this before adding to the codebase. **Treat the invariants as law.**
 
@@ -6,7 +6,7 @@ This document records the architectural decisions made in the foundational scaff
 
 ## 1. North Star
 
-TowCommand Pro is a multi-tenant SaaS designed to serve **10,000+ towing companies** and process **100M+ dispatched jobs per year**. Every decision in this codebase is made with that scale in mind. We optimize for:
+US Tow DISPATCH is a multi-tenant SaaS designed to serve **10,000+ towing companies** and process **100M+ dispatched jobs per year**. Every decision in this codebase is made with that scale in mind. We optimize for:
 
 1. **Tenant isolation** — a bug must never expose one customer's data to another.
 2. **Auditability** — every write is reconstructable, forever.
@@ -122,9 +122,9 @@ Generated in the API layer with a UUIDv7 library. UUIDv7 puts the timestamp in t
 Path aliases are enforced via `tsconfig.base.json`:
 
 ```
-@towcommand/db      -> packages/db/src/index.ts
-@towcommand/shared  -> packages/shared/src/index.ts
-@towcommand/ui      -> packages/ui/src/index.ts
+@ustowdispatch/db      -> packages/db/src/index.ts
+@ustowdispatch/shared  -> packages/shared/src/index.ts
+@ustowdispatch/ui      -> packages/ui/src/index.ts
 ```
 
 `apps/web` does not import from `apps/api` or vice versa. `packages/db` is consumed only by `apps/api`. `packages/shared` is consumed by both apps.

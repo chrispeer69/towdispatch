@@ -13,7 +13,7 @@ import type {
   PaginatedVehicles,
   VehicleDto,
   VehicleWithCustomersDto,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { apiServer } from './client';
 
 export async function fetchCustomers(

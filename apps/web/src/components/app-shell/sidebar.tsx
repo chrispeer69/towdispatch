@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { AuthTenantDto, AuthUserDto } from '@towcommand/shared';
+import type { AuthTenantDto, AuthUserDto } from '@ustowdispatch/shared';
 import {
   Building2,
   Calculator,
@@ -158,7 +158,7 @@ const SECTIONS: NavSection[] = [
     // ECOSYSTEM — Blue Collar AI sibling products surfaced as branded entry
     // points. These pages are placeholders until each product ships its own
     // integration; today they explain what the product is and why it sits
-    // next to TowCommand.
+    // next to US Tow DISPATCH.
     label: 'Ecosystem',
     items: [
       {

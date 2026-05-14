@@ -2,7 +2,7 @@
 
 Date: 2026-05-12
 Branch: `deploy/railway-on-master` (merged to `master`)
-Live URLs: `https://api.towcommand.cloud` · `https://app.towcommand.cloud`
+Live URLs: `https://api.ustowdispatch.cloud` · `https://app.ustowdispatch.cloud`
 
 ## What we set out to do
 
@@ -13,7 +13,7 @@ Live URLs: `https://api.towcommand.cloud` · `https://app.towcommand.cloud`
    deploy.
 3. Founder login was getting stuck at `mfa_setup_required` — the front-end had
    no place to land that token.
-4. `app.towcommand.cloud` was returning 502 even though the platform URL served
+4. `app.ustowdispatch.cloud` was returning 502 even though the platform URL served
    200.
 
 Goal: backend + web both healthy on Railway, full MFA enrollment + login flow
@@ -33,7 +33,7 @@ Node ESM in production.
   `.js` extensions on relative imports (TypeScript with
   `module=ESNext + moduleResolution=Bundler` doesn't rewrite them, Node ESM
   requires them).
-- Kept `@towcommand/*` path aliases pointing at source in `tsconfig.base.json`
+- Kept `@ustowdispatch/*` path aliases pointing at source in `tsconfig.base.json`
   (and added equivalents to `apps/web/tsconfig.json`) so dev-mode (Next dev,
   vite-node, tsc typecheck) still resolves workspace deps from source without a
   pre-build. Bundler chain honors the aliases; runtime Node falls through to
@@ -143,14 +143,14 @@ mfa/challenge (recovery) → 200 authenticated
 
 ### 7. Custom domain (dashboard)
 
-`app.towcommand.cloud` was returning 502 with `X-Railway-Fallback: true`
+`app.ustowdispatch.cloud` was returning 502 with `X-Railway-Fallback: true`
 because its target port in the Railway dashboard pointed at port `3000` from
 the previous `next start -p 3000` setup — our new `start:prod` honors
 Railway's `PORT` env, which is `8080`. Setting the domain's target port to
 `8080` in Railway → web → Settings → Networking fixed it. Live verification:
 
 ```
-$ curl -sI https://app.towcommand.cloud/
+$ curl -sI https://app.ustowdispatch.cloud/
 HTTP/1.1 200 OK
 Server: railway-edge
 ```
@@ -216,8 +216,8 @@ scripts/railway-start.mjs                                 new
 
 ## Acceptance criteria — final state
 
-- [x] Backend live at `https://api.towcommand.cloud/health` → 200
-- [x] Web live at `https://app.towcommand.cloud/login` → 200
+- [x] Backend live at `https://api.ustowdispatch.cloud/health` → 200
+- [x] Web live at `https://app.ustowdispatch.cloud/login` → 200
 - [x] Migrations run on every deploy (verified in deploy logs:
       `0001` through `0020` plus all drizzle migrations applied; final
       `[migrate] done`)

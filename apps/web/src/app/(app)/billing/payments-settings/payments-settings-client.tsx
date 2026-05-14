@@ -1,6 +1,6 @@
 'use client';
 
-import type { StripeConnectStatusDto } from '@towcommand/shared';
+import type { StripeConnectStatusDto } from '@ustowdispatch/shared';
 import { type JSX, useState, useTransition } from 'react';
 
 interface Props {

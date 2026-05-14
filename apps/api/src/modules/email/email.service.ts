@@ -18,7 +18,7 @@ import { ConfigService } from '../../config/config.service.js';
 import { TemplateRenderer } from './template-renderer.service.js';
 
 const BRAND = {
-  productName: 'TowCommand Pro',
+  productName: 'US Tow DISPATCH',
   orange: '#F05A1A',
   steel: '#1A1E2A',
 };

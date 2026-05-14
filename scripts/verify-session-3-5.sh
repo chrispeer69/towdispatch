@@ -100,15 +100,15 @@ FOC2=$(curl -sS -X POST "$API/customers/find-or-create-by-contact" \
 echo "$FOC2" | grep -q '"created":false' && echo "FOC_IDEMPOTENT=PASS" || echo "FOC_IDEMPOTENT=FAIL"
 
 # ---------- ecosystem interface file present ----------
-[ -f /c/dev/towcommand/apps/api/src/integrations/ecosystem/ecosystem-provider.interface.ts ] \
+[ -f /c/dev/ustowdispatch/apps/api/src/integrations/ecosystem/ecosystem-provider.interface.ts ] \
   && echo "ECOSYSTEM_FILE=PASS" || echo "ECOSYSTEM_FILE=FAIL"
-grep -q "EcosystemPartner" /c/dev/towcommand/apps/api/src/integrations/ecosystem/ecosystem-provider.interface.ts \
+grep -q "EcosystemPartner" /c/dev/ustowdispatch/apps/api/src/integrations/ecosystem/ecosystem-provider.interface.ts \
   && echo "ECOSYSTEM_IFACE=PASS" || echo "ECOSYSTEM_IFACE=FAIL"
-grep -q "CONVINI" /c/dev/towcommand/apps/api/src/integrations/ecosystem/ecosystem-provider.interface.ts \
+grep -q "CONVINI" /c/dev/ustowdispatch/apps/api/src/integrations/ecosystem/ecosystem-provider.interface.ts \
   && echo "ECOSYSTEM_COMMENT=PASS" || echo "ECOSYSTEM_COMMENT=FAIL"
 
 # ---------- no UI references motor_club_member as a customer type ----------
-if grep -rn "motor_club_member" /c/dev/towcommand/apps/web/src 2>/dev/null; then
+if grep -rn "motor_club_member" /c/dev/ustowdispatch/apps/web/src 2>/dev/null; then
   echo "UI_NO_MCM=FAIL"
 else
   echo "UI_NO_MCM=PASS"

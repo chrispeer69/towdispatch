@@ -25,8 +25,8 @@
  * is a follow-up if the off-by-a-few-hours feel becomes a problem.
  */
 import { Injectable } from '@nestjs/common';
-import { customers, driverShifts, invoices, jobs } from '@towcommand/db';
-import type { JobServiceType, JobStatus } from '@towcommand/shared';
+import { customers, driverShifts, invoices, jobs } from '@ustowdispatch/db';
+import type { JobServiceType, JobStatus } from '@ustowdispatch/shared';
 import { and, count, desc, eq, gte, inArray, isNull, sql, sum } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

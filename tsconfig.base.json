@@ -33,12 +33,12 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@towcommand/db": ["packages/db/src/index.ts"],
-      "@towcommand/db/*": ["packages/db/src/*"],
-      "@towcommand/shared": ["packages/shared/src/index.ts"],
-      "@towcommand/shared/*": ["packages/shared/src/*"],
-      "@towcommand/ui": ["packages/ui/src/index.ts"],
-      "@towcommand/ui/*": ["packages/ui/src/*"]
+      "@ustowdispatch/db": ["packages/db/src/index.ts"],
+      "@ustowdispatch/db/*": ["packages/db/src/*"],
+      "@ustowdispatch/shared": ["packages/shared/src/index.ts"],
+      "@ustowdispatch/shared/*": ["packages/shared/src/*"],
+      "@ustowdispatch/ui": ["packages/ui/src/index.ts"],
+      "@ustowdispatch/ui/*": ["packages/ui/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", ".next", "coverage"]

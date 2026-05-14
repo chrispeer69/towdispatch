@@ -1,9 +1,9 @@
 # =====================================================================
-# TowCommand - Railway deploy script (idempotent, Railway CLI v4 syntax).
+# US Tow DISPATCH - Railway deploy script (idempotent, Railway CLI v4 syntax).
 #
 # Prerequisites:
 #   1. railway login         (one time, interactive, opens a browser)
-#   2. cd C:\dev\towcommand
+#   2. cd C:\dev\ustowdispatch
 #   3. .\scripts\railway\deploy.ps1
 #
 # Re-running is safe: every step skips work that's already done.
@@ -53,7 +53,7 @@ Require-Cmd git
 $repoRoot = (git rev-parse --show-toplevel)
 Set-Location $repoRoot
 
-$projectName = 'towcommand-prod'
+$projectName = 'ustowdispatch-prod'
 $envName     = 'production'
 $backend     = 'backend'
 $web         = 'web'
@@ -225,7 +225,7 @@ Set-EnvFile -Service $web     -Path 'scripts/railway/web.env'
 
 # ---------------------------------------------------------------------
 # 6. Generate Railway-provided domains (fallback URLs).
-#    Custom domains (api/app.towcommand.cloud) require dashboard setup
+#    Custom domains (api/app.ustowdispatch.cloud) require dashboard setup
 #    AND a paid plan, so we generate the .up.railway.app URLs the CLI
 #    can issue without those gates - they work the instant GitHub
 #    source linking is done in the dashboard.
@@ -243,16 +243,16 @@ $finalStatus | Out-File scripts/railway/.deploy-status.json -Encoding utf8
 
 Write-Host ""
 Write-Host "================ NEXT STEPS (one-time, dashboard) =================" -ForegroundColor Green
-Write-Host "1. Open https://railway.com/dashboard -> towcommand-prod" -ForegroundColor Green
+Write-Host "1. Open https://railway.com/dashboard -> ustowdispatch-prod" -ForegroundColor Green
 Write-Host "2. For BOTH 'backend' and 'web' services:" -ForegroundColor Green
 Write-Host "     Settings -> Source -> Connect Repo" -ForegroundColor Green
-Write-Host "     Repo: chrispeer69/towcommand     Branch: master" -ForegroundColor Green
+Write-Host "     Repo: chrispeer69/ustowdispatch     Branch: master" -ForegroundColor Green
 Write-Host "     (Railway will auto-detect apps/{api,web}/railway.toml)" -ForegroundColor Green
 Write-Host "3. For custom domains (paid plan required):" -ForegroundColor Green
 Write-Host "     backend -> Settings -> Networking -> Custom Domain ->" -ForegroundColor Green
-Write-Host "         api.towcommand.cloud" -ForegroundColor Green
+Write-Host "         api.ustowdispatch.cloud" -ForegroundColor Green
 Write-Host "     web -> Settings -> Networking -> Custom Domain ->" -ForegroundColor Green
-Write-Host "         app.towcommand.cloud" -ForegroundColor Green
+Write-Host "         app.ustowdispatch.cloud" -ForegroundColor Green
 Write-Host "===================================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Once GitHub is linked the first build runs immediately." -ForegroundColor Green

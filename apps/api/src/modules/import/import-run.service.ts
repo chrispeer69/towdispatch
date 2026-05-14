@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
  * with ROLLBACK and marks the row 'cancelled'.
  */
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import type { Pool } from 'pg';
 import { APP_POOL } from '../../database/database.tokens.js';
 import { BundleService } from './bundle.service.js';

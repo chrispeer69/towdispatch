@@ -1,29 +1,29 @@
 # =====================================================================
-# Local development stack for TowCommand Pro.
+# Local development stack for US Tow DISPATCH.
 # Postgres uses postgis/postgis:16-3.4 because PostGIS is required for
 # service-zone geometry, driver-position geography, and route-matching.
 # Restart policy is unless-stopped so a Docker Desktop restart brings
 # everything back without manual intervention.
 # =====================================================================
 
-name: towcommand
+name: ustowdispatch
 
 services:
   postgres:
     image: postgis/postgis:16-3.4
-    container_name: towcommand-postgres
+    container_name: ustowdispatch-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-towcommand}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-towcommand_dev_pw}
-      POSTGRES_DB: ${POSTGRES_DB:-towcommand}
+      POSTGRES_USER: ${POSTGRES_USER:-ustowdispatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ustowdispatch_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-ustowdispatch}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - towcommand
+      - ustowdispatch
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -33,7 +33,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: towcommand-redis
+    container_name: ustowdispatch-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
@@ -41,7 +41,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - towcommand
+      - ustowdispatch
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -50,13 +50,13 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: towcommand-mailhog
+    container_name: ustowdispatch-mailhog
     restart: unless-stopped
     ports:
       - "1025:1025"
       - "8025:8025"
     networks:
-      - towcommand
+      - ustowdispatch
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8025/ || exit 1"]
       interval: 10s
@@ -65,11 +65,11 @@ services:
 
 volumes:
   postgres-data:
-    name: towcommand-postgres-data
+    name: ustowdispatch-postgres-data
   redis-data:
-    name: towcommand-redis-data
+    name: ustowdispatch-redis-data
 
 networks:
-  towcommand:
-    name: towcommand
+  ustowdispatch:
+    name: ustowdispatch
     driver: bridge

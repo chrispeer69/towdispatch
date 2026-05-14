@@ -7,14 +7,14 @@
  * ops-tooling concern and runs through the admin pool.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { users, uuidv7 } from '@towcommand/db';
+import { users, uuidv7 } from '@ustowdispatch/db';
 import {
   type CreateUserPayload,
   ERROR_CODES,
   type Role,
   type UpdateUserPayload,
   type UserDto,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { PasswordService } from '../auth/password.service.js';

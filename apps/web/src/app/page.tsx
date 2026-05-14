@@ -19,7 +19,7 @@ export default function LandingPage(): JSX.Element {
             <span className="font-condensed text-lg font-extrabold text-white">T</span>
           </div>
           <span className="font-condensed text-lg font-extrabold uppercase tracking-wide">
-            Tow<span className="text-orange">Command</span> Pro
+            US <span className="text-orange">Tow</span> Dispatch
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -42,13 +42,15 @@ export default function LandingPage(): JSX.Element {
         <Wordmark className="animate-fade-in-up" />
 
         <p className="mt-6 max-w-3xl font-condensed text-2xl font-bold text-text-primary md:text-3xl animate-fade-in-up">
-          The operating system the towing industry deserves.
+          The operating system owned by you, built by you.
         </p>
 
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary md:text-lg animate-fade-in-up">
-          Built by operators, for operators. Free for US Tow Alliance members at{' '}
-          <span className="font-semibold text-text-primary">cost + 20%</span>. Every integration —
-          QuickBooks, Stripe, Geotab, Agero — is a first-class citizen. Use what you want.
+          Owned and built by the operators, for the operators. The AI-powered operating system for
+          every US Tow Alliance member. Every integration is a 1st-class member, unlike the legacy
+          systems of the present and past. Built on today's tech stack, designed for the future that
+          is in front of us. Membership provides pricing benefits unmatched by today's legacy
+          software.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:gap-4 animate-fade-in-up">

@@ -2,14 +2,14 @@
  * 404 — not found. Routes that don't exist OR resources you can't see
  * (cross-tenant access) land here.
  *
- * Branded shell so the user knows they hit a real TowCommand page and not
+ * Branded shell so the user knows they hit a real US Tow DISPATCH page and not
  * an upstream gateway misroute.
  */
 import { Compass, Home, Search } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Not found — TowCommand',
+  title: 'Not found — US Tow DISPATCH',
 };
 
 export default function NotFound(): JSX.Element {
@@ -25,7 +25,8 @@ export default function NotFound(): JSX.Element {
         <h1 className="mb-2 text-2xl font-semibold text-text-primary">Page not found</h1>
         <p className="mb-6 max-w-md text-sm text-text-secondary">
           The page you tried to open doesn't exist, or you don't have access. If you got here from a
-          link inside TowCommand, the record may have been deleted or moved to a different tenant.
+          link inside US Tow DISPATCH, the record may have been deleted or moved to a different
+          tenant.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link

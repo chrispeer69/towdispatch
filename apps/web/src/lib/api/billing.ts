@@ -10,7 +10,7 @@ import type {
   InvoiceWithDetailsDto,
   PaymentDto,
   RecurringScheduleDto,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { apiServer } from './client';
 
 export interface InvoiceListResponse {

@@ -1,6 +1,6 @@
 import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers, fetchDvirs, fetchTrucks } from '@/lib/api/fleet';
-import type { PaginatedDrivers, PaginatedTrucks } from '@towcommand/shared';
+import type { PaginatedDrivers, PaginatedTrucks } from '@ustowdispatch/shared';
 import { DvirSubmitClient } from './dvir-submit-client';
 
 const EMPTY_TRUCKS: PaginatedTrucks = { data: [], total: 0, page: 1, perPage: 200 };

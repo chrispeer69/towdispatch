@@ -3,14 +3,14 @@ import Link from 'next/link';
 import { SignupForm } from './signup-form';
 
 export const metadata = {
-  title: 'Create your TowCommand account',
+  title: 'Create your US Tow DISPATCH account',
 };
 
 export default function SignupPage(): JSX.Element {
   return (
     <AuthShell
       title="Bring your towing business online."
-      subtitle="Create your TowCommand workspace in under two minutes."
+      subtitle="Create your US Tow DISPATCH workspace in under two minutes."
       footer={
         <>
           Already have an account?{' '}

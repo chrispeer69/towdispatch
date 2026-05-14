@@ -36,7 +36,7 @@ import {
   trucks,
   uuidv7,
   vehicles,
-} from '@towcommand/db';
+} from '@ustowdispatch/db';
 import {
   type CreateJobIntakePayload,
   DISPATCH_EVENTS,
@@ -49,7 +49,7 @@ import {
   type PaginatedJobs,
   type QuotePreviewPayload,
   type RateQuote,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { CustomersService } from '../customers/customers.service.js';

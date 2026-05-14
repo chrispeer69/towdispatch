@@ -3,7 +3,7 @@
  *
  * QuickBooks (and most accounting back-ends) treats customers as global
  * within the company file, so blindly creating a new customer for every
- * TowCommand customer would lead to duplicates the operator has to merge
+ * US Tow DISPATCH customer would lead to duplicates the operator has to merge
  * by hand. The rule is intentionally narrow:
  *
  *   1. Exact (normalized) email match — strongest signal.

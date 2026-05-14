@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { PaginatedAccounts } from '@towcommand/shared';
+import type { PaginatedAccounts } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 

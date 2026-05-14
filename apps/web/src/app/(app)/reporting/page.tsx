@@ -8,7 +8,7 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Reporting — TowCommand' };
+export const metadata = { title: 'Reporting — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface TrackingReport {

@@ -13,7 +13,7 @@ final class AppContainer: ObservableObject {
     let outbox: Outbox
     let photoArchive: PhotoArchive
     let reachability: Reachability
-    let api: TowCommandAPI
+    let api: USTowDispatchAPI
     let auth: AuthService
     let jobsRepository: JobsRepository
     let dvirRepository: DVIRRepository
@@ -58,7 +58,7 @@ final class AppContainer: ObservableObject {
         // until auth exists, then injecting auth as the token provider.
         let pendingClient = PendingTokenProvider()
         let client = URLSessionAPIClient(baseURL: config.apiBaseURL, tokenProvider: pendingClient)
-        let api = LiveTowCommandAPI(client: client)
+        let api = LiveUSTowDispatchAPI(client: client)
         self.api = api
 
         let auth = AuthService(api: api, store: tokenStore)

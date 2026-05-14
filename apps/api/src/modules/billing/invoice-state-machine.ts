@@ -2,7 +2,7 @@
  * Invoice status state machine. Mirrors job-state-machine.ts (Session 4)
  * for shape and feel — pure functions, no DB or framework dependencies.
  */
-import type { InvoiceStatus } from '@towcommand/shared';
+import type { InvoiceStatus } from '@ustowdispatch/shared';
 
 export const INVOICE_TERMINAL: ReadonlySet<InvoiceStatus> = new Set(['paid', 'void', 'refunded']);
 

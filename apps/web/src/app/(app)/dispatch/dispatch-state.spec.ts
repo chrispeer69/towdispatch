@@ -1,4 +1,4 @@
-import type { JobDto } from '@towcommand/shared';
+import type { JobDto } from '@ustowdispatch/shared';
 import { describe, expect, it } from 'vitest';
 import { dispatchReducer, initialState } from './dispatch-state';
 

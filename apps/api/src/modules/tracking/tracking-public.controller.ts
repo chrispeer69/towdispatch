@@ -24,7 +24,7 @@ import {
   sendTrackingMessageSchema,
   submitJobRatingSchema,
   trackingTokenSchema,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Public } from '../../common/decorators/public.decorator.js';

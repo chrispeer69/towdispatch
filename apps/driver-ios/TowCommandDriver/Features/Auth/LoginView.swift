@@ -37,7 +37,7 @@ final class LoginViewModel: ObservableObject {
         do {
             let ok = try await ctx.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Sign in to TowCommand"
+                localizedReason: "Sign in to US Tow DISPATCH"
             )
             if ok, let container, await container.auth.currentSession() != nil {
                 container.route = .signedIn
@@ -57,7 +57,7 @@ struct LoginView: View {
             TCColor.surface.ignoresSafeArea()
             VStack(spacing: 18) {
                 Spacer()
-                Text("TowCommand").font(TCFont.title(36)).foregroundStyle(.white)
+                Text("US Tow DISPATCH").font(TCFont.title(36)).foregroundStyle(.white)
                 Text("Driver").font(TCFont.headline(20)).foregroundStyle(TCColor.primary)
                 Spacer().frame(height: 30)
 
