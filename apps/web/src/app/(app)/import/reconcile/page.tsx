@@ -1,6 +1,6 @@
 import { getOptionalUser } from '@/lib/auth/session';
+import { tracedRedirect } from '@/lib/debug/redirect-trace';
 import { ROLES } from '@towcommand/shared';
-import { redirect } from 'next/navigation';
 import { ReconcileClient } from './reconcile-client';
 
 export const metadata = { title: 'Reconcile — TowCommand' };
@@ -11,7 +11,7 @@ export default async function ReconcilePage(): Promise<JSX.Element> {
   const me = await getOptionalUser();
   if (!me) return <div className="space-y-6" />;
   if (me.user.role !== ROLES.OWNER && me.user.role !== ROLES.ADMIN) {
-    redirect('/dashboard');
+    tracedRedirect('/dashboard', 'reconcile-page:role-not-admin');
   }
   return (
     <div className="space-y-6">

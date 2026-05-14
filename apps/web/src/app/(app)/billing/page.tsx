@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { tracedRedirect } from '@/lib/debug/redirect-trace';
 
 export default function BillingIndexPage(): never {
-  redirect('/billing/invoices');
+  tracedRedirect('/billing/invoices', 'billing-index-page:hardcoded');
 }

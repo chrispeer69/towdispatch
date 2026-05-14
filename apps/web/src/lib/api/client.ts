@@ -35,6 +35,7 @@ import {
   readRefreshToken,
   setSessionCookies,
 } from '../auth/cookies';
+import { getRequestId } from '../debug/redirect-trace';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -82,11 +83,21 @@ export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiEr
  * /api/socket/token's response payload) reads NEXT_PUBLIC_API_URL on its
  * own and is unaffected.
  */
-const apiBase = (): string =>
-  process.env.API_INTERNAL_URL ??
-  process.env.API_PUBLIC_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  'http://localhost:3001';
+const apiBase = (): string => {
+  const internal = process.env.API_INTERNAL_URL;
+  const publicUrl = process.env.API_PUBLIC_URL;
+  const nextPublic = process.env.NEXT_PUBLIC_API_URL;
+  const resolved = internal ?? publicUrl ?? nextPublic ?? 'http://localhost:3001';
+  // [FLEET_DEBUG_V2] — temporary. Logs what apiBase resolved to + which env
+  // var was actually set in this process. Confirms whether the PR #10 env
+  // var is being read at all in Railway's prod web container.
+  const rid = getRequestId();
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG_V2 rid=${rid}] apiBase resolved=${resolved} sources={API_INTERNAL_URL=${internal ?? 'unset'}, API_PUBLIC_URL=${publicUrl ?? 'unset'}, NEXT_PUBLIC_API_URL=${nextPublic ?? 'unset'}}`,
+  );
+  return resolved;
+};
 
 interface RequestOpts<TBody> {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -121,7 +132,25 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
   }
-  const res = await fetch(url, init);
+  // [FLEET_DEBUG_V2] — log every server-side fetch with status, so we can
+  // diff working routes against /fleet in production logs.
+  const rid = getRequestId();
+  // eslint-disable-next-line no-console
+  console.error(
+    `[FLEET_DEBUG_V2 rid=${rid}] apiServerSafe → ${init.method} ${url} hasAuth=${!!accessToken} tokenPrefix=${accessToken ? accessToken.slice(0, 12) : 'none'}`,
+  );
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[FLEET_DEBUG_V2 rid=${rid}] apiServerSafe NETWORK-FAIL ${init.method} ${url} err=${(err as Error)?.message ?? '?'}`,
+    );
+    throw err;
+  }
+  // eslint-disable-next-line no-console
+  console.error(`[FLEET_DEBUG_V2 rid=${rid}] apiServerSafe ← ${res.status} ${init.method} ${url}`);
   return parseResponseSafe<TResponse>(res);
 }
 
