@@ -66,6 +66,15 @@ export async function bootApp(): Promise<NestFastifyApplication> {
   // the raw body for Stripe webhook signature verification. Must run after
   // init() so Nest's default has been registered first.
   registerRawBodyJsonParser(app.getHttpAdapter().getInstance());
+  // Mirror main.ts: register the application/zip parser used by the Towbook
+  // import endpoint. Without this, Fastify rejects the body with 415 and
+  // every import test silently fails as a 5xx.
+  const fi = app.getHttpAdapter().getInstance();
+  fi.addContentTypeParser(
+    'application/zip',
+    { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 * 1024 },
+    (_req, body, done) => done(null, body),
+  );
   await app.getHttpAdapter().getInstance().ready();
   return app;
 }
