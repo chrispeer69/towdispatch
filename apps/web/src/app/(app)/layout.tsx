@@ -2,7 +2,6 @@ import { SessionProvider } from '@/components/app-shell/session-provider';
 import { AppSidebar } from '@/components/app-shell/sidebar';
 import { AppTopbar } from '@/components/app-shell/topbar';
 import { requireUser } from '@/lib/auth/session';
-import type { MeResponse } from '@towcommand/shared';
 /**
  * Authenticated app shell.
  *
@@ -15,7 +14,6 @@ import type { MeResponse } from '@towcommand/shared';
  *   - 60px topbar with page title (slot), search, icons, notification dot
  *   - main content slot scrolls independently
  */
-import { cookies, headers } from 'next/headers';
 import type { ReactNode } from 'react';
 
 export default async function AppLayout({
@@ -23,35 +21,7 @@ export default async function AppLayout({
 }: {
   children: ReactNode;
 }): Promise<JSX.Element> {
-  // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
-  const h = await headers();
-  const c = await cookies();
-  const path = h.get('x-current-path') ?? '(no x-current-path header)';
-  const referer = h.get('referer') ?? '(no referer)';
-  const ua = (h.get('user-agent') ?? '').slice(0, 80);
-  const cookieNames =
-    c
-      .getAll()
-      .map((ck) => ck.name)
-      .join(',') || '(none)';
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG] (app)/layout enter path=${path} referer=${referer} cookies=[${cookieNames}] ua="${ua}"`,
-  );
-  let session: MeResponse;
-  try {
-    session = await requireUser();
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(
-      `[FLEET_DEBUG] (app)/layout requireUser threw type=${(err as { digest?: string })?.digest ?? typeof err} msg=${(err as Error)?.message ?? '?'} path=${path}`,
-    );
-    throw err;
-  }
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG] (app)/layout requireUser OK userId=${session.user.id} tenantId=${session.tenant.id} path=${path}`,
-  );
+  const session = await requireUser();
   return (
     <SessionProvider value={session}>
       <div className="flex min-h-screen bg-steel text-text-primary">

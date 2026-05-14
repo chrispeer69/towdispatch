@@ -1,36 +1,8 @@
-import { getOptionalUser } from '@/lib/auth/session';
 import { FleetTabs } from './fleet-tabs';
 
 export const metadata = { title: 'Fleet — TowCommand' };
 
-/**
- * /fleet/* uses a nested sub-layout to host the header + FleetTabs client
- * component. Without a sync point on auth, the client-component boundary in
- * FleetTabs can let this layout's HTML stream to the browser before the
- * outer (app)/layout.tsx's requireUser() has resolved — producing a visible
- * shell flash on no-session navigations before the redirect to /login lands.
- *
- * Awaiting the cached getOptionalUser() here creates that sync point. The
- * call is free: it shares its React.cache entry with (app)/layout, so there
- * is no extra /auth/me round trip. When the session is missing we render an
- * empty fragment so the outer layout's redirect wins cleanly. The (app)/
- * layout remains the only auth chokepoint — this is purely a streaming
- * guard, not a second redirect path.
- */
-export default async function FleetLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}): Promise<JSX.Element> {
-  // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
-  // eslint-disable-next-line no-console
-  console.error('[FLEET_DEBUG] fleet/layout enter');
-  const session = await getOptionalUser();
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG] fleet/layout getOptionalUser=${session ? `userId=${session.user.id}` : 'null'}`,
-  );
-  if (!session) return <></>;
+export default function FleetLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <div className="space-y-6">
       <header>

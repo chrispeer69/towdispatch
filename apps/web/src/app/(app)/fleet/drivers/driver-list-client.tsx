@@ -23,13 +23,6 @@ export function DriverListClient({ initial, initialQuery }: Props): JSX.Element 
   const [data, setData] = useState<PaginatedDrivers>(initial);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
-  useEffect(() => {
-    console.error(
-      `[FLEET_DEBUG] DriverListClient mount initialTotal=${initial.total} href=${typeof window !== 'undefined' ? window.location.href : 'n/a'}`,
-    );
-  }, [initial.total]);
-
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -37,20 +30,10 @@ export function DriverListClient({ initial, initialQuery }: Props): JSX.Element 
       if (q) params.set('q', q);
       if (empStatus) params.set('employmentStatus', empStatus);
       params.set('perPage', '50');
-      console.error(
-        `[FLEET_DEBUG] DriverListClient debounce-fetch /api/fleet/drivers?${params.toString()}`,
-      );
       void fetch(`/api/fleet/drivers?${params.toString()}`)
-        .then((r) => {
-          console.error(
-            `[FLEET_DEBUG] DriverListClient debounce-fetch status=${r.status} ok=${r.ok}`,
-          );
-          return r.json();
-        })
+        .then((r) => r.json())
         .then((j: PaginatedDrivers) => setData(j))
-        .catch((err) => {
-          console.error('[FLEET_DEBUG] DriverListClient debounce-fetch err', err);
-        });
+        .catch(() => {});
     }, 300);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);

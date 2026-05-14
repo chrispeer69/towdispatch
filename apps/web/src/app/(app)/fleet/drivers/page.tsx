@@ -18,9 +18,6 @@ export default async function DriversPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
-  // [FLEET_DEBUG] — temporary diagnostic. Revert after the fleet bounce is fixed.
-  // eslint-disable-next-line no-console
-  console.error('[FLEET_DEBUG] fleet/drivers/page enter');
   const params = await searchParams;
   const result = await tryFetch(() =>
     fetchDrivers({
@@ -29,10 +26,6 @@ export default async function DriversPage({
       cdlClass: params.cdlClass,
       perPage: '50',
     }),
-  );
-  // eslint-disable-next-line no-console
-  console.error(
-    `[FLEET_DEBUG] fleet/drivers/page tryFetch=${result.data ? `ok total=${result.data.total}` : `err status=${result.error?.status} code=${result.error?.code}`}`,
   );
   const initial = result.data ?? EMPTY_DRIVERS;
   return (
