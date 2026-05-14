@@ -83,7 +83,7 @@ export class BillingController {
   // ----- invoices -----
 
   @Get('invoices')
-  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTING, ROLES.DISPATCHER)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTING, ROLES.AUDITOR)
   async list(
     @ZodQuery(invoiceFiltersSchema) query: InvoiceFilters,
     @Req() req: FastifyRequest,
