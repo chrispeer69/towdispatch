@@ -27,10 +27,15 @@ export function AuthShell({ title, subtitle, footer, children }: AuthShellProps)
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange shadow-orange-glow">
-            <span className="font-condensed text-lg font-extrabold text-white">T</span>
+            <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
+              UTD
+            </span>
           </div>
-          <span className="font-condensed text-base font-extrabold uppercase tracking-wide">
-            US <span className="text-orange">Tow</span> Dispatch
+          <span className="font-condensed text-base leading-none tracking-tight">
+            <span className="font-medium">
+              US <span className="text-orange">Tow</span>{' '}
+            </span>
+            <span className="font-extrabold italic uppercase">Dispatch</span>
           </span>
         </Link>
         <div className="flex items-center gap-3">
