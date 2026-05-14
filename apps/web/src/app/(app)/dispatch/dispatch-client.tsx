@@ -63,10 +63,13 @@ export function DispatchClient({
       try {
         const tokenRes = await fetch('/api/socket/token', { cache: 'no-store' });
         if (!tokenRes.ok) {
-          // 401/refresh-failure: leave the page, cookies cleared.
-          if (tokenRes.status === 401) {
-            window.location.href = '/login';
-          }
+          // No socket = no live updates, but the SSR snapshot is still useful.
+          // We used to hard-redirect to /login on a 401 here, but that path
+          // races the layout's already-authenticated render: if /auth/me hits
+          // a transient flake (or the BFF can't refresh) the dispatcher gets
+          // bounced off a perfectly valid session. The next server render goes
+          // through requireUser() which is the real chokepoint — let that
+          // decide whether the session is dead.
           return;
         }
         const { accessToken, apiUrl } = (await tokenRes.json()) as {

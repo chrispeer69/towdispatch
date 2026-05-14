@@ -17,15 +17,19 @@ interface Props {
 
 export default async function DriverDetailPage({ params }: Props): Promise<JSX.Element> {
   const { id } = await params;
-  const [driverRes, assignments, trucks, dvirs, docs] = await Promise.all([
+  const [driverRes, assignmentsRes, trucksRes, dvirsRes, docsRes] = await Promise.all([
     tryFetch(() => fetchDriver(id)),
-    fetchDriverTrucks(id).catch(() => []),
-    fetchTrucks({ perPage: '200' }).catch(() => ({ data: [], total: 0, page: 1, perPage: 200 })),
-    fetchDvirs({ driverId: id }).catch(() => []),
-    fetchDocuments({ ownerType: 'driver', ownerId: id }).catch(() => []),
+    tryFetch(() => fetchDriverTrucks(id)),
+    tryFetch(() => fetchTrucks({ perPage: '200' })),
+    tryFetch(() => fetchDvirs({ driverId: id })),
+    tryFetch(() => fetchDocuments({ ownerType: 'driver', ownerId: id })),
   ]);
   if (!driverRes.data) notFound();
   const driver = driverRes.data;
+  const assignments = assignmentsRes.data ?? [];
+  const trucks = trucksRes.data ?? { data: [], total: 0, page: 1, perPage: 200 };
+  const dvirs = dvirsRes.data ?? [];
+  const docs = docsRes.data ?? [];
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">

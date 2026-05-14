@@ -18,16 +18,21 @@ interface Props {
 
 export default async function TruckDetailPage({ params }: Props): Promise<JSX.Element> {
   const { id } = await params;
-  const [truckRes, schedules, records, dvirs, drivers, docs] = await Promise.all([
+  const [truckRes, schedulesRes, recordsRes, dvirsRes, driversRes, docsRes] = await Promise.all([
     tryFetch(() => fetchTruck(id)),
-    fetchTruckSchedules(id).catch(() => []),
-    fetchTruckRecords(id).catch(() => []),
-    fetchDvirs({ truckId: id }).catch(() => []),
-    fetchTruckDrivers(id).catch(() => []),
-    fetchDocuments({ ownerType: 'truck', ownerId: id }).catch(() => []),
+    tryFetch(() => fetchTruckSchedules(id)),
+    tryFetch(() => fetchTruckRecords(id)),
+    tryFetch(() => fetchDvirs({ truckId: id })),
+    tryFetch(() => fetchTruckDrivers(id)),
+    tryFetch(() => fetchDocuments({ ownerType: 'truck', ownerId: id })),
   ]);
   if (!truckRes.data) notFound();
   const truck = truckRes.data;
+  const schedules = schedulesRes.data ?? [];
+  const records = recordsRes.data ?? [];
+  const dvirs = dvirsRes.data ?? [];
+  const drivers = driversRes.data ?? [];
+  const docs = docsRes.data ?? [];
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">

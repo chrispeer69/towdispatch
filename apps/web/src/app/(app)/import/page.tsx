@@ -1,5 +1,3 @@
-import { requireUser } from '@/lib/auth/session';
-import { ROLES } from '@ustowdispatch/shared';
 /**
  * Towbook Import — Session 16.
  *
@@ -10,14 +8,22 @@ import { ROLES } from '@ustowdispatch/shared';
  *   3. lets the user run a dry-run, then commits live
  *   4. polls /import/runs/:id until status leaves 'running'
  *   5. shows the totals report and errored events
+ *
+ * Auth gating is owned by (app)/layout.tsx — we use the non-throwing
+ * getOptionalUser() so a transient /auth/me flake here can't redirect the page
+ * out from under the layout's already-authenticated shell. The null branch
+ * renders an empty fallback that the layout's redirect supersedes.
  */
+import { getOptionalUser } from '@/lib/auth/session';
+import { ROLES } from '@ustowdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ImportWizardClient } from './import-wizard-client';
 
 export const metadata = { title: 'Towbook Import — US Tow DISPATCH' };
 
 export default async function ImportPage(): Promise<JSX.Element> {
-  const me = await requireUser();
+  const me = await getOptionalUser();
+  if (!me) return <div className="space-y-6" />;
   if (me.user.role !== ROLES.OWNER && me.user.role !== ROLES.ADMIN) {
     redirect('/dashboard');
   }

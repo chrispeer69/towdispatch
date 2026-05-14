@@ -5,8 +5,7 @@
  * via the API, then hands off to DispatchClient which opens a Socket.IO
  * connection for live updates and dnd-kit-driven drag-and-drop assignment.
  */
-import { ApiError, apiServer } from '@/lib/api/client';
-import { requireUser } from '@/lib/auth/session';
+import { apiServer, tryFetch } from '@/lib/api/client';
 import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { DispatchClient } from './dispatch-client';
@@ -32,27 +31,20 @@ export default async function DispatchPage({
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
-  await requireUser();
   const params = await searchParams;
   const createdJobNumber = params.created ?? null;
   const smsHint =
     params.sms === 'skipped' ? 'skipped' : params.sms === 'pending' ? 'pending' : null;
 
-  let snapshot: BoardResponse = {
+  // Auth is enforced by (app)/layout.tsx. tryFetch surfaces a per-feature
+  // 401/403 as data so this page never races the layout's redirect.
+  const result = await tryFetch(() => apiServer<BoardResponse>('/dispatch/board'));
+  const snapshot: BoardResponse = result.data ?? {
     queue: [],
     active: [],
     recentlyCompleted: [],
     roster: [],
   };
-
-  try {
-    snapshot = await apiServer<BoardResponse>('/dispatch/board');
-  } catch (err) {
-    // 401 escalates via apiServer → handled by requireUser on next render.
-    if (!(err instanceof ApiError) || (err.status !== 401 && err.status !== 403)) {
-      throw err;
-    }
-  }
 
   const tokenRaw = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
   const mapboxToken =
