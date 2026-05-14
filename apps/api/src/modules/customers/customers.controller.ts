@@ -48,6 +48,7 @@ export class CustomersController {
   constructor(private readonly customers: CustomersService) {}
 
   @Get()
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.ACCOUNTING, ROLES.AUDITOR)
   async list(
     @ZodQuery(customerFiltersSchema) query: CustomerFilters,
     @Req() req: FastifyRequest,
@@ -56,6 +57,7 @@ export class CustomersController {
   }
 
   @Get('search')
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.ACCOUNTING, ROLES.AUDITOR)
   async search(
     @ZodQuery(customerSearchQuerySchema) query: CustomerSearchQuery,
     @Req() req: FastifyRequest,
@@ -79,6 +81,7 @@ export class CustomersController {
   }
 
   @Get(':id')
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.ACCOUNTING, ROLES.AUDITOR)
   async get(
     @ZodParam(idSchema) params: { id: string },
     @Req() req: FastifyRequest,
