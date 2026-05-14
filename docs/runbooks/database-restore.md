@@ -21,7 +21,7 @@ These are Phase 1 targets per the build plan. Until WAL archiving is wired (§3 
 Daily + 6-hourly snapshots are written to S3 by the backup cron. Bucket layout:
 
 ```
-s3://towcommand-backups/
+s3://ustowdispatch-backups/
 ├── postgres/
 │   ├── YYYY/MM/DD/HH-MM-pg_dump.sql.gz   ← compressed pg_dump custom format
 │   └── …
@@ -35,8 +35,8 @@ Required env vars on the host running the cron (and on a workstation running an 
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY_ID=…
 AWS_SECRET_ACCESS_KEY=…
-BACKUP_S3_BUCKET=towcommand-backups
-DATABASE_ADMIN_URL=postgres://towcommand:…@host:5432/towcommand
+BACKUP_S3_BUCKET=ustowdispatch-backups
+DATABASE_ADMIN_URL=postgres://ustowdispatch:…@host:5432/ustowdispatch
 ```
 
 The cron script lives at `scripts/backup-postgres.sh` (Phase 1 deliverable — see `docs/runbooks/backup-strategy.md`).
@@ -48,7 +48,7 @@ The cron script lives at `scripts/backup-postgres.sh` (Phase 1 deliverable — s
 ### 2a. Identify the snapshot
 
 ```bash
-aws s3 ls s3://towcommand-backups/postgres/$(date -u +%Y/%m/%d)/ --human-readable
+aws s3 ls s3://ustowdispatch-backups/postgres/$(date -u +%Y/%m/%d)/ --human-readable
 ```
 
 Pick the snapshot just **before** the incident time. Snapshots are named `HH-MM-pg_dump.sql.gz` in UTC.
@@ -56,7 +56,7 @@ Pick the snapshot just **before** the incident time. Snapshots are named `HH-MM-
 ### 2b. Download
 
 ```bash
-aws s3 cp s3://towcommand-backups/postgres/2026/05/12/06-00-pg_dump.sql.gz /tmp/restore.sql.gz
+aws s3 cp s3://ustowdispatch-backups/postgres/2026/05/12/06-00-pg_dump.sql.gz /tmp/restore.sql.gz
 gunzip /tmp/restore.sql.gz
 ```
 
@@ -65,8 +65,8 @@ gunzip /tmp/restore.sql.gz
 **Never restore directly into production without a verification pass on staging.**
 
 ```bash
-# Provision a fresh staging DB. On Railway: `railway service create postgres towcommand-restore`.
-export STAGING_URL='postgres://towcommand:…@staging-host:5432/towcommand_restore'
+# Provision a fresh staging DB. On Railway: `railway service create postgres ustowdispatch-restore`.
+export STAGING_URL='postgres://ustowdispatch:…@staging-host:5432/ustowdispatch_restore'
 
 # pg_dump custom format — use pg_restore
 # (If the snapshot is plain SQL: `psql "$STAGING_URL" < /tmp/restore.sql`)
@@ -107,7 +107,7 @@ If counts look right and the most recent audit log entry is roughly when the sna
 
 ```bash
 # Hit /ready against the staging API pointed at the restored DB
-DATABASE_URL="$STAGING_URL" pnpm --filter @towcommand/api start &
+DATABASE_URL="$STAGING_URL" pnpm --filter @ustowdispatch/api start &
 sleep 5
 curl -sf http://localhost:3001/ready
 curl -sf http://localhost:3001/health
@@ -131,13 +131,13 @@ pg_restore --clean --if-exists --no-owner --no-privileges \
 # 4. Re-apply any migrations that landed AFTER the snapshot
 #    (Snapshots include schema; if the prod DB was on migration N and the
 #    snapshot was taken on migration M < N, apply M+1..N before restarting.)
-pnpm --filter @towcommand/db migrate
+pnpm --filter @ustowdispatch/db migrate
 
 # 5. Restart the API
 railway service start api
 
 # 6. Verify
-curl -sf https://api.towcommand.com/ready
+curl -sf https://api.ustowdispatch.com/ready
 ```
 
 ---
@@ -147,7 +147,7 @@ curl -sf https://api.towcommand.com/ready
 PITR requires WAL archiving, which is **not yet wired in this repo**. The prerequisite work is:
 
 1. Configure `archive_mode = on` and `archive_command` on the primary Postgres
-2. Stand up an S3 bucket for WAL segments (`s3://towcommand-backups/wal/`)
+2. Stand up an S3 bucket for WAL segments (`s3://ustowdispatch-backups/wal/`)
 3. Provision a streaming standby (Railway provides this as an add-on; on AWS it's RDS Multi-AZ + read replica)
 4. Wire the standby into the failover script at `scripts/failover-postgres.sh` (does not exist yet)
 
@@ -180,14 +180,14 @@ DROP TABLE IF EXISTS login_alert_emails_sent;
 DROP TABLE IF EXISTS login_attempts;
 ```
 
-3. Apply: `pnpm --filter @towcommand/db migrate`.
+3. Apply: `pnpm --filter @ustowdispatch/db migrate`.
 
 ### When a destructive forward migration is required
 
 If you must drop a column that still has data:
 
 1. Snapshot first: `pg_dump --table=<table> "$DATABASE_ADMIN_URL" > pre-drop-<table>-$(date -u +%FT%T).sql`
-2. Stash the snapshot in `s3://towcommand-backups/pre-migration/`
+2. Stash the snapshot in `s3://ustowdispatch-backups/pre-migration/`
 3. Land the migration
 4. Keep the snapshot for at least 30 days
 
@@ -197,16 +197,16 @@ If you must drop a column that still has data:
 
 ```bash
 # 1. Provision a temporary staging DB on Railway
-railway service create postgres towcommand-restore-test
-export STAGING_URL=$(railway env get DATABASE_URL --service towcommand-restore-test)
+railway service create postgres ustowdispatch-restore-test
+export STAGING_URL=$(railway env get DATABASE_URL --service ustowdispatch-restore-test)
 
 # 2. Pull the most recent prod snapshot
-aws s3 cp s3://towcommand-backups/postgres/$(date -u +%Y/%m/%d)/06-00-pg_dump.sql.gz - | gunzip > /tmp/restore.sql
+aws s3 cp s3://ustowdispatch-backups/postgres/$(date -u +%Y/%m/%d)/06-00-pg_dump.sql.gz - | gunzip > /tmp/restore.sql
 
 # 3. Restore + verify (steps 2c, 2d above)
 
 # 4. Tear down the temp DB when done
-railway service delete towcommand-restore-test
+railway service delete ustowdispatch-restore-test
 ```
 
 Schedule this dry-run **monthly** at minimum. A backup that's never been restored isn't a backup.
@@ -218,9 +218,9 @@ Schedule this dry-run **monthly** at minimum. A backup that's never been restore
 The fast path for dev work — wipes everything, fresh start:
 
 ```bash
-pnpm --filter @towcommand/db reset    # drops + recreates the dev DB
-pnpm --filter @towcommand/db migrate  # re-applies every migration
-pnpm --filter @towcommand/db seed     # seeds 2 test tenants + 6 users
+pnpm --filter @ustowdispatch/db reset    # drops + recreates the dev DB
+pnpm --filter @ustowdispatch/db migrate  # re-applies every migration
+pnpm --filter @ustowdispatch/db seed     # seeds 2 test tenants + 6 users
 ```
 
 `packages/db/src/reset.ts` refuses to run when `NODE_ENV=production` as a safety check.

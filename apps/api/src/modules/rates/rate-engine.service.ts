@@ -25,7 +25,7 @@
  *     happens once at the line-item boundary.
  */
 import { Injectable } from '@nestjs/common';
-import { accounts, rateSheets, tenantDefaultRateSheets } from '@towcommand/db';
+import { accounts, rateSheets, tenantDefaultRateSheets } from '@ustowdispatch/db';
 import {
   type JobServiceType,
   type RateLineItem,
@@ -34,7 +34,7 @@ import {
   type SurchargeWindow,
   type VehicleClass,
   rateSheetDefinitionSchema,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

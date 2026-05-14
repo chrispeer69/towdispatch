@@ -5,7 +5,7 @@
  * revoke controls when clicked. Lives next to the active job card on the
  * dispatch board.
  */
-import { type TrackingLinkDto, type TrackingMessageDto } from '@towcommand/shared';
+import { type TrackingLinkDto, type TrackingMessageDto } from '@ustowdispatch/shared';
 import { type JSX, useEffect, useState } from 'react';
 
 interface Props {

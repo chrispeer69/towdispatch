@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchTrucks } from '@/lib/api/fleet';
-import type { PaginatedTrucks } from '@towcommand/shared';
+import type { PaginatedTrucks } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { TruckListClient } from './truck-list-client';
 

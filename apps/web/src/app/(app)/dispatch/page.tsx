@@ -7,11 +7,11 @@
  */
 import { ApiError, apiServer } from '@/lib/api/client';
 import { requireUser } from '@/lib/auth/session';
-import type { DriverRosterRow, JobDto } from '@towcommand/shared';
+import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { DispatchClient } from './dispatch-client';
 
-export const metadata = { title: 'Dispatch — TowCommand' };
+export const metadata = { title: 'Dispatch — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface BoardResponse {

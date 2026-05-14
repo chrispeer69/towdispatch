@@ -5,7 +5,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleDisplayName</key>
-    <string>TowCommand</string>
+    <string>US Tow DISPATCH</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -38,15 +38,15 @@
     <key>UIUserInterfaceStyle</key>
     <string>Dark</string>
     <key>NSCameraUsageDescription</key>
-    <string>TowCommand uses the camera to capture pre-tow and post-drop photos, VIN scans, and signatures required for every tow.</string>
+    <string>US Tow DISPATCH uses the camera to capture pre-tow and post-drop photos, VIN scans, and signatures required for every tow.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>TowCommand uses the microphone for voice memos and hands-free dictation while driving.</string>
+    <string>US Tow DISPATCH uses the microphone for voice memos and hands-free dictation while driving.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>TowCommand needs your location to route you to pickups, auto-advance jobs when you arrive, and tag photos.</string>
+    <string>US Tow DISPATCH needs your location to route you to pickups, auto-advance jobs when you arrive, and tag photos.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Background location lets dispatch see your truck and bill mileage even when the app isn't on screen.</string>
     <key>NSFaceIDUsageDescription</key>
-    <string>Sign in to TowCommand without typing your password.</string>
+    <string>Sign in to US Tow DISPATCH without typing your password.</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>Save captured tow photos to your photo library.</string>
     <key>NSUserNotificationsUsageDescription</key>

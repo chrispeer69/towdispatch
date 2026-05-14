@@ -13,7 +13,7 @@
  * so dev tenants that never connect QBO never accrue dead-letter rows.
  */
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
-import { invoices } from '@towcommand/db';
+import { invoices } from '@ustowdispatch/db';
 import { eq } from 'drizzle-orm';
 import type { Logger } from 'pino';
 import { ConfigService } from '../../config/config.service.js';

@@ -5,14 +5,14 @@
  *   → logout → login (mfa_required) → challenge with TOTP (authenticated)
  *   → logout → login (mfa_required) → challenge with recovery code (authenticated)
  *
- * Talks to https://app.towcommand.cloud (the Next BFF), which in turn calls
+ * Talks to https://app.ustowdispatch.cloud (the Next BFF), which in turn calls
  * the api. That tests the cookie bridge + proxy layer too, not just the api.
  *
  * Run: node scripts/mfa-e2e.mjs
  */
 import { authenticator } from 'otplib';
 
-const WEB = process.env.MFA_E2E_WEB ?? 'https://app.towcommand.cloud';
+const WEB = process.env.MFA_E2E_WEB ?? 'https://app.ustowdispatch.cloud';
 
 const slug = `e2e-${Math.random().toString(36).slice(2, 8)}`;
 const email = `e2e-${Math.random().toString(36).slice(2, 8)}@example.test`;
@@ -62,7 +62,9 @@ async function post(path, body, opts = {}) {
 }
 
 function log(...args) {
-  process.stdout.write(`${args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')}\n`);
+  process.stdout.write(
+    `${args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')}\n`,
+  );
 }
 
 async function main() {
@@ -89,7 +91,14 @@ async function main() {
 
   // 3) mfa setup
   r = await post('/api/auth/mfa/setup', undefined);
-  log('mfa/setup →', r.status, 'secret?', Boolean(r.json?.secret), 'codes', r.json?.recoveryCodes?.length);
+  log(
+    'mfa/setup →',
+    r.status,
+    'secret?',
+    Boolean(r.json?.secret),
+    'codes',
+    r.json?.recoveryCodes?.length,
+  );
   if (!r.ok || !r.json?.secret) throw new Error('mfa/setup failed');
   const secret = r.json.secret;
   const recoveryCodes = r.json.recoveryCodes;

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers } from '@/lib/api/fleet';
-import type { PaginatedDrivers } from '@towcommand/shared';
+import type { PaginatedDrivers } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
 

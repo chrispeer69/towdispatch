@@ -22,8 +22,8 @@ export function Wordmark({ className, size = 'xl' }: WordmarkProps): JSX.Element
         className,
       )}
     >
-      Tow<span className="text-orange">Command</span>
-      <span className="text-text-secondary"> Pro</span>
+      US <span className="text-orange">Tow</span>
+      <span className="text-text-secondary"> Dispatch</span>
     </h1>
   );
 }

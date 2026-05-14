@@ -7,7 +7,7 @@
  * the four-way state.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { trucks, uuidv7 } from '@towcommand/db';
+import { trucks, uuidv7 } from '@ustowdispatch/db';
 import {
   type CreateTruckPayload,
   ERROR_CODES,
@@ -15,7 +15,7 @@ import {
   type TruckDto,
   type TruckFilters,
   type UpdateTruckPayload,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

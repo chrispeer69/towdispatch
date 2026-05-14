@@ -22,10 +22,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@towcommand/shared': new URL('../../packages/shared/src/index.ts', import.meta.url).pathname,
-      '@towcommand/db/schema': new URL('../../packages/db/src/schema/index.ts', import.meta.url)
+      '@ustowdispatch/shared': new URL('../../packages/shared/src/index.ts', import.meta.url)
         .pathname,
-      '@towcommand/db': new URL('../../packages/db/src/index.ts', import.meta.url).pathname,
+      '@ustowdispatch/db/schema': new URL('../../packages/db/src/schema/index.ts', import.meta.url)
+        .pathname,
+      '@ustowdispatch/db': new URL('../../packages/db/src/index.ts', import.meta.url).pathname,
     },
   },
 });

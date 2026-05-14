@@ -9,7 +9,7 @@ import { ApiError, apiServer } from '@/lib/api/client';
 import { requireUser } from '@/lib/auth/session';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Reporting — TowCommand' };
+export const metadata = { title: 'Reporting — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface TrackingReport {

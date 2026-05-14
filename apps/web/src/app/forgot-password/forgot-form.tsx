@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type ForgotPasswordPayload, forgotPasswordSchema } from '@towcommand/shared';
+import { type ForgotPasswordPayload, forgotPasswordSchema } from '@ustowdispatch/shared';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 

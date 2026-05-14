@@ -1,4 +1,4 @@
-# TowCommand Pro
+# US Tow DISPATCH
 
 The operating system for the modern towing industry.
 
@@ -60,8 +60,8 @@ cp .env.example apps/api/.env
 cp .env.example apps/web/.env.local
 
 # 4. Apply migrations + seed dev tenants
-pnpm --filter @towcommand/db migrate
-pnpm --filter @towcommand/db seed
+pnpm --filter @ustowdispatch/db migrate
+pnpm --filter @ustowdispatch/db seed
 
 # 5. Run dev servers (API + web in parallel)
 pnpm dev
@@ -89,10 +89,10 @@ curl -sf http://localhost:3001/ready
 
 ```bash
 # Unit + integration (DB-gated specs skip without Postgres)
-pnpm --filter @towcommand/api test
+pnpm --filter @ustowdispatch/api test
 
 # Web vitest (presentation tests)
-pnpm --filter @towcommand/web test
+pnpm --filter @ustowdispatch/web test
 
 # Typecheck every workspace
 pnpm typecheck
@@ -106,8 +106,8 @@ pnpm build
 ```bash
 # Boot the stack first (docker + api + web running on the e2e ports)
 # Then:
-pnpm --filter @towcommand/e2e exec playwright install chromium
-E2E_RUN_REQUIRES_STACK=1 pnpm --filter @towcommand/e2e test
+pnpm --filter @ustowdispatch/e2e exec playwright install chromium
+E2E_RUN_REQUIRES_STACK=1 pnpm --filter @ustowdispatch/e2e test
 ```
 
 CI runs the full suite on every PR via `.github/workflows/e2e.yml` — Postgres + Redis service containers, API + web started as background processes, Chromium (+ Firefox + WebKit on master push).
@@ -138,12 +138,12 @@ Everything in `scripts/`:
 | `pnpm lint` | Biome lint |
 | `pnpm format` | Biome format |
 | `pnpm test` | Unit + integration tests across packages |
-| `pnpm --filter @towcommand/e2e test` | Playwright e2e (gated on `E2E_RUN_REQUIRES_STACK=1`) |
-| `pnpm --filter @towcommand/db generate` | Generate a new Drizzle migration |
-| `pnpm --filter @towcommand/db migrate` | Apply migrations + raw SQL |
-| `pnpm --filter @towcommand/db seed` | Idempotent dev seed |
-| `pnpm --filter @towcommand/db studio` | Open Drizzle Studio |
-| `pnpm --filter @towcommand/db reset` | Drop + recreate dev DB (refuses if `NODE_ENV=production`) |
+| `pnpm --filter @ustowdispatch/e2e test` | Playwright e2e (gated on `E2E_RUN_REQUIRES_STACK=1`) |
+| `pnpm --filter @ustowdispatch/db generate` | Generate a new Drizzle migration |
+| `pnpm --filter @ustowdispatch/db migrate` | Apply migrations + raw SQL |
+| `pnpm --filter @ustowdispatch/db seed` | Idempotent dev seed |
+| `pnpm --filter @ustowdispatch/db studio` | Open Drizzle Studio |
+| `pnpm --filter @ustowdispatch/db reset` | Drop + recreate dev DB (refuses if `NODE_ENV=production`) |
 
 ---
 
@@ -206,4 +206,4 @@ The exit gate: [`apps/PHASE_0_EXIT_REPORT.md`](apps/PHASE_0_EXIT_REPORT.md).
 
 ## License
 
-Proprietary — © TowCommand, Inc.
+Proprietary — © US Tow DISPATCH, Inc.

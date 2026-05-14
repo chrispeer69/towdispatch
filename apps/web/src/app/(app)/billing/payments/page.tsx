@@ -1,8 +1,8 @@
 import { type PaymentListResponse, fetchPayments, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
-import { paymentMethodLabel } from '@towcommand/shared';
+import { paymentMethodLabel } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'Payments — TowCommand' };
+export const metadata = { title: 'Payments — US Tow DISPATCH' };
 
 const EMPTY_PAYMENTS: PaymentListResponse = { data: [], total: 0 };
 

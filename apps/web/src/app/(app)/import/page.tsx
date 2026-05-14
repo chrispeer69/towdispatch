@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth/session';
-import { ROLES } from '@towcommand/shared';
+import { ROLES } from '@ustowdispatch/shared';
 /**
  * Towbook Import — Session 16.
  *
@@ -14,7 +14,7 @@ import { ROLES } from '@towcommand/shared';
 import { redirect } from 'next/navigation';
 import { ImportWizardClient } from './import-wizard-client';
 
-export const metadata = { title: 'Towbook Import — TowCommand' };
+export const metadata = { title: 'Towbook Import — US Tow DISPATCH' };
 
 export default async function ImportPage(): Promise<JSX.Element> {
   const me = await requireUser();
@@ -28,8 +28,8 @@ export default async function ImportPage(): Promise<JSX.Element> {
           Towbook Import
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          Migrate your historical Towbook data into TowCommand for <strong>{me.tenant.name}</strong>
-          . Dry-run first, then commit.
+          Migrate your historical Towbook data into US Tow DISPATCH for{' '}
+          <strong>{me.tenant.name}</strong>. Dry-run first, then commit.
         </p>
       </header>
       <ImportWizardClient tenantId={me.tenant.id} tenantName={me.tenant.name} />

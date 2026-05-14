@@ -15,7 +15,7 @@ import {
   TRACKING_EVENTS,
   type TrackingMessageDto,
   type TrackingPublicView,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { type JSX, useEffect, useRef, useState } from 'react';
 import { type Socket, io as ioClient } from 'socket.io-client';
 

@@ -1,8 +1,8 @@
 import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
-import type { AgingResponse } from '@towcommand/shared';
+import type { AgingResponse } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'A/R aging — TowCommand' };
+export const metadata = { title: 'A/R aging — US Tow DISPATCH' };
 
 function emptyAging(): AgingResponse {
   return {

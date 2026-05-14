@@ -9,7 +9,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export const metadata = { title: 'Customer — TowCommand' };
+export const metadata = { title: 'Customer — US Tow DISPATCH' };
 
 export default async function CustomerDetailPage({ params }: Props): Promise<JSX.Element> {
   const { id } = await params;

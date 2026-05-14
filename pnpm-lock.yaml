@@ -77,10 +77,10 @@ importers:
       '@socket.io/redis-adapter':
         specifier: 8.3.0
         version: 8.3.0(socket.io-adapter@2.5.6)
-      '@towcommand/db':
+      '@ustowdispatch/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@towcommand/shared':
+      '@ustowdispatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       argon2:
@@ -213,12 +213,12 @@ importers:
       '@playwright/test':
         specifier: 1.49.0
         version: 1.49.0
-      '@towcommand/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@types/node':
         specifier: 22.9.3
         version: 22.9.3
+      '@ustowdispatch/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       chrome-launcher:
         specifier: 1.1.2
         version: 1.1.2
@@ -246,10 +246,10 @@ importers:
       '@hookform/resolvers':
         specifier: 3.9.1
         version: 3.9.1(react-hook-form@7.54.0(react@18.3.1))
-      '@towcommand/shared':
+      '@ustowdispatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@towcommand/ui':
+      '@ustowdispatch/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       class-variance-authority:
@@ -328,7 +328,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@towcommand/shared':
+      '@ustowdispatch/shared':
         specifier: workspace:*
         version: link:../shared
       argon2:

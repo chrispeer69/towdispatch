@@ -3,12 +3,12 @@ import Foundation
 /// Drains the outbox against the live API. Idempotent — safe to call on
 /// reachability changes, app foregrounding, or a manual user pull-to-refresh.
 public actor SyncEngine {
-    private let api: TowCommandAPI
+    private let api: USTowDispatchAPI
     private let outbox: Outbox
     private let localStore: LocalStore
     private var isDraining = false
 
-    public init(api: TowCommandAPI, outbox: Outbox, localStore: LocalStore) {
+    public init(api: USTowDispatchAPI, outbox: Outbox, localStore: LocalStore) {
         self.api = api
         self.outbox = outbox
         self.localStore = localStore

@@ -70,7 +70,7 @@ Stripe is experiencing elevated errors. For the next hour:
    retry automatically once Stripe recovers. Tell them their card will
    be charged within 24 hours.
 
-— TowCommand operations
+— US Tow DISPATCH operations
 ```
 
 ### 2b. Card-on-file customers — automatic retry
@@ -100,7 +100,7 @@ SQL
 For each row, call the retry endpoint:
 
 ```bash
-curl -sS -X POST "https://api.towcommand.com/billing/payments/$PAYMENT_ID/retry" \
+curl -sS -X POST "https://api.ustowdispatch.com/billing/payments/$PAYMENT_ID/retry" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 

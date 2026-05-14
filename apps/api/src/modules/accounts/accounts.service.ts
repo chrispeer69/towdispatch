@@ -7,7 +7,7 @@
  * if a query forgets a tenant_id filter.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { accounts, customers, uuidv7 } from '@towcommand/db';
+import { accounts, customers, uuidv7 } from '@ustowdispatch/db';
 import {
   type AccountDto,
   type AccountFilters,
@@ -16,7 +16,7 @@ import {
   ERROR_CODES,
   type PaginatedAccounts,
   type UpdateAccountPayload,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

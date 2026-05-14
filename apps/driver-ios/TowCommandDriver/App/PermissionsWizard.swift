@@ -17,7 +17,7 @@ struct PermissionsWizard: View {
             EmptyView()
         } else {
             VStack(spacing: 20) {
-                Text("Set up TowCommand").font(.title.bold())
+                Text("Set up US Tow DISPATCH").font(.title.bold())
                 switch step {
                 case .location:
                     permissionRow(

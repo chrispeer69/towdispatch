@@ -1,7 +1,7 @@
 import { requireUser } from '@/lib/auth/session';
 import { IntakeClient } from './intake-client';
 
-export const metadata = { title: 'Call Intake — TowCommand' };
+export const metadata = { title: 'Call Intake — US Tow DISPATCH' };
 
 /**
  * /intake — the call-intake screen.

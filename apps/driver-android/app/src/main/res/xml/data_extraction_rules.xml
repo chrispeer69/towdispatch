@@ -2,10 +2,10 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="auth_prefs.xml" />
-        <exclude domain="database" path="towcommand_driver.db" />
+        <exclude domain="database" path="ustowdispatch_driver.db" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="auth_prefs.xml" />
-        <exclude domain="database" path="towcommand_driver.db" />
+        <exclude domain="database" path="ustowdispatch_driver.db" />
     </device-transfer>
 </data-extraction-rules>

@@ -1,9 +1,9 @@
 import { requireUser } from '@/lib/auth/session';
-import { ROLES } from '@towcommand/shared';
+import { ROLES } from '@ustowdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ReconcileClient } from './reconcile-client';
 
-export const metadata = { title: 'Reconcile — TowCommand' };
+export const metadata = { title: 'Reconcile — US Tow DISPATCH' };
 
 export default async function ReconcilePage(): Promise<JSX.Element> {
   const me = await requireUser();

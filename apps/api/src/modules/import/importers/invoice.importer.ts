@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import { dollarsToCents, normalizeString, parseTowbookTimestamp } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
 import { BaseImporter, type ImportRowOutcome } from './base.importer.js';

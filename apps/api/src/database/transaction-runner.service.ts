@@ -9,7 +9,7 @@
  * captures the actor.
  */
 import { Inject, Injectable } from '@nestjs/common';
-import * as schema from '@towcommand/db/schema';
+import * as schema from '@ustowdispatch/db/schema';
 import { type NodePgDatabase, drizzle } from 'drizzle-orm/node-postgres';
 import type { Pool, PoolClient } from 'pg';
 import { ADMIN_POOL } from './database.tokens.js';

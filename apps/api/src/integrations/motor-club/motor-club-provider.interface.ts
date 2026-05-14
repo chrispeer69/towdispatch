@@ -3,7 +3,7 @@
  * first; Allstate, Honk, Quest, USAC, etc. later).
  *
  * Each motor club uses its own dispatch protocol (Agero ARES/Honkbook/Allstate
- * Good Hands), but the operations look the same from TowCommand's view:
+ * Good Hands), but the operations look the same from US Tow DISPATCH's view:
  * receive a job, accept/reject, send GPS+ETA, send arrived/in-tow/dropped
  * status events, submit final invoice. We model that as a thin RPC surface
  * plus an inbound-event subscription model handled by the implementation.

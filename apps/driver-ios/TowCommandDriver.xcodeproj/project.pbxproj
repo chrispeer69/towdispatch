@@ -10,7 +10,7 @@
 		53872A16C2810E31613AA208 /* PushRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF40B92617371FD761129C77 /* PushRegistrar.swift */; };
 		CCBCED974EA796FA2EC956D2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6636DCCB10CFE1F8EE35310E /* RootView.swift */; };
 		E5DC4F6A71F17399A0B2709C /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FADFFD960EDC0B0ADA2A69 /* SettingsStore.swift */; };
-		602E77F4BD31C1E76B71FF6E /* TowCommandDriverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8463DDE9FAB6EB976F6EDF5E /* TowCommandDriverApp.swift */; };
+		602E77F4BD31C1E76B71FF6E /* UsTowDispatchDriverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8463DDE9FAB6EB976F6EDF5E /* UsTowDispatchDriverApp.swift */; };
 		3E080B11FD405EF04453A97B /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53D0E2F3BC51D01047CCC42D /* LoginView.swift */; };
 		F7F701D15FE3A8B22FEE7F7B /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608120AB41FF8B3A47247DF1 /* ChatScreen.swift */; };
 		84C32D4892F10D8C7EE86EE1 /* DVIRScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310DECA485CBC78E0A529B2A /* DVIRScreen.swift */; };
@@ -42,7 +42,7 @@
 		CF40B92617371FD761129C77 /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/PushRegistrar.swift"; sourceTree = "<group>"; };
 		6636DCCB10CFE1F8EE35310E /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/RootView.swift"; sourceTree = "<group>"; };
 		66FADFFD960EDC0B0ADA2A69 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/SettingsStore.swift"; sourceTree = "<group>"; };
-		8463DDE9FAB6EB976F6EDF5E /* TowCommandDriverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/TowCommandDriverApp.swift"; sourceTree = "<group>"; };
+		8463DDE9FAB6EB976F6EDF5E /* UsTowDispatchDriverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/UsTowDispatchDriverApp.swift"; sourceTree = "<group>"; };
 		53D0E2F3BC51D01047CCC42D /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Auth/LoginView.swift"; sourceTree = "<group>"; };
 		608120AB41FF8B3A47247DF1 /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Chat/ChatScreen.swift"; sourceTree = "<group>"; };
 		310DECA485CBC78E0A529B2A /* DVIRScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/DVIR/DVIRScreen.swift"; sourceTree = "<group>"; };
@@ -104,7 +104,7 @@
 				CF40B92617371FD761129C77 /* PushRegistrar.swift */,
 				6636DCCB10CFE1F8EE35310E /* RootView.swift */,
 				66FADFFD960EDC0B0ADA2A69 /* SettingsStore.swift */,
-				8463DDE9FAB6EB976F6EDF5E /* TowCommandDriverApp.swift */,
+				8463DDE9FAB6EB976F6EDF5E /* UsTowDispatchDriverApp.swift */,
 				53D0E2F3BC51D01047CCC42D /* LoginView.swift */,
 				608120AB41FF8B3A47247DF1 /* ChatScreen.swift */,
 				310DECA485CBC78E0A529B2A /* DVIRScreen.swift */,
@@ -168,7 +168,7 @@
 				53872A16C2810E31613AA208 /* PushRegistrar.swift in Sources */,
 				CCBCED974EA796FA2EC956D2 /* RootView.swift in Sources */,
 				E5DC4F6A71F17399A0B2709C /* SettingsStore.swift in Sources */,
-				602E77F4BD31C1E76B71FF6E /* TowCommandDriverApp.swift in Sources */,
+				602E77F4BD31C1E76B71FF6E /* UsTowDispatchDriverApp.swift in Sources */,
 				3E080B11FD405EF04453A97B /* LoginView.swift in Sources */,
 				F7F701D15FE3A8B22FEE7F7B /* ChatScreen.swift in Sources */,
 				84C32D4892F10D8C7EE86EE1 /* DVIRScreen.swift in Sources */,
@@ -430,10 +430,10 @@
 				ENABLE_PREVIEWS = "YES";
 				GENERATE_INFOPLIST_FILE = "NO";
 				INFOPLIST_FILE = "TowCommandDriver/Resources/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "TowCommand";
+				INFOPLIST_KEY_CFBundleDisplayName = "US Tow DISPATCH";
 				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
 				MARKETING_VERSION = "0.1.0";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.towcommand.driver";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ustowdispatch.driver";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = "YES";
 				TARGETED_DEVICE_FAMILY = "1";
@@ -450,10 +450,10 @@
 				ENABLE_PREVIEWS = "YES";
 				GENERATE_INFOPLIST_FILE = "NO";
 				INFOPLIST_FILE = "TowCommandDriver/Resources/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "TowCommand";
+				INFOPLIST_KEY_CFBundleDisplayName = "US Tow DISPATCH";
 				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
 				MARKETING_VERSION = "0.1.0";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.towcommand.driver";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ustowdispatch.driver";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = "YES";
 				TARGETED_DEVICE_FAMILY = "1";
@@ -468,7 +468,7 @@
 				CURRENT_PROJECT_VERSION = "1";
 				GENERATE_INFOPLIST_FILE = "YES";
 				MARKETING_VERSION = "0.1.0";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.towcommand.driver.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ustowdispatch.driver.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TowCommandDriver.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TowCommandDriver";
@@ -483,7 +483,7 @@
 				CURRENT_PROJECT_VERSION = "1";
 				GENERATE_INFOPLIST_FILE = "YES";
 				MARKETING_VERSION = "0.1.0";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.towcommand.driver.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ustowdispatch.driver.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TowCommandDriver.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TowCommandDriver";
@@ -497,7 +497,7 @@
 				CURRENT_PROJECT_VERSION = "1";
 				GENERATE_INFOPLIST_FILE = "YES";
 				MARKETING_VERSION = "0.1.0";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.towcommand.driver.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ustowdispatch.driver.uitests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1";
 				TEST_TARGET_NAME = "TowCommandDriver";
@@ -511,7 +511,7 @@
 				CURRENT_PROJECT_VERSION = "1";
 				GENERATE_INFOPLIST_FILE = "YES";
 				MARKETING_VERSION = "0.1.0";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.towcommand.driver.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ustowdispatch.driver.uitests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1";
 				TEST_TARGET_NAME = "TowCommandDriver";

@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TowCommandDriver"
+rootProject.name = "UsTowDispatchDriver"
 include(":app")

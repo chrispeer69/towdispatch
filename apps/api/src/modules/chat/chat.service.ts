@@ -34,7 +34,7 @@ import {
   jobs,
   users,
   uuidv7,
-} from '@towcommand/db';
+} from '@ustowdispatch/db';
 import {
   type AttachmentUrlRequestPayload,
   type AttachmentUrlResponse,
@@ -46,7 +46,7 @@ import {
   ROLES,
   type Role,
   type SendChatMessagePayload,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { type SQL, and, desc, eq, isNull, lt, or } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { NotificationService } from '../../integrations/notification/notification.service.js';

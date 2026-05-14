@@ -6,12 +6,12 @@ public actor AuthService: TokenProvider {
         case signedOut
     }
 
-    private let api: TowCommandAPI
+    private let api: USTowDispatchAPI
     private let store: TokenStore
     private var session: AuthSession?
     private var refreshTask: Task<String, Error>?
 
-    public init(api: TowCommandAPI, store: TokenStore) {
+    public init(api: USTowDispatchAPI, store: TokenStore) {
         self.api = api
         self.store = store
         self.session = store.load()

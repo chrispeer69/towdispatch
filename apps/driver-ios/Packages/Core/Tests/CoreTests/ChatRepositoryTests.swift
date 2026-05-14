@@ -34,7 +34,7 @@ final class ChatRepositoryTests: XCTestCase {
     }
 }
 
-private actor NoopAPIForChat: TowCommandAPI {
+private actor NoopAPIForChat: USTowDispatchAPI {
     func login(_ body: LoginRequest) async throws -> LoginResponse { fatalError() }
     func refresh(_ body: RefreshRequest) async throws -> RefreshResponse { fatalError() }
     func logout(_ body: LogoutRequest) async throws {}

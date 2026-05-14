@@ -1,3 +1,3 @@
-app_identifier("com.towcommand.driver")
+app_identifier("com.ustowdispatch.driver")
 # apple_id("you@example.com")  # set in CI env
 # team_id("XXXXXXXXXX")         # set in CI env

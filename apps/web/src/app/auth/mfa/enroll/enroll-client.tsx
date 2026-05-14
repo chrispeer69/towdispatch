@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { MfaSetupResponse } from '@towcommand/shared';
+import type { MfaSetupResponse } from '@ustowdispatch/shared';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -154,7 +154,7 @@ function CodesPanel({
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'towcommand-recovery-codes.txt';
+            a.download = 'ustowdispatch-recovery-codes.txt';
             a.click();
             URL.revokeObjectURL(url);
           }}

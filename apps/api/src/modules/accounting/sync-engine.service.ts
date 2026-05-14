@@ -26,7 +26,7 @@
  * race conditions.
  */
 import { Inject, Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
-import { type SyncJob, syncJobs, uuidv7 } from '@towcommand/db';
+import { type SyncJob, syncJobs, uuidv7 } from '@ustowdispatch/db';
 import { and, eq } from 'drizzle-orm';
 import type { Logger } from 'pino';
 import { ConfigService } from '../../config/config.service.js';

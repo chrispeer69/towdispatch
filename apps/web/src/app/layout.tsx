@@ -27,7 +27,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'TowCommand Pro — The operating system the towing industry deserves',
+  title: 'US Tow DISPATCH — The operating system owned by you, built by you',
   description: 'Built by operators, for operators. Free for US Tow Alliance members at cost + 20%.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'),
 };

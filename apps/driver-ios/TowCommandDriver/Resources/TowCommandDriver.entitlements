@@ -10,7 +10,7 @@
     <true/>
     <key>keychain-access-groups</key>
     <array>
-        <string>$(AppIdentifierPrefix)com.towcommand.driver</string>
+        <string>$(AppIdentifierPrefix)com.ustowdispatch.driver</string>
     </array>
 </dict>
 </plist>

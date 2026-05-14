@@ -12,8 +12,8 @@
  * runInTenantContext() transaction so RLS is in effect.
  */
 import { ForbiddenException } from '@nestjs/common';
-import { driverTruckAssignments, drivers } from '@towcommand/db';
-import { ERROR_CODES, ROLES, type Role } from '@towcommand/shared';
+import { driverTruckAssignments, drivers } from '@ustowdispatch/db';
+import { ERROR_CODES, ROLES, type Role } from '@ustowdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { Tx } from '../../database/tenant-aware-db.service.js';
 

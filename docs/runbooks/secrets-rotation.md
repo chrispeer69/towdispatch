@@ -16,7 +16,7 @@ Every secret has: a rotation command, the files to update, the restart procedure
 | `JWT_MFA_SECRET` | API env | In-flight MFA challenges fail; users redo MFA | §1 |
 | `TOTP_ENCRYPTION_KEY` | API env | Coordinated re-encrypt required (see §6) | §6 |
 | `DATABASE_URL` password (`app_user`) | API env + DB | API restart + every replica | §2 |
-| `DATABASE_ADMIN_URL` password (`towcommand`) | Ops env | Admin tools fail until rotated everywhere | §3 |
+| `DATABASE_ADMIN_URL` password (`ustowdispatch`) | Ops env | Admin tools fail until rotated everywhere | §3 |
 | `STRIPE_SECRET_KEY` | API env | New charges fail until rotated; webhooks unaffected | §4 |
 | `STRIPE_WEBHOOK_SECRET` | API env | Webhook deliveries fail signature check | §4 |
 | `MAPBOX_SECRET_TOKEN` | Web env | Map tiles fail to load | §5 |
@@ -45,7 +45,7 @@ Set in the runtime environment (Railway / AWS Secrets Manager):
 
 ```bash
 railway env set --service api JWT_ACCESS_SECRET="$NEW"
-# or AWS: aws ssm put-parameter --name /towcommand/prod/api/JWT_ACCESS_SECRET --value "$NEW" --overwrite
+# or AWS: aws ssm put-parameter --name /ustowdispatch/prod/api/JWT_ACCESS_SECRET --value "$NEW" --overwrite
 ```
 
 Update `.env.example` only if the format changed; never commit a real secret.
@@ -62,10 +62,10 @@ Verify — old tokens must fail, fresh login must succeed:
 # Old access token: should 401
 OLD_TOKEN='<token-from-pre-rotation-curl>'
 curl -sf -o /dev/null -w '%{http_code}\n' \
-  -H "Authorization: Bearer $OLD_TOKEN" https://api.towcommand.com/auth/me  # → 401
+  -H "Authorization: Bearer $OLD_TOKEN" https://api.ustowdispatch.com/auth/me  # → 401
 
 # Fresh login: should 200
-curl -sf -X POST https://api.towcommand.com/auth/login \
+curl -sf -X POST https://api.ustowdispatch.com/auth/login \
   -H 'content-type: application/json' \
   -d '{"email":"…","password":"…"}'  # → 200 with new accessToken
 ```
@@ -86,7 +86,7 @@ NEW=$(openssl rand -base64 32 | tr -d '=+/' | cut -c1-32)
 psql "$DATABASE_ADMIN_URL" -c "ALTER ROLE app_user WITH PASSWORD '$NEW';"
 
 # 3. Build the new DATABASE_URL — same host/db, new password
-NEW_URL="postgres://app_user:$NEW@<host>:5432/towcommand"
+NEW_URL="postgres://app_user:$NEW@<host>:5432/ustowdispatch"
 
 # 4. Set it
 railway env set --service api DATABASE_URL="$NEW_URL"
@@ -99,19 +99,19 @@ Verify:
 
 ```bash
 # `/ready` succeeds means the new password works
-curl -sf https://api.towcommand.com/ready
+curl -sf https://api.ustowdispatch.com/ready
 ```
 
 ---
 
 ## §3. Admin database password
 
-`towcommand` (the bootstrap superuser used by `DATABASE_ADMIN_URL` for migrations and ops).
+`ustowdispatch` (the bootstrap superuser used by `DATABASE_ADMIN_URL` for migrations and ops).
 
 ```bash
 NEW=$(openssl rand -base64 32 | tr -d '=+/' | cut -c1-32)
-psql "<old DATABASE_ADMIN_URL>" -c "ALTER ROLE towcommand WITH PASSWORD '$NEW';"
-NEW_ADMIN_URL="postgres://towcommand:$NEW@<host>:5432/towcommand"
+psql "<old DATABASE_ADMIN_URL>" -c "ALTER ROLE ustowdispatch WITH PASSWORD '$NEW';"
+NEW_ADMIN_URL="postgres://ustowdispatch:$NEW@<host>:5432/ustowdispatch"
 railway env set --service api DATABASE_ADMIN_URL="$NEW_ADMIN_URL"
 ```
 
@@ -130,7 +130,7 @@ railway env set --service api STRIPE_SECRET_KEY="$NEW_KEY"
 # 3. Restart
 railway service restart api
 # 4. Verify with a test charge in Stripe test mode (separate test key, not rotated)
-curl -sf -X POST https://api.towcommand.com/payments/intents \
+curl -sf -X POST https://api.ustowdispatch.com/payments/intents \
   -H "Authorization: Bearer $OWNER_TOKEN" \
   -H 'content-type: application/json' \
   -d '{"invoiceId":"<test-invoice-id>"}'
@@ -281,7 +281,7 @@ railway service restart api
 S3 is used for tenant uploads (logos, job photos, signatures, import bundles).
 
 ```bash
-# 1. AWS console → IAM → users → towcommand-app-user → create new access key
+# 1. AWS console → IAM → users → ustowdispatch-app-user → create new access key
 # 2. Update env
 railway env set --service api AWS_ACCESS_KEY_ID="$NEW_KEY"
 railway env set --service api AWS_SECRET_ACCESS_KEY="$NEW_SECRET"

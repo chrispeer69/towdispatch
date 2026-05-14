@@ -3,7 +3,7 @@
 Date: 2026-05-12
 Branches: `scope/android-mfa` (read-only scoping) → `feature/android-mfa-challenge`
 (implementation), both landed on `master`.
-Live URLs touched: `https://api.towcommand.cloud` (via the
+Live URLs touched: `https://api.ustowdispatch.cloud` (via the
 `https://web-production-7e5b.up.railway.app` BFF, since the custom domain
 verification went through that path earlier in the session).
 
@@ -35,7 +35,7 @@ Concrete deltas surfaced:
 | Layer | Change |
 | --- | --- |
 | `AuthDtos.kt` | `LoginResponse` drops stale `mfaToken`, adds `challengeToken`, `setupToken`, `role` for completeness. New `MfaChallengeRequest` / `MfaChallengeResponse` mirror the backend contract exactly. |
-| `TowCommandApi.kt` | New `@POST("/auth/mfa/challenge") fun mfaChallenge(@Body req)`. |
+| `UsTowDispatchApi.kt` | New `@POST("/auth/mfa/challenge") fun mfaChallenge(@Body req)`. |
 | `AuthRepository.kt` | `LoginResult.MfaRequired` becomes a data class carrying the `challengeToken`. New `challenge(challengeToken, code)` method classifies HTTP outcomes into a dedicated `MfaChallengeResult` sealed class (401 → `InvalidCode`, 403/429 → `TooManyAttempts`, 400 → `SessionExpired`). On success persists via the existing `AuthTokenStore.saveTokens` + `saveSession` — no new storage path. |
 | `ui/mfa/MfaChallengeScreen.kt` + `MfaChallengeViewModel.kt` | Numeric 6-digit field with auto-submit on the 6th keystroke, recovery-code toggle (alphanumeric paste-friendly), monospace 28sp letter-spaced display for gloved-hand legibility, error and rate-limit copy, session-expired bounce back to `/login`. |
 | `LoginViewModel.kt` | `MfaRequired` now stashes the token + flips a nav field. The "go to web" string is removed. |
@@ -137,7 +137,7 @@ device/web tests against.
 - [x] `LoginResponse` carries `challengeToken` (and `setupToken` + `role`
       for completeness).
 - [x] `MfaChallengeRequest` / `MfaChallengeResponse` DTOs added.
-- [x] `@POST("/auth/mfa/challenge")` on `TowCommandApi`.
+- [x] `@POST("/auth/mfa/challenge")` on `UsTowDispatchApi`.
 - [x] `LoginResult.MfaRequired` carries `challengeToken`.
 - [x] `AuthRepository.login()` surfaces the token rather than dropping it.
 - [x] `AuthRepository.challenge()` calls the endpoint, persists via
