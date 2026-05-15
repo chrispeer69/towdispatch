@@ -11,6 +11,7 @@
  *
  * Skipped automatically when Postgres/Redis env vars are absent.
  */
+import { randomUUID } from 'node:crypto';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { JwtService } from '../../src/modules/auth/jwt.service.js';
@@ -70,9 +71,13 @@ describeIfDb('Chat integration', () => {
       // Driver user + driver row in primary tenant.
       const userEmail = `driver-${SUFFIX}@spec.test`;
       ctx.createdEmails.push(userEmail);
+      // users schema has first_name + last_name; there is no full_name
+      // column. Earlier sessions used full_name; the migration that split
+      // it was 0006 in packages/db/drizzle/. The test was never updated,
+      // so the suite silently failed in beforeAll and reported as skipped.
       const uRes = await c.query<{ id: string }>(
-        `INSERT INTO users (id, tenant_id, email, password_hash, role, full_name)
-         VALUES (gen_random_uuid(), $1::uuid, $2, $3, 'driver', 'Test Driver')
+        `INSERT INTO users (id, tenant_id, email, password_hash, role, first_name, last_name)
+         VALUES (gen_random_uuid(), $1::uuid, $2, $3, 'driver', 'Test', 'Driver')
          RETURNING id`,
         [owner.tenant.id, userEmail, '$argon2id$v=19$m=65536,t=2,p=1$placeholder$placeholder'],
       );
@@ -94,11 +99,27 @@ describeIfDb('Chat integration', () => {
       const truckId = tRes.rows[0]?.id as string;
 
       // Job assigned to the driver — chat participant check needs this link.
+      // pickup_address and authorized_by are NOT NULL on the jobs table.
+      // job_number must match the YYYYMMDD-NNNN constraint
+      // (jobs_job_number_format in sql/0008). Use today's date + a 4-digit
+      // suffix derived from the SUFFIX hash so parallel runs don't collide.
+      const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      let h = 0;
+      for (const ch of SUFFIX) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      const jobNumber = `${today}-${String((h % 9000) + 1000).padStart(4, '0')}`;
       const jRes = await c.query<{ id: string }>(
-        `INSERT INTO jobs (id, tenant_id, job_number, status, service_type, assigned_driver_id, assigned_truck_id)
-         VALUES (gen_random_uuid(), $1::uuid, $2, 'dispatched', 'tow', $3::uuid, $4::uuid)
+        `INSERT INTO jobs (
+            id, tenant_id, job_number, status, service_type,
+            assigned_driver_id, assigned_truck_id,
+            pickup_address, authorized_by
+         )
+         VALUES (
+            gen_random_uuid(), $1::uuid, $2, 'dispatched', 'tow',
+            $3::uuid, $4::uuid,
+            '100 Test St', 'customer'
+         )
          RETURNING id`,
-        [owner.tenant.id, `JOB-${SUFFIX}-1`, driverId, truckId],
+        [owner.tenant.id, jobNumber, driverId, truckId],
       );
       jobId = jRes.rows[0]?.id as string;
 
@@ -106,8 +127,8 @@ describeIfDb('Chat integration', () => {
       const attackerEmail = `driver-${SUFFIX}-att@spec.test`;
       ctx.createdEmails.push(attackerEmail);
       const aUserRes = await c.query<{ id: string }>(
-        `INSERT INTO users (id, tenant_id, email, password_hash, role, full_name)
-         VALUES (gen_random_uuid(), $1::uuid, $2, $3, 'driver', 'Attacker Driver')
+        `INSERT INTO users (id, tenant_id, email, password_hash, role, first_name, last_name)
+         VALUES (gen_random_uuid(), $1::uuid, $2, $3, 'driver', 'Attacker', 'Driver')
          RETURNING id`,
         [
           attacker.tenant.id,
@@ -124,19 +145,22 @@ describeIfDb('Chat integration', () => {
 
       await c.query('COMMIT');
 
-      // Mint access tokens for both drivers via the live JwtService.
+      // Mint access tokens for both drivers via the live JwtService. The
+      // access-token claims schema requires `jti` to be a UUID; using a
+      // human-readable label silently fails Zod validation in the JWT
+      // guard, which returns 401 for every request.
       const jwt = app.get(JwtService);
       driverToken = await jwt.signAccess({
         sub: driverUserId,
         tid: owner.tenant.id,
         role: 'driver',
-        jti: 'chat-spec-driver',
+        jti: randomUUID(),
       });
       attackerDriverToken = await jwt.signAccess({
         sub: attackerDriverUserId,
         tid: attacker.tenant.id,
         role: 'driver',
-        jti: 'chat-spec-driver-attacker',
+        jti: randomUUID(),
       });
     } catch (e) {
       await c.query('ROLLBACK').catch(() => {});
