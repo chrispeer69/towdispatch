@@ -402,19 +402,12 @@ export class JobsService {
           message: `Cannot reassign a job in '${job.status}' state. Unassign first.`,
         });
       }
-      // Optimistic concurrency: if the job is already assigned to a
-      // different driver, return 409 so the client can show a conflict
-      // toast and re-fetch. Reassigning to the same driver is a no-op.
-      if (
-        job.status === 'dispatched' &&
-        job.assignedDriverId &&
-        job.assignedDriverId !== input.driverId
-      ) {
-        throw new ConflictException({
-          code: ERROR_CODES.CONFLICT,
-          message: 'Job already assigned to a different driver. Refresh and try again.',
-        });
-      }
+      // Drag-between-drivers is an explicit dispatcher action while the job
+      // is still in 'dispatched' (no driver on-scene yet). Refusing the
+      // reassign here was masking the legitimate UX path. Stale-state
+      // protection should come from an ETag / If-Match header at the
+      // controller level once we add it; until then, the active dispatcher's
+      // intent wins.
 
       // Validate driver — must exist, be active, and have an open shift.
       const driver = await tx.query.drivers.findFirst({
