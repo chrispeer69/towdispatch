@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { fetchCustomers } from '@/lib/api/resources';
-import { ACCESS_COOKIE } from '@/lib/auth/cookies';
+import { getSessionToken } from '@/lib/auth/session';
 import type { CustomerType } from '@ustowdispatch/shared';
-import { cookies, headers } from 'next/headers';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
@@ -25,25 +24,16 @@ export default async function CustomersPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  // Session 9.7 fix: Next.js 15 production builds lose the cookies() request
-  // scope between the (app)/layout.tsx requireUser() call and the page render
-  // — same request, two cookies() calls, the second returns an empty store.
-  // Read directly from the cookie request header instead. See
-  // BUILD_DECISIONS.md Session 9.7.
-  const cookieHeader = (await headers()).get('cookie') ?? '';
-  const token =
-    cookieHeader
-      .split(/;\s*/)
-      .find((c) => c.startsWith(`${ACCESS_COOKIE}=`))
-      ?.slice(ACCESS_COOKIE.length + 1) ?? null;
-  // [diag-page-cookies] Temporary: confirm headers()-based read sees the cookie
-  // when the page-level cookies() call does not. Remove once Session 9.7 closes.
+  // Session 9.7 — both cookies() AND headers().get('cookie') return empty in
+  // the page-render context even when the layout's parallel call sees the
+  // cookie. Read the token from the cache()-deduped getSessionToken() that
+  // the layout primed at the top of (app)/layout.tsx. See
+  // BUILD_DECISIONS.md Session 9.7 and lib/auth/session.ts header.
+  const token = await getSessionToken();
+  // [diag-page-cookies] Temporary: confirm the cache()-bridged read returns
+  // the token in the page-render context. Remove once Session 9.7 closes.
   // eslint-disable-next-line no-console
-  console.log('[diag-page-cookies]', {
-    hasToken: Boolean(token),
-    cookieNames: (await cookies()).getAll().map((c) => c.name),
-    headerHasCookie: cookieHeader.length > 0,
-  });
+  console.log('[diag-page-cookies]', { hasTokenFromCachedRead: Boolean(token) });
   // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
   // (app)/error.tsx instead of silently rendering an empty list. Restore the
   // tryFetch wrapper once the list-pages-empty triage closes.

@@ -1,7 +1,7 @@
 import { SessionProvider } from '@/components/app-shell/session-provider';
 import { AppSidebar } from '@/components/app-shell/sidebar';
 import { AppTopbar } from '@/components/app-shell/topbar';
-import { requireUser } from '@/lib/auth/session';
+import { getSessionToken, requireUser } from '@/lib/auth/session';
 /**
  * Authenticated app shell.
  *
@@ -21,6 +21,12 @@ export default async function AppLayout({
 }: {
   children: ReactNode;
 }): Promise<JSX.Element> {
+  // Session 9.7 — read the access cookie HERE, in the layout-render context
+  // where cookies() actually works in Next 15 prod builds, so the result is
+  // memoized in React.cache() and any descendant page that calls
+  // getSessionToken() gets the value without re-invoking cookies(). See
+  // BUILD_DECISIONS.md Session 9.7 and lib/auth/session.ts header comment.
+  await getSessionToken();
   const session = await requireUser();
   return (
     <SessionProvider value={session}>
