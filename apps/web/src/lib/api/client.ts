@@ -97,6 +97,18 @@ interface RequestOpts<TBody> {
   authenticated?: boolean;
   /** Forwarded to fetch's `cache` option. Default: 'no-store'. */
   cache?: RequestCache;
+  /**
+   * Caller-provided access token. When defined (including `null`), it
+   * replaces the inline `cookies()` read inside the fetcher. Server
+   * components that reach the API through a typed fetcher in
+   * `lib/api/*.ts` MUST set this — see BUILD_DECISIONS.md Session 9.7.
+   * Next.js 15's dynamic-API request scope does not survive the second
+   * module boundary in production builds, so `cookies()` returns an
+   * empty store when called from inside the typed fetcher's call site
+   * (one hop removed from the page). Reading at the page level and
+   * passing the value through restores the link.
+   */
+  accessToken?: string | null;
 }
 
 /**
@@ -112,10 +124,17 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   opts: RequestOpts<TBody> = {},
 ): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
-  // Inline cookie read — see file header for why this is not factored into a
-  // helper. Production server-side fetches were going out with no
-  // Authorization header until this read happened at the call site.
-  const accessToken = authenticated ? ((await cookies()).get(ACCESS_COOKIE)?.value ?? null) : null;
+  // Token resolution: caller-provided wins, otherwise read cookies() inline
+  // at this call site. See the file header for why the inline read is
+  // load-bearing, and RequestOpts.accessToken for why callers from typed
+  // fetchers in lib/api/*.ts have to override it.
+  let accessToken: string | null = null;
+  if (authenticated) {
+    accessToken =
+      opts.accessToken !== undefined
+        ? opts.accessToken
+        : ((await cookies()).get(ACCESS_COOKIE)?.value ?? null);
+  }
   const base = apiBase();
   const url = path.startsWith('http') ? path : `${base}${path}`;
 
@@ -193,7 +212,11 @@ export async function apiServerBffSafe<TResponse, TBody = unknown>(
 ): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
   const store = await cookies();
-  let accessToken = authenticated ? (store.get(ACCESS_COOKIE)?.value ?? null) : null;
+  let accessToken: string | null = null;
+  if (authenticated) {
+    accessToken =
+      opts.accessToken !== undefined ? opts.accessToken : (store.get(ACCESS_COOKIE)?.value ?? null);
+  }
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
 
   const buildInit = (token: string | null): RequestInit => {

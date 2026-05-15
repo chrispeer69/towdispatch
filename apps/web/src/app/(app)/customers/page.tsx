@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { fetchCustomers } from '@/lib/api/resources';
+import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import type { CustomerType } from '@ustowdispatch/shared';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
@@ -23,15 +25,25 @@ export default async function CustomersPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
+  // Session 9.7 fix: Next.js 15 dynamic-API request scope does not survive
+  // the second module boundary into lib/api/resources.ts in production
+  // builds, so the inline cookies() read inside the fetcher returns an
+  // empty store and the API gets no Authorization header. Read here at
+  // the page render site and thread the token through. See
+  // BUILD_DECISIONS.md Session 9.7.
+  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
   // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
   // (app)/error.tsx instead of silently rendering an empty list. Restore the
   // tryFetch wrapper once the list-pages-empty triage closes.
-  const initial = await fetchCustomers({
-    q: params.q,
-    type: params.type,
-    page: params.page,
-    perPage: '50',
-  });
+  const initial = await fetchCustomers(
+    {
+      q: params.q,
+      type: params.type,
+      page: params.page,
+      perPage: '50',
+    },
+    token,
+  );
 
   return (
     <div className="space-y-6">

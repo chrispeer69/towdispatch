@@ -18,9 +18,15 @@ import { apiServer } from './client';
 
 export async function fetchCustomers(
   query: Record<string, string | undefined>,
+  accessToken?: string | null,
 ): Promise<PaginatedCustomers> {
   const qs = toQuery(query);
-  return apiServer<PaginatedCustomers>(`/customers${qs}`);
+  // Token must be read inline at the page render site and threaded through —
+  // see RequestOpts.accessToken in lib/api/client.ts and BUILD_DECISIONS.md
+  // Session 9.7. Leaving accessToken undefined keeps the legacy inline-read
+  // fallback so non-page callers (route handlers, server actions) behave as
+  // before.
+  return apiServer<PaginatedCustomers>(`/customers${qs}`, { accessToken });
 }
 
 export async function fetchCustomer(id: string): Promise<CustomerWithVehiclesDto> {
