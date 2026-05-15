@@ -1,7 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
-import type { PaginatedAccounts } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { AccountListClient } from './account-list-client';
 
@@ -20,8 +18,6 @@ interface SearchParams {
   page?: string;
 }
 
-const EMPTY_ACCOUNTS: PaginatedAccounts = { data: [], total: 0, page: 1, perPage: 50 };
-
 export default async function AccountsPage({
   searchParams,
 }: {
@@ -30,16 +26,16 @@ export default async function AccountsPage({
   const params = await searchParams;
   const isMotorClub = params.isMotorClub ?? (params.type === 'motor_club' ? 'true' : undefined);
 
-  const result = await tryFetch(() =>
-    fetchAccounts({
-      q: params.q,
-      active: params.active,
-      isMotorClub,
-      page: params.page,
-      perPage: '50',
-    }),
-  );
-  const initial = result.data ?? EMPTY_ACCOUNTS;
+  // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
+  // (app)/error.tsx instead of silently rendering an empty list. Restore the
+  // tryFetch wrapper once the list-pages-empty triage closes.
+  const initial = await fetchAccounts({
+    q: params.q,
+    active: params.active,
+    isMotorClub,
+    page: params.page,
+    perPage: '50',
+  });
 
   return (
     <div className="space-y-6">

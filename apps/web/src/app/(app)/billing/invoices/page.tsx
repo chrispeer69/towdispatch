@@ -1,5 +1,4 @@
-import { type InvoiceListResponse, fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
-import { tryFetch } from '@/lib/api/client';
+import { fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
 import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
@@ -13,23 +12,21 @@ interface SearchParams {
   offset?: string;
 }
 
-const EMPTY_INVOICES: InvoiceListResponse = { data: [], total: 0, limit: 50, offset: 0 };
-
 export default async function InvoicesPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  const result = await tryFetch(() =>
-    fetchInvoices({
-      status: params.status,
-      search: params.search,
-      limit: params.limit ?? '50',
-      offset: params.offset ?? '0',
-    }),
-  );
-  const list = result.data ?? EMPTY_INVOICES;
+  // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
+  // (app)/error.tsx instead of silently rendering an empty list. Restore the
+  // tryFetch wrapper once the list-pages-empty triage closes.
+  const list = await fetchInvoices({
+    status: params.status,
+    search: params.search,
+    limit: params.limit ?? '50',
+    offset: params.offset ?? '0',
+  });
 
   return (
     <div className="space-y-6">

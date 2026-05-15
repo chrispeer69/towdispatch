@@ -116,7 +116,8 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   // helper. Production server-side fetches were going out with no
   // Authorization header until this read happened at the call site.
   const accessToken = authenticated ? ((await cookies()).get(ACCESS_COOKIE)?.value ?? null) : null;
-  const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
+  const base = apiBase();
+  const url = path.startsWith('http') ? path : `${base}${path}`;
 
   // [diag-list-empty] Temporary: surface SSR auth state per request so we can
   // see in Railway logs whether the list-page bounce is "no cookie reached
@@ -136,9 +137,34 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
     init.body = JSON.stringify(opts.body);
   }
   const res = await fetch(url, init);
-  if (authenticated && !res.ok) {
+  if (!res.ok) {
+    // [diag-list-empty] Temporary: log every non-2xx with the exact request
+    // URL, status, and structured error fields so we can distinguish 400
+    // (Zod validation) vs 403 (roles guard) vs 404 (wrong API hostname) for
+    // the list-pages-empty triage. Reads a clone of the response so
+    // parseResponseSafe below can still consume the original body. Does NOT
+    // log the access token or the full response body. Remove once the
+    // triage closes.
+    let errorCode: string | undefined;
+    let errorMessage: string | undefined;
+    try {
+      const body = (await res.clone().json()) as { code?: string; message?: string } | null;
+      errorCode = body?.code;
+      errorMessage = body?.message;
+    } catch {
+      // body was not JSON — leave errorCode/errorMessage undefined.
+    }
     // eslint-disable-next-line no-console
-    console.log('[diag-list-empty:resp]', { path, status: res.status });
+    console.log('[diag-list-empty:resp]', {
+      tag: 'diag-list-empty:resp',
+      path,
+      requestUrl: url,
+      status: res.status,
+      hasAuth: Boolean(accessToken),
+      base,
+      errorCode,
+      errorMessage,
+    });
   }
   return parseResponseSafe<TResponse>(res);
 }
