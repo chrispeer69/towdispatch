@@ -118,6 +118,15 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   const accessToken = authenticated ? ((await cookies()).get(ACCESS_COOKIE)?.value ?? null) : null;
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
 
+  // [diag-list-empty] Temporary: surface SSR auth state per request so we can
+  // see in Railway logs whether the list-page bounce is "no cookie reached
+  // SSR" vs "cookie reached SSR but API said 401" vs "200 but empty body".
+  // Remove once the list-pages-empty triage closes.
+  if (authenticated) {
+    // eslint-disable-next-line no-console
+    console.log('[diag-list-empty]', { path, hasAuth: Boolean(accessToken) });
+  }
+
   const init: RequestInit = {
     method: opts.method ?? 'GET',
     headers: buildHeaders(accessToken, opts.body !== undefined),
@@ -127,6 +136,10 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
     init.body = JSON.stringify(opts.body);
   }
   const res = await fetch(url, init);
+  if (authenticated && !res.ok) {
+    // eslint-disable-next-line no-console
+    console.log('[diag-list-empty:resp]', { path, status: res.status });
+  }
   return parseResponseSafe<TResponse>(res);
 }
 
