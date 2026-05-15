@@ -5,22 +5,24 @@
  * dashboard works behind a Stripe-style external redirect.
  */
 import { cookies } from 'next/headers';
+import {
+  ACCESS_COOKIE,
+  ACCESS_TTL_SECONDS,
+  MFA_CHALLENGE_COOKIE,
+  MFA_CHALLENGE_TTL_SECONDS,
+  MFA_SETUP_COOKIE,
+  MFA_SETUP_TTL_SECONDS,
+  REFRESH_COOKIE,
+  REFRESH_TTL_SECONDS,
+} from './cookie-config';
 
-export const ACCESS_COOKIE = 'tc_at';
-export const REFRESH_COOKIE = 'tc_rt';
-// Short-lived bridge cookies that hold the JWT returned by /auth/login when
-// the response is mfa_setup_required or mfa_required. The page-level MFA
-// proxies read these and forward the value to the backend. The token itself
-// is HttpOnly so it never reaches client JS — only the proxies see it.
-export const MFA_SETUP_COOKIE = 'tc_mfa_setup';
-export const MFA_CHALLENGE_COOKIE = 'tc_mfa_challenge';
-
-const ACCESS_TTL_SECONDS = 15 * 60;
-const REFRESH_TTL_SECONDS = 30 * 24 * 60 * 60;
-// Match the backend JWT TTLs so an expired cookie always means the token is
-// also dead. /auth/mfa/setup is signed for 15m, /auth/mfa/challenge for 5m.
-const MFA_SETUP_TTL_SECONDS = 15 * 60;
-const MFA_CHALLENGE_TTL_SECONDS = 5 * 60;
+// Re-export so existing call sites (server actions, route handlers) keep
+// working unchanged. Edge middleware imports directly from cookie-config.
+// Short-lived bridge cookies (tc_mfa_setup / tc_mfa_challenge) hold the JWT
+// returned by /auth/login on the mfa_setup_required and mfa_required flows.
+// The page-level MFA proxies read these and forward the value to the
+// backend; the token itself is HttpOnly so it never reaches client JS.
+export { ACCESS_COOKIE, REFRESH_COOKIE, MFA_SETUP_COOKIE, MFA_CHALLENGE_COOKIE };
 
 export interface SetSessionCookiesOpts {
   accessToken: string;
