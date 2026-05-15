@@ -30,9 +30,16 @@ export interface SynthOptions {
   payments?: number;
   motorClubHistory?: number;
   attachments?: number;
+  /**
+   * Prefix used in every external_id (e.g. `cust-${idPrefix}-1`). Tests
+   * that run multiple bundle imports against the same tenant in the same
+   * suite MUST pass distinct prefixes so the dedup-by-external_id path
+   * does not collapse "different bundles" into "the same import". Defaults
+   * to 'synth' for backwards compatibility with the CLI smoke path.
+   */
+  idPrefix?: string;
 }
 
-const PHONES = ['(310) 555-1234', '(415) 555-2222', '(212) 555-9999', '(310) 555-4444'];
 const NAMES = ['Sam Carter', 'Lena Ortiz', 'Mike Cho', 'Renee Watson', 'Jamal King', 'Priya Patel'];
 const CITIES = ['Brooklyn', 'Austin', 'Phoenix', 'Detroit', 'Atlanta'];
 const STATES = ['NY', 'TX', 'AZ', 'MI', 'GA'];
@@ -139,13 +146,45 @@ function crc32(buf: Buffer): number {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
+/**
+ * Build a synthetic per-row phone in E.164-friendly format. Unique per
+ * (idPrefix, kind, i) so dedup-by-phone never collapses rows of the same
+ * bundle into one another.
+ */
+const synthPhone = (idPrefix: string, kind: 'cust' | 'drv', i: number): string => {
+  const stem = `${idPrefix}-${kind}`;
+  let h = 0;
+  for (const ch of stem) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const tail = String(((h + i) % 9000) + 1000).padStart(4, '0');
+  const mid = String(((h >> 8) % 900) + 100).padStart(3, '0');
+  return `(310) ${mid}-${tail}`;
+};
+
+/**
+ * Build a synthetic 17-char VIN. The importer's check-digit validator
+ * (isValidVin) warns-but-accepts, so we don't bother making it pass —
+ * we just need uniqueness per (idPrefix, kind, i) so dedup-by-VIN doesn't
+ * collapse multiple vehicles onto one row.
+ */
+const synthVin = (idPrefix: string, kind: 'veh' | 'tr', i: number): string => {
+  let h = 0;
+  for (const ch of `${idPrefix}-${kind}`) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  // 11 fixed + 6 unique = 17. Forbidden chars I/O/Q are excluded by using
+  // only digits in the unique tail.
+  const prefix = '1HGBH41JXMN';
+  const stem = String(h % 1000).padStart(3, '0');
+  const tail = String(i + 1).padStart(3, '0');
+  return `${prefix}${stem}${tail}`;
+};
+
 export function buildSyntheticBundle(opts: SynthOptions): Buffer {
+  const idPrefix = opts.idPrefix ?? 'synth';
   const customers = Array.from({ length: opts.customers }, (_, i) => ({
-    towbook_id: `cust-synth-${i + 1}`,
+    towbook_id: `cust-${idPrefix}-${i + 1}`,
     name: pick(NAMES, i),
-    phone_primary: pick(PHONES, i),
+    phone_primary: synthPhone(idPrefix, 'cust', i),
     phone_secondary: '',
-    email: `customer-${i + 1}-${Date.now()}@example.test`,
+    email: `customer-${idPrefix}-${i + 1}@example.test`,
     street_address: `${100 + i} Main St`,
     city: pick(CITIES, i),
     state: pick(STATES, i),
@@ -158,23 +197,23 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
   }));
 
   const vehicles = Array.from({ length: opts.vehicles }, (_, i) => ({
-    towbook_id: `veh-synth-${i + 1}`,
-    customer_towbook_id: opts.customers > 0 ? `cust-synth-${(i % opts.customers) + 1}` : '',
+    towbook_id: `veh-${idPrefix}-${i + 1}`,
+    customer_towbook_id: opts.customers > 0 ? `cust-${idPrefix}-${(i % opts.customers) + 1}` : '',
     year: 2015 + (i % 10),
     make: pick(MAKES, i),
     model: pick(MODELS, i),
     color: 'Silver',
     plate: `PLT${String(i + 1).padStart(4, '0')}`,
     plate_state: pick(STATES, i),
-    vin: pick(VINS, i),
+    vin: synthVin(idPrefix, 'veh', i),
     notes: '',
   }));
 
   const drivers = Array.from({ length: opts.drivers }, (_, i) => ({
-    towbook_id: `drv-synth-${i + 1}`,
-    name: `Driver ${i + 1}`,
-    phone: pick(PHONES, i + 7),
-    email: `driver-${i + 1}-${Date.now()}@example.test`,
+    towbook_id: `drv-${idPrefix}-${i + 1}`,
+    name: `Driver ${idPrefix} ${i + 1}`,
+    phone: synthPhone(idPrefix, 'drv', i),
+    email: `driver-${idPrefix}-${i + 1}@example.test`,
     license_number: `D${String(i + 1).padStart(8, '0')}`,
     license_state: pick(STATES, i),
     license_expiration: '2027-12-31',
@@ -184,12 +223,12 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
   }));
 
   const trucks = Array.from({ length: opts.trucks }, (_, i) => ({
-    towbook_id: `tr-synth-${i + 1}`,
-    unit_number: `T-${100 + i}`,
+    towbook_id: `tr-${idPrefix}-${i + 1}`,
+    unit_number: `T-${idPrefix}-${100 + i}`,
     year: 2018 + (i % 8),
     make: pick(MAKES, i),
     model: pick(MODELS, i),
-    vin: pick(VINS, i + 1),
+    vin: synthVin(idPrefix, 'tr', i),
     plate: `TRK${String(i + 1).padStart(4, '0')}`,
     plate_state: pick(STATES, i),
     gvwr: 26000 + (i % 5) * 1000,
@@ -197,22 +236,22 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
   }));
 
   const jobs = Array.from({ length: opts.jobs }, (_, i) => ({
-    towbook_id: `job-synth-${i + 1}`,
+    towbook_id: `job-${idPrefix}-${i + 1}`,
     call_received_at: '2024-03-15 14:32:00',
     service_type: 'Tow',
     source: 'Phone',
     network: i % 3 === 0 ? pick(NETWORKS, i) : '',
-    network_case_id: i % 3 === 0 ? `CASE-${i + 1000}` : '',
+    network_case_id: i % 3 === 0 ? `CASE-${idPrefix}-${i + 1000}` : '',
     pickup_address: `${100 + i} Pickup Ln, ${pick(CITIES, i)} ${pick(STATES, i)}`,
     pickup_lat: 33.0 + i * 0.01,
     pickup_lng: -118.0 - i * 0.01,
     dropoff_address: `${200 + i} Dropoff Rd`,
     dropoff_lat: 33.05 + i * 0.01,
     dropoff_lng: -118.05 - i * 0.01,
-    customer_towbook_id: opts.customers > 0 ? `cust-synth-${(i % opts.customers) + 1}` : '',
-    vehicle_towbook_id: opts.vehicles > 0 ? `veh-synth-${(i % opts.vehicles) + 1}` : '',
-    assigned_driver_towbook_id: opts.drivers > 0 ? `drv-synth-${(i % opts.drivers) + 1}` : '',
-    assigned_truck_towbook_id: opts.trucks > 0 ? `tr-synth-${(i % opts.trucks) + 1}` : '',
+    customer_towbook_id: opts.customers > 0 ? `cust-${idPrefix}-${(i % opts.customers) + 1}` : '',
+    vehicle_towbook_id: opts.vehicles > 0 ? `veh-${idPrefix}-${(i % opts.vehicles) + 1}` : '',
+    assigned_driver_towbook_id: opts.drivers > 0 ? `drv-${idPrefix}-${(i % opts.drivers) + 1}` : '',
+    assigned_truck_towbook_id: opts.trucks > 0 ? `tr-${idPrefix}-${(i % opts.trucks) + 1}` : '',
     status: 'Completed',
     assigned_at: '2024-03-15 14:35:00',
     en_route_at: '2024-03-15 14:37:00',
@@ -227,8 +266,8 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
   }));
 
   const impounds = Array.from({ length: opts.impounds ?? 0 }, (_, i) => ({
-    towbook_id: `imp-synth-${i + 1}`,
-    vehicle_towbook_id: opts.vehicles > 0 ? `veh-synth-${(i % opts.vehicles) + 1}` : '',
+    towbook_id: `imp-${idPrefix}-${i + 1}`,
+    vehicle_towbook_id: opts.vehicles > 0 ? `veh-${idPrefix}-${(i % opts.vehicles) + 1}` : '',
     impound_date: '2024-04-01 11:00:00',
     yard_name: 'Main Yard',
     hold_type: 'police',
@@ -239,9 +278,9 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
   }));
 
   const invoices = Array.from({ length: opts.invoices ?? 0 }, (_, i) => ({
-    towbook_id: `inv-synth-${i + 1}`,
-    job_towbook_id: opts.jobs > 0 ? `job-synth-${(i % opts.jobs) + 1}` : '',
-    invoice_number: `INV-${String(20000 + i)}`,
+    towbook_id: `inv-${idPrefix}-${i + 1}`,
+    job_towbook_id: opts.jobs > 0 ? `job-${idPrefix}-${(i % opts.jobs) + 1}` : '',
+    invoice_number: `INV-${idPrefix}-${String(20000 + i)}`,
     issued_date: '2024-03-20 09:00:00',
     due_date: '2024-04-19 09:00:00',
     total: (125 + (i % 10) * 25).toFixed(2),
@@ -250,25 +289,25 @@ export function buildSyntheticBundle(opts: SynthOptions): Buffer {
   }));
 
   const payments = Array.from({ length: opts.payments ?? 0 }, (_, i) => ({
-    towbook_id: `pay-synth-${i + 1}`,
+    towbook_id: `pay-${idPrefix}-${i + 1}`,
     invoice_towbook_id:
-      (opts.invoices ?? 0) > 0 ? `inv-synth-${(i % (opts.invoices ?? 1)) + 1}` : '',
+      (opts.invoices ?? 0) > 0 ? `inv-${idPrefix}-${(i % (opts.invoices ?? 1)) + 1}` : '',
     received_date: '2024-03-25 14:00:00',
     amount: (125 + (i % 10) * 25).toFixed(2),
     method: i % 3 === 0 ? 'Cash' : i % 3 === 1 ? 'Credit Card' : 'Check',
-    reference: i % 3 === 2 ? `CHK${1000 + i}` : '',
+    reference: i % 3 === 2 ? `CHK${idPrefix}${1000 + i}` : '',
   }));
 
   const motorClubHistory = Array.from({ length: opts.motorClubHistory ?? 0 }, (_, i) => ({
-    job_towbook_id: opts.jobs > 0 ? `job-synth-${(i % opts.jobs) + 1}` : '',
+    job_towbook_id: opts.jobs > 0 ? `job-${idPrefix}-${(i % opts.jobs) + 1}` : '',
     network: pick(NETWORKS, i),
-    network_case_id: `CASE-${20000 + i}`,
+    network_case_id: `CASE-${idPrefix}-${20000 + i}`,
     partial_fee_amount: i % 5 === 0 ? '15.00' : '',
     partial_fee_reason: i % 5 === 0 ? 'Time over allowance' : '',
   }));
 
   const attachmentManifest = Array.from({ length: opts.attachments ?? 0 }, (_, i) => ({
-    towbook_id: opts.jobs > 0 ? `job-synth-${(i % opts.jobs) + 1}` : '',
+    towbook_id: opts.jobs > 0 ? `job-${idPrefix}-${(i % opts.jobs) + 1}` : '',
     filename: `photo-${i + 1}.jpg`,
     type: 'photo',
   }));

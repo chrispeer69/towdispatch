@@ -178,6 +178,14 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM customer_vehicles WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          // Session 16 import tables — import_run_events FK-cascades on
+          // import_runs, but import_runs.tenant_id is ON DELETE RESTRICT,
+          // so the rows must be cleared explicitly before the tenant
+          // delete. Order: events (child) → runs (parent).
+          await c.query('DELETE FROM import_run_events WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM import_runs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM vehicles WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM customers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM accounts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);

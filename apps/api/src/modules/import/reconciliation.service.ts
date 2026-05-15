@@ -32,6 +32,16 @@ export interface ReconciliationDiff {
   }[];
 }
 
+/**
+ * A drift-field definition. When the DB column name and the bundle's
+ * canonical mapping name differ (e.g. db `phone` vs bundle `phone_primary`)
+ * the two must be specified separately. When equal, pass a string.
+ */
+type DriftField = string | { db: string; bundle: string };
+
+const driftDb = (f: DriftField) => (typeof f === 'string' ? f : f.db);
+const driftBundle = (f: DriftField) => (typeof f === 'string' ? f : f.bundle);
+
 @Injectable()
 export class ReconciliationService {
   constructor(
@@ -61,7 +71,7 @@ export class ReconciliationService {
         table: 'customers',
         csvKey: 'customers',
         identifier: 'name',
-        driftFields: ['name', 'phone', 'email'],
+        driftFields: ['name', { db: 'phone', bundle: 'phone_primary' }, 'email'],
         bundle: b,
         mapping,
       });
@@ -155,7 +165,7 @@ export class ReconciliationService {
     table: string;
     csvKey: string;
     identifier: string;
-    driftFields: string[];
+    driftFields: DriftField[];
     bundle: {
       csv: Map<string, import('./types.js').ParsedCsvFile>;
       attachments: Map<string, Buffer>;
@@ -175,12 +185,13 @@ export class ReconciliationService {
     // Tenant scoping is handled by RLS via app.current_tenant_id GUC set in
     // the caller (reconcile()). Do NOT add WHERE tenant_id=… here — RLS
     // already filters and the parameter list above is empty.
+    const dbColumns = opts.driftFields.map(driftDb);
     const dbRows = await opts.client.query<{
       id: string;
       external_id: string;
       [key: string]: string;
     }>(
-      `SELECT id, external_id, ${opts.driftFields.join(', ')}
+      `SELECT id, external_id, ${dbColumns.join(', ')}
        FROM ${opts.table}
        WHERE external_source='towbook' AND external_id IS NOT NULL`,
       [],
@@ -207,10 +218,12 @@ export class ReconciliationService {
           : null;
         if (get) {
           for (const f of opts.driftFields) {
-            const bundleVal = normalizeForCompare(f, get(row, f));
-            const dbVal = normalizeForCompare(f, dbRow[f] ?? null);
+            const dbField = driftDb(f);
+            const bundleField = driftBundle(f);
+            const bundleVal = normalizeForCompare(dbField, get(row, bundleField));
+            const dbVal = normalizeForCompare(dbField, dbRow[dbField] ?? null);
             if (bundleVal !== dbVal) {
-              fieldDiffs.push({ field: f, bundle: bundleVal, db: dbVal });
+              fieldDiffs.push({ field: dbField, bundle: bundleVal, db: dbVal });
             }
           }
         }

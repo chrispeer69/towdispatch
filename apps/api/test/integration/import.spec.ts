@@ -45,6 +45,7 @@ describeIfDb('Towbook import integration', () => {
 
   it('runs a dry run that rolls back', async () => {
     const bundle = buildSyntheticBundle({
+      idPrefix: 'dryrun',
       customers: 5,
       vehicles: 5,
       drivers: 2,
@@ -79,6 +80,7 @@ describeIfDb('Towbook import integration', () => {
 
   it('runs a live import that persists', async () => {
     const bundle = buildSyntheticBundle({
+      idPrefix: 'live',
       customers: 3,
       vehicles: 3,
       drivers: 1,
@@ -110,6 +112,7 @@ describeIfDb('Towbook import integration', () => {
 
   it('is idempotent: running the same bundle twice does not duplicate', async () => {
     const bundle = buildSyntheticBundle({
+      idPrefix: 'idem',
       customers: 4,
       vehicles: 0,
       drivers: 0,
@@ -148,6 +151,7 @@ describeIfDb('Towbook import integration', () => {
 
   it('reconciliation diff shows zero missing after a successful live import', async () => {
     const bundle = buildSyntheticBundle({
+      idPrefix: 'recon',
       customers: 2,
       vehicles: 0,
       drivers: 0,
@@ -177,6 +181,7 @@ describeIfDb('Towbook import integration', () => {
 
   it('rejects cross-tenant import attempts', async () => {
     const bundle = buildSyntheticBundle({
+      idPrefix: 'cross',
       customers: 1,
       vehicles: 0,
       drivers: 0,
