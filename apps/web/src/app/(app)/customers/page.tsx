@@ -32,6 +32,14 @@ export default async function CustomersPage({
   // the page render site and thread the token through. See
   // BUILD_DECISIONS.md Session 9.7.
   const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+  // [diag-page-cookies] Temporary: print what the page-render cookies() call sees
+  // in production. Determines whether the cookie is missing entirely vs present
+  // but not being read. Remove once Session 9.7 closes.
+  // eslint-disable-next-line no-console
+  console.log('[diag-page-cookies]', {
+    hasToken: Boolean(token),
+    cookieNames: (await cookies()).getAll().map((c) => c.name),
+  });
   // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
   // (app)/error.tsx instead of silently rendering an empty list. Restore the
   // tryFetch wrapper once the list-pages-empty triage closes.
