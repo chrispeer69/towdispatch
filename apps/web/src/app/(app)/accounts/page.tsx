@@ -1,4 +1,4 @@
-﻿import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
 import type { PaginatedAccounts } from '@ustowdispatch/shared';
@@ -47,7 +47,7 @@ export default async function AccountsPage({
           <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             {isMotorClub === 'true' ? 'Motor Clubs' : 'Accounts'}
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
             <span data-testid="account-count">{initial.total}</span> total Â·{' '}
             {isMotorClub === 'true'
               ? 'AAA, Agero, and friends'

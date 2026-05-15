@@ -1,4 +1,4 @@
-﻿import { getOptionalUser } from '@/lib/auth/session';
+import { getOptionalUser } from '@/lib/auth/session';
 import { ROLES } from '@ustowdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ReconcileClient } from './reconcile-client';
@@ -19,7 +19,7 @@ export default async function ReconcilePage(): Promise<JSX.Element> {
         <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
           Towbook Reconciliation
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-sm text-text-secondary-on-dark">
           Diff a Towbook export against what we have. Drop the same bundle you'd import â€” you'll
           get missing / orphaned / drift counts back. Cancel Towbook when both missing and drift are
           zero.

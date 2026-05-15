@@ -53,7 +53,7 @@ export function InvoiceActionsClient({ invoice }: Props): JSX.Element {
             type="button"
             onClick={() => call('POST', `invoices/${invoice.id}/issue`)}
             disabled={busy}
-            className="rounded-md bg-orange px-4 py-1.5 text-sm font-medium text-white hover:bg-orange-light disabled:opacity-50"
+            className="rounded-md bg-brand-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-primary-hover disabled:opacity-50"
             data-testid="invoice-issue-btn"
           >
             Issue invoice
@@ -63,7 +63,7 @@ export function InvoiceActionsClient({ invoice }: Props): JSX.Element {
           <button
             type="button"
             onClick={() => setShowPay((v) => !v)}
-            className="rounded-md bg-steel-light px-4 py-1.5 text-sm hover:bg-steel-border"
+            className="rounded-md bg-bg-surface-elevated px-4 py-1.5 text-sm hover:bg-divider"
             data-testid="invoice-record-payment-btn"
           >
             Record payment
@@ -74,7 +74,7 @@ export function InvoiceActionsClient({ invoice }: Props): JSX.Element {
             href={`/api/billing/invoices/${invoice.id}/pdf`}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md bg-steel-light px-4 py-1.5 text-sm hover:bg-steel-border"
+            className="rounded-md bg-bg-surface-elevated px-4 py-1.5 text-sm hover:bg-divider"
             data-testid="invoice-pdf-link"
           >
             PDF
@@ -133,7 +133,7 @@ function PaymentForm({
   const [ref, setRef] = useState('');
   return (
     <form
-      className="rounded-md border border-steel-border bg-steel-mid/40 p-3"
+      className="rounded-md border border-divider bg-bg-surface/40 p-3"
       data-testid="payment-form"
       onSubmit={(e) => {
         e.preventDefault();
@@ -148,22 +148,22 @@ function PaymentForm({
       }}
     >
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-muted">
+        <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
           Amount
           <input
             type="text"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-32 rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
+            className="w-32 rounded border border-divider bg-bg-surface px-2 py-1.5 text-sm"
             data-testid="payment-amount-input"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-muted">
+        <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
           Method
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value)}
-            className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
+            className="rounded border border-divider bg-bg-surface px-2 py-1.5 text-sm"
             data-testid="payment-method-select"
           >
             {paymentMethodValues.map((m) => (
@@ -173,20 +173,20 @@ function PaymentForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-muted">
+        <label className="flex flex-col gap-1 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
           Reference
           <input
             type="text"
             value={ref}
             onChange={(e) => setRef(e.target.value)}
             placeholder="check #, ACH ref…"
-            className="rounded border border-steel-border bg-steel-mid px-2 py-1.5 text-sm"
+            className="rounded border border-divider bg-bg-surface px-2 py-1.5 text-sm"
           />
         </label>
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-orange px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-light disabled:opacity-50"
+          className="rounded-md bg-brand-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-primary-hover disabled:opacity-50"
           data-testid="payment-submit-btn"
         >
           Record

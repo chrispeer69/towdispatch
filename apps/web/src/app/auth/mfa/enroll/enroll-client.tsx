@@ -76,7 +76,9 @@ export function EnrollClient(): JSX.Element {
   }
 
   if (step === 'loading') {
-    return <p className="text-sm text-text-secondary">Preparing your authenticator setup…</p>;
+    return (
+      <p className="text-sm text-text-secondary-on-dark">Preparing your authenticator setup…</p>
+    );
   }
 
   if (step === 'codes' && setup) {
@@ -107,7 +109,7 @@ export function EnrollClient(): JSX.Element {
     );
   }
 
-  return <p className="text-sm text-text-secondary">You&rsquo;re all set. Redirecting…</p>;
+  return <p className="text-sm text-text-secondary-on-dark">You&rsquo;re all set. Redirecting…</p>;
 }
 
 function CodesPanel({
@@ -129,7 +131,7 @@ function CodesPanel({
         These recovery codes are shown <strong>only once</strong>. Save them somewhere safe — you
         can use any of them in place of a TOTP code if you lose your phone.
       </div>
-      <ul className="grid grid-cols-2 gap-2 rounded-[10px] border border-steel-border bg-steel-mid px-4 py-4 font-mono text-sm tracking-[0.2em] text-text-primary">
+      <ul className="grid grid-cols-2 gap-2 rounded-[10px] border border-divider bg-bg-surface px-4 py-4 font-mono text-sm tracking-[0.2em] text-text-primary-on-dark">
         {setup.recoveryCodes.map((c) => (
           <li key={c} className="select-all">
             {c}
@@ -139,7 +141,7 @@ function CodesPanel({
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted hover:text-text-secondary"
+          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-text-secondary-on-dark"
           onClick={() => {
             void navigator.clipboard.writeText(setup.recoveryCodes.join('\n'));
           }}
@@ -148,7 +150,7 @@ function CodesPanel({
         </button>
         <button
           type="button"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted hover:text-text-secondary"
+          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-text-secondary-on-dark"
           onClick={() => {
             const blob = new Blob([setup.recoveryCodes.join('\n')], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -162,12 +164,12 @@ function CodesPanel({
           Download
         </button>
       </div>
-      <label className="flex items-center gap-3 text-sm text-text-secondary">
+      <label className="flex items-center gap-3 text-sm text-text-secondary-on-dark">
         <input
           type="checkbox"
           checked={acknowledged}
           onChange={(e) => onAck(e.target.checked)}
-          className="h-4 w-4 rounded border-steel-border bg-steel-mid"
+          className="h-4 w-4 rounded border-divider bg-bg-surface"
         />
         I&rsquo;ve saved my recovery codes somewhere safe.
       </label>
@@ -218,7 +220,7 @@ function VerifyPanel({
       }}
       className="space-y-5"
     >
-      <div className="flex flex-col items-center gap-3 rounded-[10px] border border-steel-border bg-steel-mid p-4">
+      <div className="flex flex-col items-center gap-3 rounded-[10px] border border-divider bg-bg-surface p-4">
         {/* qrcode is generated server-side in /auth/mfa/setup. Rendering it
             as a plain <img> avoids pulling a QR library into the bundle. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -229,15 +231,16 @@ function VerifyPanel({
           height={196}
           className="rounded-[6px] bg-white p-2"
         />
-        <details className="w-full text-xs text-text-muted">
+        <details className="w-full text-xs text-text-secondary-on-dark-on-dark/60">
           <summary className="cursor-pointer select-none">Can&rsquo;t scan? Enter manually</summary>
           <div className="mt-2 space-y-1">
             <p>
-              Secret: <code className="select-all font-mono text-text-secondary">{secret}</code>
+              Secret:{' '}
+              <code className="select-all font-mono text-text-secondary-on-dark">{secret}</code>
             </p>
             <p className="truncate">
               URL:{' '}
-              <a className="text-orange-light underline" href={otpAuthUrl}>
+              <a className="text-brand-primary underline" href={otpAuthUrl}>
                 {otpAuthUrl}
               </a>
             </p>
@@ -247,7 +250,7 @@ function VerifyPanel({
       <div className="space-y-1.5">
         <label
           htmlFor="mfa-totp"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted"
+          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60"
         >
           6-digit code from your app
         </label>
@@ -274,7 +277,7 @@ function VerifyPanel({
       <button
         type="button"
         onClick={onBack}
-        className="block w-full text-center text-xs font-semibold uppercase tracking-[0.18em] text-text-muted hover:text-text-secondary"
+        className="block w-full text-center text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-text-secondary-on-dark"
       >
         ← Back to recovery codes
       </button>

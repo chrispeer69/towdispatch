@@ -151,7 +151,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
             const el = document.createElement('div');
             el.dataset.testid = `map-job-${id}`;
             el.className =
-              'flex h-7 w-7 items-center justify-center rounded-full border-2 border-orange-300 bg-orange-500 text-[10px] font-bold uppercase text-white shadow';
+              'flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-primary bg-brand-primary text-[10px] font-bold uppercase text-white shadow';
             el.textContent = job.serviceType.slice(0, 1).toUpperCase();
             // biome-ignore lint/suspicious/noExplicitAny: marker constructor
             const marker = new Marker({ element: el })
@@ -178,16 +178,16 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
     return (
       <div
         data-testid="dispatch-map-placeholder"
-        className="flex min-h-[320px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-steel-border bg-steel/40 p-6 text-center"
+        className="flex min-h-[320px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-divider bg-bg-base/40 p-6 text-center"
       >
         <AlertTriangle className="h-6 w-6 text-warn" />
-        <p className="font-condensed text-sm font-bold uppercase tracking-wide text-text-primary">
+        <p className="font-condensed text-sm font-bold uppercase tracking-wide text-text-primary-on-dark">
           Mapbox token not configured
         </p>
-        <p className="max-w-md text-xs text-text-secondary">
-          Set <code className="rounded bg-steel px-1 py-0.5">NEXT_PUBLIC_MAPBOX_TOKEN</code> in{' '}
-          <code className="rounded bg-steel px-1 py-0.5">apps/web/.env.local</code> and restart the
-          web dev server. The rest of the dispatch board works without it.
+        <p className="max-w-md text-xs text-text-secondary-on-dark">
+          Set <code className="rounded bg-bg-base px-1 py-0.5">NEXT_PUBLIC_MAPBOX_TOKEN</code> in{' '}
+          <code className="rounded bg-bg-base px-1 py-0.5">apps/web/.env.local</code> and restart
+          the web dev server. The rest of the dispatch board works without it.
         </p>
       </div>
     );
@@ -197,7 +197,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
     <div
       ref={containerRef}
       data-testid="dispatch-map-container"
-      className="h-[420px] w-full overflow-hidden rounded-md border border-steel-border"
+      className="h-[420px] w-full overflow-hidden rounded-md border border-divider"
     />
   );
 }

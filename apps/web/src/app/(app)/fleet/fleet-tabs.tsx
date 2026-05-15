@@ -28,7 +28,7 @@ export function FleetTabs(): JSX.Element {
   const pathname = usePathname() ?? '';
   return (
     <nav
-      className="flex flex-wrap gap-1.5 border-b border-steel-border pb-3"
+      className="flex flex-wrap gap-1.5 border-b border-divider pb-3"
       aria-label="Fleet navigation"
     >
       {TABS.map((t) => {
@@ -40,8 +40,8 @@ export function FleetTabs(): JSX.Element {
             className={cn(
               'rounded-[8px] border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-colors',
               active
-                ? 'border-orange/40 bg-orange/15 text-orange-light'
-                : 'border-steel-border bg-steel-light/40 text-text-secondary hover:text-text-primary',
+                ? 'border-brand-primary/40 bg-brand-primary/15 text-brand-primary'
+                : 'border-divider bg-bg-surface-elevated/40 text-text-secondary-on-dark hover:text-text-primary-on-dark',
             )}
           >
             {t.label}

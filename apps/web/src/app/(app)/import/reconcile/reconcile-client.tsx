@@ -106,7 +106,9 @@ export function ReconcileClient({ tenantId }: { tenantId: string }): JSX.Element
                       </li>
                     ))}
                     {d.drift.length > 20 && (
-                      <li className="text-text-secondary">… and {d.drift.length - 20} more</li>
+                      <li className="text-text-secondary-on-dark">
+                        … and {d.drift.length - 20} more
+                      </li>
                     )}
                   </ul>
                 </div>
@@ -128,7 +130,7 @@ function Counter({
     value === 0 ? 'text-success' : tone === 'destructive' ? 'text-destructive' : 'text-warning';
   return (
     <div className="rounded border border-border bg-background p-3">
-      <p className="text-xs text-text-secondary">{label}</p>
+      <p className="text-xs text-text-secondary-on-dark">{label}</p>
       <p className={`text-2xl font-bold ${toneClass}`}>{value}</p>
     </div>
   );
@@ -139,7 +141,7 @@ function Bucket({ title, items }: { title: string; items: string[] }): JSX.Eleme
   return (
     <div className="mt-3">
       <p className="text-sm font-medium">{title}</p>
-      <ul className="mt-2 list-disc pl-5 text-xs text-text-secondary">
+      <ul className="mt-2 list-disc pl-5 text-xs text-text-secondary-on-dark">
         {head.map((i) => (
           <li key={i}>{i}</li>
         ))}

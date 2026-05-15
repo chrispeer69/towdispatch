@@ -40,8 +40,13 @@ const config: Config = {
         bg: {
           base: 'hsl(var(--bg-base) / <alpha-value>)',
           surface: 'hsl(var(--bg-surface) / <alpha-value>)',
+          'surface-elevated': 'hsl(var(--bg-surface-elevated) / <alpha-value>)',
           marketing: 'hsl(var(--bg-marketing) / <alpha-value>)',
           section: 'hsl(var(--bg-section) / <alpha-value>)',
+        },
+        divider: {
+          DEFAULT: 'hsl(var(--bg-divider) / <alpha-value>)',
+          strong: 'hsl(var(--bg-divider-strong) / <alpha-value>)',
         },
         status: {
           success: 'hsl(var(--status-success) / <alpha-value>)',

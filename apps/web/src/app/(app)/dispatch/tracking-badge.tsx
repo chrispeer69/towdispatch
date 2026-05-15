@@ -42,17 +42,17 @@ export function TrackingBadge({ jobId, jobNumber, canRevoke }: Props): JSX.Eleme
     };
   }, [jobId]);
 
-  if (!link) return <span className="text-[10px] text-text-secondary">—</span>;
+  if (!link) return <span className="text-[10px] text-text-secondary-on-dark">—</span>;
 
   const meta = STATUS_LABELS[link.smsStatus] ?? { label: link.smsStatus, tone: 'neutral' };
   const tone =
     meta.tone === 'ok'
       ? 'bg-ok/15 text-ok'
       : meta.tone === 'warn'
-        ? 'bg-orange/15 text-orange'
+        ? 'bg-brand-primary/15 text-brand-primary'
         : meta.tone === 'err'
           ? 'bg-danger/15 text-danger'
-          : 'bg-steel-mid text-text-secondary';
+          : 'bg-bg-surface text-text-secondary-on-dark';
 
   return (
     <>
@@ -165,7 +165,7 @@ function TrackingModal({
       aria-modal="true"
     >
       <div
-        className="bg-steel rounded-lg p-5 max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-bg-base rounded-lg p-5 max-w-md w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
         role="document"
@@ -175,7 +175,7 @@ function TrackingModal({
             <h3 className="font-condensed text-lg font-extrabold uppercase">
               Tracking — #{jobNumber}
             </h3>
-            <p className="text-xs text-text-secondary mt-0.5">
+            <p className="text-xs text-text-secondary-on-dark mt-0.5">
               SMS to {link.smsToPhone ?? '—'} · status {link.smsStatus}
               {link.viewCount > 0 ? ` · viewed ${link.viewCount}× ` : ''}
             </p>
@@ -183,15 +183,15 @@ function TrackingModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-text-secondary hover:text-text-primary"
+            className="text-text-secondary-on-dark hover:text-text-primary-on-dark"
             aria-label="Close"
           >
             ✕
           </button>
         </div>
 
-        <div className="rounded-md bg-steel-light px-3 py-2 mb-3 break-all text-xs">
-          <span className="text-text-secondary">URL: </span>
+        <div className="rounded-md bg-bg-surface-elevated px-3 py-2 mb-3 break-all text-xs">
+          <span className="text-text-secondary-on-dark">URL: </span>
           <a href={link.url} target="_blank" rel="noopener noreferrer" className="underline">
             {link.url}
           </a>
@@ -203,20 +203,20 @@ function TrackingModal({
               key={m.id}
               className={`text-sm rounded-md px-3 py-2 max-w-[85%] ${
                 m.direction === 'outbound'
-                  ? 'ml-auto bg-orange/15'
+                  ? 'ml-auto bg-brand-primary/15'
                   : m.direction === 'system'
-                    ? 'bg-steel-mid'
-                    : 'bg-steel-light'
+                    ? 'bg-bg-surface'
+                    : 'bg-bg-surface-elevated'
               }`}
             >
               <div>{m.body}</div>
-              <div className="text-text-secondary text-[10px] mt-1">
+              <div className="text-text-secondary-on-dark text-[10px] mt-1">
                 {new Date(m.createdAt).toLocaleTimeString()}
               </div>
             </div>
           ))}
           {messages.length === 0 ? (
-            <div className="text-xs text-text-secondary">No messages yet.</div>
+            <div className="text-xs text-text-secondary-on-dark">No messages yet.</div>
           ) : null}
         </div>
 
@@ -228,7 +228,7 @@ function TrackingModal({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !busy) void send();
             }}
-            className="flex-1 bg-steel-light rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange"
+            className="flex-1 bg-bg-surface-elevated rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             placeholder="Reply to customer…"
             disabled={busy}
           />
@@ -236,7 +236,7 @@ function TrackingModal({
             type="button"
             onClick={() => void send()}
             disabled={busy}
-            className="rounded-md bg-orange px-3 py-2 text-sm font-semibold text-steel disabled:opacity-50"
+            className="rounded-md bg-brand-primary px-3 py-2 text-sm font-semibold text-steel disabled:opacity-50"
           >
             Send
           </button>
@@ -247,7 +247,7 @@ function TrackingModal({
             type="button"
             onClick={() => void resend()}
             disabled={busy}
-            className="rounded-md bg-steel-light px-3 py-1.5 hover:bg-steel-mid disabled:opacity-50"
+            className="rounded-md bg-bg-surface-elevated px-3 py-1.5 hover:bg-bg-surface disabled:opacity-50"
           >
             Resend SMS
           </button>

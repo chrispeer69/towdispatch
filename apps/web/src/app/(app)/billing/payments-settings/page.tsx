@@ -33,7 +33,7 @@ export default async function PaymentsSettingsPage(): Promise<JSX.Element> {
     <div className="space-y-8">
       <header>
         <h1 className="text-2xl font-bold">Stripe payments</h1>
-        <p className="text-text-secondary mt-1 max-w-prose">
+        <p className="text-text-secondary-on-dark mt-1 max-w-prose">
           Connect a Stripe account to accept card and ACH payments. Funds are paid out directly to
           your bank — US Tow DISPATCH only retains its configured platform margin.
         </p>

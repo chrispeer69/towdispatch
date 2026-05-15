@@ -84,7 +84,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
       <h2 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
         Submit DVIR
       </h2>
-      <div className="mt-3 grid gap-3 rounded-[12px] border border-steel-border bg-steel-mid p-4 md:grid-cols-2">
+      <div className="mt-3 grid gap-3 rounded-[12px] border border-divider bg-bg-surface p-4 md:grid-cols-2">
         <div className="flex flex-col gap-1">
           <Label htmlFor="dvir-driver">Driver</Label>
           <select
@@ -92,7 +92,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
             value={driverId}
             onChange={(e) => setDriverId(e.target.value)}
             data-testid="dvir-driver-select"
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
           >
             {drivers.map((d) => (
               <option key={d.id} value={d.id}>
@@ -108,7 +108,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             data-testid="dvir-truck-select"
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
           >
             {trucks.map((t) => (
               <option key={t.id} value={t.id}>
@@ -123,7 +123,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
             id="dvir-type"
             value={type}
             onChange={(e) => setType(e.target.value as (typeof dvirTypeValues)[number])}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
           >
             {dvirTypeValues.map((v) => (
               <option key={v} value={v}>
@@ -144,13 +144,13 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
         </div>
         <div className="md:col-span-2">
           <div className="flex items-center justify-between">
-            <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+            <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
               Defects
             </h3>
             <button
               type="button"
               onClick={addDefect}
-              className="font-mono text-[10px] uppercase tracking-[0.18em] text-orange-light hover:text-orange"
+              className="font-mono text-[10px] uppercase tracking-[0.18em] text-brand-primary hover:text-brand-primary"
               data-testid="dvir-add-defect"
             >
               + Add defect
@@ -176,7 +176,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
                     })
                   }
                   data-testid={`dvir-defect-severity-${i}`}
-                  className="rounded-[8px] border border-steel-border bg-steel px-2 py-1 text-sm"
+                  className="rounded-[8px] border border-divider bg-bg-base px-2 py-1 text-sm"
                 >
                   {dvirDefectSeverityValues.map((v) => (
                     <option key={v} value={v}>
@@ -188,7 +188,7 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
                   type="button"
                   onClick={() => removeDefect(i)}
                   aria-label={`Remove defect ${i + 1}`}
-                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted hover:text-red-400"
+                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-red-400"
                 >
                   Remove
                 </button>

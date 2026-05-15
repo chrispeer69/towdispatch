@@ -12,7 +12,7 @@ export default function ForgotPasswordPage(): JSX.Element {
       footer={
         <Link
           href="/login"
-          className="font-semibold text-orange-light transition-colors hover:text-orange"
+          className="font-semibold text-brand-primary transition-colors hover:text-brand-primary"
         >
           ← Back to sign in
         </Link>

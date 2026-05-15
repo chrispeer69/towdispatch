@@ -140,7 +140,7 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
           <Field label="Class" error={errors.vehicleClass?.message}>
             <select
               {...register('vehicleClass')}
-              className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
+              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
             >
               {vehicleClassValues.map((v) => (
                 <option key={v} value={v}>
@@ -152,7 +152,7 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
           <Field label="Drivetrain" error={errors.drivetrain?.message}>
             <select
               {...register('drivetrain')}
-              className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
+              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
             >
               {drivetrainValues.map((v) => (
                 <option key={v} value={v}>
@@ -163,11 +163,11 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
           </Field>
         </div>
         <div className="flex flex-wrap gap-6">
-          <label className="flex items-center gap-2 text-sm text-text-secondary">
+          <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
             <input type="checkbox" className="h-4 w-4 accent-orange" {...register('isElectric')} />
             <span>Electric / hybrid</span>
           </label>
-          <label className="flex items-center gap-2 text-sm text-text-secondary">
+          <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
             <input
               type="checkbox"
               className="h-4 w-4 accent-orange"
@@ -184,7 +184,7 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
             {...register('specialInstructions')}
             rows={3}
             placeholder="e.g. loose front bumper, AWD do not flat-tow"
-            className="w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 py-2 text-sm text-text-primary"
+            className="w-full rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark"
           />
         </Field>
       </Section>
@@ -219,8 +219,8 @@ function Section({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <section className="space-y-4 rounded-[14px] border border-steel-border bg-steel-mid p-5">
-      <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+    <section className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
+      <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
         {title}
       </h2>
       <div className="space-y-4">{children}</div>

@@ -39,11 +39,11 @@ export function EcosystemPlaceholder({
         >
           {productName}
         </h1>
-        <p className="text-sm text-text-secondary">Blue Collar AI ecosystem product.</p>
+        <p className="text-sm text-text-secondary-on-dark">Blue Collar AI ecosystem product.</p>
       </header>
 
-      <section className="rounded-[14px] border border-steel-border bg-steel-mid p-5">
-        <p className="text-sm leading-relaxed text-text-primary">{description}</p>
+      <section className="rounded-[14px] border border-divider bg-bg-surface p-5">
+        <p className="text-sm leading-relaxed text-text-primary-on-dark">{description}</p>
       </section>
 
       {children}

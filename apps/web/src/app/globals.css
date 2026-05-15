@@ -13,7 +13,7 @@
  *   - Surface     --bg-surface      #1C2333
  *
  * LEGACY hue-named tokens (--orange*, --steel*) are LEFT UNCHANGED so
- * existing utility classes (`bg-orange`, `text-text-primary`, `bg-steel`,
+ * existing utility classes (`bg-brand-primary`, `text-text-primary-on-dark`, `bg-bg-base`,
  * etc.) keep rendering the previous palette. A follow-up PR will sweep
  * components to use the new role-named tokens; this PR is tokens only.
  *
@@ -26,7 +26,7 @@
  *
  * Variables hold HSL channels (no `hsl()` wrapper) so Tailwind can produce
  * `hsl(var(--token) / <alpha-value>)` — that lets `bg-brand-primary/30` etc.
- * work the same way `bg-steel/30` does today.
+ * work the same way `bg-bg-base/30` does today.
  */
 :root {
   /* NEW role-named brand tokens — US Tow DISPATCH v1 (sampled from TowGrade). */
@@ -36,8 +36,12 @@
 
   --bg-base: 222 25% 7%; /* #0E1117 */
   --bg-surface: 224 26% 15%; /* #1C2333 (one step lighter than base) */
+  --bg-surface-elevated: 225 21% 23%; /* third surface tier for hover / inline accents */
   --bg-marketing: 0 0% 100%; /* #FFFFFF */
   --bg-section: 210 40% 98%; /* #F8FAFC */
+
+  --bg-divider: 225 21% 29%; /* default border / divide-y line */
+  --bg-divider-strong: 225 21% 37%; /* hover state for dividers */
 
   --text-primary-on-dark: 210 40% 96%; /* #F1F5F9 */
   --text-secondary-on-dark: 215 20% 65%; /* #94A3B8 */
@@ -126,8 +130,8 @@
 
 html,
 body {
-  background: hsl(var(--steel));
-  color: hsl(var(--text-primary));
+  background: hsl(var(--bg-base));
+  color: hsl(var(--text-primary-on-dark));
   font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
@@ -152,7 +156,7 @@ body {
   background-position: -1px -1px;
 }
 
-.bg-orange-glow-radial {
+. {
   background: radial-gradient(
     ellipse at center,
     var(--orange-glow-radial-rgba) 0%,

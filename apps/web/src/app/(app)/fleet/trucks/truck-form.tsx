@@ -113,7 +113,7 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
         <Field label="Truck type">
           <select
             {...register('truckType')}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2"
           >
             {truckTypeValues.map((v) => (
               <option key={v} value={v}>
@@ -125,7 +125,7 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
         <Field label="Capacity class">
           <select
             {...register('capacityClass')}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2"
           >
             <option value="">—</option>
             {truckCapacityClassValues.map((v) => (
@@ -138,7 +138,7 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
         <Field label="Fuel type">
           <select
             {...register('fuelType')}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2"
           >
             <option value="">—</option>
             {truckFuelTypeValues.map((v) => (
@@ -151,7 +151,7 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
         <Field label="Status">
           <select
             {...register('status')}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2"
           >
             {truckStatusValues.map((v) => (
               <option key={v} value={v}>
@@ -171,7 +171,7 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
       <Section title="Equipment">
         <fieldset className="col-span-full grid grid-cols-2 gap-2 md:grid-cols-3">
           {truckEquipmentValues.map((v) => (
-            <label key={v} className="flex items-center gap-2 text-sm text-text-secondary">
+            <label key={v} className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
               <input
                 type="checkbox"
                 value={v}
@@ -200,15 +200,15 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
       </Section>
 
       <Section title="Certifications">
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
+        <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
           <input type="checkbox" {...register('teslaCertified')} className="accent-orange" />
           Tesla certified
         </label>
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
+        <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
           <input type="checkbox" {...register('aaaFlatbed')} className="accent-orange" />
           AAA flatbed
         </label>
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
+        <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
           <input type="checkbox" {...register('heavyDutyCapable')} className="accent-orange" />
           Heavy-duty capable
         </label>
@@ -218,7 +218,7 @@ export function TruckForm({ mode, initial }: Props): JSX.Element {
         <textarea
           {...register('notes')}
           rows={3}
-          className="col-span-full w-full rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+          className="col-span-full w-full rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
         />
       </Section>
 
@@ -246,7 +246,9 @@ function Section({
 }): JSX.Element {
   return (
     <section className="space-y-3">
-      <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">{title}</h2>
+      <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
+        {title}
+      </h2>
       <div className="grid gap-4 md:grid-cols-2">{children}</div>
     </section>
   );

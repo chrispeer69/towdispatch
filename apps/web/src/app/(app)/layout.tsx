@@ -24,11 +24,11 @@ export default async function AppLayout({
   const session = await requireUser();
   return (
     <SessionProvider value={session}>
-      <div className="flex min-h-screen bg-steel text-text-primary">
+      <div className="flex min-h-screen bg-bg-base text-text-primary-on-dark">
         <AppSidebar tenant={session.tenant} user={session.user} />
         <div className="flex min-h-screen flex-1 flex-col">
           <AppTopbar />
-          <main id="main-content" className="flex-1 overflow-y-auto bg-steel" tabIndex={-1}>
+          <main id="main-content" className="flex-1 overflow-y-auto bg-bg-base" tabIndex={-1}>
             <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10">{children}</div>
           </main>
         </div>

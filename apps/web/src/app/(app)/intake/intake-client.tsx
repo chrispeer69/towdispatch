@@ -656,7 +656,7 @@ export function IntakeClient(): JSX.Element {
               tabIndex={0}
               value={form.vehicleClass}
               onChange={(e) => update('vehicleClass', e.target.value as FormState['vehicleClass'])}
-              className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
+              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
             >
               {VEHICLE_CLASSES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -671,7 +671,7 @@ export function IntakeClient(): JSX.Element {
               value={form.specialInstructions}
               onChange={(e) => update('specialInstructions', e.target.value)}
               rows={2}
-              className="w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 py-2 text-sm text-text-primary"
+              className="w-full rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark"
               placeholder="Low clearance, all-wheel-drive, etc."
             />
           </Field>
@@ -691,8 +691,8 @@ export function IntakeClient(): JSX.Element {
                   className={cn(
                     'rounded-[10px] border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition-colors',
                     form.serviceType === svc
-                      ? 'border-orange bg-orange/15 text-orange-light'
-                      : 'border-steel-border text-text-secondary hover:bg-steel-light',
+                      ? 'border-brand-primary bg-brand-primary/15 text-brand-primary'
+                      : 'border-divider text-text-secondary-on-dark hover:bg-bg-surface-elevated',
                   )}
                 >
                   {SERVICE_TYPE_LABELS[svc]}
@@ -779,7 +779,7 @@ export function IntakeClient(): JSX.Element {
                 tabIndex={0}
                 value={form.authorizedBy}
                 onChange={(e) => update('authorizedBy', e.target.value as JobAuthorizedBy)}
-                className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
               >
                 {jobAuthorizedByValues.map((v) => (
                   <option key={v} value={v}>
@@ -808,12 +808,12 @@ export function IntakeClient(): JSX.Element {
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
               rows={2}
-              className="w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 py-2 text-sm text-text-primary"
+              className="w-full rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark"
               placeholder="Anything the driver needs to know"
             />
           </Field>
 
-          <label className="flex items-start gap-2 text-xs text-text-secondary">
+          <label className="flex items-start gap-2 text-xs text-text-secondary-on-dark">
             <input
               type="checkbox"
               checked={form.skipCustomerSms}
@@ -861,10 +861,10 @@ function Card({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <section className="space-y-4 rounded-[14px] border border-steel-border bg-steel-mid p-5">
+    <section className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
       <header className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-orange-light" />
-        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <Icon className="h-4 w-4 text-brand-primary" />
+        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           {title}
         </h2>
       </header>
@@ -919,10 +919,10 @@ function AdditionalContactInfo({
 }): JSX.Element {
   return (
     <details
-      className="rounded-[10px] border border-steel-border bg-steel/40 px-3 py-2"
+      className="rounded-[10px] border border-divider bg-bg-base/40 px-3 py-2"
       data-testid="intake-additional-contact"
     >
-      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">
+      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary-on-dark">
         Additional contact info
       </summary>
       <div className="mt-3 space-y-3">
@@ -1000,13 +1000,13 @@ function AdditionalContactInfo({
             />
           </Field>
         </div>
-        <label className="mt-1 inline-flex cursor-pointer items-center gap-2 text-xs text-text-secondary">
+        <label className="mt-1 inline-flex cursor-pointer items-center gap-2 text-xs text-text-secondary-on-dark">
           <input
             type="checkbox"
             data-testid="intake-convini-app"
             checked={form.conviniAppDownloaded}
             onChange={(e) => update('conviniAppDownloaded', e.target.checked)}
-            className="h-4 w-4 rounded border-steel-border bg-steel-mid"
+            className="h-4 w-4 rounded border-divider bg-bg-surface"
           />
           Customer has the Convini app installed
         </label>
@@ -1034,16 +1034,16 @@ function RateQuotePanel({
   return (
     <div
       data-testid="intake-rate-quote"
-      className="rounded-[12px] border border-steel-border bg-steel/60 p-3"
+      className="rounded-[12px] border border-divider bg-bg-base/60 p-3"
     >
       <div className="flex items-baseline justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
           Live quote
         </span>
         <span
           className={cn(
             'font-condensed text-2xl font-extrabold',
-            loading ? 'text-text-muted' : 'text-orange-light',
+            loading ? 'text-text-secondary-on-dark-on-dark/60' : 'text-brand-primary',
           )}
           data-testid="intake-rate-total"
         >
@@ -1051,7 +1051,7 @@ function RateQuotePanel({
         </span>
       </div>
       {quote ? (
-        <ul className="mt-2 space-y-1 text-xs text-text-secondary">
+        <ul className="mt-2 space-y-1 text-xs text-text-secondary-on-dark">
           {quote.lineItems.map((li) => (
             <li key={li.code} className="flex justify-between">
               <span>{li.label}</span>
@@ -1059,16 +1059,16 @@ function RateQuotePanel({
             </li>
           ))}
           {quote.lineItems.length === 0 ? (
-            <li className="text-text-muted">No line items.</li>
+            <li className="text-text-secondary-on-dark-on-dark/60">No line items.</li>
           ) : null}
         </ul>
       ) : (
-        <p className="mt-2 text-xs text-text-muted">
+        <p className="mt-2 text-xs text-text-secondary-on-dark-on-dark/60">
           Enter the service and pickup to see the calculated price.
         </p>
       )}
       {quote ? (
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
           Source: {quote.source} · {quote.distanceMiles.toFixed(2)} mi
         </p>
       ) : null}

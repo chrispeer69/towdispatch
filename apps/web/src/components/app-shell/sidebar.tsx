@@ -189,16 +189,16 @@ const SECTIONS: NavSection[] = [
 export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   const pathname = usePathname() ?? '/';
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-steel-border bg-steel-mid md:flex">
-      <div className="flex items-center gap-3 border-b border-steel-border px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange shadow-orange-glow">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
+      <div className="flex items-center gap-3 border-b border-divider px-5 py-4">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary ">
           <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
             UTD
           </span>
         </div>
         <span className="font-condensed text-base leading-none tracking-tight">
           <span className="font-medium">
-            US <span className="text-orange">Tow</span>{' '}
+            US <span className="text-brand-primary">Tow</span>{' '}
           </span>
           <span className="font-extrabold italic uppercase">Dispatch</span>
         </span>
@@ -207,7 +207,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5">
         {SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+            <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
               {section.label}
             </p>
             <ul className="space-y-0.5">
@@ -241,7 +241,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                             'group relative flex items-center justify-between rounded-[8px] px-3 py-2 transition-colors',
                             isActive
                               ? 'bg-[var(--accent-bg-active)] text-[var(--accent)]'
-                              : 'text-text-secondary hover:bg-[var(--accent-bg-hover)]',
+                              : 'text-text-secondary-on-dark hover:bg-[var(--accent-bg-hover)]',
                           )}
                         >
                           {isActive ? (
@@ -266,14 +266,14 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                         className={cn(
                           'group relative flex items-center justify-between rounded-[8px] px-3 py-2 transition-colors',
                           isActive
-                            ? 'bg-orange/15 text-orange-light'
-                            : 'text-text-secondary hover:bg-steel-light hover:text-text-primary',
+                            ? 'bg-brand-primary/15 text-brand-primary'
+                            : 'text-text-secondary-on-dark hover:bg-bg-surface-elevated hover:text-text-primary-on-dark',
                         )}
                       >
                         {isActive ? (
                           <span
                             aria-hidden
-                            className="absolute -left-3 top-1.5 h-6 w-1 rounded-r-full bg-orange"
+                            className="absolute -left-3 top-1.5 h-6 w-1 rounded-r-full bg-brand-primary"
                           />
                         ) : null}
                         {content}
@@ -284,11 +284,11 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                 return (
                   <li
                     key={item.label}
-                    className="flex cursor-not-allowed items-center justify-between rounded-[8px] px-3 py-2 text-text-muted"
+                    className="flex cursor-not-allowed items-center justify-between rounded-[8px] px-3 py-2 text-text-secondary-on-dark-on-dark/60"
                     title="Coming soon"
                   >
                     {content}
-                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
                       Soon
                     </span>
                   </li>
@@ -299,12 +299,12 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
         ))}
       </nav>
 
-      <div className="border-t border-steel-border px-3 py-3">
+      <div className="border-t border-divider px-3 py-3">
         <ul className="space-y-0.5">
           <li>
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-steel-light hover:text-text-primary"
+              className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
             >
               <Settings className="h-4 w-4" />
               <span className="font-medium">Settings</span>
@@ -313,20 +313,22 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
           <li>
             <Link
               href="/logout"
-              className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-steel-light hover:text-text-primary"
+              className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
             >
               <LogOut className="h-4 w-4" />
               <span className="font-medium">Sign out</span>
             </Link>
           </li>
         </ul>
-        <div className="mt-3 flex items-center gap-3 rounded-[8px] border border-steel-border bg-steel-light/40 px-3 py-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-orange-glow text-xs font-extrabold text-orange-light">
+        <div className="mt-3 flex items-center gap-3 rounded-[8px] border border-divider bg-bg-surface-elevated/40 px-3 py-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md  text-xs font-extrabold text-brand-primary">
             {tenant.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-text-primary">{tenant.name}</p>
-            <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
+            <p className="truncate text-sm font-semibold text-text-primary-on-dark">
+              {tenant.name}
+            </p>
+            <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
               {user.role}
             </p>
           </div>

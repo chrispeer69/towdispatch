@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import {
   DndContext,
   type DragEndEvent,
@@ -251,7 +251,7 @@ export function DispatchClient({
           <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Live Dispatch
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
             Drag a job onto a driver to assign. Drag back to the queue to unassign.
           </p>
         </div>
@@ -265,11 +265,13 @@ export function DispatchClient({
         >
           Job #{createdJobNumber} created and waiting in the new queue.
           {smsHint === 'pending' ? (
-            <span className="ml-1 text-text-secondary">
+            <span className="ml-1 text-text-secondary-on-dark">
               Customer tracking SMS will fire automatically on assign.
             </span>
           ) : smsHint === 'skipped' ? (
-            <span className="ml-1 text-text-secondary">Customer SMS skipped for this job.</span>
+            <span className="ml-1 text-text-secondary-on-dark">
+              Customer SMS skipped for this job.
+            </span>
           ) : null}
         </div>
       ) : null}
@@ -323,15 +325,15 @@ function QueuePane({ jobs }: { jobs: JobDto[] }): JSX.Element {
     <section
       ref={setNodeRef}
       data-testid="dispatch-queue"
-      className={`lg:col-span-3 rounded-[14px] border bg-steel-mid/40 p-4 ${
-        isOver ? 'border-orange/70 ring-2 ring-orange/40' : 'border-steel-border'
+      className={`lg:col-span-3 rounded-[14px] border bg-bg-surface/40 p-4 ${
+        isOver ? 'border-brand-primary/70 ring-2 ring-brand-primary/40' : 'border-divider'
       }`}
     >
       <header className="flex items-center justify-between pb-3">
-        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           New queue
         </h2>
-        <span className="rounded-full bg-steel px-2 py-0.5 text-xs font-semibold text-text-secondary">
+        <span className="rounded-full bg-bg-base px-2 py-0.5 text-xs font-semibold text-text-secondary-on-dark">
           {jobs.length}
         </span>
       </header>
@@ -363,13 +365,13 @@ function ActivePane({ jobs }: { jobs: JobDto[] }): JSX.Element {
   return (
     <section
       data-testid="dispatch-active"
-      className="lg:col-span-4 rounded-[14px] border border-steel-border bg-steel-mid/40 p-4"
+      className="lg:col-span-4 rounded-[14px] border border-divider bg-bg-surface/40 p-4"
     >
       <header className="flex items-center justify-between pb-3">
-        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           Active jobs
         </h2>
-        <span className="rounded-full bg-steel px-2 py-0.5 text-xs font-semibold text-text-secondary">
+        <span className="rounded-full bg-bg-base px-2 py-0.5 text-xs font-semibold text-text-secondary-on-dark">
           {jobs.length}
         </span>
       </header>
@@ -379,7 +381,7 @@ function ActivePane({ jobs }: { jobs: JobDto[] }): JSX.Element {
           if (group.length === 0) return null;
           return (
             <div key={status}>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-text-secondary">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-text-secondary-on-dark">
                 {status.replace('_', ' ')}
               </p>
               <ul className="space-y-2">
@@ -407,13 +409,13 @@ function RosterPane({ roster }: { roster: DriverRosterRow[] }): JSX.Element {
   return (
     <section
       data-testid="dispatch-roster"
-      className="lg:col-span-5 rounded-[14px] border border-steel-border bg-steel-mid/40 p-4"
+      className="lg:col-span-5 rounded-[14px] border border-divider bg-bg-surface/40 p-4"
     >
       <header className="flex items-center justify-between pb-3">
-        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           Driver roster
         </h2>
-        <span className="rounded-full bg-steel px-2 py-0.5 text-xs font-semibold text-text-secondary">
+        <span className="rounded-full bg-bg-base px-2 py-0.5 text-xs font-semibold text-text-secondary-on-dark">
           {roster.filter((r) => r.shift && !r.shift.endedAt).length} on shift
         </span>
       </header>
@@ -436,27 +438,29 @@ function RecentlyCompletedPane({ jobs }: { jobs: JobDto[] }): JSX.Element {
   return (
     <section
       data-testid="dispatch-completed"
-      className="lg:col-span-3 rounded-[14px] border border-steel-border bg-steel-mid/40 p-4"
+      className="lg:col-span-3 rounded-[14px] border border-divider bg-bg-surface/40 p-4"
     >
       <header className="flex items-center justify-between pb-3">
-        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           Recently closed
         </h2>
-        <span className="rounded-full bg-steel px-2 py-0.5 text-xs font-semibold text-text-secondary">
+        <span className="rounded-full bg-bg-base px-2 py-0.5 text-xs font-semibold text-text-secondary-on-dark">
           {jobs.length}
         </span>
       </header>
       {jobs.length === 0 ? (
-        <p className="py-4 text-center text-xs text-text-secondary">Nothing closed today yet.</p>
+        <p className="py-4 text-center text-xs text-text-secondary-on-dark">
+          Nothing closed today yet.
+        </p>
       ) : (
         <ul className="space-y-1.5">
           {jobs.map((job) => (
             <li
               key={job.id}
-              className="flex items-center justify-between rounded-md bg-steel/60 px-2 py-1.5 text-xs"
+              className="flex items-center justify-between rounded-md bg-bg-base/60 px-2 py-1.5 text-xs"
             >
-              <span className="font-mono text-text-primary">#{job.jobNumber}</span>
-              <span className="font-condensed font-bold uppercase tracking-wider text-text-secondary">
+              <span className="font-mono text-text-primary-on-dark">#{job.jobNumber}</span>
+              <span className="font-condensed font-bold uppercase tracking-wider text-text-secondary-on-dark">
                 {job.status}
               </span>
             </li>
@@ -477,13 +481,13 @@ function MapPane({
   return (
     <section
       data-testid="dispatch-map"
-      className="lg:col-span-9 rounded-[14px] border border-steel-border bg-steel-mid/40 p-4"
+      className="lg:col-span-9 rounded-[14px] border border-divider bg-bg-surface/40 p-4"
     >
       <header className="flex items-center justify-between pb-3">
-        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           Map
         </h2>
-        <span className="text-xs text-text-secondary">
+        <span className="text-xs text-text-secondary-on-dark">
           <MapPin className="inline h-3.5 w-3.5" /> Mapbox
         </span>
       </header>
@@ -498,7 +502,7 @@ function MapPane({
 
 function EmptyState({ icon, label }: { icon: JSX.Element; label: string }): JSX.Element {
   return (
-    <div className="flex flex-col items-center gap-2 py-8 text-text-secondary">
+    <div className="flex flex-col items-center gap-2 py-8 text-text-secondary-on-dark">
       {icon}
       <p className="text-xs uppercase tracking-wider">{label}</p>
     </div>
@@ -514,7 +518,7 @@ const SERVICE_TYPE_COLOR: Record<JobServiceType, string> = {
   // color system. Distinct serviceTypes that share a slot are grouped by
   // operational category â€” heavy/recovery on warn (caution), light maintenance
   // on info (informational), money/impound on violet (commercial).
-  tow: 'bg-orange/20 text-orange border-orange/40',
+  tow: 'bg-brand-primary/20 text-brand-primary border-brand-primary/40',
   jump_start: 'bg-info/20 text-info border-info/40',
   lockout: 'bg-info/20 text-info border-info/40',
   tire_change: 'bg-info/20 text-info border-info/40',
@@ -522,7 +526,7 @@ const SERVICE_TYPE_COLOR: Record<JobServiceType, string> = {
   winch: 'bg-ok/20 text-ok border-ok/40',
   recovery: 'bg-danger/20 text-danger border-danger/40',
   impound: 'bg-violet/20 text-violet border-violet/40',
-  other: 'bg-steel text-text-secondary border-steel-border',
+  other: 'bg-bg-base text-text-secondary-on-dark border-divider',
 };
 
 function JobCard({ job, compact = false }: { job: JobDto; compact?: boolean }): JSX.Element {
@@ -544,19 +548,21 @@ function JobCard({ job, compact = false }: { job: JobDto; compact?: boolean }): 
       type="button"
       {...attributes}
       {...listeners}
-      className={`block w-full cursor-grab rounded-md border bg-steel/80 p-2.5 text-left text-xs transition active:cursor-grabbing ${
-        isDragging ? 'opacity-50 ring-2 ring-orange/60' : ''
+      className={`block w-full cursor-grab rounded-md border bg-bg-base/80 p-2.5 text-left text-xs transition active:cursor-grabbing ${
+        isDragging ? 'opacity-50 ring-2 ring-brand-primary/60' : ''
       } ${colorCls}`}
     >
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] tracking-tight text-text-primary">
+        <span className="font-mono text-[11px] tracking-tight text-text-primary-on-dark">
           #{job.jobNumber}
         </span>
         <span className="font-condensed text-[10px] font-extrabold uppercase tracking-widest">
           {job.serviceType.replace('_', ' ')}
         </span>
       </div>
-      {!compact ? <p className="mt-1 truncate text-text-primary/90">{job.pickupAddress}</p> : null}
+      {!compact ? (
+        <p className="mt-1 truncate text-text-primary-on-dark/90">{job.pickupAddress}</p>
+      ) : null}
     </button>
   );
 }
@@ -575,35 +581,35 @@ function DriverCard({ row }: { row: DriverRosterRow }): JSX.Element {
       data-shift-id={shift?.id ?? ''}
       className={`rounded-md border p-3 transition ${
         !onShift
-          ? 'border-steel-border bg-steel/40 opacity-60'
+          ? 'border-divider bg-bg-base/40 opacity-60'
           : isOver
-            ? 'border-orange bg-orange/10 ring-2 ring-orange/50'
+            ? 'border-brand-primary bg-brand-primary/10 ring-2 ring-brand-primary/50'
             : accepting
-              ? 'border-orange/40 bg-steel/80'
-              : 'border-steel-border bg-steel/80'
+              ? 'border-brand-primary/40 bg-bg-base/80'
+              : 'border-divider bg-bg-base/80'
       }`}
     >
       <div className="flex items-center justify-between">
-        <p className="font-condensed text-sm font-bold uppercase tracking-wide text-text-primary">
+        <p className="font-condensed text-sm font-bold uppercase tracking-wide text-text-primary-on-dark">
           {driver.firstName} {driver.lastName}
         </p>
         {shift ? (
           <span
-            className="rounded-full bg-steel-mid px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary"
+            className="rounded-full bg-bg-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary-on-dark"
             data-testid={`driver-status-${driver.id}`}
           >
             {shift.status.replace('_', ' ')}
           </span>
         ) : (
-          <span className="rounded-full bg-steel-mid px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
+          <span className="rounded-full bg-bg-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary-on-dark">
             off
           </span>
         )}
       </div>
-      <div className="mt-1 flex items-center justify-between text-xs text-text-secondary">
+      <div className="mt-1 flex items-center justify-between text-xs text-text-secondary-on-dark">
         <span>{truck ? truck.unitNumber : 'no truck'}</span>
         {currentJobNumber ? (
-          <span className="font-mono text-text-primary">on #{currentJobNumber}</span>
+          <span className="font-mono text-text-primary-on-dark">on #{currentJobNumber}</span>
         ) : (
           <span>idle</span>
         )}

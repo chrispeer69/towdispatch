@@ -16,7 +16,7 @@ export function ThemeToggle({ className = '' }: { className?: string }): JSX.Ele
   useEffect(() => setMounted(true), []);
 
   const baseClasses =
-    'flex h-11 w-11 items-center justify-center rounded-[8px] border border-steel-border bg-steel-light/40 text-text-secondary transition-colors hover:text-text-primary';
+    'flex h-11 w-11 items-center justify-center rounded-[8px] border border-divider bg-bg-surface-elevated/40 text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark';
   const composed = `${baseClasses} ${className}`.trim();
 
   if (!mounted) {

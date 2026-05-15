@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Towbook Import â€” Session 16.
  *
  * Multi-step wizard, admin/owner only. Reads the session role on the server,
@@ -33,7 +33,7 @@ export default async function ImportPage(): Promise<JSX.Element> {
         <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
           Towbook Import
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-sm text-text-secondary-on-dark">
           Migrate your historical Towbook data into US Tow DISPATCH for{' '}
           <strong>{me.tenant.name}</strong>. Dry-run first, then commit.
         </p>

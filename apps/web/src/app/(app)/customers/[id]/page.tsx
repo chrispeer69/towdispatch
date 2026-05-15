@@ -20,17 +20,19 @@ export default async function CustomerDetailPage({ params }: Props): Promise<JSX
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header className="space-y-1">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
-          <Link href="/customers" className="hover:text-text-primary">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+          <Link href="/customers" className="hover:text-text-primary-on-dark">
             ← All customers
           </Link>
         </p>
         <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           {customer.name}
         </h1>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           {customer.type.replace('_', ' ')} ·{' '}
-          {customer.phone ?? <span className="text-text-muted">no phone</span>}
+          {customer.phone ?? (
+            <span className="text-text-secondary-on-dark-on-dark/60">no phone</span>
+          )}
         </p>
       </header>
 

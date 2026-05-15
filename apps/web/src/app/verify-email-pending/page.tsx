@@ -19,13 +19,13 @@ export default async function VerifyEmailPendingPage(): Promise<JSX.Element> {
       footer={
         <Link
           href="/dashboard"
-          className="font-semibold text-orange-light transition-colors hover:text-orange"
+          className="font-semibold text-brand-primary transition-colors hover:text-brand-primary"
         >
           Skip for now → Dashboard
         </Link>
       }
     >
-      <p className="text-sm text-text-secondary">
+      <p className="text-sm text-text-secondary-on-dark">
         Click the link in that email to confirm your account. The link expires in 24 hours.
       </p>
       <div className="mt-6">

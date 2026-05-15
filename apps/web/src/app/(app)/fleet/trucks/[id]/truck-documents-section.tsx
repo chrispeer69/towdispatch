@@ -58,16 +58,16 @@ export function TruckDocumentsSection({ truckId, initialDocs }: Props): JSX.Elem
 
   return (
     <section data-testid="truck-documents-section">
-      <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+      <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
         Documents
       </h3>
-      <div className="mt-3 grid gap-3 rounded-[12px] border border-steel-border bg-steel-mid p-4 md:grid-cols-3">
+      <div className="mt-3 grid gap-3 rounded-[12px] border border-divider bg-bg-surface p-4 md:grid-cols-3">
         <div className="flex flex-col gap-1">
           <Label>Type</Label>
           <select
             value={docType}
             onChange={(e) => setDocType(e.target.value)}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
           >
             {documentTypeValues.map((d) => (
               <option key={d} value={d}>
@@ -86,7 +86,7 @@ export function TruckDocumentsSection({ truckId, initialDocs }: Props): JSX.Elem
             type="file"
             data-testid="document-file-input"
             onChange={(e: ChangeEvent<HTMLInputElement>) => setFile(e.target.files?.[0] ?? null)}
-            className="text-sm text-text-secondary"
+            className="text-sm text-text-secondary-on-dark"
           />
         </div>
         <div className="md:col-span-3">
@@ -103,18 +103,18 @@ export function TruckDocumentsSection({ truckId, initialDocs }: Props): JSX.Elem
       </div>
 
       {docs.length === 0 ? (
-        <p className="mt-2 text-sm text-text-muted">No documents on file.</p>
+        <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">No documents on file.</p>
       ) : (
         <ul className="mt-3 space-y-1 text-sm" data-testid="truck-documents-list">
           {docs.map((d) => (
             <li key={d.id} className="flex justify-between">
               <span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
                   {d.docType}
                 </span>{' '}
                 {d.fileName}
               </span>
-              <span className="font-mono text-xs text-text-muted">
+              <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
                 {d.expiresAt ? `exp ${d.expiresAt.slice(0, 10)}` : '—'}
               </span>
             </li>

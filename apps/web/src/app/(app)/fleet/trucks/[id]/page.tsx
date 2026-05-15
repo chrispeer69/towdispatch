@@ -35,8 +35,8 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
   const docs = docsRes.data ?? [];
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
-        <Link href="/fleet/trucks" className="hover:text-text-primary">
+      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+        <Link href="/fleet/trucks" className="hover:text-text-primary-on-dark">
           ← All trucks
         </Link>
       </p>
@@ -44,7 +44,7 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
         <h2 className="font-condensed text-2xl font-extrabold uppercase tracking-tight">
           {truck.unitNumber}
         </h2>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           {truck.year ?? ''} {truck.make ?? ''} {truck.model ?? ''} ·{' '}
           {truck.truckType.replace('_', ' ')}
           {truck.capacityClass ? ` · ${truck.capacityClass}` : ''}
@@ -52,20 +52,22 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
       </header>
 
       <section>
-        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
           Assigned drivers
         </h3>
         {drivers.length === 0 ? (
-          <p className="mt-2 text-sm text-text-muted">No drivers assigned.</p>
+          <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">
+            No drivers assigned.
+          </p>
         ) : (
           <ul className="mt-2 space-y-1">
             {drivers.map((a) => (
               <li key={a.id} className="text-sm">
-                <Link href={`/fleet/drivers/${a.driverId}`} className="hover:text-orange-light">
+                <Link href={`/fleet/drivers/${a.driverId}`} className="hover:text-brand-primary">
                   {a.driverId.slice(0, 8)}…
                 </Link>
                 {a.isPrimary ? (
-                  <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-orange-light">
+                  <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-brand-primary">
                     primary
                   </span>
                 ) : null}
@@ -78,11 +80,13 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
       <TruckDocumentsSection truckId={truck.id} initialDocs={docs} />
 
       <section>
-        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
           Maintenance schedules
         </h3>
         {schedules.length === 0 ? (
-          <p className="mt-2 text-sm text-text-muted">No schedules configured.</p>
+          <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">
+            No schedules configured.
+          </p>
         ) : (
           <ul className="mt-2 space-y-1 text-sm">
             {schedules.map((s) => (
@@ -91,7 +95,7 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
                   {s.serviceType}
                   {s.customLabel ? ` (${s.customLabel})` : ''}
                 </span>
-                <span className="font-mono text-xs text-text-muted">
+                <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
                   next due: {s.nextDueAt ?? '—'}
                   {s.nextDueMiles !== null ? ` / ${s.nextDueMiles.toLocaleString()} mi` : ''}
                 </span>
@@ -102,11 +106,13 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
       </section>
 
       <section>
-        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
           Maintenance history
         </h3>
         {records.length === 0 ? (
-          <p className="mt-2 text-sm text-text-muted">No service records yet.</p>
+          <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">
+            No service records yet.
+          </p>
         ) : (
           <ul className="mt-2 space-y-1 text-sm">
             {records.map((r) => (
@@ -114,7 +120,7 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
                 <span>
                   {r.performedAt} · {r.serviceType}
                 </span>
-                <span className="font-mono text-xs text-text-muted">
+                <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
                   ${(r.costCents / 100).toFixed(2)}
                 </span>
               </li>
@@ -124,11 +130,13 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
       </section>
 
       <section>
-        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
           Recent DVIRs
         </h3>
         {dvirs.length === 0 ? (
-          <p className="mt-2 text-sm text-text-muted">No DVIRs filed for this truck.</p>
+          <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">
+            No DVIRs filed for this truck.
+          </p>
         ) : (
           <ul className="mt-2 space-y-1 text-sm">
             {dvirs.slice(0, 10).map((d) => (
@@ -136,7 +144,9 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
                 <span>
                   {d.submittedAt.slice(0, 10)} · {d.type.replace('_', ' ')}
                 </span>
-                <span className="font-mono text-xs uppercase text-text-muted">{d.status}</span>
+                <span className="font-mono text-xs uppercase text-text-secondary-on-dark-on-dark/60">
+                  {d.status}
+                </span>
               </li>
             ))}
           </ul>

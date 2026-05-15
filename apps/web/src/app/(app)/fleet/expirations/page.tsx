@@ -30,7 +30,7 @@ export default async function ExpirationsPage({
   const data = result.data ?? emptyExpirations(Number.isFinite(windowDays) ? windowDays : 30);
   return (
     <div className="space-y-6">
-      <p className="text-sm text-text-secondary">
+      <p className="text-sm text-text-secondary-on-dark">
         Anything expiring within {data.windowDays} days, plus already-expired items.
       </p>
       <Bucket title="Expired" rows={data.expired} tone="expired" />
@@ -52,12 +52,12 @@ function Bucket({
   const palette = {
     expired: 'border-red-500/30 bg-red-500/5',
     critical: 'border-amber-500/30 bg-amber-500/5',
-    warning: 'border-steel-border bg-steel-mid',
+    warning: 'border-divider bg-bg-surface',
   } as const;
   const labelPalette = {
     expired: 'text-red-300',
     critical: 'text-amber-300',
-    warning: 'text-text-secondary',
+    warning: 'text-text-secondary-on-dark',
   } as const;
   return (
     <section
@@ -68,7 +68,7 @@ function Bucket({
         {title} · {rows.length}
       </h3>
       {rows.length === 0 ? (
-        <p className="mt-2 text-sm text-text-muted">Nothing here.</p>
+        <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">Nothing here.</p>
       ) : (
         <ul className="mt-3 space-y-1 text-sm">
           {rows.map((r, i) => (
@@ -77,7 +77,7 @@ function Bucket({
               className="flex items-center justify-between"
             >
               <span>{r.label}</span>
-              <span className="font-mono text-xs text-text-muted">
+              <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
                 {r.daysUntilExpiry <= 0
                   ? `expired ${Math.abs(r.daysUntilExpiry)}d ago`
                   : `${r.daysUntilExpiry}d left`}

@@ -78,19 +78,19 @@ export function AccountingSettingsClient({ initialStatus, initialSync }: Props):
 
   return (
     <div className="space-y-6">
-      <section className="rounded-lg bg-steel-light p-6 space-y-4">
+      <section className="rounded-lg bg-bg-surface-elevated p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold">Connection</h2>
-            <p className="text-sm text-text-secondary mt-1">
+            <p className="text-sm text-text-secondary-on-dark mt-1">
               Status: <span className="font-mono">{connectionLabel}</span>
             </p>
             {status.connection?.realmId ? (
-              <p className="text-xs text-text-secondary mt-1 font-mono">
+              <p className="text-xs text-text-secondary-on-dark mt-1 font-mono">
                 realmId: {status.connection.realmId}
               </p>
             ) : null}
-            <p className="text-xs text-text-secondary mt-1">
+            <p className="text-xs text-text-secondary-on-dark mt-1">
               Environment:{' '}
               <span className="font-mono">{status.sandbox ? 'sandbox' : 'production'}</span>
             </p>
@@ -107,7 +107,7 @@ export function AccountingSettingsClient({ initialStatus, initialSync }: Props):
                 type="button"
                 onClick={onDisconnect}
                 disabled={pending}
-                className="rounded bg-steel px-3 py-2 text-sm border border-border hover:border-red-500"
+                className="rounded bg-bg-base px-3 py-2 text-sm border border-border hover:border-red-500"
               >
                 Disconnect
               </button>
@@ -124,43 +124,43 @@ export function AccountingSettingsClient({ initialStatus, initialSync }: Props):
         </div>
       </section>
 
-      <section className="rounded-lg bg-steel-light p-6 space-y-4">
+      <section className="rounded-lg bg-bg-surface-elevated p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Sync status</h2>
           <button
             type="button"
             onClick={() => start(refresh)}
             disabled={pending}
-            className="rounded bg-steel px-3 py-2 text-sm border border-border hover:border-action"
+            className="rounded bg-bg-base px-3 py-2 text-sm border border-border hover:border-action"
           >
             Refresh
           </button>
         </div>
         <dl className="grid grid-cols-5 gap-4 text-sm">
           <div>
-            <dt className="text-text-secondary">Pending</dt>
+            <dt className="text-text-secondary-on-dark">Pending</dt>
             <dd className="font-mono">{sync.totals.pending}</dd>
           </div>
           <div>
-            <dt className="text-text-secondary">Processing</dt>
+            <dt className="text-text-secondary-on-dark">Processing</dt>
             <dd className="font-mono">{sync.totals.processing}</dd>
           </div>
           <div>
-            <dt className="text-text-secondary">Completed</dt>
+            <dt className="text-text-secondary-on-dark">Completed</dt>
             <dd className="font-mono">{sync.totals.completed}</dd>
           </div>
           <div>
-            <dt className="text-text-secondary">Failed</dt>
+            <dt className="text-text-secondary-on-dark">Failed</dt>
             <dd className="font-mono">{sync.totals.failed}</dd>
           </div>
           <div>
-            <dt className="text-text-secondary">Dead-letter</dt>
+            <dt className="text-text-secondary-on-dark">Dead-letter</dt>
             <dd className="font-mono">{sync.totals.deadLetter}</dd>
           </div>
         </dl>
         <table className="w-full text-xs">
           <thead>
-            <tr className="text-left text-text-secondary">
+            <tr className="text-left text-text-secondary-on-dark">
               <th className="py-1">Entity</th>
               <th className="py-1">Status</th>
               <th className="py-1">Retries</th>
