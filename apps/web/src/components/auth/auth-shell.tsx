@@ -4,7 +4,6 @@
  * The grid + radial backgrounds match the landing page so the brand carries
  * across the whole gate.
  */
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -39,7 +38,6 @@ export function AuthShell({ title, subtitle, footer, children }: AuthShellProps)
           </span>
         </Link>
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <Link
             href="/"
             className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted transition-colors hover:text-text-secondary"
