@@ -70,6 +70,16 @@ const PAYMENT_TOKEN_BYTES = 24;
 
 const generatePaymentToken = (): string => randomBytes(PAYMENT_TOKEN_BYTES).toString('base64url');
 
+/**
+ * A real Stripe publishable key matches pk_live_… or pk_test_… followed by
+ * the random suffix. A bare placeholder like `pk_test_placeholder` matches
+ * !!config.stripe.publicKey but represents an unconfigured tenant; treating
+ * it as configured misleads operators verifying their Stripe setup.
+ */
+const STRIPE_PK_REGEX = /^pk_(live|test)_[A-Za-z0-9]{20,}$/;
+const isRealStripePublishableKey = (key: string | null | undefined): boolean =>
+  STRIPE_PK_REGEX.test(key ?? '');
+
 @Injectable()
 export class PaymentsService {
   private readonly logger: Logger;
@@ -110,7 +120,7 @@ export class PaymentsService {
       chargesEnabled: tenant.stripeChargesEnabled,
       payoutsEnabled: tenant.stripePayoutsEnabled,
       platformMarginBps: tenant.platformMarginBps,
-      publicKeyConfigured: !!this.config.stripe.publicKey,
+      publicKeyConfigured: isRealStripePublishableKey(this.config.stripe.publicKey),
     };
   }
 
