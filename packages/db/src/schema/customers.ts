@@ -80,6 +80,11 @@ export const customers = pgTable(
       .notNull()
       .default('manual'),
 
+    // Session 9.5 — where the (cash) customer came from. Free-text by design;
+    // examples: 'google_ad', 'yelp', 'walk_in', 'referral'. Nullable for the
+    // long tail of customers created before this column existed.
+    referralSource: text('referral_source'),
+
     defaultRateSheetId: uuid('default_rate_sheet_id'),
 
     // Session 11 — Stripe customer + saved card on file.

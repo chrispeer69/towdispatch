@@ -25,6 +25,7 @@
     "generate": "drizzle-kit generate",
     "migrate": "tsx src/migrate.ts",
     "seed": "tsx src/seed.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
     "studio": "drizzle-kit studio",
     "reset": "tsx src/reset.ts",
     "typecheck": "tsc --noEmit"
