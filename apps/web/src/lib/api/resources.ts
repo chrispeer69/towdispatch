@@ -26,7 +26,7 @@ export async function fetchCustomers(
   // Session 9.7. Leaving accessToken undefined keeps the legacy inline-read
   // fallback so non-page callers (route handlers, server actions) behave as
   // before.
-  return apiServer<PaginatedCustomers>(`/customers${qs}`, { accessToken });
+  return apiServer<PaginatedCustomers>(`/customers${qs}`, { accessToken: accessToken ?? null });
 }
 
 export async function fetchCustomer(id: string): Promise<CustomerWithVehiclesDto> {
