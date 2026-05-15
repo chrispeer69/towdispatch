@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { uuidv7 } from '@towcommand/db';
+import { BundleService } from '../bundle.service.js';
 import { isValidVin, normalizeString } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
 import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
@@ -8,6 +9,11 @@ import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
 export class VehicleImporter extends BaseImporter {
   protected readonly recordType: ImportRecordType = 'vehicle';
   protected readonly csvKey = 'vehicles';
+
+  // biome-ignore lint/complexity/noUselessConstructor: required for NestJS DI metadata
+  constructor(bundle: BundleService) {
+    super(bundle);
+  }
 
   protected async importRow(
     ctx: ImportContext,
@@ -56,6 +62,8 @@ export class VehicleImporter extends BaseImporter {
     if (existingByExternal.rowCount && existingByExternal.rowCount > 0) {
       const id = existingByExternal.rows[0]?.id ?? null;
       if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
+      // vehicles schema has no `notes` column — Towbook notes flow into
+      // special_instructions for the imported row.
       await ctx.client.query(
         `UPDATE vehicles SET
             vin = COALESCE(NULLIF($2, ''), vin),
@@ -65,7 +73,7 @@ export class VehicleImporter extends BaseImporter {
             make = COALESCE(NULLIF($6, ''), make),
             model = COALESCE(NULLIF($7, ''), model),
             color = COALESCE(NULLIF($8, ''), color),
-            notes = COALESCE(NULLIF($9, ''), notes),
+            special_instructions = COALESCE(NULLIF($9, ''), special_instructions),
             updated_at = now()
          WHERE id = $1`,
         [
@@ -120,10 +128,14 @@ export class VehicleImporter extends BaseImporter {
     }
 
     const id = uuidv7();
+    // vehicles columns are default_customer_id (not customer_id) and
+    // special_instructions (no notes column). The customer<->vehicle
+    // relationship is also tracked via the customer_vehicles join table
+    // below.
     await ctx.client.query(
       `INSERT INTO vehicles (
-          id, tenant_id, customer_id, vin, plate, plate_state,
-          year, make, model, color, notes,
+          id, tenant_id, default_customer_id, vin, plate, plate_state,
+          year, make, model, color, special_instructions,
           external_source, external_id, created_at, updated_at
        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'towbook', $12, now(), now())`,
       [
@@ -142,13 +154,16 @@ export class VehicleImporter extends BaseImporter {
       ],
     );
 
-    // Link to customer_vehicles if FK exists
+    // Link to customer_vehicles (id PK has no default; relationship/is_primary
+    // have schema defaults). ON CONFLICT DO NOTHING absorbs the partial
+    // unique index on (tenant_id, customer_id, vehicle_id) defined in
+    // sql/0006.
     if (customerId) {
       await ctx.client.query(
-        `INSERT INTO customer_vehicles (tenant_id, customer_id, vehicle_id, created_at)
-         VALUES ($1, $2, $3, now())
+        `INSERT INTO customer_vehicles (id, tenant_id, customer_id, vehicle_id, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, now(), now())
          ON CONFLICT DO NOTHING`,
-        [ctx.tenantId, customerId, id],
+        [uuidv7(), ctx.tenantId, customerId, id],
       );
     }
 

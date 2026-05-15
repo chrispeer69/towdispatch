@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { uuidv7 } from '@towcommand/db';
+import { BundleService } from '../bundle.service.js';
 import { dollarsToCents, normalizeString, parseTowbookTimestamp } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
 import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
@@ -16,6 +17,11 @@ import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
 export class ImpoundImporter extends BaseImporter {
   protected readonly recordType: ImportRecordType = 'impound';
   protected readonly csvKey = 'impounds';
+
+  // biome-ignore lint/complexity/noUselessConstructor: required for NestJS DI metadata
+  constructor(bundle: BundleService) {
+    super(bundle);
+  }
 
   protected async importRow(
     ctx: ImportContext,

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { uuidv7 } from '@towcommand/db';
+import { BundleService } from '../bundle.service.js';
 import {
   mapValue,
   normalizeEmail,
@@ -14,6 +15,14 @@ import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
 export class CustomerImporter extends BaseImporter {
   protected readonly recordType: ImportRecordType = 'customer';
   protected readonly csvKey = 'customers';
+
+  // Explicit constructor is required so Nest's DI emits constructor
+  // metadata for this derived class and injects BundleService. Without it,
+  // design:paramtypes is empty and the base's `bundle` is undefined.
+  // biome-ignore lint/complexity/noUselessConstructor: required for NestJS DI metadata
+  constructor(bundle: BundleService) {
+    super(bundle);
+  }
 
   protected async importRow(
     ctx: ImportContext,

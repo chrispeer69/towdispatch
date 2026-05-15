@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { uuidv7 } from '@towcommand/db';
+import { BundleService } from '../bundle.service.js';
 import {
   dollarsToCents,
   mapValue,
@@ -13,6 +14,11 @@ import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
 export class PaymentImporter extends BaseImporter {
   protected readonly recordType: ImportRecordType = 'payment';
   protected readonly csvKey = 'payments';
+
+  // biome-ignore lint/complexity/noUselessConstructor: required for NestJS DI metadata
+  constructor(bundle: BundleService) {
+    super(bundle);
+  }
 
   protected async importRow(
     ctx: ImportContext,

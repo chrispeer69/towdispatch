@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { uuidv7 } from '@towcommand/db';
+import { BundleService } from '../bundle.service.js';
 import {
   dollarsToCents,
   mapValue,
@@ -13,6 +14,11 @@ import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
 export class JobImporter extends BaseImporter {
   protected readonly recordType: ImportRecordType = 'job';
   protected readonly csvKey = 'calls';
+
+  // biome-ignore lint/complexity/noUselessConstructor: required for NestJS DI metadata
+  constructor(bundle: BundleService) {
+    super(bundle);
+  }
 
   protected async importRow(
     ctx: ImportContext,
@@ -75,11 +81,11 @@ export class JobImporter extends BaseImporter {
             status = $2,
             service_type = $3,
             pickup_address = $4,
-            pickup_lat = COALESCE($5, pickup_lat),
-            pickup_lng = COALESCE($6, pickup_lng),
+            pickup_lat = COALESCE($5::text, pickup_lat),
+            pickup_lng = COALESCE($6::text, pickup_lng),
             dropoff_address = COALESCE(NULLIF($7, ''), dropoff_address),
-            dropoff_lat = COALESCE($8, dropoff_lat),
-            dropoff_lng = COALESCE($9, dropoff_lng),
+            dropoff_lat = COALESCE($8::text, dropoff_lat),
+            dropoff_lng = COALESCE($9::text, dropoff_lng),
             customer_id = COALESCE($10, customer_id),
             vehicle_id = COALESCE($11, vehicle_id),
             assigned_driver_id = COALESCE($12, assigned_driver_id),
@@ -93,11 +99,11 @@ export class JobImporter extends BaseImporter {
           status,
           serviceType,
           pickupAddress,
-          pickupLat,
-          pickupLng,
+          pickupLat === null ? null : String(pickupLat),
+          pickupLng === null ? null : String(pickupLng),
           dropoffAddress ?? '',
-          dropoffLat,
-          dropoffLng,
+          dropoffLat === null ? null : String(dropoffLat),
+          dropoffLng === null ? null : String(dropoffLng),
           customerId,
           vehicleId,
           driverId,
@@ -112,6 +118,17 @@ export class JobImporter extends BaseImporter {
     const id = uuidv7();
     const jobNumber = await this.allocateJobNumber(ctx, callReceivedAt ?? new Date().toISOString());
 
+    // jobs has only an assigned_at timestamp column; the rest of the
+    // lifecycle is captured in job_status_transitions, which we'll backfill
+    // for cleared imports in a follow-up. Imported jobs land with their
+    // final status and assignedAt; the intermediate timestamps would
+    // require synthesising a transition history that doesn't change
+    // operational behavior today.
+    void enRouteAt;
+    void onSceneAt;
+    void inTransitAt;
+    void droppedAt;
+    void clearedAt;
     await ctx.client.query(
       `INSERT INTO jobs (
           id, tenant_id, job_number, status, service_type,
@@ -119,18 +136,16 @@ export class JobImporter extends BaseImporter {
           pickup_address, pickup_lat, pickup_lng,
           dropoff_address, dropoff_lat, dropoff_lng,
           authorized_by, rate_quoted_cents, notes,
-          assigned_at, enroute_at, on_scene_at, in_progress_at,
-          completed_at, created_at, updated_at,
+          assigned_at, created_at, updated_at,
           external_source, external_id
        ) VALUES (
           $1, $2, $3, $4, $5,
           $6, $7, $8, $9,
-          $10, $11, $12,
-          $13, $14, $15,
+          $10, $11::text, $12::text,
+          $13, $14::text, $15::text,
           'customer', $16, $17,
-          $18, $19, $20, $21,
-          $22, COALESCE($23, now()), now(),
-          'towbook', $24
+          $18, COALESCE($19, now()), now(),
+          'towbook', $20
        )`,
       [
         id,
@@ -143,18 +158,14 @@ export class JobImporter extends BaseImporter {
         driverId,
         truckId,
         pickupAddress,
-        pickupLat,
-        pickupLng,
+        pickupLat === null ? null : String(pickupLat),
+        pickupLng === null ? null : String(pickupLng),
         dropoffAddress,
-        dropoffLat,
-        dropoffLng,
+        dropoffLat === null ? null : String(dropoffLat),
+        dropoffLng === null ? null : String(dropoffLng),
         totalCents,
         notes,
         assignedAt,
-        enRouteAt,
-        onSceneAt,
-        inTransitAt,
-        clearedAt ?? droppedAt,
         callReceivedAt,
         externalId,
       ],
@@ -176,11 +187,15 @@ export class JobImporter extends BaseImporter {
 
   private async allocateJobNumber(ctx: ImportContext, isoTimestamp: string): Promise<string> {
     const day = isoTimestamp.slice(0, 10).replace(/-/g, '');
+    // job_number_sequences PK is (tenant_id, day_key) per schema; the column
+    // is day_key, not day. updated_at must be bumped on conflict so the
+    // not-null timestamp stays current.
     const r = await ctx.client.query<{ next_seq: number }>(
-      `INSERT INTO job_number_sequences (tenant_id, day, last_seq)
-       VALUES ($1, $2, 1)
-       ON CONFLICT (tenant_id, day)
-       DO UPDATE SET last_seq = job_number_sequences.last_seq + 1
+      `INSERT INTO job_number_sequences (tenant_id, day_key, last_seq, updated_at)
+       VALUES ($1, $2, 1, now())
+       ON CONFLICT (tenant_id, day_key)
+       DO UPDATE SET last_seq = job_number_sequences.last_seq + 1,
+                     updated_at = now()
        RETURNING last_seq AS next_seq`,
       [ctx.tenantId, day],
     );

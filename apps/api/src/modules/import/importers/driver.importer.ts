@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { uuidv7 } from '@towcommand/db';
+import { BundleService } from '../bundle.service.js';
 import {
   normalizeEmail,
   normalizePhone,
@@ -13,6 +14,11 @@ import { BaseImporter, type ImportRowOutcome } from './base.importer.js';
 export class DriverImporter extends BaseImporter {
   protected readonly recordType: ImportRecordType = 'driver';
   protected readonly csvKey = 'drivers';
+
+  // biome-ignore lint/complexity/noUselessConstructor: required for NestJS DI metadata
+  constructor(bundle: BundleService) {
+    super(bundle);
+  }
 
   protected async importRow(
     ctx: ImportContext,
@@ -44,6 +50,8 @@ export class DriverImporter extends BaseImporter {
     if (byExternal.rowCount && byExternal.rowCount > 0) {
       const id = byExternal.rows[0]?.id ?? null;
       if (!id) return { action: 'error', externalId, errorMessage: 'dedup row vanished' };
+      // drivers schema has no terminated_at column — employment_status
+      // captures the terminated state. termDate informs status above only.
       await ctx.client.query(
         `UPDATE drivers SET
             first_name = COALESCE(NULLIF($2, ''), first_name),
@@ -55,8 +63,7 @@ export class DriverImporter extends BaseImporter {
             license_expires_at = COALESCE($8::date, license_expires_at),
             medical_card_expires_at = COALESCE($9::date, medical_card_expires_at),
             hired_at = COALESCE($10::date, hired_at),
-            terminated_at = COALESCE($11::date, terminated_at),
-            employment_status = $12,
+            employment_status = $11,
             updated_at = now()
          WHERE id=$1`,
         [
@@ -70,7 +77,6 @@ export class DriverImporter extends BaseImporter {
           licenseExp,
           medExp,
           hireDate,
-          termDate,
           status,
         ],
       );
@@ -113,11 +119,11 @@ export class DriverImporter extends BaseImporter {
       `INSERT INTO drivers (
           id, tenant_id, first_name, last_name, phone, email,
           license_number, license_state, license_expires_at,
-          medical_card_expires_at, hired_at, terminated_at,
+          medical_card_expires_at, hired_at,
           employment_status, active, cdl_class,
           external_source, external_id, created_at, updated_at
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10::date, $11::date, $12::date,
-                 $13, $14, 'none', 'towbook', $15, now(), now())`,
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::date, $10::date, $11::date,
+                 $12, $13, 'none', 'towbook', $14, now(), now())`,
       [
         id,
         ctx.tenantId,
@@ -130,7 +136,6 @@ export class DriverImporter extends BaseImporter {
         licenseExp,
         medExp,
         hireDate,
-        termDate,
         status,
         status === 'active',
         externalId,
