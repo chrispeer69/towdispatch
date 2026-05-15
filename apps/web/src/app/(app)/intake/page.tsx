@@ -1,4 +1,4 @@
-﻿import { getOptionalUser } from '@/lib/auth/session';
+import { getOptionalUser } from '@/lib/auth/session';
 import { IntakeClient } from './intake-client';
 
 export const metadata = { title: 'Call Intake â€” US Tow DISPATCH' };
@@ -22,11 +22,11 @@ export default async function IntakePage(): Promise<JSX.Element> {
           <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Call Intake
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
             Phone-first capture{tenantName ? ` Â· ${tenantName}` : ''}
           </p>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
           Tab to advance Â· Cmd/Ctrl+Enter to dispatch
         </span>
       </header>

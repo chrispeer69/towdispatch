@@ -28,15 +28,15 @@ export default async function AccountDetailPage({ params }: Props): Promise<JSX.
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header className="space-y-1">
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted">
-          <Link href="/accounts" className="hover:text-text-primary">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+          <Link href="/accounts" className="hover:text-text-primary-on-dark">
             ← All accounts
           </Link>
         </p>
         <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           {account.name}
         </h1>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           {account.billingTerms.replace('_', ' ')} · ${account.creditUsed} used
           {account.creditLimit ? ` / $${account.creditLimit} limit` : ' / no limit'}
           {account.isMotorClub
@@ -45,28 +45,28 @@ export default async function AccountDetailPage({ params }: Props): Promise<JSX.
         </p>
       </header>
 
-      <section className="rounded-[14px] border border-steel-border bg-steel-mid p-5">
+      <section className="rounded-[14px] border border-divider bg-bg-surface p-5">
         <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide">
           Customers under this account ({linked.total})
         </h2>
         {linked.data.length === 0 ? (
-          <p className="mt-3 text-sm text-text-secondary">
+          <p className="mt-3 text-sm text-text-secondary-on-dark">
             No customers are billed to this account yet.
           </p>
         ) : (
-          <ul className="mt-3 divide-y divide-steel-border overflow-hidden rounded-[10px] border border-steel-border">
+          <ul className="mt-3 divide-y divide-divider overflow-hidden rounded-[10px] border border-divider">
             {linked.data.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between bg-steel-light/30 px-3 py-2 text-sm"
+                className="flex items-center justify-between bg-bg-surface-elevated/30 px-3 py-2 text-sm"
               >
                 <Link
                   href={`/customers/${c.id}`}
-                  className="font-medium text-text-primary hover:text-orange-light"
+                  className="font-medium text-text-primary-on-dark hover:text-brand-primary"
                 >
                   {c.name}
                 </Link>
-                <span className="font-mono text-[11px] text-text-muted">
+                <span className="font-mono text-[11px] text-text-secondary-on-dark-on-dark/60">
                   {c.phone ?? '—'} · {c.type}
                 </span>
               </li>

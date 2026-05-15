@@ -31,7 +31,7 @@ export default async function DriversPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           <span data-testid="driver-count">{initial.total}</span> drivers
         </p>
         <Link href="/fleet/drivers/new">

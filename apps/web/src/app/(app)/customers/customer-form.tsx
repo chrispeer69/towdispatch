@@ -91,7 +91,7 @@ export function CustomerForm({ mode, initial }: Props): JSX.Element {
         <Field label="Type" error={errors.type?.message}>
           <select
             {...register('type')}
-            className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
+            className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
           >
             {customerTypeValues.map((v) => (
               <option key={v} value={v}>
@@ -119,7 +119,7 @@ export function CustomerForm({ mode, initial }: Props): JSX.Element {
           <Input placeholder="UUID of commercial account" {...register('accountId')} />
         </Field>
         <Field label="Tax exempt">
-          <label className="flex items-center gap-2 text-sm text-text-secondary">
+          <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
             <input type="checkbox" className="h-4 w-4 accent-orange" {...register('taxExempt')} />
             <span>This customer is tax-exempt</span>
           </label>
@@ -127,7 +127,7 @@ export function CustomerForm({ mode, initial }: Props): JSX.Element {
         <Field label="Notes" error={errors.notes?.message}>
           <textarea
             {...register('notes')}
-            className="w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 py-2 text-sm text-text-primary"
+            className="w-full rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark"
             rows={3}
           />
         </Field>
@@ -163,8 +163,8 @@ function Section({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <section className="space-y-4 rounded-[14px] border border-steel-border bg-steel-mid p-5">
-      <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+    <section className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
+      <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
         {title}
       </h2>
       <div className="space-y-4">{children}</div>
@@ -199,7 +199,7 @@ function Field({
       <Label htmlFor={id}>{label}</Label>
       {enhanced}
       {hint && !error ? (
-        <p id={hintId} className="text-xs text-text-muted">
+        <p id={hintId} className="text-xs text-text-secondary-on-dark-on-dark/60">
           {hint}
         </p>
       ) : null}

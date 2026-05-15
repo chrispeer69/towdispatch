@@ -109,7 +109,9 @@ export function SignupForm(): JSX.Element {
         hint="Lowercase letters, numbers, hyphens. This is your workspace URL."
       >
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-muted">ustowdispatch.app/</span>
+          <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
+            ustowdispatch.app/
+          </span>
           <Input
             className="flex-1"
             placeholder="acme-towing"
@@ -143,10 +145,10 @@ export function SignupForm(): JSX.Element {
         <Input type="password" autoComplete="new-password" {...register('confirmPassword')} />
       </Field>
 
-      <label className="flex items-start gap-3 text-xs text-text-secondary">
+      <label className="flex items-start gap-3 text-xs text-text-secondary-on-dark">
         <input
           type="checkbox"
-          className="mt-1 h-4 w-4 rounded border-steel-border bg-steel-mid accent-orange"
+          className="mt-1 h-4 w-4 rounded border-divider bg-bg-surface accent-orange"
           {...register('authorized')}
         />
         <span>I am authorized to create this account on behalf of my company.</span>
@@ -155,9 +157,10 @@ export function SignupForm(): JSX.Element {
         <p className="text-xs text-danger">{errors.authorized.message}</p>
       ) : null}
 
-      <p className="text-xs text-text-muted">
-        By creating an account you agree to our <span className="text-text-secondary">Terms</span>{' '}
-        and <span className="text-text-secondary">Privacy Policy</span>.
+      <p className="text-xs text-text-secondary-on-dark-on-dark/60">
+        By creating an account you agree to our{' '}
+        <span className="text-text-secondary-on-dark">Terms</span> and{' '}
+        <span className="text-text-secondary-on-dark">Privacy Policy</span>.
       </p>
 
       {submitError ? (
@@ -204,7 +207,7 @@ function Field({ label, error, hint, children }: FieldProps): JSX.Element {
       <Label htmlFor={id}>{label}</Label>
       {enhanced}
       {hint && !error ? (
-        <p id={hintId} className="text-xs text-text-muted">
+        <p id={hintId} className="text-xs text-text-secondary-on-dark-on-dark/60">
           {hint}
         </p>
       ) : null}

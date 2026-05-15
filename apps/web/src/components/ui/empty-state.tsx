@@ -30,16 +30,16 @@ export function EmptyState({
     <section
       aria-live="polite"
       className={cn(
-        'flex flex-col items-center justify-center rounded-lg border border-dashed border-steel-border bg-steel-light/30 px-6 py-16 text-center',
+        'flex flex-col items-center justify-center rounded-lg border border-dashed border-divider bg-bg-surface-elevated/30 px-6 py-16 text-center',
         className,
       )}
     >
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-steel-light text-text-secondary">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-bg-surface-elevated text-text-secondary-on-dark">
         <Icon size={32} strokeWidth={1.5} aria-hidden="true" />
       </div>
-      <h2 className="mb-2 text-lg font-semibold text-text-primary">{title}</h2>
+      <h2 className="mb-2 text-lg font-semibold text-text-primary-on-dark">{title}</h2>
       {description ? (
-        <p className="mb-6 max-w-md text-sm text-text-secondary">{description}</p>
+        <p className="mb-6 max-w-md text-sm text-text-secondary-on-dark">{description}</p>
       ) : null}
       {action}
     </section>

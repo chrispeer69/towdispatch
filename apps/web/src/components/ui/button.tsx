@@ -11,7 +11,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-steel disabled:pointer-events-none disabled:opacity-50 font-sans',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base disabled:pointer-events-none disabled:opacity-50 font-sans',
   {
     variants: {
       variant: {
@@ -19,12 +19,12 @@ const buttonVariants = cva(
         // the brand orange (#F05A1A) falls just short (3.19:1) which
         // Lighthouse flags. Hover lifts to the brand orange so the
         // pressed/hover state still reads as the canonical brand color.
-        default: 'bg-orange-dark text-white hover:bg-orange',
+        default: 'bg-brand-primary-hover text-white hover:bg-brand-primary',
         secondary:
-          'bg-steel-light text-text-primary border border-steel-border hover:border-steel-border-light',
-        ghost: 'bg-transparent text-text-primary hover:bg-steel-light',
+          'bg-bg-surface-elevated text-text-primary-on-dark border border-divider hover:border-divider-strong',
+        ghost: 'bg-transparent text-text-primary-on-dark hover:bg-bg-surface-elevated',
         outline:
-          'border border-steel-border bg-transparent text-text-primary hover:bg-steel-light',
+          'border border-divider bg-transparent text-text-primary-on-dark hover:bg-bg-surface-elevated',
         destructive: 'bg-danger/15 text-danger border border-danger/30 hover:bg-danger/25',
       },
       size: {

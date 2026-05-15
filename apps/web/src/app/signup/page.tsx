@@ -16,7 +16,7 @@ export default function SignupPage(): JSX.Element {
           Already have an account?{' '}
           <Link
             href="/login"
-            className="font-semibold text-orange-light transition-colors hover:text-orange"
+            className="font-semibold text-brand-primary transition-colors hover:text-brand-primary"
           >
             Sign in
           </Link>

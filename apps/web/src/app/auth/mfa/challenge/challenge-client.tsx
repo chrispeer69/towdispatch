@@ -57,7 +57,7 @@ export function ChallengeClient(): JSX.Element {
       <div className="space-y-1.5">
         <label
           htmlFor="mfa-code"
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted"
+          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60"
         >
           {mode === 'totp' ? '6-digit code from your app' : 'Recovery code'}
         </label>
@@ -94,7 +94,7 @@ export function ChallengeClient(): JSX.Element {
           setCode('');
           setError(null);
         }}
-        className="block w-full text-center text-xs font-semibold uppercase tracking-[0.18em] text-text-muted hover:text-text-secondary"
+        className="block w-full text-center text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-text-secondary-on-dark"
       >
         {mode === 'totp' ? 'Use a recovery code instead' : 'Use authenticator app instead'}
       </button>

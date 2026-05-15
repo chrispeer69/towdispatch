@@ -52,12 +52,12 @@ export function DriverAssignmentsSection({ driverId, initial, trucks }: Props): 
 
   return (
     <section data-testid="driver-assignments-section">
-      <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">
+      <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
         Assigned trucks
       </h3>
-      <div className="mt-3 flex flex-wrap items-end gap-3 rounded-[12px] border border-steel-border bg-steel-mid p-4">
+      <div className="mt-3 flex flex-wrap items-end gap-3 rounded-[12px] border border-divider bg-bg-surface p-4">
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-text-secondary" htmlFor="assign-truck">
+          <label className="text-xs text-text-secondary-on-dark" htmlFor="assign-truck">
             Truck
           </label>
           <select
@@ -65,7 +65,7 @@ export function DriverAssignmentsSection({ driverId, initial, trucks }: Props): 
             value={truckId}
             onChange={(e) => setTruckId(e.target.value)}
             data-testid="driver-assign-truck-select"
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
           >
             {trucks.map((t) => (
               <option key={t.id} value={t.id}>
@@ -86,7 +86,9 @@ export function DriverAssignmentsSection({ driverId, initial, trucks }: Props): 
       </div>
 
       {assignments.length === 0 ? (
-        <p className="mt-2 text-sm text-text-muted">No truck assignments yet.</p>
+        <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">
+          No truck assignments yet.
+        </p>
       ) : (
         <ul className="mt-3 space-y-1 text-sm" data-testid="driver-assignments-list">
           {assignments.map((a) => {
@@ -98,7 +100,7 @@ export function DriverAssignmentsSection({ driverId, initial, trucks }: Props): 
                   type="button"
                   onClick={() => void remove(a.id)}
                   disabled={busy}
-                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-muted hover:text-red-400"
+                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-red-400"
                 >
                   Remove
                 </button>

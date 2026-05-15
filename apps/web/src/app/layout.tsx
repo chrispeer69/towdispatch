@@ -32,7 +32,7 @@ export default function RootLayout({
 }): JSX.Element {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="bg-steel text-text-primary antialiased">
+      <body className="bg-bg-base text-text-primary-on-dark antialiased">
         <ThemeProvider>
           {/* Skip link — first focusable element on every page so keyboard
               users can bypass the sidebar/topbar and jump straight to
@@ -42,7 +42,7 @@ export default function RootLayout({
               analysis). */}
           <a
             href="#main-content"
-            className="fixed left-4 top-0 z-50 -translate-y-16 rounded bg-orange px-4 py-2 font-semibold text-white transition-transform focus:translate-y-4"
+            className="fixed left-4 top-0 z-50 -translate-y-16 rounded bg-brand-primary px-4 py-2 font-semibold text-white transition-transform focus:translate-y-4"
           >
             Skip to main content
           </a>

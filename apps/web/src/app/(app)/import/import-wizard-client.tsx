@@ -108,7 +108,7 @@ export function ImportWizardClient({
     <div className="space-y-6">
       <section className="rounded-lg border border-border bg-card p-6">
         <h2 className="mb-2 text-lg font-semibold">1. Target tenant</h2>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           Importing into <strong>{tenantName}</strong> (tenant {tenantId}).
         </p>
       </section>
@@ -123,12 +123,12 @@ export function ImportWizardClient({
           {file ? (
             <div className="text-center">
               <p className="font-medium">{file.name}</p>
-              <p className="text-xs text-text-secondary">
+              <p className="text-xs text-text-secondary-on-dark">
                 {(file.size / (1024 * 1024)).toFixed(1)} MB
               </p>
             </div>
           ) : (
-            <div className="text-center text-text-secondary">
+            <div className="text-center text-text-secondary-on-dark">
               <p>Drop a Towbook export ZIP here</p>
               <p className="text-xs">Max 2 GiB. Includes CSVs + media/ subfolder.</p>
             </div>
@@ -153,7 +153,7 @@ export function ImportWizardClient({
 
       <section className="rounded-lg border border-border bg-card p-6">
         <h2 className="mb-2 text-lg font-semibold">3. Dry run, then live</h2>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           Dry-run rolls back at the end so you can see what would happen without persisting changes.
           Live commits the bundle.
         </p>
@@ -187,7 +187,7 @@ export function ImportWizardClient({
                 style={{ width: `${phase === 'uploading' ? uploadPct : 100}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-text-secondary">
+            <p className="mt-2 text-xs text-text-secondary-on-dark">
               {phase === 'uploading' ? `Uploading ${uploadPct}%` : 'Running on server…'}
             </p>
           </div>
@@ -199,7 +199,9 @@ export function ImportWizardClient({
           <h2 className="mb-2 text-lg font-semibold">
             4. {phase === 'completed' ? 'Completed' : phase === 'failed' ? 'Failed' : 'Cancelled'}
           </h2>
-          {result.message && <p className="text-sm text-text-secondary">{result.message}</p>}
+          {result.message && (
+            <p className="text-sm text-text-secondary-on-dark">{result.message}</p>
+          )}
           <table className="mt-4 w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">

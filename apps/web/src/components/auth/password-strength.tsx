@@ -35,8 +35,8 @@ export function PasswordStrength({ value }: { value: string }): JSX.Element {
             key={i}
             className={
               i < passed
-                ? 'h-1.5 flex-1 rounded-full bg-orange'
-                : 'h-1.5 flex-1 rounded-full bg-steel-border'
+                ? 'h-1.5 flex-1 rounded-full bg-brand-primary'
+                : 'h-1.5 flex-1 rounded-full bg-divider'
             }
           />
         ))}
@@ -48,7 +48,7 @@ export function PasswordStrength({ value }: { value: string }): JSX.Element {
             className={
               r.passed
                 ? 'flex items-center gap-2 text-ok'
-                : 'flex items-center gap-2 text-text-muted'
+                : 'flex items-center gap-2 text-text-secondary-on-dark-on-dark/60'
             }
           >
             <span aria-hidden>{r.passed ? '✓' : '·'}</span>
