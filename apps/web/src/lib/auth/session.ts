@@ -1,5 +1,5 @@
 import type { MeResponse } from '@ustowdispatch/shared';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 /**
  * Server-side session loaders.
  *
@@ -45,6 +45,26 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { ApiError, apiServer } from '../api/client';
+import { ACCESS_COOKIE } from './cookies';
+
+/**
+ * Session 9.7 — In Next 15 production builds, `cookies()` and `headers()` both
+ * return an empty store when called from a page module, even when the
+ * (app)/ layout's parallel call in the same request reads them successfully
+ * (`[diag-list-empty] hasAuth: true` vs `[diag-page-cookies] headerHasCookie:
+ * false`). The `fix/cookie-via-header-9.7` workaround proved cookies are
+ * genuinely absent from the page-render request scope, not just inaccessible
+ * via cookies(). Workaround: read the cookie inside a `cache()`-wrapped
+ * server function, invoked from the layout where the read works, and have
+ * the page consume the cached value. The (app)/ layout calls
+ * `getSessionToken()` explicitly so any future contributor can see the
+ * cookie read happening at the auth chokepoint. Do NOT thread the token
+ * through SessionProvider — that would serialize it into the RSC payload
+ * and expose the bearer to client JS, defeating the httpOnly posture.
+ */
+export const getSessionToken = cache(async (): Promise<string | null> => {
+  return (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+});
 
 export const getOptionalUser = cache(async (): Promise<MeResponse | null> => {
   try {
