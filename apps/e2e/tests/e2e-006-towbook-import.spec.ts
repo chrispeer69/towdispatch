@@ -143,8 +143,11 @@ test.describe('E2E-006 Towbook import end-to-end', () => {
       },
       body: bundle,
     });
-    expect(res.ok, `dry-run failed: ${res.status} ${await res.text()}`).toBe(true);
-    const body = (await res.json()) as {
+    // Read the body once — node's fetch impl rejects a second read. Stash
+    // a snapshot for assertion error messages.
+    const rawBody = await res.text();
+    expect(res.ok, `dry-run failed: ${res.status} ${rawBody}`).toBe(true);
+    const body = JSON.parse(rawBody) as {
       status: string;
       totals: Record<string, { created: number } | undefined>;
     };
