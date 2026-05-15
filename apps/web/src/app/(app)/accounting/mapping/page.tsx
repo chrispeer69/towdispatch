@@ -1,5 +1,5 @@
 /**
- * /accounting/mapping — Map TowCommand's internal billing categories onto the
+ * /accounting/mapping — Map US Tow DISPATCH's internal billing categories onto the
  * tenant's QuickBooks chart of accounts. Server-renders the current chart and
  * existing mappings, then the client component handles save.
  */
@@ -28,7 +28,7 @@ export default async function AccountingMappingPage(): Promise<JSX.Element> {
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold">Account mapping</h1>
-        <p className="text-text-secondary mt-1 max-w-prose">
+        <p className="text-text-secondary-on-dark mt-1 max-w-prose">
           Choose which account in your QuickBooks chart receives each internal billing category. New
           invoices and payments will post to the mapped accounts; remove a mapping to fall back to
           QuickBooks defaults.

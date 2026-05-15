@@ -1,8 +1,8 @@
 import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
-import type { AgingResponse } from '@towcommand/shared';
+import type { AgingResponse } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'A/R aging — TowCommand' };
+export const metadata = { title: 'A/R aging â€” US Tow DISPATCH' };
 
 function emptyAging(): AgingResponse {
   return {
@@ -26,10 +26,10 @@ export default async function AgingPage(): Promise<JSX.Element> {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           A/R aging
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">As of {aging.asOf.slice(0, 10)}</p>
+        <p className="mt-1 text-sm text-text-secondary-on-dark">As of {aging.asOf.slice(0, 10)}</p>
       </header>
       <div className="grid gap-2 md:grid-cols-6">
         <Tile label="Current" value={aging.totals.currentDueCents} />
@@ -39,37 +39,37 @@ export default async function AgingPage(): Promise<JSX.Element> {
         <Tile label="91+ days" value={aging.totals.bucket91PlusCents} />
         <Tile label="Total due" value={aging.totals.totalCents} bold />
       </div>
-      <div className="overflow-hidden rounded-lg border border-steel-border">
-        <table className="w-full divide-y divide-steel-border text-sm" data-testid="aging-table">
-          <thead className="bg-steel-mid/60 text-left">
+      <div className="overflow-hidden rounded-lg border border-divider">
+        <table className="w-full divide-y divide-divider text-sm" data-testid="aging-table">
+          <thead className="bg-bg-surface/60 text-left">
             <tr>
-              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 Account / Customer
               </th>
-              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 Current
               </th>
-              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 1-30
               </th>
-              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 31-60
               </th>
-              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 61-90
               </th>
-              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 91+
               </th>
-              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-muted">
+              <th className="px-4 py-2 text-right text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-steel-border">
+          <tbody className="divide-y divide-divider">
             {aging.rows.map((r) => (
               <tr key={`${r.accountId ?? r.customerId ?? 'unk'}`}>
-                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? '—'}</td>
+                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? 'â€”'}</td>
                 <td className="px-4 py-2 text-right font-mono">
                   {formatMoneyCents(r.currentDueCents)}
                 </td>
@@ -92,7 +92,10 @@ export default async function AgingPage(): Promise<JSX.Element> {
             ))}
             {aging.rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-text-muted">
+                <td
+                  colSpan={7}
+                  className="px-4 py-8 text-center text-text-secondary-on-dark-on-dark/60"
+                >
                   No outstanding balances.
                 </td>
               </tr>
@@ -114,8 +117,10 @@ function Tile({
   bold?: boolean;
 }): JSX.Element {
   return (
-    <div className="rounded-lg border border-steel-border p-3">
-      <p className="text-xs uppercase tracking-wider text-text-muted">{label}</p>
+    <div className="rounded-lg border border-divider p-3">
+      <p className="text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
+        {label}
+      </p>
       <p className={`mt-1 font-mono text-lg ${bold ? 'font-bold' : ''}`}>
         {formatMoneyCents(value)}
       </p>

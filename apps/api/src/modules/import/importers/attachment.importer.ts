@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
-import type { StorageProvider } from '@towcommand/shared';
+import { uuidv7 } from '@ustowdispatch/db';
+import type { StorageProvider } from '@ustowdispatch/shared';
 import { STORAGE_PROVIDER } from '../../storage/storage.module.js';
 import { BundleService } from '../bundle.service.js';
 import { normalizeString } from '../normalizers.js';

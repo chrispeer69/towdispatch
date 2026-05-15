@@ -1,6 +1,6 @@
 import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers, fetchDvirs, fetchTrucks } from '@/lib/api/fleet';
-import type { PaginatedDrivers, PaginatedTrucks } from '@towcommand/shared';
+import type { PaginatedDrivers, PaginatedTrucks } from '@ustowdispatch/shared';
 import { DvirSubmitClient } from './dvir-submit-client';
 
 const EMPTY_TRUCKS: PaginatedTrucks = { data: [], total: 0, page: 1, perPage: 200 };
@@ -26,18 +26,20 @@ export default async function DvirsPage(): Promise<JSX.Element> {
           Recent inspections
         </h2>
         {dvirs.length === 0 ? (
-          <p className="mt-2 text-sm text-text-muted">No DVIRs filed yet.</p>
+          <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">No DVIRs filed yet.</p>
         ) : (
           <ul className="mt-2 space-y-1 text-sm" data-testid="dvir-list">
             {dvirs.map((d) => (
               <li
                 key={d.id}
-                className="flex items-center justify-between rounded-[8px] border border-steel-border bg-steel-mid px-3 py-2"
+                className="flex items-center justify-between rounded-[8px] border border-divider bg-bg-surface px-3 py-2"
               >
                 <span>
                   {d.submittedAt.slice(0, 10)} · {d.type.replace('_', ' ')}
                 </span>
-                <span className="font-mono text-xs uppercase text-text-muted">{d.status}</span>
+                <span className="font-mono text-xs uppercase text-text-secondary-on-dark-on-dark/60">
+                  {d.status}
+                </span>
               </li>
             ))}
           </ul>

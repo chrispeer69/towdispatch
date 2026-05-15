@@ -125,7 +125,7 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
   }
 
   return (
-    <section className="rounded-[14px] border border-steel-border bg-steel-mid p-5">
+    <section className="rounded-[14px] border border-divider bg-bg-surface p-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide">
           Vehicles on file ({vehicles.length})
@@ -142,7 +142,7 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
       </div>
 
       {vehicles.length === 0 && !adding ? (
-        <p className="mt-3 text-sm text-text-secondary">
+        <p className="mt-3 text-sm text-text-secondary-on-dark">
           No vehicles linked yet. Most vehicles are captured during a call (Session 4 — Call
           Intake); use Add vehicle here only when you're updating a customer record outside of a tow
           job.
@@ -150,28 +150,28 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
       ) : null}
 
       {vehicles.length > 0 ? (
-        <ul className="mt-3 divide-y divide-steel-border overflow-hidden rounded-[10px] border border-steel-border">
+        <ul className="mt-3 divide-y divide-divider overflow-hidden rounded-[10px] border border-divider">
           {vehicles.map((v) => (
             <li
               key={v.id}
-              className="flex items-start justify-between gap-4 bg-steel-light/30 px-3 py-3 text-sm"
+              className="flex items-start justify-between gap-4 bg-bg-surface-elevated/30 px-3 py-3 text-sm"
             >
               <div className="min-w-0 flex-1 space-y-1">
-                <div className="flex items-baseline gap-2 font-medium text-text-primary">
-                  <Link href={`/vehicles/${v.id}`} className="hover:text-orange-light">
+                <div className="flex items-baseline gap-2 font-medium text-text-primary-on-dark">
+                  <Link href={`/vehicles/${v.id}`} className="hover:text-brand-primary">
                     {v.year ?? '—'} {v.make ?? '—'} {v.model ?? ''}
                   </Link>
                   {v.isPrimary ? (
-                    <span className="rounded bg-orange/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-orange-light">
+                    <span className="rounded bg-brand-primary/15 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-brand-primary">
                       primary
                     </span>
                   ) : null}
                 </div>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-text-muted">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-text-secondary-on-dark-on-dark/60">
                   {v.plate ? (
                     <span>
                       plate{' '}
-                      <span className="text-text-secondary">
+                      <span className="text-text-secondary-on-dark">
                         {v.plate}
                         {v.plateState ? ` / ${v.plateState}` : ''}
                       </span>
@@ -179,7 +179,7 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
                   ) : null}
                   {v.vin ? (
                     <span>
-                      VIN …<span className="text-text-secondary">{v.vin.slice(-6)}</span>
+                      VIN …<span className="text-text-secondary-on-dark">{v.vin.slice(-6)}</span>
                     </span>
                   ) : null}
                   <span>relationship {v.relationship}</span>
@@ -202,7 +202,7 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
       {adding ? (
         <div
           className={cn(
-            'mt-4 space-y-3 rounded-[10px] border border-steel-border bg-steel-light/20 p-4',
+            'mt-4 space-y-3 rounded-[10px] border border-divider bg-bg-surface-elevated/20 p-4',
             busy && 'opacity-60',
           )}
         >
@@ -258,7 +258,7 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
             <textarea
               rows={2}
               placeholder="e.g. AWD, do not flat-tow"
-              className="w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 py-2 text-sm text-text-primary"
+              className="w-full rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark"
               value={form.specialInstructions}
               onChange={(e) => setForm({ ...form, specialInstructions: e.target.value })}
             />

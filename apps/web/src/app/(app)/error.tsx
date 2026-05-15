@@ -31,13 +31,15 @@ export default function AppError({ error, reset }: Props): JSX.Element {
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-danger/15 text-danger">
         <AlertTriangle size={32} strokeWidth={1.5} aria-hidden="true" />
       </div>
-      <h2 className="mb-2 text-lg font-semibold text-text-primary">Something went wrong.</h2>
-      <p className="mb-6 max-w-md text-sm text-text-secondary">
+      <h2 className="mb-2 text-lg font-semibold text-text-primary-on-dark">
+        Something went wrong.
+      </h2>
+      <p className="mb-6 max-w-md text-sm text-text-secondary-on-dark">
         The page hit an unexpected error. Try again — if it keeps happening, share the reference ID
         below with support.
       </p>
       {error.digest ? (
-        <code className="mb-6 select-all rounded bg-steel-light px-3 py-1 font-mono text-xs text-text-secondary">
+        <code className="mb-6 select-all rounded bg-bg-surface-elevated px-3 py-1 font-mono text-xs text-text-secondary-on-dark">
           ref: {error.digest}
         </code>
       ) : null}
@@ -47,7 +49,7 @@ export default function AppError({ error, reset }: Props): JSX.Element {
         </Button>
         <Link
           href="/dashboard"
-          className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-steel-border bg-steel-light px-4 text-sm font-semibold text-text-primary transition-colors hover:border-steel-border-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-steel"
+          className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-divider bg-bg-surface-elevated px-4 text-sm font-semibold text-text-primary-on-dark transition-colors hover:border-divider-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base"
         >
           <ArrowLeft size={16} aria-hidden="true" /> Back to dashboard
         </Link>

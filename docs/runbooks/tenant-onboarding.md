@@ -5,14 +5,14 @@
 
 ---
 
-Onboards a new towing company onto TowCommand Pro. Run this top-to-bottom; total time should be < 30 minutes once integrations are pre-approved.
+Onboards a new towing company onto US Tow DISPATCH. Run this top-to-bottom; total time should be < 30 minutes once integrations are pre-approved.
 
 ## 1. Provision the tenant + first OWNER user
 
 The canonical path is the `/signup` endpoint, which creates a tenant + OWNER user + idempotently triggers verification mail in a single transaction. There is no admin SQL for "create a tenant" because doing so bypasses the integrity guards in `AuthService.signup()` (`apps/api/src/modules/auth/auth.service.ts`).
 
 ```bash
-curl -sS -X POST https://api.towcommand.cloud/auth/signup \
+curl -sS -X POST https://api.ustowdispatch.com/auth/signup \
   -H 'content-type: application/json' \
   -d '{
     "tenantName": "Acme Towing & Recovery, Inc.",
@@ -79,7 +79,7 @@ SQL
 Verify the inbound dispatch path with the stub:
 
 ```bash
-curl -sS -X POST https://api.towcommand.cloud/motor-club/agero/dispatch \
+curl -sS -X POST https://api.ustowdispatch.com/motor-club/agero/dispatch \
   -H 'content-type: application/json' \
   -d "$(cat <<JSON
 {
@@ -105,7 +105,7 @@ Each tenant gets its own Stripe Connect Express account (see Session 11).
 
 ```bash
 # Start onboarding — returns a Stripe-hosted onboarding URL
-curl -sS -X POST https://api.towcommand.cloud/payments/connect/start \
+curl -sS -X POST https://api.ustowdispatch.com/payments/connect/start \
   -H "Authorization: Bearer $TENANT_OWNER_ACCESS_TOKEN" \
   -H 'content-type: application/json'
 ```
@@ -115,7 +115,7 @@ curl -sS -X POST https://api.towcommand.cloud/payments/connect/start \
 3. Verify connection:
 
 ```bash
-curl -sS https://api.towcommand.cloud/payments/connect/status \
+curl -sS https://api.ustowdispatch.com/payments/connect/status \
   -H "Authorization: Bearer $TENANT_OWNER_ACCESS_TOKEN"
 # Expect: { "connected": true, "chargesEnabled": true, "payoutsEnabled": true }
 ```
@@ -128,9 +128,9 @@ If `chargesEnabled=false` after 24 hours: nudge the owner to finish Stripe's ver
 
 QBO connection is per-tenant OAuth (Session 12).
 
-1. Send the tenant owner to `https://app.towcommand.cloud/accounting` from the web app.
+1. Send the tenant owner to `https://app.ustowdispatch.com/accounting` from the web app.
 2. They click "Connect QuickBooks" → completes Intuit OAuth → lands back on the mapping screen.
-3. Owner maps each TowCommand category to a QBO Chart-of-Accounts entry:
+3. Owner maps each US Tow DISPATCH category to a QBO Chart-of-Accounts entry:
    - **Tow revenue** → QBO income account (typically "Towing Income")
    - **Accessorial revenue** → QBO income account
    - **Cash collected** → QBO bank/clearing account
@@ -142,7 +142,7 @@ The mapping UI is at `/accounting/mapping`. Required mappings are flagged; sync 
 4. Trigger a backfill sync:
 
 ```bash
-curl -sS -X POST https://api.towcommand.cloud/accounting/sync/manual \
+curl -sS -X POST https://api.ustowdispatch.com/accounting/sync/manual \
   -H "Authorization: Bearer $TENANT_OWNER_ACCESS_TOKEN"
 ```
 
@@ -159,7 +159,7 @@ Logos and brand color are per-tenant.
 ```bash
 psql "$DATABASE_ADMIN_URL" <<SQL
 UPDATE tenants
-SET logo_url = 'https://towcommand-tenants.s3.amazonaws.com/<tenant-id>/logo.png',
+SET logo_url = 'https://ustowdispatch-tenants.s3.amazonaws.com/<tenant-id>/logo.png',
     brand_color = '#F05A1A',
     updated_at = now()
 WHERE slug = 'acme-towing';
@@ -170,7 +170,7 @@ SQL
 
 ```bash
 aws s3 cp ./acme-logo.png \
-  s3://towcommand-tenants/<tenant-id>/logo.png \
+  s3://ustowdispatch-tenants/<tenant-id>/logo.png \
   --acl private \
   --metadata tenant-id=<tenant-id>
 ```
@@ -188,7 +188,7 @@ This step is **non-negotiable**. Run before letting the tenant log a single real
 ```bash
 # From any developer machine with DB + Redis up
 E2E_RUN_REQUIRES_STACK=1 \
-  pnpm --filter @towcommand/api test test/security/rls-bypass.spec.ts
+  pnpm --filter @ustowdispatch/api test test/security/rls-bypass.spec.ts
 ```
 
 The test seeds two synthetic tenants and verifies cross-tenant access fails on every record-by-id endpoint. A clean pass against the new tenant validates that RLS policies took effect.
@@ -197,7 +197,7 @@ The test seeds two synthetic tenants and verifies cross-tenant access fails on e
 
 ```bash
 # As the new tenant's OWNER
-NEW_TOKEN=$(curl -sS -X POST https://api.towcommand.cloud/auth/login \
+NEW_TOKEN=$(curl -sS -X POST https://api.ustowdispatch.com/auth/login \
   -H 'content-type: application/json' \
   -d '{"email":"jane@acme-towing.com","password":"..."}' | jq -r .accessToken)
 
@@ -205,7 +205,7 @@ NEW_TOKEN=$(curl -sS -X POST https://api.towcommand.cloud/auth/login \
 # know exists in tenant-002, e.g. Auto Lyft, from your seed data)
 curl -sS -o /dev/null -w '%{http_code}\n' \
   -H "Authorization: Bearer $NEW_TOKEN" \
-  https://api.towcommand.cloud/customers/<auto-lyft-customer-id>
+  https://api.ustowdispatch.com/customers/<auto-lyft-customer-id>
 ```
 
 **Must return 404.** Not 403, not 200. If 200 — STOP, this is a SEV-1, see `docs/runbooks/security-incident.md`.
@@ -217,7 +217,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' \
 The new tenant owner walks through this checklist on the onboarding call:
 
 ```
-[ ] Log in at https://app.towcommand.cloud — lands on dashboard
+[ ] Log in at https://app.ustowdispatch.com — lands on dashboard
 [ ] Click "Settings → Users", invite a dispatcher (sends verification email)
 [ ] Click "Fleet → Drivers", create a driver
 [ ] Click "Fleet → Trucks", create a truck

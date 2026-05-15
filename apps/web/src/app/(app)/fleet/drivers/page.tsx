@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers } from '@/lib/api/fleet';
-import type { PaginatedDrivers } from '@towcommand/shared';
+import type { PaginatedDrivers } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
 
@@ -31,7 +31,7 @@ export default async function DriversPage({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           <span data-testid="driver-count">{initial.total}</span> drivers
         </p>
         <Link href="/fleet/drivers/new">

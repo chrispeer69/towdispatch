@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@towcommand/db';
+import { uuidv7 } from '@ustowdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import {
   dollarsToCents,

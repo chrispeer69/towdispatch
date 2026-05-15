@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
  * MFA_LOGIN_GATE_ENABLED on the API to re-wire them.
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type LoginPayload, type TenantSelectionDto, loginSchema } from '@towcommand/shared';
+import { type LoginPayload, type TenantSelectionDto, loginSchema } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -120,7 +120,7 @@ export function LoginForm(): JSX.Element {
       <div className="flex items-center justify-between text-xs">
         <Link
           href="/forgot-password"
-          className="font-semibold text-orange-light transition-colors hover:text-orange"
+          className="font-semibold text-brand-primary transition-colors hover:text-brand-primary"
         >
           Forgot password?
         </Link>
@@ -172,7 +172,7 @@ function TenantPicker({
 }): JSX.Element {
   return (
     <div className="space-y-3">
-      <p className="text-sm text-text-secondary">
+      <p className="text-sm text-text-secondary-on-dark">
         We found this email in more than one workspace. Pick which to sign in to:
       </p>
       <ul className="space-y-2">
@@ -181,13 +181,15 @@ function TenantPicker({
             <button
               type="button"
               onClick={() => onPick(t.slug)}
-              className="flex w-full items-center justify-between rounded-[10px] border border-steel-border bg-steel-mid px-4 py-3 text-left transition-colors hover:border-orange"
+              className="flex w-full items-center justify-between rounded-[10px] border border-divider bg-bg-surface px-4 py-3 text-left transition-colors hover:border-brand-primary"
             >
               <span>
-                <span className="block font-semibold text-text-primary">{t.name}</span>
-                <span className="block font-mono text-xs text-text-muted">{t.slug}</span>
+                <span className="block font-semibold text-text-primary-on-dark">{t.name}</span>
+                <span className="block font-mono text-xs text-text-secondary-on-dark-on-dark/60">
+                  {t.slug}
+                </span>
               </span>
-              <span className="text-xs font-semibold text-orange-light">Sign in →</span>
+              <span className="text-xs font-semibold text-brand-primary">Sign in →</span>
             </button>
           </li>
         ))}
@@ -195,7 +197,7 @@ function TenantPicker({
       <button
         type="button"
         onClick={onCancel}
-        className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted hover:text-text-secondary"
+        className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60 hover:text-text-secondary-on-dark"
       >
         ← Use a different email
       </button>

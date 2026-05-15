@@ -17,7 +17,7 @@ export function ThemedToaster(): JSX.Element {
       richColors
       toastOptions={{
         classNames: {
-          toast: 'border border-steel-border bg-steel-light text-text-primary',
+          toast: 'border border-divider bg-bg-surface-elevated text-text-primary-on-dark',
         },
       }}
     />

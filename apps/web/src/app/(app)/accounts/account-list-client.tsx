@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { PaginatedAccounts } from '@towcommand/shared';
+import type { PaginatedAccounts } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -76,8 +76,8 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
               className={cn(
                 'rounded-[8px] border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-colors',
                 isMotorClub === f.value
-                  ? 'border-orange/40 bg-orange/15 text-orange-light'
-                  : 'border-steel-border bg-steel-light/40 text-text-secondary hover:text-text-primary',
+                  ? 'border-brand-primary/40 bg-brand-primary/15 text-brand-primary'
+                  : 'border-divider bg-bg-surface-elevated/40 text-text-secondary-on-dark hover:text-text-primary-on-dark',
               )}
             >
               {f.label}
@@ -86,9 +86,9 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[14px] border border-steel-border bg-steel-mid">
+      <div className="overflow-hidden rounded-[14px] border border-divider bg-bg-surface">
         <table className="w-full text-sm" data-testid="accounts-table">
-          <thead className="border-b border-steel-border text-left text-text-muted">
+          <thead className="border-b border-divider text-left text-text-secondary-on-dark-on-dark/60">
             <tr>
               <Th>Name</Th>
               <Th>Terms</Th>
@@ -101,10 +101,10 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
             {empty ? (
               <tr>
                 <td colSpan={5} className="px-4 py-12 text-center">
-                  <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+                  <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
                     No accounts yet.
                   </p>
-                  <p className="mt-1 text-sm text-text-secondary">
+                  <p className="mt-1 text-sm text-text-secondary-on-dark">
                     Add your first account so commercial jobs can be billed properly.
                   </p>
                 </td>
@@ -113,14 +113,17 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
               data.data.map((a) => (
                 <tr
                   key={a.id}
-                  className="border-b border-steel-border last:border-0 hover:bg-steel-light/30"
+                  className="border-b border-divider last:border-0 hover:bg-bg-surface-elevated/30"
                 >
                   <Td>
-                    <Link href={`/accounts/${a.id}`} className="font-medium text-text-primary">
+                    <Link
+                      href={`/accounts/${a.id}`}
+                      className="font-medium text-text-primary-on-dark"
+                    >
                       {a.name}
                     </Link>
                   </Td>
-                  <Td className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">
+                  <Td className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
                     {a.billingTerms}
                   </Td>
                   <Td>
@@ -144,7 +147,7 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
                         {a.motorClubNetworkCode ?? 'club'}
                       </span>
                     ) : (
-                      <span className="text-text-muted">—</span>
+                      <span className="text-text-secondary-on-dark-on-dark/60">—</span>
                     )}
                   </Td>
                 </tr>
@@ -154,7 +157,7 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
         </table>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-text-muted">
+      <div className="flex items-center justify-between text-xs text-text-secondary-on-dark-on-dark/60">
         <span>
           Showing {data.data.length} of {data.total}
           {loading ? ' · loading…' : ''}

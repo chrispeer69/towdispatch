@@ -6,27 +6,29 @@ import Link from 'next/link';
 
 export default function LandingPage(): JSX.Element {
   return (
-    <main className="relative flex min-h-screen flex-col overflow-hidden bg-steel">
+    <main className="relative flex min-h-screen flex-col overflow-hidden bg-bg-base">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid opacity-60" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-[-10rem] h-[40rem] bg-orange-glow-radial"
-      />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-[-10rem] h-[40rem] " />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange shadow-orange-glow">
-            <span className="font-condensed text-lg font-extrabold text-white">T</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary ">
+            <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
+              UTD
+            </span>
           </div>
-          <span className="font-condensed text-lg font-extrabold uppercase tracking-wide">
-            Tow<span className="text-orange">Command</span> Pro
+          <span className="font-condensed text-lg leading-none tracking-tight">
+            <span className="font-medium">
+              US <span className="text-brand-primary">Tow</span>{' '}
+            </span>
+            <span className="font-extrabold italic uppercase">Dispatch</span>
           </span>
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link
             href="/login"
-            className="text-sm font-semibold text-text-secondary transition-colors hover:text-text-primary"
+            className="text-sm font-semibold text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark"
           >
             Sign in
           </Link>
@@ -34,21 +36,23 @@ export default function LandingPage(): JSX.Element {
       </header>
 
       <section className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-6 pb-16 text-center md:px-10">
-        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-steel-border bg-steel-mid/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary backdrop-blur animate-fade-in-up">
-          <span className="h-1.5 w-1.5 rounded-full bg-orange shadow-orange-glow" />
+        <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-divider bg-bg-surface/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary-on-dark backdrop-blur animate-fade-in-up">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-primary " />
           US Tow Alliance member preview
         </span>
 
         <Wordmark className="animate-fade-in-up" />
 
-        <p className="mt-6 max-w-3xl font-condensed text-2xl font-bold text-text-primary md:text-3xl animate-fade-in-up">
-          The operating system the towing industry deserves.
+        <p className="mt-6 max-w-3xl font-condensed text-2xl font-bold text-text-primary-on-dark md:text-3xl animate-fade-in-up">
+          The operating system owned by you, built by you.
         </p>
 
-        <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary md:text-lg animate-fade-in-up">
-          Built by operators, for operators. Free for US Tow Alliance members at{' '}
-          <span className="font-semibold text-text-primary">cost + 20%</span>. Every integration —
-          QuickBooks, Stripe, Geotab, Agero — is a first-class citizen. Use what you want.
+        <p className="mt-5 max-w-2xl text-base leading-relaxed text-text-secondary-on-dark md:text-lg animate-fade-in-up">
+          Owned and built by the operators, for the operators. The AI-powered operating system for
+          every US Tow Alliance member. Every integration is a 1st-class member, unlike the legacy
+          systems of the present and past. Built on today's tech stack, designed for the future that
+          is in front of us. Membership provides pricing benefits unmatched by today's legacy
+          software.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:gap-4 animate-fade-in-up">
@@ -62,30 +66,30 @@ export default function LandingPage(): JSX.Element {
             href="/login"
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'lg' }),
-              'min-w-44 text-text-secondary',
+              'min-w-44 text-text-secondary-on-dark',
             )}
           >
             Sign in
           </Link>
         </div>
 
-        <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-text-muted">
+        <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-text-secondary-on-dark-on-dark/60">
           No credit card · Self-host or cloud · Open data export
         </p>
       </section>
 
-      <footer className="relative z-10 border-t border-steel-border bg-steel-mid/40 px-6 py-6 md:px-10">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-xs uppercase tracking-[0.25em] text-text-muted sm:flex-row">
+      <footer className="relative z-10 border-t border-divider bg-bg-surface/40 px-6 py-6 md:px-10">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-xs uppercase tracking-[0.25em] text-text-secondary-on-dark-on-dark/60 sm:flex-row">
           <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md border border-steel-border bg-steel-light">
-              <span className="font-condensed text-[10px] font-extrabold text-orange-light">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md border border-divider bg-bg-surface-elevated">
+              <span className="font-condensed text-[10px] font-extrabold text-brand-primary">
                 USTA
               </span>
             </div>
             <span className="font-mono text-[11px] tracking-[0.2em]">US Tow Alliance</span>
           </div>
           <span className="font-mono text-[11px] tracking-[0.2em]">
-            Powered by <span className="text-text-secondary">Blue Collar AI</span>
+            Powered by <span className="text-text-secondary-on-dark">Blue Collar AI</span>
           </span>
         </div>
       </footer>

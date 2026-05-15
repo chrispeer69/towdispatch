@@ -6,7 +6,7 @@
  * (NOT bundled — PCI SAQ A) and renders Stripe Elements against the
  * client_secret returned by the API.
  */
-import type { PublicPaymentView } from '@towcommand/shared';
+import type { PublicPaymentView } from '@ustowdispatch/shared';
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 import { PayClient } from './pay-client';
@@ -47,10 +47,10 @@ export default async function PayPage({ params }: Props): Promise<JSX.Element> {
 
 function NotFound(): JSX.Element {
   return (
-    <main className="min-h-screen bg-steel text-text-primary p-6 flex items-center justify-center">
-      <div className="max-w-md w-full bg-steel-light rounded-lg p-8 text-center">
+    <main className="min-h-screen bg-bg-base text-text-primary-on-dark p-6 flex items-center justify-center">
+      <div className="max-w-md w-full bg-bg-surface-elevated rounded-lg p-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Payment link not found</h1>
-        <p className="text-text-secondary">
+        <p className="text-text-secondary-on-dark">
           The link you used appears to be invalid. Double-check the URL or contact the tow operator.
         </p>
       </div>
@@ -60,10 +60,10 @@ function NotFound(): JSX.Element {
 
 function PaidNotice({ view }: { view: PublicPaymentView }): JSX.Element {
   return (
-    <main className="min-h-screen bg-steel text-text-primary p-6 flex items-center justify-center">
-      <div className="max-w-md w-full bg-steel-light rounded-lg p-8 text-center">
+    <main className="min-h-screen bg-bg-base text-text-primary-on-dark p-6 flex items-center justify-center">
+      <div className="max-w-md w-full bg-bg-surface-elevated rounded-lg p-8 text-center">
         <h1 className="text-2xl font-bold mb-4">Invoice already paid</h1>
-        <p className="text-text-secondary">
+        <p className="text-text-secondary-on-dark">
           {view.tenant.name} marked invoice {view.invoice.invoiceNumber} as paid. Nothing more to
           do.
         </p>

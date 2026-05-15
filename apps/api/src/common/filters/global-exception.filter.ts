@@ -12,7 +12,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { ERROR_CODES, type ProblemDetails } from '@towcommand/shared';
+import { ERROR_CODES, type ProblemDetails } from '@ustowdispatch/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from 'pino';
 import { ZodError } from 'zod';
@@ -33,7 +33,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let problem: ProblemDetails = {
-      type: `https://errors.towcommand.com/${ERROR_CODES.INTERNAL_ERROR}`,
+      type: `https://errors.ustowdispatch.com/${ERROR_CODES.INTERNAL_ERROR}`,
       title: 'Internal Server Error',
       status,
       code: ERROR_CODES.INTERNAL_ERROR,
@@ -43,7 +43,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof ZodError) {
       status = HttpStatus.BAD_REQUEST;
       problem = {
-        type: `https://errors.towcommand.com/${ERROR_CODES.VALIDATION_FAILED}`,
+        type: `https://errors.ustowdispatch.com/${ERROR_CODES.VALIDATION_FAILED}`,
         title: 'Validation Failed',
         status,
         code: ERROR_CODES.VALIDATION_FAILED,
@@ -62,7 +62,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           : (r as { code?: string; message?: string; errors?: ProblemDetails['errors'] });
       const code = payload.code ?? statusToCode(status);
       problem = {
-        type: `https://errors.towcommand.com/${code}`,
+        type: `https://errors.ustowdispatch.com/${code}`,
         title: payload.message ?? exception.message ?? 'Request failed',
         status,
         code,

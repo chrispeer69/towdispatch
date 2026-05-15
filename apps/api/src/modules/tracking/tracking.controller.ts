@@ -12,7 +12,7 @@ import {
   type TrackingMessageDto,
   resendTrackingSmsSchema,
   sendTrackingMessageSchema,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';

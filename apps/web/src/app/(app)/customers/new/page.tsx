@@ -1,15 +1,15 @@
 import { CustomerForm } from '../customer-form';
 
-export const metadata = { title: 'New customer — TowCommand' };
+export const metadata = { title: 'New customer â€” US Tow DISPATCH' };
 
 export default function NewCustomerPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <header className="space-y-1">
-        <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
           New customer
         </h1>
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary-on-dark">
           Identity, contact, and billing details for the person or business you serve.
         </p>
       </header>

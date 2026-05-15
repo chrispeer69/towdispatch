@@ -50,7 +50,7 @@ import {
   recordPaymentSchema,
   updateInvoiceSchema,
   voidInvoiceSchema,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';

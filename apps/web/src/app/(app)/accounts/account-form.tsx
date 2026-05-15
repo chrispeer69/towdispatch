@@ -9,7 +9,7 @@ import {
   type CreateAccountPayload,
   billingTermsValues,
   createAccountSchema,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useState } from 'react';
@@ -115,7 +115,7 @@ export function AccountForm({ mode, initial }: Props): JSX.Element {
           <Field label="Terms" error={errors.billingTerms?.message}>
             <select
               {...register('billingTerms')}
-              className="h-11 w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 text-sm text-text-primary"
+              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
             >
               {billingTermsValues.map((v) => (
                 <option key={v} value={v}>
@@ -149,15 +149,15 @@ export function AccountForm({ mode, initial }: Props): JSX.Element {
 
       <Section title="Motor club / settings">
         <div className="flex flex-wrap gap-6">
-          <label className="flex items-center gap-2 text-sm text-text-secondary">
+          <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
             <input type="checkbox" className="h-4 w-4 accent-orange" {...register('isMotorClub')} />
             <span>This is a motor club account</span>
           </label>
-          <label className="flex items-center gap-2 text-sm text-text-secondary">
+          <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
             <input type="checkbox" className="h-4 w-4 accent-orange" {...register('coiRequired')} />
             <span>COI required</span>
           </label>
-          <label className="flex items-center gap-2 text-sm text-text-secondary">
+          <label className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
             <input
               type="checkbox"
               className="h-4 w-4 accent-orange"
@@ -178,7 +178,7 @@ export function AccountForm({ mode, initial }: Props): JSX.Element {
           <textarea
             {...register('notes')}
             rows={3}
-            className="w-full rounded-[10px] border border-steel-border bg-steel-mid px-3 py-2 text-sm text-text-primary"
+            className="w-full rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark"
           />
         </Field>
       </Section>
@@ -213,8 +213,8 @@ function Section({
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <section className="space-y-4 rounded-[14px] border border-steel-border bg-steel-mid p-5">
-      <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+    <section className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
+      <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
         {title}
       </h2>
       <div className="space-y-4">{children}</div>
@@ -249,7 +249,7 @@ function Field({
       <Label htmlFor={id}>{label}</Label>
       {enhanced}
       {hint && !error ? (
-        <p id={hintId} className="text-xs text-text-muted">
+        <p id={hintId} className="text-xs text-text-secondary-on-dark-on-dark/60">
           {hint}
         </p>
       ) : null}

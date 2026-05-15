@@ -15,7 +15,7 @@
  * domain-specific integration specs.
  */
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { ROLES, type Role } from '@towcommand/shared';
+import { ROLES, type Role } from '@ustowdispatch/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   type AuthedResp,

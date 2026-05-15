@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { tryFetch } from '@/lib/api/client';
 import { fetchCustomers } from '@/lib/api/resources';
-import type { CustomerType, PaginatedCustomers } from '@towcommand/shared';
+import type { CustomerType, PaginatedCustomers } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
-export const metadata = { title: 'Customers — TowCommand' };
+export const metadata = { title: 'Customers â€” US Tow DISPATCH' };
 
 interface SearchParams {
   q?: string;
@@ -35,11 +35,11 @@ export default async function CustomersPage({
     <div className="space-y-6">
       <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+          <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Customers
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            <span data-testid="customer-count">{initial.total}</span> total · who you serve
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
+            <span data-testid="customer-count">{initial.total}</span> total Â· who you serve
           </p>
         </div>
         <Link href="/customers/new">

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type ForgotPasswordPayload, forgotPasswordSchema } from '@towcommand/shared';
+import { type ForgotPasswordPayload, forgotPasswordSchema } from '@ustowdispatch/shared';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -30,7 +30,7 @@ export function ForgotForm(): JSX.Element {
 
   if (submitted) {
     return (
-      <div className="rounded-[10px] border border-steel-border bg-steel-light/40 p-4 text-sm text-text-secondary">
+      <div className="rounded-[10px] border border-divider bg-bg-surface-elevated/40 p-4 text-sm text-text-secondary-on-dark">
         If an account exists for that email, we&rsquo;ve sent a reset link. Check your inbox (and
         spam folder) for instructions.
       </div>

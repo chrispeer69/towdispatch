@@ -5,10 +5,10 @@ export default function AccountingLayout({ children }: { children: React.ReactNo
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-4 text-sm">
-        <Link href="/accounting/settings" className="text-text-primary hover:text-action">
+        <Link href="/accounting/settings" className="text-text-primary-on-dark hover:text-action">
           Connection
         </Link>
-        <Link href="/accounting/mapping" className="text-text-primary hover:text-action">
+        <Link href="/accounting/mapping" className="text-text-primary-on-dark hover:text-action">
           Chart mapping
         </Link>
       </nav>

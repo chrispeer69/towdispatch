@@ -1,9 +1,14 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
-import type { JobListItemDto, JobServiceType, JobStatus, PaginatedJobs } from '@towcommand/shared';
+import type {
+  JobListItemDto,
+  JobServiceType,
+  JobStatus,
+  PaginatedJobs,
+} from '@ustowdispatch/shared';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Tow Jobs — TowCommand' };
+export const metadata = { title: 'Tow Jobs â€” US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_LABEL: Record<JobStatus, string> = {
@@ -45,11 +50,11 @@ function formatCreatedAt(iso: string): string {
 }
 
 function vehicleLabel(v: JobListItemDto['vehicle']): string {
-  if (!v) return '—';
+  if (!v) return 'â€”';
   const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ');
   const plate = v.plate ? (v.plateState ? `${v.plate} (${v.plateState})` : v.plate) : '';
-  if (ymm && plate) return `${ymm} · ${plate}`;
-  return ymm || plate || '—';
+  if (ymm && plate) return `${ymm} Â· ${plate}`;
+  return ymm || plate || 'â€”';
 }
 
 function driverLabel(d: JobListItemDto['driver']): string {
@@ -81,23 +86,23 @@ export default async function JobsPage({
     <div className="space-y-6">
       <header className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+          <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
             Tow Jobs
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            <span data-testid="jobs-total">{list.total}</span> total · newest first
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
+            <span data-testid="jobs-total">{list.total}</span> total Â· newest first
           </p>
         </div>
       </header>
 
       {list.data.length === 0 ? (
-        <div className="flex h-44 flex-col items-center justify-center rounded-[14px] border border-dashed border-steel-border bg-steel-mid/40 text-center">
-          <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary">
+        <div className="flex h-44 flex-col items-center justify-center rounded-[14px] border border-dashed border-divider bg-bg-surface/40 text-center">
+          <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
             Your first job will show here.
           </p>
-          <p className="mt-1 max-w-md text-sm text-text-secondary">
+          <p className="mt-1 max-w-md text-sm text-text-secondary-on-dark">
             Take a call from{' '}
-            <Link href="/intake" className="text-orange-light hover:underline">
+            <Link href="/intake" className="text-brand-primary hover:underline">
               Intake
             </Link>{' '}
             and it will appear in this list.
@@ -105,60 +110,64 @@ export default async function JobsPage({
         </div>
       ) : (
         <>
-          <div className="overflow-hidden rounded-[14px] border border-steel-border bg-steel-mid">
-            <table className="w-full divide-y divide-steel-border text-sm" data-testid="jobs-table">
-              <thead className="bg-steel-light/30">
+          <div className="overflow-hidden rounded-[14px] border border-divider bg-bg-surface">
+            <table className="w-full divide-y divide-divider text-sm" data-testid="jobs-table">
+              <thead className="bg-bg-surface-elevated/30">
                 <tr className="text-left">
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Created
                   </th>
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Customer
                   </th>
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Vehicle
                   </th>
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Service
                   </th>
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Status
                   </th>
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Driver
                   </th>
-                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-muted">
+                  <th className="px-4 py-2 text-xs uppercase tracking-wider text-text-secondary-on-dark-on-dark/60">
                     Pickup
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-steel-border">
+              <tbody className="divide-y divide-divider">
                 {list.data.map((job) => (
-                  <tr key={job.id} className="hover:bg-steel-light/20">
-                    <td className="px-4 py-2 font-mono text-xs text-text-secondary">
+                  <tr key={job.id} className="hover:bg-bg-surface-elevated/20">
+                    <td className="px-4 py-2 font-mono text-xs text-text-secondary-on-dark">
                       {formatCreatedAt(job.createdAt)}
                     </td>
-                    <td className="px-4 py-2 font-medium text-text-primary">
-                      {job.customer?.name ?? '—'}
+                    <td className="px-4 py-2 font-medium text-text-primary-on-dark">
+                      {job.customer?.name ?? 'â€”'}
                     </td>
-                    <td className="px-4 py-2 text-text-secondary">{vehicleLabel(job.vehicle)}</td>
-                    <td className="px-4 py-2 text-text-secondary">
+                    <td className="px-4 py-2 text-text-secondary-on-dark">
+                      {vehicleLabel(job.vehicle)}
+                    </td>
+                    <td className="px-4 py-2 text-text-secondary-on-dark">
                       {SERVICE_LABEL[job.serviceType]}
                     </td>
                     <td className="px-4 py-2">
-                      <span className="rounded-full border border-steel-border bg-steel-light/40 px-2 py-0.5 text-[11px] uppercase tracking-[0.14em] text-text-secondary">
+                      <span className="rounded-full border border-divider bg-bg-surface-elevated/40 px-2 py-0.5 text-[11px] uppercase tracking-[0.14em] text-text-secondary-on-dark">
                         {STATUS_LABEL[job.status]}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-text-secondary">{driverLabel(job.driver)}</td>
-                    <td className="px-4 py-2 text-text-secondary">{job.pickupAddress}</td>
+                    <td className="px-4 py-2 text-text-secondary-on-dark">
+                      {driverLabel(job.driver)}
+                    </td>
+                    <td className="px-4 py-2 text-text-secondary-on-dark">{job.pickupAddress}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-text-muted">
+          <div className="flex items-center justify-between text-xs text-text-secondary-on-dark-on-dark/60">
             <span>
               Page {list.page} of {totalPages}
             </span>
@@ -166,25 +175,25 @@ export default async function JobsPage({
               {hasPrev ? (
                 <Link
                   href={`/jobs?page=${list.page - 1}`}
-                  className="rounded-md border border-steel-border px-3 py-1 hover:bg-steel-light/30"
+                  className="rounded-md border border-divider px-3 py-1 hover:bg-bg-surface-elevated/30"
                 >
-                  ← Prev
+                  â† Prev
                 </Link>
               ) : (
-                <span className="cursor-not-allowed rounded-md border border-steel-border px-3 py-1 opacity-50">
-                  ← Prev
+                <span className="cursor-not-allowed rounded-md border border-divider px-3 py-1 opacity-50">
+                  â† Prev
                 </span>
               )}
               {hasNext ? (
                 <Link
                   href={`/jobs?page=${list.page + 1}`}
-                  className="rounded-md border border-steel-border px-3 py-1 hover:bg-steel-light/30"
+                  className="rounded-md border border-divider px-3 py-1 hover:bg-bg-surface-elevated/30"
                 >
-                  Next →
+                  Next â†’
                 </Link>
               ) : (
-                <span className="cursor-not-allowed rounded-md border border-steel-border px-3 py-1 opacity-50">
-                  Next →
+                <span className="cursor-not-allowed rounded-md border border-divider px-3 py-1 opacity-50">
+                  Next â†’
                 </span>
               )}
             </div>

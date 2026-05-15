@@ -28,7 +28,7 @@ export function Skeleton({ className, ...props }: SkeletonProps): JSX.Element {
 /** A row of N table cells. Default 4 columns. */
 export function SkeletonTableRow({ columns = 4 }: { columns?: number }): JSX.Element {
   return (
-    <div className="flex items-center gap-4 border-b border-steel-border px-4 py-3">
+    <div className="flex items-center gap-4 border-b border-divider px-4 py-3">
       {Array.from({ length: columns }).map((_, i) => (
         <Skeleton
           // biome-ignore lint/suspicious/noArrayIndexKey: stable count
@@ -52,10 +52,10 @@ export function SkeletonTable({
 }): JSX.Element {
   return (
     <div role="status" aria-busy="true" aria-label={caption} className="overflow-hidden rounded-lg">
-      <div className="flex items-center gap-4 border-b border-steel-border bg-steel-light px-4 py-3">
+      <div className="flex items-center gap-4 border-b border-divider bg-bg-surface-elevated px-4 py-3">
         {Array.from({ length: columns }).map((_, i) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: stable count
-          <Skeleton key={i} className="h-3 flex-1 bg-steel-border" />
+          <Skeleton key={i} className="h-3 flex-1 bg-divider" />
         ))}
       </div>
       {Array.from({ length: rows }).map((_, i) => (
@@ -74,7 +74,7 @@ export function SkeletonCard({ className }: { className?: string }): JSX.Element
       role="status"
       aria-busy="true"
       aria-label="Loading"
-      className={cn('rounded-lg border border-steel-border bg-steel-light p-6', className)}
+      className={cn('rounded-lg border border-divider bg-bg-surface-elevated p-6', className)}
     >
       <Skeleton className="mb-3 h-4 w-1/3" />
       <Skeleton className="mb-6 h-8 w-2/3" />

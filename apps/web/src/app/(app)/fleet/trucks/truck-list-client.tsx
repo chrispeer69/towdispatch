@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { type PaginatedTrucks, type TruckStatus, truckStatusValues } from '@towcommand/shared';
+import { type PaginatedTrucks, type TruckStatus, truckStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -65,9 +65,9 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[14px] border border-steel-border bg-steel-mid">
+      <div className="overflow-hidden rounded-[14px] border border-divider bg-bg-surface">
         <table className="w-full text-sm" data-testid="trucks-table">
-          <thead className="border-b border-steel-border text-left text-text-muted">
+          <thead className="border-b border-divider text-left text-text-secondary-on-dark-on-dark/60">
             <tr>
               <Th>Unit</Th>
               <Th>Type / Capacity</Th>
@@ -79,7 +79,7 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
           <tbody>
             {data.data.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-text-secondary">
+                <td colSpan={5} className="px-4 py-12 text-center text-text-secondary-on-dark">
                   No trucks match those filters.
                 </td>
               </tr>
@@ -87,38 +87,40 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
               data.data.map((t) => (
                 <tr
                   key={t.id}
-                  className="border-b border-steel-border last:border-b-0 hover:bg-steel-light/40"
+                  className="border-b border-divider last:border-b-0 hover:bg-bg-surface-elevated/40"
                 >
                   <Td>
                     <Link
                       href={`/fleet/trucks/${t.id}`}
-                      className="font-semibold text-text-primary hover:text-orange-light"
+                      className="font-semibold text-text-primary-on-dark hover:text-brand-primary"
                     >
                       {t.unitNumber}
                     </Link>
                     {t.make ? (
-                      <p className="text-xs text-text-muted">
+                      <p className="text-xs text-text-secondary-on-dark-on-dark/60">
                         {t.year ?? ''} {t.make} {t.model ?? ''}
                       </p>
                     ) : null}
                   </Td>
                   <Td>
-                    <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
                       {t.truckType.replace('_', ' ')}
                     </span>
                     {t.capacityClass ? (
-                      <span className="ml-1 text-text-muted">· {t.capacityClass}</span>
+                      <span className="ml-1 text-text-secondary-on-dark-on-dark/60">
+                        · {t.capacityClass}
+                      </span>
                     ) : null}
                   </Td>
                   <Td>
-                    <span className="font-mono text-[11px] text-text-secondary">
+                    <span className="font-mono text-[11px] text-text-secondary-on-dark">
                       {t.vin ?? '—'}
                     </span>
                   </Td>
                   <Td>
                     <StatusBadge status={t.status} />
                   </Td>
-                  <Td className="text-right font-mono text-[12px] text-text-secondary">
+                  <Td className="text-right font-mono text-[12px] text-text-secondary-on-dark">
                     {t.currentOdometer !== null ? `${t.currentOdometer.toLocaleString()} mi` : '—'}
                   </Td>
                 </tr>
@@ -147,8 +149,8 @@ function FilterPill({
       className={cn(
         'rounded-[8px] border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-colors',
         active
-          ? 'border-orange/40 bg-orange/15 text-orange-light'
-          : 'border-steel-border bg-steel-light/40 text-text-secondary hover:text-text-primary',
+          ? 'border-brand-primary/40 bg-brand-primary/15 text-brand-primary'
+          : 'border-divider bg-bg-surface-elevated/40 text-text-secondary-on-dark hover:text-text-primary-on-dark',
       )}
     >
       {children}
@@ -161,7 +163,7 @@ function StatusBadge({ status }: { status: TruckStatus }): JSX.Element {
     active: 'bg-emerald-500/15 text-emerald-300',
     in_maintenance: 'bg-amber-500/15 text-amber-300',
     out_of_service: 'bg-red-500/15 text-red-300',
-    retired: 'bg-steel-light text-text-muted',
+    retired: 'bg-bg-surface-elevated text-text-secondary-on-dark-on-dark/60',
   };
   return (
     <span

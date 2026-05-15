@@ -15,15 +15,11 @@ const sizeClass: Record<NonNullable<WordmarkProps['size']>, string> = {
 
 export function Wordmark({ className, size = 'xl' }: WordmarkProps): JSX.Element {
   return (
-    <h1
-      className={cn(
-        'font-condensed font-extrabold leading-none tracking-tight uppercase',
-        sizeClass[size],
-        className,
-      )}
-    >
-      Tow<span className="text-orange">Command</span>
-      <span className="text-text-secondary"> Pro</span>
+    <h1 className={cn('font-condensed leading-none tracking-tight', sizeClass[size], className)}>
+      <span className="font-medium">
+        US <span className="text-brand-primary">Tow</span>{' '}
+      </span>
+      <span className="font-extrabold italic uppercase">Dispatch</span>
     </h1>
   );
 }

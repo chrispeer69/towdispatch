@@ -23,11 +23,11 @@
 | SEV-2 | Founder + on-call | PagerDuty page + Slack #incidents |
 | SEV-3 | On-call | Slack #incidents (no page) |
 
-> PagerDuty + Slack #incidents are Phase 1 prerequisites — see `docs/runbooks/secrets-rotation.md` for the env vars they consume. While these aren't wired, page the founder by phone and email `incidents@towcommand.com`.
+> PagerDuty + Slack #incidents are Phase 1 prerequisites — see `docs/runbooks/secrets-rotation.md` for the env vars they consume. While these aren't wired, page the founder by phone and email `incidents@ustowdispatch.com`.
 
 ### Status page
 
-A public status page is a **Phase 1 prerequisite** (https://status.towcommand.cloud on Atlassian Statuspage). Until it lands, communicate via direct email to affected tenants — the per-tenant contact list lives in `SELECT name, owner_email FROM tenants` (queried via the admin pool).
+A public status page is a **Phase 1 prerequisite** (https://status.ustowdispatch.com on Atlassian Statuspage). Until it lands, communicate via direct email to affected tenants — the per-tenant contact list lives in `SELECT name, owner_email FROM tenants` (queried via the admin pool).
 
 ---
 
@@ -37,13 +37,13 @@ A public status page is a **Phase 1 prerequisite** (https://status.towcommand.cl
 
 ```bash
 # Public probe endpoints (see apps/api/src/common/observability/health-metrics.controller.ts)
-curl -sf https://api.towcommand.cloud/health
-curl -sf https://api.towcommand.cloud/ready
-curl -sf https://api.towcommand.cloud/healthz   # legacy alias
-curl -sf https://api.towcommand.cloud/readyz    # legacy alias
+curl -sf https://api.ustowdispatch.com/health
+curl -sf https://api.ustowdispatch.com/ready
+curl -sf https://api.ustowdispatch.com/healthz   # legacy alias
+curl -sf https://api.ustowdispatch.com/readyz    # legacy alias
 
 # Prometheus scrape — useful to eyeball if the host is up but reporting bad metrics
-curl -s https://api.towcommand.cloud/metrics | head -40
+curl -s https://api.ustowdispatch.com/metrics | head -40
 ```
 
 `/ready` returns 503 if either Postgres or Redis fails its ping. If `/health` returns 200 but `/ready` returns 503, the API process is up but a dependency is down — see §4.
@@ -52,10 +52,10 @@ curl -s https://api.towcommand.cloud/metrics | head -40
 
 ```bash
 # Set SENTRY_DSN's project slug in this command. Replace TIME_WINDOW with the incident window (e.g. 30m, 1h).
-sentry-cli issues list --project towcommand-api --max-rows 50 --query 'is:unresolved age:-30m'
+sentry-cli issues list --project ustowdispatch-api --max-rows 50 --query 'is:unresolved age:-30m'
 ```
 
-If `sentry-cli` isn't installed: log into Sentry UI → project `towcommand-api` → Issues → filter `age:-30m`. Group by request_id (every event carries `request_id`, `tenant_id`, `user_id` tags — set by `apps/api/src/common/observability/sentry.service.ts`).
+If `sentry-cli` isn't installed: log into Sentry UI → project `ustowdispatch-api` → Issues → filter `age:-30m`. Group by request_id (every event carries `request_id`, `tenant_id`, `user_id` tags — set by `apps/api/src/common/observability/sentry.service.ts`).
 
 ### 2c. Count affected tenants
 
@@ -92,7 +92,7 @@ WHERE created_at > now() - interval '1 hour'
 GROUP BY network;"
 
 # In-memory stub outbox (dev / staging — production replaces this with the real provider)
-curl -sf https://api.towcommand.cloud/motor-club/agero/_test/outbox | jq 'length'
+curl -sf https://api.ustowdispatch.com/motor-club/agero/_test/outbox | jq 'length'
 ```
 
 Threshold: > 1000 pending in a single network in a 5-minute window pages oncall (see `docs/observability.md`).
@@ -149,8 +149,8 @@ If Railway is unreachable: redeploy the previous commit explicitly.
 ```bash
 git checkout <previous-good-sha>
 pnpm install --frozen-lockfile
-pnpm --filter @towcommand/api build
-pnpm --filter @towcommand/web build
+pnpm --filter @ustowdispatch/api build
+pnpm --filter @ustowdispatch/web build
 # Push the artifact through the normal CI path with the previous SHA tagged as RELEASE_TAG
 ```
 
@@ -248,7 +248,7 @@ Action items get filed as GitHub issues with the `incident-followup` label.
 |---|---|---|
 | Internal engineering | Slack #incidents | every 15 min for SEV-1, 30 min for SEV-2 |
 | Founder | Direct message + phone if SEV-1 | every status change |
-| Affected tenants | Email from `incidents@towcommand.com` | initial 15 min after declaration; updates every 30 min |
+| Affected tenants | Email from `incidents@ustowdispatch.com` | initial 15 min after declaration; updates every 30 min |
 | Public status page | Atlassian Statuspage (Phase 1) | initial + status change |
 
 Drafts for each go in `docs/runbooks/templates/` — see `motor-club-down.md` and `payment-processor-down.md` for examples.

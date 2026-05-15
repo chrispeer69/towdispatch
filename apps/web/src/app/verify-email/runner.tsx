@@ -52,12 +52,14 @@ export function VerifyEmailRunner(): JSX.Element {
   }, [token]);
 
   if (status === 'pending') {
-    return <p className="text-sm text-text-secondary">Confirming your email…</p>;
+    return <p className="text-sm text-text-secondary-on-dark">Confirming your email…</p>;
   }
   if (status === 'success') {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-text-secondary">Your email is confirmed. Welcome aboard.</p>
+        <p className="text-sm text-text-secondary-on-dark">
+          Your email is confirmed. Welcome aboard.
+        </p>
         <Link href="/dashboard">
           <Button size="lg" className="w-full">
             Continue to dashboard

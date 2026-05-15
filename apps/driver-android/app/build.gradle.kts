@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-    namespace = "ai.bluecollar.towcommand.driver"
+    namespace = "ai.bluecollar.ustowdispatch.driver"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ai.bluecollar.towcommand.driver"
+        applicationId = "ai.bluecollar.ustowdispatch.driver"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -25,11 +25,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.cloud\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.ustowdispatch.cloud\"")
             isMinifyEnabled = false
         }
         release {
-            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.cloud\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.ustowdispatch.cloud\"")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

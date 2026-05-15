@@ -4,7 +4,7 @@
 # "Dockerfile Path" = apps/web/Dockerfile, "Watch Paths" = apps/web/**,
 # packages/shared/**, packages/ui/**.
 #
-# next.config.mjs sets transpilePackages for @towcommand/shared|db|ui so the
+# next.config.mjs sets transpilePackages for @ustowdispatch/shared|db|ui so the
 # workspace deps don't need a separate compile step — Next bundles them at
 # build time.
 
@@ -31,8 +31,8 @@ ARG NEXT_PUBLIC_MAPBOX_TOKEN
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_MAPBOX_TOKEN=${NEXT_PUBLIC_MAPBOX_TOKEN}
 
-RUN pnpm --filter @towcommand/web build
+RUN pnpm --filter @ustowdispatch/web build
 
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["pnpm", "--filter", "@towcommand/web", "run", "start:prod"]
+CMD ["pnpm", "--filter", "@ustowdispatch/web", "run", "start:prod"]

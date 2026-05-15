@@ -9,7 +9,7 @@
  * account id is passed via the `stripeAccount` option to Stripe.js so the
  * payment intent is confirmed on the connected account, not the platform.
  */
-import type { PublicPaymentView } from '@towcommand/shared';
+import type { PublicPaymentView } from '@ustowdispatch/shared';
 import { type JSX, useEffect, useRef, useState } from 'react';
 
 declare global {
@@ -145,10 +145,10 @@ export function PayClient({ view, token: _token }: Props): JSX.Element {
   };
 
   return (
-    <main className="min-h-screen bg-steel text-text-primary p-6 flex items-center justify-center">
-      <div className="max-w-md w-full bg-steel-light rounded-lg p-8 space-y-6">
+    <main className="min-h-screen bg-bg-base text-text-primary-on-dark p-6 flex items-center justify-center">
+      <div className="max-w-md w-full bg-bg-surface-elevated rounded-lg p-8 space-y-6">
         <header>
-          <p className="text-text-secondary text-sm">{view.tenant.name}</p>
+          <p className="text-text-secondary-on-dark text-sm">{view.tenant.name}</p>
           <h1 className="text-2xl font-bold">Invoice {view.invoice.invoiceNumber}</h1>
           <p className="mt-2 text-3xl font-mono">
             ${(view.invoice.balanceCents / 100).toFixed(2)} {view.invoice.currency}
@@ -182,7 +182,7 @@ export function PayClient({ view, token: _token }: Props): JSX.Element {
           </>
         )}
 
-        <footer className="text-xs text-text-secondary text-center">
+        <footer className="text-xs text-text-secondary-on-dark text-center">
           Secured by Stripe. Card information is sent directly to Stripe and never touches{' '}
           {view.tenant.name}'s servers.
         </footer>

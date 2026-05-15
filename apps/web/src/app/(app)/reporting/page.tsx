@@ -1,5 +1,5 @@
 /**
- * Reporting — Session 9 light tile.
+ * Reporting â€” Session 9 light tile.
  *
  * Single page for now; full reporting module is a future session. The
  * tracking summary is the only tile here. We keep the page so the link
@@ -8,7 +8,7 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Reporting — TowCommand' };
+export const metadata = { title: 'Reporting â€” US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface TrackingReport {
@@ -32,14 +32,16 @@ export default async function ReportingPage(): Promise<JSX.Element> {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
+        <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
           Reporting
         </h1>
-        <p className="mt-1 text-sm text-text-secondary">Customer tracking and SMS performance.</p>
+        <p className="mt-1 text-sm text-text-secondary-on-dark">
+          Customer tracking and SMS performance.
+        </p>
       </header>
 
       <section
-        className="rounded-[14px] border border-steel-border bg-steel-mid/40 p-6"
+        className="rounded-[14px] border border-divider bg-bg-surface/40 p-6"
         data-testid="tracking-report-tile"
       >
         <h2 className="font-condensed text-xl font-bold uppercase tracking-wide mb-4">
@@ -56,18 +58,18 @@ export default async function ReportingPage(): Promise<JSX.Element> {
               label="Avg time-to-view"
               value={
                 report.avgTimeToFirstViewSeconds === null
-                  ? '—'
+                  ? 'â€”'
                   : formatSeconds(report.avgTimeToFirstViewSeconds)
               }
             />
             <Stat label="Ratings" value={report.ratingsCount} />
             <Stat
               label="Avg rating"
-              value={report.avgRating === null ? '—' : `${report.avgRating} ★`}
+              value={report.avgRating === null ? 'â€”' : `${report.avgRating} â˜…`}
             />
           </div>
         ) : (
-          <p className="text-text-secondary text-sm">No tracking data yet.</p>
+          <p className="text-text-secondary-on-dark text-sm">No tracking data yet.</p>
         )}
       </section>
     </div>
@@ -84,10 +86,14 @@ function Stat({
   tone?: 'err' | 'muted';
 }): JSX.Element {
   const cls =
-    tone === 'err' ? 'text-danger' : tone === 'muted' ? 'text-text-secondary' : 'text-text-primary';
+    tone === 'err'
+      ? 'text-danger'
+      : tone === 'muted'
+        ? 'text-text-secondary-on-dark'
+        : 'text-text-primary-on-dark';
   return (
-    <div className="rounded-md bg-steel/50 p-3">
-      <div className="text-xs uppercase tracking-wider text-text-secondary">{label}</div>
+    <div className="rounded-md bg-bg-base/50 p-3">
+      <div className="text-xs uppercase tracking-wider text-text-secondary-on-dark">{label}</div>
       <div className={`mt-1 font-condensed text-2xl font-extrabold ${cls}`}>{value}</div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { ChallengeClient } from './challenge-client';
 
 export const metadata = {
-  title: 'Two-factor — TowCommand',
+  title: 'Two-factor — US Tow DISPATCH',
 };
 
 export const dynamic = 'force-dynamic';

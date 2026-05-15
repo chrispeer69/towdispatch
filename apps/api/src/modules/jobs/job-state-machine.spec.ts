@@ -1,4 +1,4 @@
-import type { JobStatus } from '@towcommand/shared';
+import type { JobStatus } from '@ustowdispatch/shared';
 import { describe, expect, it } from 'vitest';
 import {
   INVALID_TRANSITIONS,

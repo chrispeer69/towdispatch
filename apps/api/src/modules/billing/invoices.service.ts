@@ -36,7 +36,7 @@ import {
   payments,
   recurringBillingSchedules,
   uuidv7,
-} from '@towcommand/db';
+} from '@ustowdispatch/db';
 import {
   type AgingFilters,
   type AgingResponse,
@@ -65,7 +65,7 @@ import {
   type RecurringScheduleDto,
   dueDaysForTerms,
   termsFromAccountBilling,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { and, asc, desc, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { AccountingService } from '../accounting/accounting.service.js';

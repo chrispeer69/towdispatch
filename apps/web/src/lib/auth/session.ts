@@ -1,4 +1,4 @@
-import type { MeResponse } from '@towcommand/shared';
+import type { MeResponse } from '@ustowdispatch/shared';
 import { headers } from 'next/headers';
 /**
  * Server-side session loaders.

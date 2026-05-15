@@ -5,7 +5,7 @@
  * board's "snapshot in, websocket updates after" pattern.
  */
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { ROLES, type Role } from '@towcommand/shared';
+import { ROLES, type Role } from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';

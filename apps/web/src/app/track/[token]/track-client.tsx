@@ -15,7 +15,7 @@ import {
   TRACKING_EVENTS,
   type TrackingMessageDto,
   type TrackingPublicView,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { type JSX, useEffect, useRef, useState } from 'react';
 import { type Socket, io as ioClient } from 'socket.io-client';
 
@@ -192,7 +192,7 @@ export function TrackClient({ token, initialView, lang, mapboxToken }: Props): J
 
   return (
     <main
-      className="min-h-screen bg-steel text-text-primary"
+      className="min-h-screen bg-bg-base text-text-primary-on-dark"
       style={{
         // Tenant brand colors as CSS vars so child elements pick them up.
         ['--tenant-accent' as string]: accent,
@@ -226,7 +226,7 @@ export function TrackClient({ token, initialView, lang, mapboxToken }: Props): J
 
       <section className="px-4 py-5 max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-text-secondary text-sm uppercase tracking-wide">
+          <span className="text-text-secondary-on-dark text-sm uppercase tracking-wide">
             #{view.jobNumber}
           </span>
           <LangSwitcher current={lang} token={token} />
@@ -258,7 +258,7 @@ export function TrackClient({ token, initialView, lang, mapboxToken }: Props): J
         </div>
 
         {view.driver ? (
-          <div className="mt-5 rounded-lg bg-steel-light p-4 flex items-center gap-3">
+          <div className="mt-5 rounded-lg bg-bg-surface-elevated p-4 flex items-center gap-3">
             {view.driver.photoUrl ? (
               <img
                 src={view.driver.photoUrl}
@@ -278,7 +278,7 @@ export function TrackClient({ token, initialView, lang, mapboxToken }: Props): J
                 {t.driverLabel}: {view.driver.firstName}
               </div>
               {view.driver.truckUnitNumber ? (
-                <div className="text-text-secondary text-sm">
+                <div className="text-text-secondary-on-dark text-sm">
                   {t.truckLabel} #{view.driver.truckUnitNumber}
                 </div>
               ) : null}
@@ -318,9 +318,9 @@ export function TrackClient({ token, initialView, lang, mapboxToken }: Props): J
           />
         ) : null}
         {ratingSubmitted ? (
-          <div className="mt-6 rounded-lg bg-steel-light p-4 text-center">
+          <div className="mt-6 rounded-lg bg-bg-surface-elevated p-4 text-center">
             <h2 className="font-semibold mb-1">{t.thanksTitle}</h2>
-            <p className="text-text-secondary text-sm">{t.thanksBody}</p>
+            <p className="text-text-secondary-on-dark text-sm">{t.thanksBody}</p>
           </div>
         ) : null}
       </section>
@@ -330,8 +330,8 @@ export function TrackClient({ token, initialView, lang, mapboxToken }: Props): J
 
 function Field({ label, value }: { label: string; value: string }): JSX.Element {
   return (
-    <div className="bg-steel-light rounded-md px-3 py-2">
-      <div className="text-text-secondary text-xs uppercase tracking-wide">{label}</div>
+    <div className="bg-bg-surface-elevated rounded-md px-3 py-2">
+      <div className="text-text-secondary-on-dark text-xs uppercase tracking-wide">{label}</div>
       <div className="font-medium break-words">{value}</div>
     </div>
   );
@@ -365,7 +365,9 @@ function StatusTimeline({
                 backgroundColor: reached ? 'var(--tenant-accent)' : '#37414F',
               }}
             />
-            <span className={`truncate ${reached ? 'text-text-primary' : 'text-text-secondary'}`}>
+            <span
+              className={`truncate ${reached ? 'text-text-primary-on-dark' : 'text-text-secondary-on-dark'}`}
+            >
               {labels[step]?.[lang]}
             </span>
           </li>
@@ -392,7 +394,7 @@ function MapPanel({
   // in the browser (it's not SSR-safe).
   if (!mapboxToken || (!driverLocation && !pickup)) {
     return (
-      <div className="mt-5 rounded-lg bg-steel-light p-4 h-48 sm:h-64 flex items-center justify-center text-text-secondary text-sm text-center">
+      <div className="mt-5 rounded-lg bg-bg-surface-elevated p-4 h-48 sm:h-64 flex items-center justify-center text-text-secondary-on-dark text-sm text-center">
         {fallbackCopy}
       </div>
     );
@@ -402,7 +404,7 @@ function MapPanel({
   const center = driverLocation ?? pickup;
   if (!center) {
     return (
-      <div className="mt-5 rounded-lg bg-steel-light p-4 h-48 flex items-center justify-center text-text-secondary text-sm">
+      <div className="mt-5 rounded-lg bg-bg-surface-elevated p-4 h-48 flex items-center justify-center text-text-secondary-on-dark text-sm">
         {fallbackCopy}
       </div>
     );
@@ -411,7 +413,7 @@ function MapPanel({
   const lng = 'lng' in center ? center.lng : null;
   if (lat === null || lng === null) {
     return (
-      <div className="mt-5 rounded-lg bg-steel-light p-4 h-48 flex items-center justify-center text-text-secondary text-sm">
+      <div className="mt-5 rounded-lg bg-bg-surface-elevated p-4 h-48 flex items-center justify-center text-text-secondary-on-dark text-sm">
         {fallbackCopy}
       </div>
     );
@@ -425,7 +427,7 @@ function MapPanel({
     mapboxToken,
   )}`;
   return (
-    <div className="mt-5 rounded-lg overflow-hidden bg-steel-light h-48 sm:h-64">
+    <div className="mt-5 rounded-lg overflow-hidden bg-bg-surface-elevated h-48 sm:h-64">
       <img src={url} alt="" className="w-full h-full object-cover" />
     </div>
   );
@@ -451,7 +453,7 @@ function ChatPanel({
   error: string | null;
 }): JSX.Element {
   return (
-    <section className="mt-6 rounded-lg bg-steel-light p-4" data-testid="chat-panel">
+    <section className="mt-6 rounded-lg bg-bg-surface-elevated p-4" data-testid="chat-panel">
       <h2 className="font-semibold mb-2">{title}</h2>
       <div className="space-y-2 max-h-64 overflow-y-auto mb-3" data-testid="chat-messages">
         {messages.map((m) => (
@@ -464,13 +466,13 @@ function ChatPanel({
             }`}
           >
             <div>{m.body}</div>
-            <div className="text-text-secondary text-[11px] mt-1">
+            <div className="text-text-secondary-on-dark text-[11px] mt-1">
               {new Date(m.createdAt).toLocaleTimeString()}
             </div>
           </div>
         ))}
         {messages.length === 0 ? (
-          <div className="text-text-secondary text-sm">No messages yet.</div>
+          <div className="text-text-secondary-on-dark text-sm">No messages yet.</div>
         ) : null}
       </div>
       {error ? <div className="text-red-300 text-xs mb-2">{error}</div> : null}
@@ -483,7 +485,7 @@ function ChatPanel({
           onKeyDown={(e) => {
             if (e.key === 'Enter') onSend();
           }}
-          className="flex-1 bg-steel rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--tenant-accent)]"
+          className="flex-1 bg-bg-base rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--tenant-accent)]"
           placeholder={placeholder}
           data-testid="chat-input"
         />
@@ -523,9 +525,9 @@ function RatingPanel({
   submitLabel: string;
 }): JSX.Element {
   return (
-    <section className="mt-6 rounded-lg bg-steel-light p-4" data-testid="rating-panel">
+    <section className="mt-6 rounded-lg bg-bg-surface-elevated p-4" data-testid="rating-panel">
       <h2 className="font-semibold mb-1">{title}</h2>
-      <p className="text-text-secondary text-sm mb-3">{body}</p>
+      <p className="text-text-secondary-on-dark text-sm mb-3">{body}</p>
       <div className="flex gap-1 mb-3">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -546,7 +548,7 @@ function RatingPanel({
         onChange={(e) => onCommentChange(e.target.value)}
         placeholder={commentPlaceholder}
         rows={3}
-        className="w-full bg-steel rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--tenant-accent)]"
+        className="w-full bg-bg-base rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--tenant-accent)]"
       />
       <button
         type="button"
@@ -567,7 +569,7 @@ function LangSwitcher({ current, token }: { current: 'en' | 'es'; token: string 
   return (
     <a
       href={`/track/${encodeURIComponent(token)}?lang=${other}`}
-      className="text-xs text-text-secondary hover:text-text-primary underline"
+      className="text-xs text-text-secondary-on-dark hover:text-text-primary-on-dark underline"
       data-testid="lang-switcher"
     >
       {other === 'es' ? 'Español' : 'English'}

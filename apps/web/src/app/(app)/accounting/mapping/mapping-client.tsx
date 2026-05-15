@@ -6,7 +6,7 @@ import {
   type ChartOfAccountDto,
   type ChartOfAccountsResponse,
   accountMappingInternalCategoryDtoValues,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { type JSX, useMemo, useState, useTransition } from 'react';
 
 interface Props {
@@ -44,8 +44,8 @@ export function MappingClient({ chart, mappings }: Props): JSX.Element {
 
   if (!chart || chart.accounts.length === 0) {
     return (
-      <section className="rounded-lg bg-steel-light p-6">
-        <p className="text-sm text-text-secondary">
+      <section className="rounded-lg bg-bg-surface-elevated p-6">
+        <p className="text-sm text-text-secondary-on-dark">
           Connect QuickBooks Online first; once your chart of accounts is available you can map
           internal categories here.
         </p>
@@ -101,10 +101,10 @@ export function MappingClient({ chart, mappings }: Props): JSX.Element {
   };
 
   return (
-    <section className="rounded-lg bg-steel-light p-6 space-y-4">
+    <section className="rounded-lg bg-bg-surface-elevated p-6 space-y-4">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-text-secondary">
+          <tr className="text-left text-text-secondary-on-dark">
             <th className="py-2">Internal category</th>
             <th className="py-2">QBO account</th>
             <th className="py-2 w-32" />
@@ -121,7 +121,7 @@ export function MappingClient({ chart, mappings }: Props): JSX.Element {
                     aria-label={`Map ${CATEGORY_LABELS[cat] ?? cat} to external account`}
                     value={m?.externalAccountId ?? ''}
                     onChange={(e) => onSelect(cat, e.target.value)}
-                    className="rounded bg-steel border border-border px-2 py-1 font-mono text-xs"
+                    className="rounded bg-bg-base border border-border px-2 py-1 font-mono text-xs"
                   >
                     <option value="">— unmapped —</option>
                     {chart.accounts

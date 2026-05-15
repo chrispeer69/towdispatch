@@ -1,11 +1,11 @@
-import { ManualInvoiceFormClient } from './manual-invoice-form';
+﻿import { ManualInvoiceFormClient } from './manual-invoice-form';
 
-export const metadata = { title: 'New invoice — TowCommand' };
+export const metadata = { title: 'New invoice â€” US Tow DISPATCH' };
 
 export default function NewInvoicePage(): JSX.Element {
   return (
     <div className="space-y-4">
-      <h1 className="font-condensed text-3xl font-extrabold uppercase tracking-tight">
+      <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
         New manual invoice
       </h1>
       <ManualInvoiceFormClient />

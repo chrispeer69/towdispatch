@@ -11,7 +11,7 @@ import {
   driverCdlClassValues,
   driverCertificationValues,
   driverEmploymentStatusValues,
-} from '@towcommand/shared';
+} from '@ustowdispatch/shared';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useState } from 'react';
@@ -110,7 +110,7 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
         <Field label="Status">
           <select
             {...register('employmentStatus')}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2"
           >
             {driverEmploymentStatusValues.map((v) => (
               <option key={v} value={v}>
@@ -128,7 +128,7 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
         <Field label="CDL class">
           <select
             {...register('cdlClass')}
-            className="rounded-[8px] border border-steel-border bg-steel px-3 py-2"
+            className="rounded-[8px] border border-divider bg-bg-base px-3 py-2"
           >
             {driverCdlClassValues.map((v) => (
               <option key={v} value={v}>
@@ -163,7 +163,7 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
       <Section title="Certifications">
         <fieldset className="col-span-full grid grid-cols-2 gap-2 md:grid-cols-3">
           {driverCertificationValues.map((v) => (
-            <label key={v} className="flex items-center gap-2 text-sm text-text-secondary">
+            <label key={v} className="flex items-center gap-2 text-sm text-text-secondary-on-dark">
               <input
                 type="checkbox"
                 value={v}
@@ -180,7 +180,7 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
         <textarea
           {...register('notes')}
           rows={3}
-          className="col-span-full w-full rounded-[8px] border border-steel-border bg-steel px-3 py-2 text-sm"
+          className="col-span-full w-full rounded-[8px] border border-divider bg-bg-base px-3 py-2 text-sm"
         />
       </Section>
 
@@ -208,7 +208,9 @@ function Section({
 }): JSX.Element {
   return (
     <section className="space-y-3">
-      <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-muted">{title}</h2>
+      <h2 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
+        {title}
+      </h2>
       <div className="grid gap-4 md:grid-cols-2">{children}</div>
     </section>
   );

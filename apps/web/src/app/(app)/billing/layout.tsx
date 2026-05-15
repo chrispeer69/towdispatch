@@ -17,15 +17,12 @@ const TABS = [
 export default function BillingLayout({ children }: { children: ReactNode }): JSX.Element {
   return (
     <div className="space-y-4">
-      <nav
-        aria-label="Billing tabs"
-        className="flex flex-wrap gap-2 border-b border-steel-border pb-2"
-      >
+      <nav aria-label="Billing tabs" className="flex flex-wrap gap-2 border-b border-divider pb-2">
         {TABS.map((t) => (
           <Link
             key={t.href}
             href={t.href}
-            className="rounded-md px-3 py-1.5 text-sm text-text-secondary hover:bg-steel-light hover:text-text-primary"
+            className="rounded-md px-3 py-1.5 text-sm text-text-secondary-on-dark hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
           >
             {t.label}
           </Link>
