@@ -4,6 +4,7 @@ import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
 export const metadata = { title: 'Invoices â€” US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
 interface SearchParams {
   status?: string;

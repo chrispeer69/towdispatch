@@ -24,8 +24,15 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
   const [data, setData] = useState<PaginatedAccounts>(initial);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Skip the first effect run — SSR already seeded `initial` with this same
+  // query. Mirrors CustomerListClient; same rationale.
+  const skipFirstRef = useRef(true);
 
   useEffect(() => {
+    if (skipFirstRef.current) {
+      skipFirstRef.current = false;
+      return;
+    }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       void refetch(q, isMotorClub);
@@ -46,10 +53,9 @@ export function AccountListClient({ initial, initialQ, initialIsMotorClub }: Pro
       const res = await fetch(`/api/accounts?${params.toString()}`, {
         headers: { Accept: 'application/json' },
       });
-      if (res.ok) {
-        const json = (await res.json()) as PaginatedAccounts;
-        setData(json);
-      }
+      if (!res.ok) return;
+      const json = (await res.json().catch(() => null)) as PaginatedAccounts | null;
+      if (json && Array.isArray(json.data)) setData(json);
     } finally {
       setLoading(false);
     }

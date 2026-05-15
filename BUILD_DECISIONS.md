@@ -105,3 +105,42 @@ The schema uses `(tenant_id, year_key) → last_seq` with `UPSERT + UPDATE … R
 ### 16. `--reset` is the only data-destruction path
 
 Even on `--target=local`, the seed does not `DROP SCHEMA`. The existing `pnpm db:reset` already does that. `--reset` is scoped to the demo tenant: every child table is cleared in FK-safe order, then the `tenants` row is dropped. Side benefit: a future "seed two demo tenants" extension can target one tenant without touching the other.
+
+---
+
+## Session 9.6 — list-page fetch hardening (`feature/fix-list-page-fetches`)
+
+### 17. Reported bug ("list pages render empty") could not be reproduced
+
+Production at `https://app.towcommand.cloud` was already SSR-rendering the
+correct 7 customers / 2 accounts / 8 jobs / 7 invoices when fetched with
+`curl + chris@roadside.demo cookies`. Tested against the live deployment;
+HTML included the entity rows. The BFF route handlers (`/api/customers`,
+`/api/accounts`, etc.) also returned correct JSON. Bug is therefore likely
+either a stale browser/router-cache state on the founder's end OR a latent
+window where the on-mount client refetch overwrites good SSR data — we
+hardened against the second and documented the first.
+
+### 18. `dynamic = 'force-dynamic'` is now belt-and-suspenders on every list page
+
+`searchParams: Promise<…>` already forces dynamic rendering. The explicit
+declaration is in place anyway so a future refactor that drops `searchParams`
+(e.g. switching to client-only filters) can't accidentally re-enable static
+caching of these authenticated pages.
+
+### 19. Client list components skip the first useEffect run
+
+The customer/account/driver/truck list clients used to refetch their data
+300 ms after mount even though SSR had just resolved the same query. A
+`skipFirstRef` ref now blocks the first effect run. Behavioral consequence:
+the initial `/customers` page load makes **no** browser-visible
+`/api/customers` request. The first such request fires only after the user
+types in the search box or clicks a filter pill — which is the only time
+the client state and SSR state can actually diverge.
+
+### 20. Refetch state-update is shape-guarded
+
+`setData(await res.json() as Paginated…)` now goes through a `.catch(() =>
+null)` JSON parse and an `Array.isArray(json.data)` check before applying.
+A 200 with `{ code, message }` no longer corrupts state into a
+`data.data.length` TypeError on the next render.

@@ -5,6 +5,8 @@ import type { PaginatedDrivers } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
 
+export const dynamic = 'force-dynamic';
+
 interface SearchParams {
   q?: string;
   employmentStatus?: string;

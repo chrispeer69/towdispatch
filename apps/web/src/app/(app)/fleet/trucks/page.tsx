@@ -5,6 +5,8 @@ import type { PaginatedTrucks } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { TruckListClient } from './truck-list-client';
 
+export const dynamic = 'force-dynamic';
+
 interface SearchParams {
   q?: string;
   status?: string;

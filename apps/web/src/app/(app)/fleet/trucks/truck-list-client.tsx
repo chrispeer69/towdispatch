@@ -18,8 +18,14 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
   );
   const [data, setData] = useState<PaginatedTrucks>(initial);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Skip first effect — SSR already seeded `initial` with this same query.
+  const skipFirstRef = useRef(true);
 
   useEffect(() => {
+    if (skipFirstRef.current) {
+      skipFirstRef.current = false;
+      return;
+    }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       const params = new URLSearchParams();
@@ -34,8 +40,8 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
       void fetch(`/api/fleet/trucks?${params.toString()}`)
         .then(async (r) => {
           if (!r.ok) return;
-          const j = (await r.json()) as PaginatedTrucks;
-          setData(j);
+          const j = (await r.json().catch(() => null)) as PaginatedTrucks | null;
+          if (j && Array.isArray(j.data)) setData(j);
         })
         .catch(() => {});
     }, 300);

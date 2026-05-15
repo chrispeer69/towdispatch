@@ -24,8 +24,18 @@ export function CustomerListClient({ initial, initialQ, initialType }: Props): J
   const [data, setData] = useState<PaginatedCustomers>(initial);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Skip the first effect run: the server component already fetched with the
+  // same q/type and seeded `initial`. Re-running the same query on mount is
+  // wasted work, and worse — if the BFF flakes or its response shape ever
+  // drifts, we'd overwrite a good SSR render with empty state. The effect
+  // still fires on every subsequent change to q or type.
+  const skipFirstRef = useRef(true);
 
   useEffect(() => {
+    if (skipFirstRef.current) {
+      skipFirstRef.current = false;
+      return;
+    }
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       void refetch(q, type);
@@ -46,10 +56,12 @@ export function CustomerListClient({ initial, initialQ, initialType }: Props): J
       const res = await fetch(`/api/customers?${params.toString()}`, {
         headers: { Accept: 'application/json' },
       });
-      if (res.ok) {
-        const json = (await res.json()) as PaginatedCustomers;
-        setData(json);
-      }
+      if (!res.ok) return;
+      // Guard against the BFF returning a non-list shape (e.g. an error
+      // envelope on an unexpected 200). Assigning that to data would crash
+      // the next render on `data.data.length`.
+      const json = (await res.json().catch(() => null)) as PaginatedCustomers | null;
+      if (json && Array.isArray(json.data)) setData(json);
     } finally {
       setLoading(false);
     }

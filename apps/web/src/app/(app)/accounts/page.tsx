@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { AccountListClient } from './account-list-client';
 
 export const metadata = { title: 'Accounts â€” US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
 interface SearchParams {
   q?: string;

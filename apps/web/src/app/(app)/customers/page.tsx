@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
 export const metadata = { title: 'Customers â€” US Tow DISPATCH' };
+// Same posture as /jobs and /dashboard — never prerender, never cache. async
+// searchParams already opts this page into dynamic, but stating it explicitly
+// keeps the entire (app)/ list-page surface uniform and rules out any future
+// path where Next.js decides to cache an unauthenticated empty render.
+export const dynamic = 'force-dynamic';
 
 interface SearchParams {
   q?: string;
