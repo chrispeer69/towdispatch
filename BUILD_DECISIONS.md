@@ -144,3 +144,68 @@ the client state and SSR state can actually diverge.
 null)` JSON parse and an `Array.isArray(json.data)` check before applying.
 A 200 with `{ code, message }` no longer corrupts state into a
 `data.data.length` TypeError on the next render.
+
+---
+
+## Session 9.7 — list-pages-empty root cause: page-level `cookies()` returns empty store (`fix/cookie-via-header-9.7`)
+
+### 21. Root cause: `cookies()` request scope is lost between `(app)/layout.tsx` and the page render in Next.js 15 production builds
+
+Production diagnostics showed the same request producing two different
+results from `cookies()`:
+
+```
+[diag-list-empty]    { path: '/auth/me', hasAuth: true }     ← layout: cookie present
+[diag-page-cookies]  { hasToken: false, cookieNames: [] }    ← page:   empty store
+```
+
+`requireUser()` inside `(app)/layout.tsx` reads the access cookie correctly
+and calls `/auth/me` with the bearer; the very next module — the page
+component — calls `cookies()` and gets back an empty store. The cookie is
+on the request (the browser sent it, the layout saw it), but Next 15's
+dynamic-API request scope does not propagate to the page module in
+optimized production builds. Earlier sessions misdiagnosed this as a
+fetcher-boundary problem (Session 9.6 #19/#20) and as a cookie-domain
+problem (`fix/web-cookie-domain-towcommand-cloud`) — both were real but
+neither was the actual cause of the empty list pages.
+
+### 22. Fix: read the cookie from the raw request header via `headers()`
+
+`headers().get('cookie')` returns the verbatim `Cookie:` request header,
+which is request-bound the same way `cookies()` is *supposed* to be but
+empirically isn't. Parsing `tc_at=…` out of that string at the page level
+gets the token through reliably. Pattern:
+
+```ts
+import { cookies, headers } from 'next/headers';
+
+const cookieHeader = (await headers()).get('cookie') ?? '';
+const token =
+  cookieHeader
+    .split(/;\s*/)
+    .find((c) => c.startsWith(`${ACCESS_COOKIE}=`))
+    ?.slice(ACCESS_COOKIE.length + 1) ?? null;
+```
+
+The token is then threaded into `fetchCustomers(params, token)` exactly
+the same way Session 9.6 wired it — only the *source* of the token
+changed, not the plumbing.
+
+### 23. Rollout scope is the SSR list pages, not every server component
+
+This affects pages that read the access cookie at render time to call the
+BFF with an `Authorization` header. Apply to: `/customers`, `/accounts`,
+`/billing/invoices`, `/jobs`, `/fleet/drivers`, `/fleet/trucks`. Server
+components that don't read the cookie themselves (they go through middleware
+or a route handler) are unaffected. `(app)/layout.tsx` keeps using
+`cookies()` directly — that call works; the failure is only on the second
+invocation in the same request.
+
+### 24. `[diag-page-cookies]` log stays in place until the fix is verified
+
+The log now reports `hasToken`, `cookieNames` (from the broken `cookies()`
+call), and `headerHasCookie` (from the new `headers()` read). After deploy
+we expect `headerHasCookie: true, hasToken: true, cookieNames: []` — that
+combination both confirms the fix and keeps the original symptom visible
+so we don't lose the evidence trail. Remove the log only after the
+rollout to the other five pages is confirmed working.
