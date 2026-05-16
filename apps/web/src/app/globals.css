@@ -3,57 +3,96 @@
 @tailwind utilities;
 
 /*
- * US Tow DISPATCH design tokens v1.
+ * US Tow DISPATCH design tokens v1 — two-theme.
  *
- * NEW role-named tokens (--brand-*, --bg-*, --text-*-on-*, --status-*) are the
- * canonical surface for the new design system, sampled from sibling product
- * TowGrade (www.towgrade.com) for cross-product visual consistency:
- *   - Royal blue  --brand-primary   #1A56C4
- *   - Dark slate  --bg-base         #0E1117
- *   - Surface     --bg-surface      #1C2333
+ * The token surface is layered. From top to bottom:
  *
- * LEGACY hue-named tokens (--orange*, --steel*) are LEFT UNCHANGED so
- * existing utility classes (`bg-brand-primary`, `text-text-primary-on-dark`, `bg-bg-base`,
- * etc.) keep rendering the previous palette. A follow-up PR will sweep
- * components to use the new role-named tokens; this PR is tokens only.
+ *  1. NEW role-named brand tokens (--brand-*, --status-*). Stable
+ *     across themes — orange-free, TowGrade-aligned royal blue brand.
+ *     These never flip.
  *
- * shadcn semantic tokens (--primary, --ring, --accent, --background, --card)
- * are REPOINTED to the new tokens — so anything consuming them (button
- * variants, focus rings, the shadcn surface stack) flips to royal blue
- * immediately. This is intentional and matches the verify-step expectation
- * of an intermediate state where hue-named utilities stay orange while
- * token-based primitives flip blue.
+ *  2. NEW role-named surface + text tokens for the existing dark
+ *     stack (--bg-*, --text-*-on-dark, --text-*-on-light, --bg-divider).
+ *     Values are dark-baked by design: every utility that uses these
+ *     names (bg-bg-base, text-text-primary-on-dark, …) assumes a
+ *     dark background. Renaming those utilities to be theme-neutral
+ *     is the follow-up sweep documented in docs/theming.md.
  *
- * Variables hold HSL channels (no `hsl()` wrapper) so Tailwind can produce
- * `hsl(var(--token) / <alpha-value>)` — that lets `bg-brand-primary/30` etc.
- * work the same way `bg-bg-base/30` does today.
+ *  3. shadcn-named semantic tokens (--background, --foreground,
+ *     --card, --primary, --ring, …). These DO flip between themes:
+ *     :root holds the LIGHT values; .dark overrides with DARK values.
+ *     New shadcn primitives (DropdownMenu, Dialog, etc.) consume only
+ *     this layer and will render correctly in both themes today.
+ *
+ *  4. LEGACY hue-named tokens (--orange, --steel, --text-*). Preserved
+ *     verbatim so older components still rendering the prior palette
+ *     keep compiling. The dark-mode adjustments in .dark are the
+ *     pre-existing values from the previous globals.css.
+ *
+ * HSL channels (no `hsl()` wrapper) so Tailwind's
+ * `hsl(var(--token) / <alpha-value>)` arithmetic produces working
+ * `/30` alpha utilities. Do not wrap the channels in `hsl()` here.
  */
+
 :root {
-  /* NEW role-named brand tokens — US Tow DISPATCH v1 (sampled from TowGrade). */
-  --brand-primary: 217 76% 44%; /* #1A56C4 */
-  --brand-primary-hover: 217 76% 39%; /* #174DB0 (10% darker) */
+  /* ─────────────────────────────────────────────────────────────────
+     1. Brand + status. Stable across themes.
+     ───────────────────────────────────────────────────────────────── */
+  --brand-primary: 217 76% 44%; /* #1A56C4 royal blue (TowGrade) */
+  --brand-primary-hover: 217 76% 39%; /* #174DB0 10% darker */
   --brand-primary-text: 0 0% 100%; /* #FFFFFF */
 
-  --bg-base: 222 25% 7%; /* #0E1117 */
-  --bg-surface: 224 26% 15%; /* #1C2333 (one step lighter than base) */
-  --bg-surface-elevated: 225 21% 23%; /* third surface tier for hover / inline accents */
-  --bg-marketing: 0 0% 100%; /* #FFFFFF */
-  --bg-section: 210 40% 98%; /* #F8FAFC */
+  --status-success: 160 84% 39%; /* #10B981 */
+  --status-warning: 38 92% 50%; /* #F59E0B */
+  --status-danger: 0 84% 60%; /* #EF4444 */
 
-  --bg-divider: 225 21% 29%; /* default border / divide-y line */
-  --bg-divider-strong: 225 21% 37%; /* hover state for dividers */
+  /* ─────────────────────────────────────────────────────────────────
+     2. Dark-stack role tokens. Values are dark-baked — utilities like
+        bg-bg-base and text-text-primary-on-dark are still expected to
+        render the dark anchor regardless of theme.
+     ───────────────────────────────────────────────────────────────── */
+  --bg-base: 222 25% 7%; /* #0E1117 */
+  --bg-surface: 224 26% 15%; /* #1C2333 */
+  --bg-surface-elevated: 225 21% 23%;
+  --bg-marketing: 0 0% 100%;
+  --bg-section: 210 40% 98%;
+
+  --bg-divider: 225 21% 29%;
+  --bg-divider-strong: 225 21% 37%;
 
   --text-primary-on-dark: 210 40% 96%; /* #F1F5F9 */
   --text-secondary-on-dark: 215 20% 65%; /* #94A3B8 */
   --text-primary-on-light: 222 47% 11%; /* #0F172A */
   --text-secondary-on-light: 215 25% 27%; /* #475569 */
 
-  --status-success: 160 84% 39%; /* #10B981 */
-  --status-warning: 38 92% 50%; /* #F59E0B */
-  --status-danger: 0 84% 60%; /* #EF4444 */
+  /* ─────────────────────────────────────────────────────────────────
+     3. shadcn semantic tokens — LIGHT theme values.
+        These are the tokens new components should consume. They flip
+        under .dark below.
+     ───────────────────────────────────────────────────────────────── */
+  --background: 0 0% 100%; /* #FFFFFF */
+  --foreground: 222 47% 11%; /* #0F172A */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--brand-primary-text);
+  --secondary: 210 40% 96%; /* #F1F5F9 */
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%; /* #64748B */
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: var(--status-danger);
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%; /* #E2E8F0 */
+  --input: 214 32% 91%;
+  --ring: var(--brand-primary);
 
-  /* LEGACY hue-named tokens — preserved verbatim so existing utility classes
-     keep rendering the old palette until the component sweep ships. */
+  /* ─────────────────────────────────────────────────────────────────
+     4. Legacy hue-named tokens — preserved verbatim.
+     ───────────────────────────────────────────────────────────────── */
   --orange: 18 88% 53%;
   --orange-dark: 19 85% 42%;
   --orange-light: 18 100% 62%;
@@ -81,35 +120,32 @@
 
   --radius: 10px;
   --radius-lg: 14px;
+}
 
-  /* shadcn-ui semantic tokens — REPOINTED to the new brand tokens. Anything
-     consuming `--primary`, `--ring`, `--accent`, etc. (shadcn button, focus
-     ring) now reads royal blue. */
+.dark {
+  /* shadcn semantic tokens flip to DARK values. The dark surface stack
+     anchors on --bg-base / --bg-surface so the new shadcn primitives
+     visually sit on top of the existing dispatcher dark UI. */
   --background: var(--bg-base);
   --foreground: var(--text-primary-on-dark);
   --card: var(--bg-surface);
   --card-foreground: var(--text-primary-on-dark);
   --popover: var(--bg-surface);
   --popover-foreground: var(--text-primary-on-dark);
-  --primary: var(--brand-primary);
-  --primary-foreground: var(--brand-primary-text);
   --secondary: var(--bg-surface);
   --secondary-foreground: var(--text-primary-on-dark);
   --muted: var(--bg-surface);
   --muted-foreground: var(--text-secondary-on-dark);
-  --accent: var(--brand-primary);
-  --accent-foreground: var(--brand-primary-text);
-  --destructive: var(--status-danger);
-  --destructive-foreground: 0 0% 100%;
+  --accent: var(--bg-surface-elevated);
+  --accent-foreground: var(--text-primary-on-dark);
   --border: 224 26% 22%;
   --input: 224 26% 22%;
-  --ring: var(--brand-primary);
-}
+  /* --primary / --primary-foreground / --ring / --destructive don't
+     flip — they're the stable brand + status from the top of :root. */
 
-.dark {
-  /* Dark-mode overrides for the LEGACY hue-named surface stack — preserved
-     verbatim. The new role-named tokens are designed dark-first so they do
-     not need .dark overrides. */
+  /* Legacy steel/text adjustments — preserved verbatim from the
+     pre-rewire globals.css so older components keep rendering as they
+     did before this PR. */
   --steel: 225 24% 13%;
   --steel-mid: 225 21% 18%;
   --steel-light: 225 21% 23%;
@@ -130,8 +166,8 @@
 
 html,
 body {
-  background: hsl(var(--bg-base));
-  color: hsl(var(--text-primary-on-dark));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
