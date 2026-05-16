@@ -83,13 +83,17 @@ renaming the call sites. The `-on-dark` suffix is historical and is
 no longer accurate in light mode; the semantic is now "primary /
 secondary text colour for the current theme."
 
+Light mode is a **soft warm cream / light tan** palette (not the
+shadcn cool-grey default — pure white read as clinical against the
+brand chrome). Surfaces are warmer-than-page so cards pop forward.
+
 | Token | `:root` (light) | `.dark` |
 |---|---|---|
-| `--bg-base` | `#F8FAFC` (`210 40% 98%`) page background | `#0E1117` (`222 25% 7%`) |
-| `--bg-surface` | `#FFFFFF` (`0 0% 100%`) sidebar / topbar / cards | `#1C2333` (`224 26% 15%`) |
-| `--bg-surface-elevated` | `#F1F5F9` (`210 40% 96%`) hover | `225 21% 23%` |
-| `--bg-divider` | `#E2E8F0` (`214 32% 91%`) | `225 21% 29%` |
-| `--bg-divider-strong` | `#CBD5E1` (`215 25% 80%`) | `225 21% 37%` |
+| `--bg-base` | `#F2EBDB` (`40 36% 94%`) warm cream page | `#0E1117` (`222 25% 7%`) |
+| `--bg-surface` | `#FAF6EC` (`42 50% 97%`) sidebar / topbar / cards | `#1C2333` (`224 26% 15%`) |
+| `--bg-surface-elevated` | `#E5DCC7` (`38 30% 89%`) hover | `225 21% 23%` |
+| `--bg-divider` | `#D8CDB3` (`38 22% 84%`) warm beige border | `225 21% 29%` |
+| `--bg-divider-strong` | `#BFAF8F` (`38 18% 74%`) | `225 21% 37%` |
 | `--text-primary-on-dark` | `#0F172A` (`222 47% 11%`) | `#F1F5F9` (`210 40% 96%`) |
 | `--text-secondary-on-dark` | `#64748B` (`215 16% 47%`) | `#94A3B8` (`215 20% 65%`) |
 

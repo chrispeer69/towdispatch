@@ -56,23 +56,28 @@
         on-dark`, `border-divider`) read these. .dark below restores
         the dark anchor.
 
+        Light-mode palette is a SOFT WARM CREAM / LIGHT TAN, not the
+        cool blue-grey shadcn default — pure white was too clinical
+        against the brand chrome. Surfaces are warmer-than-page so
+        cards still pop forward off the background.
+
         Visual hierarchy in light mode:
-          --bg-base               #F8FAFC  page background (pale slate)
-          --bg-surface            #FFFFFF  sidebar / topbar / cards
-          --bg-surface-elevated   #F1F5F9  hover / inline accents
-          --bg-divider            #E2E8F0  borders / dividers
-          --bg-divider-strong     #CBD5E1  divider hover
+          --bg-base               #F7F2E9  page background (warm cream)
+          --bg-surface            #FCF9F2  sidebar / topbar / cards
+          --bg-surface-elevated   #EDE6D6  hover / inline accents
+          --bg-divider            #E3DBC9  borders / dividers (warm)
+          --bg-divider-strong     #CABF9E  divider hover
           --text-primary-on-dark  #0F172A  headings / primary text
           --text-secondary-on-dark #64748B muted body text
      ───────────────────────────────────────────────────────────────── */
-  --bg-base: 210 40% 98%; /* #F8FAFC */
-  --bg-surface: 0 0% 100%; /* #FFFFFF */
-  --bg-surface-elevated: 210 40% 96%; /* #F1F5F9 */
+  --bg-base: 40 36% 94%; /* #F2EBDB warm cream — page background */
+  --bg-surface: 42 50% 97%; /* #FAF6EC slightly lighter warm white */
+  --bg-surface-elevated: 38 30% 89%; /* #E5DCC7 warm beige hover */
   --bg-marketing: 0 0% 100%; /* #FFFFFF — fixed-light, unchanged */
   --bg-section: 210 40% 98%; /* #F8FAFC — fixed-light, unchanged */
 
-  --bg-divider: 214 32% 91%; /* #E2E8F0 */
-  --bg-divider-strong: 215 25% 80%; /* #CBD5E1 */
+  --bg-divider: 38 22% 84%; /* #D8CDB3 warm beige border */
+  --bg-divider-strong: 38 18% 74%; /* #BFAF8F darker beige */
 
   --text-primary-on-dark: 222 47% 11%; /* #0F172A */
   --text-secondary-on-dark: 215 16% 47%; /* #64748B */
