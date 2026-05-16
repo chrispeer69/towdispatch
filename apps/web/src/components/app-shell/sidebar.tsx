@@ -311,13 +311,13 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
             </button>
           </li>
           <li>
-            <Link
+            <a
               href="/logout"
               className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
             >
               <LogOut className="h-4 w-4" />
               <span className="font-medium">Sign out</span>
-            </Link>
+            </a>
           </li>
         </ul>
         <div className="mt-3 flex items-center gap-3 rounded-[8px] border border-divider bg-bg-surface-elevated/40 px-3 py-2">
