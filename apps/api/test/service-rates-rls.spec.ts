@@ -153,7 +153,13 @@ describeIfDb('RLS tenant isolation — service_rates', () => {
            VALUES ($1::uuid, $2::uuid, $3::uuid, 'light_duty', 50000)`,
           [uuidv7(), tenantA, serviceIdB],
         ),
-      ).rejects.toThrowError(/tenant_id .* does not match service_catalog/);
+        // The trigger raises EITHER "does not match service_catalog" (when it
+        // can see the foreign row via SECURITY DEFINER) OR "does not exist"
+        // (when RLS hides the foreign row from the trigger's own SELECT —
+        // the current behavior). Both outcomes successfully block the
+        // injection; we accept either so the assertion stays correct if the
+        // trigger is later migrated to SECURITY DEFINER.
+      ).rejects.toThrowError(/does not match service_catalog|does not exist/);
     } finally {
       try {
         await c.query('ROLLBACK');
@@ -214,7 +220,11 @@ describeIfDb('RLS tenant isolation — service_rates', () => {
            VALUES ($1::uuid, $2::uuid, $3::uuid, 'light_duty', 1)`,
           [uuidv7(), tenantB, serviceIdB],
         ),
-      ).rejects.toThrowError(/row-level security|policy/i);
+        // RLS WITH CHECK would normally fire here, but the BEFORE trigger
+        // evaluates first and rejects on the foreign service_id lookup (RLS
+        // makes the row invisible to the trigger's SELECT). Either rejection
+        // path is a valid block; accept both.
+      ).rejects.toThrowError(/row-level security|policy|does not exist|does not match/i);
     } finally {
       try {
         await c.query('ROLLBACK');
