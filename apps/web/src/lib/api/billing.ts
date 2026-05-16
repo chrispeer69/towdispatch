@@ -28,7 +28,9 @@ export async function fetchInvoices(
   query: Record<string, string | undefined>,
   accessToken?: string | null,
 ): Promise<InvoiceListResponse> {
-  return apiServer<InvoiceListResponse>(`/billing/invoices${toQuery(query)}`, { accessToken: accessToken ?? null });
+  return apiServer<InvoiceListResponse>(`/billing/invoices${toQuery(query)}`, {
+    accessToken: accessToken ?? null,
+  });
 }
 
 export async function fetchInvoice(id: string): Promise<InvoiceWithDetailsDto> {
@@ -37,22 +39,34 @@ export async function fetchInvoice(id: string): Promise<InvoiceWithDetailsDto> {
 
 export async function fetchPayments(
   query: Record<string, string | undefined>,
+  accessToken?: string | null,
 ): Promise<PaymentListResponse> {
-  return apiServer<PaymentListResponse>(`/billing/payments${toQuery(query)}`);
+  return apiServer<PaymentListResponse>(`/billing/payments${toQuery(query)}`, {
+    accessToken: accessToken ?? null,
+  });
 }
 
 export async function fetchAging(
   query: Record<string, string | undefined>,
+  accessToken?: string | null,
 ): Promise<AgingResponse> {
-  return apiServer<AgingResponse>(`/billing/aging${toQuery(query)}`);
+  return apiServer<AgingResponse>(`/billing/aging${toQuery(query)}`, {
+    accessToken: accessToken ?? null,
+  });
 }
 
-export async function fetchCreditMemos(): Promise<CreditMemoDto[]> {
-  return apiServer<CreditMemoDto[]>('/billing/credit-memos');
+export async function fetchCreditMemos(accessToken?: string | null): Promise<CreditMemoDto[]> {
+  return apiServer<CreditMemoDto[]>('/billing/credit-memos', {
+    accessToken: accessToken ?? null,
+  });
 }
 
-export async function fetchRecurringSchedules(): Promise<RecurringScheduleDto[]> {
-  return apiServer<RecurringScheduleDto[]>('/billing/recurring');
+export async function fetchRecurringSchedules(
+  accessToken?: string | null,
+): Promise<RecurringScheduleDto[]> {
+  return apiServer<RecurringScheduleDto[]>('/billing/recurring', {
+    accessToken: accessToken ?? null,
+  });
 }
 
 function toQuery(q: Record<string, string | undefined>): string {

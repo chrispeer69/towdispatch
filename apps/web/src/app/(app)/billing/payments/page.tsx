@@ -1,13 +1,17 @@
 import { type PaymentListResponse, fetchPayments, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
+import { getSessionToken } from '@/lib/auth/session';
 import { paymentMethodLabel } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'Payments â€” US Tow DISPATCH' };
+export const metadata = { title: 'Payments — US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
 const EMPTY_PAYMENTS: PaymentListResponse = { data: [], total: 0 };
 
 export default async function PaymentsPage(): Promise<JSX.Element> {
-  const result = await tryFetch(() => fetchPayments({ limit: '100' }));
+  // Session 9.8 token threading — see /billing/aging/page.tsx for why.
+  const token = await getSessionToken();
+  const result = await tryFetch(() => fetchPayments({ limit: '100' }, token));
   const list = result.data ?? EMPTY_PAYMENTS;
   return (
     <div className="space-y-4">
