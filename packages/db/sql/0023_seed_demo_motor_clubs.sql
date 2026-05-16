@@ -12,9 +12,15 @@
 -- strip the "x" from the name and the seed row becomes the production
 -- record without renaming.
 --
--- Idempotent via the (tenant_id, name) unique constraint on accounts:
--- ON CONFLICT DO NOTHING. Safe to re-run with every migration cycle —
--- the SQL migration runner does not version-track raw .sql files.
+-- Idempotent via the partial (tenant_id, name) WHERE deleted_at IS NULL
+-- unique index on accounts: ON CONFLICT (tenant_id, name) WHERE deleted_at
+-- IS NULL DO NOTHING. The WHERE clause is REQUIRED because the unique
+-- index is partial — without it Postgres throws "there is no unique or
+-- exclusion constraint matching the ON CONFLICT specification" and the
+-- whole migration transaction rolls back.
+--
+-- Safe to re-run with every migration cycle — the SQL migration runner
+-- does not version-track raw .sql files.
 --
 -- Down (rollback) — run by hand if these need to come out:
 --   DELETE FROM accounts
@@ -44,7 +50,7 @@ BEGIN
     (gen_random_uuid(), p_tenant_id, 'GEICOx',    'MC-GEICO',    'net_30', 'dispatch+geico@example.com',    '+18005551003', TRUE, 'geico',    TRUE, NOW(), NOW()),
     (gen_random_uuid(), p_tenant_id, 'AAAx',      'MC-AAA',      'net_30', 'dispatch+aaa@example.com',      '+18005551004', TRUE, 'aaa',      TRUE, NOW(), NOW()),
     (gen_random_uuid(), p_tenant_id, 'URGENTLYx', 'MC-URGENTLY', 'net_30', 'dispatch+urgently@example.com', '+18005551005', TRUE, 'urgently', TRUE, NOW(), NOW())
-  ON CONFLICT (tenant_id, name) DO NOTHING;
+  ON CONFLICT (tenant_id, name) WHERE deleted_at IS NULL DO NOTHING;
 
   GET DIAGNOSTICS v_count = ROW_COUNT;
   RETURN v_count;
