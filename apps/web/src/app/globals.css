@@ -134,10 +134,17 @@
   --radius-lg: 14px;
 }
 
+html.dark,
 .dark {
   /* ─────────────────────────────────────────────────────────────────
      Dispatcher surface stack — DARK values. Restores the original
      dark anchor that the dispatcher UI was designed against.
+
+     `html.dark` is included alongside `.dark` to bump specificity
+     past `:root` (0,1,0) → (0,1,1). next-themes applies the class
+     to <html>, so this selector matches with strictly higher
+     specificity and there's no source-order ambiguity for the
+     custom-property cascade.
      ───────────────────────────────────────────────────────────────── */
   --bg-base: 222 25% 7%; /* #0E1117 */
   --bg-surface: 224 26% 15%; /* #1C2333 */
