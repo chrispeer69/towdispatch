@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers } from '@/lib/api/fleet';
+import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import type { PaginatedDrivers } from '@ustowdispatch/shared';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
 
@@ -21,15 +22,16 @@ export default async function DriversPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  const result = await tryFetch(() =>
-    fetchDrivers({
-      q: params.q,
-      employmentStatus: params.employmentStatus,
-      cdlClass: params.cdlClass,
-      perPage: '50',
-    }),
-  );
-  const initial = result.data ?? EMPTY_DRIVERS;
+  // Session 9.8 fix: read token at the page render site and thread through.
+  // See BUILD_DECISIONS.md Session 9.7.
+  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+  const result = await fetchDrivers({
+    q: params.q,
+    employmentStatus: params.employmentStatus,
+    cdlClass: params.cdlClass,
+    perPage: '50',
+  }, token);
+  const initial = result ?? EMPTY_DRIVERS;
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">

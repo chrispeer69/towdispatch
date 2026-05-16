@@ -1,8 +1,10 @@
 import { fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
+import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 
-export const metadata = { title: 'Invoices â€” US Tow DISPATCH' };
+export const metadata = { title: 'Invoices — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {
@@ -18,15 +20,15 @@ export default async function InvoicesPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
-  // (app)/error.tsx instead of silently rendering an empty list. Restore the
-  // tryFetch wrapper once the list-pages-empty triage closes.
+  // Session 9.8 fix: read token at the page render site and thread through.
+  // See BUILD_DECISIONS.md Session 9.7.
+  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
   const list = await fetchInvoices({
     status: params.status,
     search: params.search,
     limit: params.limit ?? '50',
     offset: params.offset ?? '0',
-  });
+  }, token);
 
   return (
     <div className="space-y-6">

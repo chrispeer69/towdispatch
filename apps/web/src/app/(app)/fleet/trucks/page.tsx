@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { tryFetch } from '@/lib/api/client';
 import { fetchTrucks } from '@/lib/api/fleet';
+import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import type { PaginatedTrucks } from '@ustowdispatch/shared';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { TruckListClient } from './truck-list-client';
 
@@ -22,16 +23,17 @@ export default async function TrucksPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  const result = await tryFetch(() =>
-    fetchTrucks({
-      q: params.q,
-      status: params.status,
-      capacityClass: params.capacityClass,
-      equipment: params.equipment,
-      perPage: '50',
-    }),
-  );
-  const initial = result.data ?? EMPTY_TRUCKS;
+  // Session 9.8 fix: read token at the page render site and thread through.
+  // See BUILD_DECISIONS.md Session 9.7.
+  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+  const result = await fetchTrucks({
+    q: params.q,
+    status: params.status,
+    capacityClass: params.capacityClass,
+    equipment: params.equipment,
+    perPage: '50',
+  }, token);
+  const initial = result ?? EMPTY_TRUCKS;
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">

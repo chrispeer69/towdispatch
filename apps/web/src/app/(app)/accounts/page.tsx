@@ -1,9 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { fetchAccounts } from '@/lib/api/resources';
+import { ACCESS_COOKIE } from '@/lib/auth/cookies';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { AccountListClient } from './account-list-client';
 
-export const metadata = { title: 'Accounts â€” US Tow DISPATCH' };
+export const metadata = { title: 'Accounts — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {
@@ -26,16 +28,16 @@ export default async function AccountsPage({
   const params = await searchParams;
   const isMotorClub = params.isMotorClub ?? (params.type === 'motor_club' ? 'true' : undefined);
 
-  // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
-  // (app)/error.tsx instead of silently rendering an empty list. Restore the
-  // tryFetch wrapper once the list-pages-empty triage closes.
+  // Session 9.8 fix: read token at the page render site and thread through.
+  // See BUILD_DECISIONS.md Session 9.7.
+  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
   const initial = await fetchAccounts({
     q: params.q,
     active: params.active,
     isMotorClub,
     page: params.page,
     perPage: '50',
-  });
+  }, token);
 
   return (
     <div className="space-y-6">

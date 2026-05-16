@@ -46,9 +46,10 @@ export async function fetchVehicle(id: string): Promise<VehicleWithCustomersDto>
 
 export async function fetchAccounts(
   query: Record<string, string | undefined>,
+  accessToken?: string | null,
 ): Promise<PaginatedAccounts> {
   const qs = toQuery(query);
-  return apiServer<PaginatedAccounts>(`/accounts${qs}`);
+  return apiServer<PaginatedAccounts>(`/accounts${qs}`, { accessToken: accessToken ?? null });
 }
 
 export async function fetchAccount(id: string): Promise<AccountDto> {

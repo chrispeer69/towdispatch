@@ -25,15 +25,20 @@ const qs = (q: Record<string, string | undefined>): string => {
   return `?${new URLSearchParams(e as [string, string][]).toString()}`;
 };
 
-export const fetchTrucks = (q: Record<string, string | undefined> = {}): Promise<PaginatedTrucks> =>
-  apiServer<PaginatedTrucks>(`/fleet/trucks${qs(q)}`);
+export const fetchTrucks = (
+  q: Record<string, string | undefined> = {},
+  accessToken?: string | null,
+): Promise<PaginatedTrucks> =>
+  apiServer<PaginatedTrucks>(`/fleet/trucks${qs(q)}`, { accessToken: accessToken ?? null });
 
 export const fetchTruck = (id: string): Promise<TruckDto> =>
   apiServer<TruckDto>(`/fleet/trucks/${id}`);
 
 export const fetchDrivers = (
   q: Record<string, string | undefined> = {},
-): Promise<PaginatedDrivers> => apiServer<PaginatedDrivers>(`/fleet/drivers${qs(q)}`);
+  accessToken?: string | null,
+): Promise<PaginatedDrivers> =>
+  apiServer<PaginatedDrivers>(`/fleet/drivers${qs(q)}`, { accessToken: accessToken ?? null });
 
 export const fetchDriver = (id: string): Promise<DriverDto> =>
   apiServer<DriverDto>(`/fleet/drivers/${id}`);

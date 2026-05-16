@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { fetchCustomers } from '@/lib/api/resources';
-import { getSessionToken } from '@/lib/auth/session';
+import { ACCESS_COOKIE } from '@/lib/auth/cookies';
 import type { CustomerType } from '@ustowdispatch/shared';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
-export const metadata = { title: 'Customers â€” US Tow DISPATCH' };
+export const metadata = { title: 'Customers — US Tow DISPATCH' };
 // Same posture as /jobs and /dashboard — never prerender, never cache. async
 // searchParams already opts this page into dynamic, but stating it explicitly
 // keeps the entire (app)/ list-page surface uniform and rules out any future
@@ -24,16 +25,13 @@ export default async function CustomersPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  // Session 9.7 — both cookies() AND headers().get('cookie') return empty in
-  // the page-render context even when the layout's parallel call sees the
-  // cookie. Read the token from the cache()-deduped getSessionToken() that
-  // the layout primed at the top of (app)/layout.tsx. See
-  // BUILD_DECISIONS.md Session 9.7 and lib/auth/session.ts header.
-  const token = await getSessionToken();
-  // [diag-page-cookies] Temporary: confirm the cache()-bridged read returns
-  // the token in the page-render context. Remove once Session 9.7 closes.
-  // eslint-disable-next-line no-console
-  console.log('[diag-page-cookies]', { hasTokenFromCachedRead: Boolean(token) });
+  // Session 9.8 fix: Next.js 15 dynamic-API request scope does not survive
+  // the second module boundary into lib/api/resources.ts in production
+  // builds, so the inline cookies() read inside the fetcher returns an
+  // empty store and the API gets no Authorization header. Read here at
+  // the page render site and thread the token through. See
+  // BUILD_DECISIONS.md Session 9.7.
+  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
   // [diag-list-empty] Temporary: unwrap tryFetch so any 4xx throws into
   // (app)/error.tsx instead of silently rendering an empty list. Restore the
   // tryFetch wrapper once the list-pages-empty triage closes.

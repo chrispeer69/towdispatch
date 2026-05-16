@@ -26,8 +26,9 @@ export interface PaymentListResponse {
 
 export async function fetchInvoices(
   query: Record<string, string | undefined>,
+  accessToken?: string | null,
 ): Promise<InvoiceListResponse> {
-  return apiServer<InvoiceListResponse>(`/billing/invoices${toQuery(query)}`);
+  return apiServer<InvoiceListResponse>(`/billing/invoices${toQuery(query)}`, { accessToken: accessToken ?? null });
 }
 
 export async function fetchInvoice(id: string): Promise<InvoiceWithDetailsDto> {
