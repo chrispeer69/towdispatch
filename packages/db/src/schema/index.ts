@@ -9,6 +9,7 @@ export * from './customers';
 export * from './vehicles';
 export * from './customer-vehicles';
 export * from './rate-sheets';
+export * from './service-catalog';
 export * from './jobs';
 export * from './drivers';
 export * from './trucks';
