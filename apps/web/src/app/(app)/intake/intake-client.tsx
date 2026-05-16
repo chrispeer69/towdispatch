@@ -509,7 +509,11 @@ export function IntakeClient(): JSX.Element {
               placeholder="555-555-0100"
               value={form.phone}
               onChange={(e: ChangeEvent<HTMLInputElement>) => update('phone', e.target.value)}
+              onBlur={(e: ChangeEvent<HTMLInputElement>) =>
+                update('phone', formatPhoneOnBlur(e.target.value))
+              }
               autoComplete="tel"
+              inputMode="tel"
             />
             {existingCustomerName ? (
               <Badge>Existing customer · {existingCustomerName}</Badge>
@@ -995,8 +999,12 @@ function AdditionalContactInfo({
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 update('secondaryContactPhone', e.target.value)
               }
+              onBlur={(e: ChangeEvent<HTMLInputElement>) =>
+                update('secondaryContactPhone', formatPhoneOnBlur(e.target.value))
+              }
               placeholder="555-555-0102"
               autoComplete="off"
+              inputMode="tel"
             />
           </Field>
         </div>
@@ -1088,6 +1096,24 @@ function toE164(s: string): string | null {
   if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
   if (digits.length >= 8 && digits.length <= 15) return `+${digits}`;
   return null;
+}
+
+/**
+ * Normalize anything the dispatcher typed into a US-style XXX-XXX-XXXX
+ * phone number on blur. Strips every non-digit and:
+ *   - 10 digits         → "XXX-XXX-XXXX"
+ *   - 11 digits, leading "1" → drops the 1, then "XXX-XXX-XXXX"
+ *   - anything else     → leaves the input alone (toE164 handles the
+ *                          looser inputs at submit time)
+ *
+ * Live formatting on every keystroke was rejected because it fights
+ * paste / select-and-replace flows; on-blur is the cleanest UX.
+ */
+function formatPhoneOnBlur(raw: string): string {
+  let digits = raw.replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
+  if (digits.length !== 10) return raw;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
 function optionalCoord(lat: string, lng: string): { lat?: number; lng?: number } {
