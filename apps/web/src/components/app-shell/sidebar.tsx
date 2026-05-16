@@ -309,13 +309,30 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
       <div className="border-t border-divider px-3 py-3">
         <ul className="space-y-0.5">
           <li>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
-            >
-              <Settings className="h-4 w-4" />
-              <span className="font-medium">Settings</span>
-            </button>
+            {(() => {
+              const settingsActive = pathname === '/settings' || pathname.startsWith('/settings/');
+              return (
+                <Link
+                  href="/settings"
+                  aria-current={settingsActive ? 'page' : undefined}
+                  className={cn(
+                    'group relative flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-colors',
+                    settingsActive
+                      ? 'bg-brand-primary/15 text-brand-primary'
+                      : 'text-text-secondary-on-dark hover:bg-bg-surface-elevated hover:text-text-primary-on-dark',
+                  )}
+                >
+                  {settingsActive ? (
+                    <span
+                      aria-hidden
+                      className="absolute -left-3 top-1.5 h-6 w-1 rounded-r-full bg-brand-primary"
+                    />
+                  ) : null}
+                  <Settings className="h-4 w-4" />
+                  <span className="font-medium">Settings</span>
+                </Link>
+              );
+            })()}
           </li>
           <li>
             <a
