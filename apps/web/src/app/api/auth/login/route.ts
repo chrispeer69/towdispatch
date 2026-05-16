@@ -61,6 +61,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         { status: err.status },
       );
     }
-    return NextResponse.json({ message: 'Unexpected error' }, { status: 500 });
+    // Non-ApiError exceptions used to surface as the opaque
+    // "Unexpected error" message, which made diagnosing login
+    // failures impossible (was it a network blip to the API, a
+    // cookies() write failure, a malformed response, …?). Log the
+    // full error to the server console + bubble the constructor name
+    // and message back to the client so the failure mode is at least
+    // visible in the toast. Password never reaches this catch — the
+    // body was already serialized into the apiServer call above.
+    // eslint-disable-next-line no-console
+    console.error('[auth/login] non-ApiError exception', {
+      tag: 'auth/login:non-api-error',
+      errorName: err instanceof Error ? err.constructor.name : typeof err,
+      errorMessage: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
+    const message =
+      err instanceof Error
+        ? `Login failed: ${err.constructor.name}${err.message ? ` — ${err.message}` : ''}`
+        : 'Login failed: unknown error';
+    return NextResponse.json({ code: 'login_failed', message }, { status: 500 });
   }
 }
