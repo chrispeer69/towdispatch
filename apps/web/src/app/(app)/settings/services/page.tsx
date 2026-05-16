@@ -1,17 +1,27 @@
 /**
- * /settings/services — the Service Catalog admin surface (build 1 of 6 in
- * the Admin Settings rollout). Replaces the "Coming soon" placeholder.
+ * /settings/services — the Service Catalog + Master Rate Sheet admin surface.
  *
- * Pricing is intentionally OUT of scope here — that lands with the Master
- * Rate Sheet at /settings/services in build 2 (the rate sheet becomes a
- * sub-route, this page stays as the catalog index).
+ * Build 1 (#23): Catalog view — structural CRUD on services.
+ * Build 2 (this build): Rate Sheet view — inline-editable price grid keyed
+ * off the catalog. View toggle lives in services-view-toggle.tsx and
+ * persists choice via ?view=rate_sheet in the URL.
+ *
+ * Both initial datasets (catalog + rates) are fetched server-side here so
+ * the first paint has data; the client island handles every subsequent
+ * mutation.
  */
-import { fetchServiceCatalog } from '@/lib/api/resources';
+import { fetchServiceCatalog, fetchServiceRates } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/session';
-import type { ServiceCatalogEntryDto, ServiceCategory } from '@ustowdispatch/shared';
+import type {
+  ServiceCatalogEntryDto,
+  ServiceCategory,
+  ServiceRateDto,
+} from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
+import { RateSheetClient } from './rate-sheet-client';
 import { ServiceCatalogClient } from './service-catalog-client';
+import { ServicesViewToggle } from './services-view-toggle';
 
 export const metadata = { title: 'Services & Pricing — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
@@ -22,6 +32,7 @@ interface SearchParams {
   category?: ServiceCategory;
   active?: string;
   q?: string;
+  view?: string;
 }
 
 export default async function ServicesPricingPage({
@@ -32,17 +43,21 @@ export default async function ServicesPricingPage({
   const params = await searchParams;
   const token = await getSessionToken();
 
-  let initial: ServiceCatalogEntryDto[] = [];
+  let catalog: ServiceCatalogEntryDto[] = [];
+  let rates: ServiceRateDto[] = [];
   let loadError: string | null = null;
   try {
-    initial = await fetchServiceCatalog(
-      {
-        category: params.category,
-        active: params.active,
-        q: params.q,
-      },
-      token,
-    );
+    [catalog, rates] = await Promise.all([
+      fetchServiceCatalog(
+        {
+          category: params.category,
+          active: params.active,
+          q: params.q,
+        },
+        token,
+      ),
+      fetchServiceRates(token),
+    ]);
   } catch (err) {
     loadError = err instanceof Error ? err.message : 'Failed to load services';
   }
@@ -54,7 +69,7 @@ export default async function ServicesPricingPage({
           {TAB.label}
         </h1>
         <p className="text-sm text-text-secondary-on-dark">
-          The service catalog defines what your shop bills for. Prices and the rate sheet ship next.
+          The service catalog defines what your shop bills for. The rate sheet sets the price.
         </p>
       </header>
 
@@ -67,11 +82,18 @@ export default async function ServicesPricingPage({
         </div>
       ) : null}
 
-      <ServiceCatalogClient
-        initial={initial}
-        initialCategory={params.category ?? null}
-        initialActive={params.active === 'true' ? true : params.active === 'false' ? false : null}
-        initialQ={params.q ?? ''}
+      <ServicesViewToggle
+        catalog={
+          <ServiceCatalogClient
+            initial={catalog}
+            initialCategory={params.category ?? null}
+            initialActive={
+              params.active === 'true' ? true : params.active === 'false' ? false : null
+            }
+            initialQ={params.q ?? ''}
+          />
+        }
+        rateSheet={<RateSheetClient catalog={catalog} initialRates={rates} />}
       />
     </div>
   );
