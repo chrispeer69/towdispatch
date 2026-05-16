@@ -35,7 +35,7 @@ import {
  * config.
  */
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { CSSProperties } from 'react';
 
 interface SidebarProps {
@@ -49,11 +49,11 @@ interface NavItem {
   icon: LucideIcon;
   disabled?: boolean;
   /**
-   * Match function. Defaults to exact match. Some items (Motor Clubs is just
-   * /accounts with a query string) need a custom matcher so the highlight
-   * stays accurate.
+   * Match function. Defaults to exact path match. Some items (Motor Clubs is
+   * just /accounts with a query string) need to read searchParams to
+   * discriminate, so both are passed.
    */
-  match?: (pathname: string) => boolean;
+  match?: (pathname: string, searchParams: URLSearchParams) => boolean;
   /**
    * Per-item brand accent (hex). Overrides the orange default for active
    * state — used by the ECOSYSTEM tabs so each Blue Collar AI sibling
@@ -121,8 +121,10 @@ const SECTIONS: NavSection[] = [
         label: 'Accounts',
         href: '/accounts',
         icon: Building2,
-        // Plain /accounts path. Motor Clubs filters via /accounts?type=motor_club.
-        match: (p) => p === '/accounts' || p.startsWith('/accounts/'),
+        // Plain /accounts path. Motor Clubs is /accounts?type=motor_club — let
+        // that item own the highlight when the type filter is set.
+        match: (p, sp) =>
+          (p === '/accounts' && sp.get('type') !== 'motor_club') || p.startsWith('/accounts/'),
       },
       {
         label: 'Billing',
@@ -150,6 +152,7 @@ const SECTIONS: NavSection[] = [
         label: 'Motor Clubs',
         href: '/accounts?type=motor_club',
         icon: ShieldCheck,
+        match: (p, sp) => p === '/accounts' && sp.get('type') === 'motor_club',
       },
       { label: 'Email Settings', href: null, icon: Mail, disabled: true },
     ],
@@ -188,6 +191,10 @@ const SECTIONS: NavSection[] = [
 
 export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   const pathname = usePathname() ?? '/';
+  // useSearchParams() returns ReadonlyURLSearchParams; fall back to an empty
+  // params object during edge cases where Next returns null (initial render
+  // boundary). Matchers that don't read sp ignore this entirely.
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
       <div className="flex items-center gap-3 border-b border-divider px-5 py-4">
@@ -214,7 +221,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
               {section.items.map((item) => {
                 const isActive =
                   item.href !== null &&
-                  (item.match ? item.match(pathname) : pathname === item.href);
+                  (item.match ? item.match(pathname, searchParams) : pathname === item.href);
                 const content = (
                   <span className="flex items-center gap-3">
                     <item.icon className="h-4 w-4" />
