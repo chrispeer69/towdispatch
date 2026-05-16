@@ -36,7 +36,6 @@ export async function setSessionCookies(opts: SetSessionCookiesOpts): Promise<vo
     sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_TTL_SECONDS,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
   });
   store.set(REFRESH_COOKIE, opts.refreshToken, {
     httpOnly: true,
@@ -44,24 +43,13 @@ export async function setSessionCookies(opts: SetSessionCookiesOpts): Promise<vo
     sameSite: 'strict',
     path: '/',
     maxAge: REFRESH_TTL_SECONDS,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
   });
 }
 
 export async function clearSessionCookies(): Promise<void> {
   const store = await cookies();
-  store.set(ACCESS_COOKIE, '', {
-    httpOnly: true,
-    path: '/',
-    maxAge: 0,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
-  });
-  store.set(REFRESH_COOKIE, '', {
-    httpOnly: true,
-    path: '/',
-    maxAge: 0,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
-  });
+  store.set(ACCESS_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
+  store.set(REFRESH_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
 }
 
 export async function readAccessToken(): Promise<string | null> {
@@ -83,7 +71,6 @@ export async function setMfaSetupCookie(token: string): Promise<void> {
     sameSite: 'lax',
     path: '/',
     maxAge: MFA_SETUP_TTL_SECONDS,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
   });
 }
 
@@ -96,7 +83,6 @@ export async function setMfaChallengeCookie(token: string): Promise<void> {
     sameSite: 'lax',
     path: '/',
     maxAge: MFA_CHALLENGE_TTL_SECONDS,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
   });
 }
 
@@ -112,16 +98,6 @@ export async function readMfaChallengeCookie(): Promise<string | null> {
 
 export async function clearMfaCookies(): Promise<void> {
   const store = await cookies();
-  store.set(MFA_SETUP_COOKIE, '', {
-    httpOnly: true,
-    path: '/',
-    maxAge: 0,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
-  });
-  store.set(MFA_CHALLENGE_COOKIE, '', {
-    httpOnly: true,
-    path: '/',
-    maxAge: 0,
-    domain: process.env.NODE_ENV === 'production' ? '.towcommand.cloud' : undefined,
-  });
+  store.set(MFA_SETUP_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
+  store.set(MFA_CHALLENGE_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
 }
