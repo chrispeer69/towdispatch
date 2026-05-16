@@ -39,7 +39,7 @@
  * tracking attached to the call site, which is what every Next.js 15 server-
  * component example does — and what fixes the bounce.
  */
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { ACCESS_COOKIE, REFRESH_COOKIE, setSessionCookies } from '../auth/cookies';
 
 export class ApiError extends Error {
@@ -111,6 +111,29 @@ interface RequestOpts<TBody> {
   accessToken?: string | null;
 }
 
+async function resolveAccessToken(opts: RequestOpts<any>): Promise<string | null> {
+  if (opts.accessToken !== undefined) return opts.accessToken;
+  const cookieHeader = (await headers()).get('cookie') ?? '';
+  const tokenFromHeader =
+    cookieHeader
+      .split(/;\s*/)
+      .find((c) => c.startsWith(`${ACCESS_COOKIE}=`))
+      ?.slice(ACCESS_COOKIE.length + 1) ?? null;
+  if (tokenFromHeader) return tokenFromHeader;
+  return (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+}
+
+async function resolveRefreshToken(): Promise<string | null> {
+  const cookieHeader = (await headers()).get('cookie') ?? '';
+  const tokenFromHeader =
+    cookieHeader
+      .split(/;\s*/)
+      .find((c) => c.startsWith(`${REFRESH_COOKIE}=`))
+      ?.slice(REFRESH_COOKIE.length + 1) ?? null;
+  if (tokenFromHeader) return tokenFromHeader;
+  return (await cookies()).get(REFRESH_COOKIE)?.value ?? null;
+}
+
 /**
  * Read-only API call, non-throwing variant. Server-component safe.
  *
@@ -124,16 +147,12 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
   opts: RequestOpts<TBody> = {},
 ): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
-  // Token resolution: caller-provided wins, otherwise read cookies() inline
-  // at this call site. See the file header for why the inline read is
-  // load-bearing, and RequestOpts.accessToken for why callers from typed
+  // Token resolution: caller-provided wins, otherwise read from headers/cookies
+  // at this call site. See RequestOpts.accessToken for why callers from typed
   // fetchers in lib/api/*.ts have to override it.
   let accessToken: string | null = null;
   if (authenticated) {
-    accessToken =
-      opts.accessToken !== undefined
-        ? opts.accessToken
-        : ((await cookies()).get(ACCESS_COOKIE)?.value ?? null);
+    accessToken = await resolveAccessToken(opts);
   }
   const base = apiBase();
   const url = path.startsWith('http') ? path : `${base}${path}`;
@@ -211,11 +230,9 @@ export async function apiServerBffSafe<TResponse, TBody = unknown>(
   opts: RequestOpts<TBody> = {},
 ): Promise<ApiResult<TResponse>> {
   const authenticated = opts.authenticated ?? true;
-  const store = await cookies();
   let accessToken: string | null = null;
   if (authenticated) {
-    accessToken =
-      opts.accessToken !== undefined ? opts.accessToken : (store.get(ACCESS_COOKIE)?.value ?? null);
+    accessToken = await resolveAccessToken(opts);
   }
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
 
@@ -322,7 +339,7 @@ export function isAuthError(err: unknown): err is ApiError {
  * handlers — writes cookies via setSessionCookies.
  */
 export async function tryRefresh(): Promise<{ accessToken: string } | null> {
-  const refreshToken = (await cookies()).get(REFRESH_COOKIE)?.value ?? null;
+  const refreshToken = await resolveRefreshToken();
   if (!refreshToken) return null;
   const res = await fetch(`${apiBase()}/auth/refresh`, {
     method: 'POST',
@@ -349,8 +366,7 @@ export async function apiServerBffRaw(
   path: string,
   opts: { method?: 'GET' | 'POST' } = {},
 ): Promise<Response> {
-  const store = await cookies();
-  let accessToken = store.get(ACCESS_COOKIE)?.value ?? null;
+  let accessToken = await resolveAccessToken({});
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
   const buildInit = (token: string | null): RequestInit => ({
     method: opts.method ?? 'GET',
