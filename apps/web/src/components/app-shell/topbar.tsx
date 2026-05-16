@@ -2,6 +2,7 @@
 
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Bell, HelpCircle, Search } from 'lucide-react';
+import Link from 'next/link';
 import { useUser } from './session-provider';
 
 export function AppTopbar(): JSX.Element {
@@ -24,13 +25,14 @@ export function AppTopbar(): JSX.Element {
           />
         </div>
         <ThemeToggle />
-        <button
-          type="button"
-          aria-label="Help"
+        <Link
+          href="/help"
+          aria-label="Help center"
+          title="Help center"
           className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-divider bg-bg-surface-elevated/40 text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark"
         >
           <HelpCircle className="h-4 w-4" />
-        </button>
+        </Link>
         <button
           type="button"
           aria-label="Notifications"
