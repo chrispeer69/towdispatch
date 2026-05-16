@@ -25,18 +25,45 @@
  *     happens once at the line-item boundary.
  */
 import { Injectable } from '@nestjs/common';
-import { accounts, rateSheets, tenantDefaultRateSheets } from '@ustowdispatch/db';
+import {
+  accounts,
+  rateSheets,
+  serviceCatalog,
+  serviceRates,
+  tenantDefaultRateSheets,
+} from '@ustowdispatch/db';
 import {
   type JobServiceType,
   type RateLineItem,
   type RateQuote,
   type RateSheetDefinition,
+  SERVICE_RATE_ANY_CLASS,
   type SurchargeWindow,
   type VehicleClass,
   rateSheetDefinitionSchema,
 } from '@ustowdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
-import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
+
+/**
+ * Canonical mapping from the legacy JobServiceType (the dispatch intake
+ * vocabulary) to the catalog `code` that represents the same service in the
+ * Master Rate Sheet (Admin Settings build 2). The engine looks up
+ * service_rates by (code, vehicleClass) first; on miss it falls back to the
+ * legacy rate_sheets JSON. As the catalog grows we expect more JobServiceType
+ * variants — until then 'other' has no canonical code and always falls back.
+ */
+const SERVICE_TYPE_CATALOG_CODE: Record<JobServiceType, string | null> = {
+  tow: 'TOW',
+  jump_start: 'JUMP_START_SERVICE',
+  lockout: 'LOCKOUT_SERVICE',
+  tire_change: 'TIRE_SERVICE',
+  fuel: 'FUEL_DELIVERY_SERVICE',
+  winch: 'WINCHING',
+  recovery: 'LABOR',
+  impound: 'DAILY_IMPOUND_RATE',
+  other: null,
+};
 
 export interface QuoteInput {
   tenantId: string;
@@ -217,6 +244,23 @@ export class RateEngineService {
 
         // Step 3: build line items.
         const lineItems: RateLineItem[] = [];
+
+        // Step 3a: if the operator has set a per-class price on the Master
+        // Rate Sheet for this serviceType, that wins for the base line. We
+        // still keep the legacy resolvedDefinition around for per-mile and
+        // surcharge logic (those land in their own Master Rate Sheet
+        // surfaces in later builds).
+        const masterPriceCents = await resolveMasterRateBase(
+          tx,
+          input.serviceType,
+          input.vehicleClass,
+        );
+        if (masterPriceCents != null) {
+          trace.push(
+            `Master Rate Sheet base for ${input.serviceType} / ${input.vehicleClass}: ${masterPriceCents}¢.`,
+          );
+        }
+
         const service = resolvedDefinition.services.find(
           (s) => s.serviceType === input.serviceType,
         );
@@ -229,14 +273,14 @@ export class RateEngineService {
             lineItems.push({
               code: 'base',
               label: `${labelFor(input.serviceType)} base fee`,
-              amountCents: fb.baseCents,
+              amountCents: masterPriceCents ?? fb.baseCents,
             });
           }
         } else {
           lineItems.push({
             code: 'base',
             label: `${labelFor(input.serviceType)} base fee`,
-            amountCents: service.baseCents,
+            amountCents: masterPriceCents ?? service.baseCents,
           });
           const flat = service.flatFeesByClass[input.vehicleClass];
           if (flat && flat > 0) {
@@ -308,6 +352,48 @@ export class RateEngineService {
       },
     );
   }
+}
+
+/**
+ * Resolve the Master Rate Sheet base price for a (serviceType, vehicleClass)
+ * pair. Returns null when:
+ *   - the JobServiceType has no canonical catalog code mapping (e.g. 'other')
+ *   - the tenant catalog has no row with that code (catalog never seeded, or
+ *     the operator deleted it)
+ *   - the catalog row exists but no service_rates row matches the requested
+ *     vehicleClass (or 'any' for class-independent services).
+ * In every "miss" case the engine falls back to the legacy rateSheets JSON
+ * path that was already there before build 2.
+ */
+async function resolveMasterRateBase(
+  tx: Tx,
+  serviceType: JobServiceType,
+  vehicleClass: VehicleClass,
+): Promise<number | null> {
+  const code = SERVICE_TYPE_CATALOG_CODE[serviceType];
+  if (!code) return null;
+  const catalogRow = await tx.query.serviceCatalog.findFirst({
+    where: and(eq(serviceCatalog.code, code), isNull(serviceCatalog.deletedAt)),
+  });
+  if (!catalogRow) return null;
+
+  const applicable = (catalogRow.applicableVehicleClasses as string[]) ?? [];
+  const lookupClass: string = applicable.length === 0 ? SERVICE_RATE_ANY_CLASS : vehicleClass;
+
+  // If the requested vehicleClass isn't even applicable to this catalog
+  // entry, there's no Master Rate Sheet answer — fall back.
+  if (applicable.length > 0 && !applicable.includes(vehicleClass)) {
+    return null;
+  }
+
+  const rateRow = await tx.query.serviceRates.findFirst({
+    where: and(
+      eq(serviceRates.serviceId, catalogRow.id),
+      eq(serviceRates.vehicleClass, lookupClass),
+    ),
+  });
+  if (!rateRow) return null;
+  return Number(rateRow.priceCents);
 }
 
 function haversineMiles(

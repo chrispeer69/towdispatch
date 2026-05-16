@@ -236,7 +236,20 @@ export function ServiceCatalogClient({
                     {list.length}
                   </span>
                 </header>
-                <table className="w-full text-sm" data-testid="service-catalog-table">
+                <table className="w-full table-fixed text-sm" data-testid="service-catalog-table">
+                  <colgroup>
+                    {/* Fixed-width <colgroup> so every category section
+                        aligns column-for-column — fixes the Build 1 width
+                        drift caused by per-section auto-layout. */}
+                    <col className="w-[14%]" />
+                    <col className="w-[22%]" />
+                    <col className="w-[14%]" />
+                    <col className="w-[20%]" />
+                    <col className="w-[7%]" />
+                    <col className="w-[8%]" />
+                    <col className="w-[6%]" />
+                    <col className="w-[9%]" />
+                  </colgroup>
                   <thead className="border-b border-divider text-left text-text-secondary-on-dark/60">
                     <tr>
                       <Th>Code</Th>
@@ -309,12 +322,12 @@ export function ServiceCatalogClient({
                             {r.isActive ? 'yes' : 'no'}
                           </span>
                         </Td>
-                        <Td className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <Td className="px-2 text-right">
+                          <div className="flex flex-wrap justify-end gap-1.5">
                             <button
                               type="button"
                               onClick={() => setEditing({ mode: 'edit', entry: r })}
-                              className="rounded-[6px] border border-divider px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark hover:border-divider-strong hover:text-text-primary-on-dark"
+                              className="rounded-[6px] border border-divider px-1.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-text-secondary-on-dark hover:border-divider-strong hover:text-text-primary-on-dark"
                               disabled={busy}
                             >
                               Edit
@@ -323,7 +336,7 @@ export function ServiceCatalogClient({
                               <button
                                 type="button"
                                 onClick={() => handleDeactivate(r)}
-                                className="rounded-[6px] border border-danger/30 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-danger hover:bg-danger/10"
+                                className="whitespace-nowrap rounded-[6px] border border-danger/30 px-1.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-danger hover:bg-danger/10"
                                 disabled={busy}
                               >
                                 Deactivate

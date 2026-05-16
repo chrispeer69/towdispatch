@@ -190,6 +190,10 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM customers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM accounts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM rate_sheets WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          // service_rates first — FK to service_catalog with ON DELETE CASCADE
+          // would handle it, but listing it explicitly keeps the order
+          // intentional and parallel to the rest of the cleanup.
+          await c.query('DELETE FROM service_rates WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM service_catalog WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
