@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { fetchAccounts } from '@/lib/api/resources';
-import { ACCESS_COOKIE } from '@/lib/auth/cookies';
-import { cookies } from 'next/headers';
+import { getSessionToken } from '@/lib/auth/session';
 import Link from 'next/link';
 import { AccountListClient } from './account-list-client';
 
@@ -28,9 +27,8 @@ export default async function AccountsPage({
   const params = await searchParams;
   const isMotorClub = params.isMotorClub ?? (params.type === 'motor_club' ? 'true' : undefined);
 
-  // Session 9.8 fix: read token at the page render site and thread through.
-  // See BUILD_DECISIONS.md Session 9.7.
-  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+  // Combine Session 9.7 cached layout read with Session 9.8 token threading.
+  const token = await getSessionToken();
   const initial = await fetchAccounts({
     q: params.q,
     active: params.active,

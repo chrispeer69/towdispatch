@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { fetchDrivers } from '@/lib/api/fleet';
-import { ACCESS_COOKIE } from '@/lib/auth/cookies';
+import { getSessionToken } from '@/lib/auth/session';
 import type { PaginatedDrivers } from '@ustowdispatch/shared';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
 
@@ -22,9 +21,8 @@ export default async function DriversPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  // Session 9.8 fix: read token at the page render site and thread through.
-  // See BUILD_DECISIONS.md Session 9.7.
-  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+  // Combine Session 9.7 cached layout read with Session 9.8 token threading.
+  const token = await getSessionToken();
   const result = await fetchDrivers({
     q: params.q,
     employmentStatus: params.employmentStatus,

@@ -1,7 +1,6 @@
 import { fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
-import { ACCESS_COOKIE } from '@/lib/auth/cookies';
+import { getSessionToken } from '@/lib/auth/session';
 import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 
 export const metadata = { title: 'Invoices — US Tow DISPATCH' };
@@ -20,9 +19,8 @@ export default async function InvoicesPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  // Session 9.8 fix: read token at the page render site and thread through.
-  // See BUILD_DECISIONS.md Session 9.7.
-  const token = (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+  // Combine Session 9.7 cached layout read with Session 9.8 token threading.
+  const token = await getSessionToken();
   const list = await fetchInvoices({
     status: params.status,
     search: params.search,
