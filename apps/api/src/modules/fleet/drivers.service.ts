@@ -121,6 +121,10 @@ export class FleetDriversService {
             employmentStatus: input.employmentStatus,
             assignedYardId: input.assignedYardId ?? null,
             commissionRuleId: input.commissionRuleId ?? null,
+            defaultCommissionPct:
+              input.defaultCommissionPct === undefined
+                ? null
+                : input.defaultCommissionPct.toFixed(2),
             notes: input.notes ?? null,
             active: input.employmentStatus === 'active',
             createdBy: ctx.userId,
@@ -149,6 +153,11 @@ export class FleetDriversService {
         for (const k of Object.keys(input) as Array<keyof UpdateDriverPayload>) {
           const v = input[k];
           if (v === undefined) continue;
+          if (k === 'defaultCommissionPct') {
+            // numeric(5,2) — drizzle expects a string for numeric columns.
+            patch.defaultCommissionPct = v === null ? null : (v as number).toFixed(2);
+            continue;
+          }
           // biome-ignore lint/suspicious/noExplicitAny: dynamic patch dispatch — schema-constrained at the Zod boundary
           (patch as any)[k] = v;
         }
@@ -230,6 +239,7 @@ export function toDriverDto(d: typeof drivers.$inferSelect): DriverDto {
     employmentStatus: d.employmentStatus,
     assignedYardId: d.assignedYardId,
     commissionRuleId: d.commissionRuleId,
+    defaultCommissionPct: d.defaultCommissionPct === null ? null : Number(d.defaultCommissionPct),
     notes: d.notes,
     active: d.active,
     createdAt: d.createdAt.toISOString(),
