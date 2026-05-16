@@ -25,6 +25,40 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * Anti-flash script. Runs synchronously in <head> BEFORE React hydrates
+ * so the .dark class is on <html> on the very first paint — eliminates
+ * the white→dark flash users would otherwise see on dark-preferring
+ * systems. Logic mirrors next-themes' own resolution order:
+ *   1. localStorage 'theme' if set ('light' | 'dark' | 'system')
+ *   2. prefers-color-scheme: dark
+ *   3. fall back to 'dark' (matches our previous default)
+ * Wrapped in try/catch because storage access throws in some private-
+ * browsing modes and we must never let theme detection crash the page.
+ */
+const THEME_INIT_SCRIPT = `
+(function () {
+  try {
+    var stored = localStorage.getItem('theme');
+    var resolved;
+    if (stored === 'light' || stored === 'dark') {
+      resolved = stored;
+    } else if (stored === 'system' || !stored) {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    if (resolved === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    document.documentElement.style.colorScheme = resolved;
+  } catch (e) {
+    document.documentElement.classList.add('dark');
+    document.documentElement.style.colorScheme = 'dark';
+  }
+})();
+`.trim();
+
 export default function RootLayout({
   children,
 }: {
@@ -32,7 +66,11 @@ export default function RootLayout({
 }): JSX.Element {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className="bg-bg-base text-text-primary-on-dark antialiased">
+      <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: anti-flash script intentionally inlined */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="bg-background text-foreground antialiased">
         <ThemeProvider>
           {/* Skip link — first focusable element on every page so keyboard
               users can bypass the sidebar/topbar and jump straight to
