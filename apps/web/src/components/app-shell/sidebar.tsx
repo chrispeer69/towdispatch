@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 /**
  * 240px-wide left sidebar. Pulls the active path from `usePathname()` so the
- * matching pill highlights when on that route. The only remaining disabled
- * item is Email Settings — no settings UI exists yet.
+ * matching pill highlights when on that route. Email Settings points at the
+ * Notifications tab inside /settings, which is the canonical home for the
+ * email + notifications surface (read-only inventory today; per-tenant
+ * config is follow-up work).
  *
  * Per-item accentColor: ECOSYSTEM tabs (CONVINI, FleetCommand, FleetGuard Pro)
  * each get a brand color used for the icon at all times, the text + 3px
@@ -154,7 +156,12 @@ const SECTIONS: NavSection[] = [
         icon: ShieldCheck,
         match: (p, sp) => p === '/accounts' && sp.get('type') === 'motor_club',
       },
-      { label: 'Email Settings', href: null, icon: Mail, disabled: true },
+      {
+        label: 'Email Settings',
+        href: '/settings/notifications',
+        icon: Mail,
+        match: (p) => p.startsWith('/settings/notifications'),
+      },
     ],
   },
   {
