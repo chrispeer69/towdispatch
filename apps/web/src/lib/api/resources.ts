@@ -11,6 +11,7 @@ import type {
   PaginatedAccounts,
   PaginatedCustomers,
   PaginatedVehicles,
+  ServiceCatalogEntryDto,
   VehicleDto,
   VehicleWithCustomersDto,
 } from '@ustowdispatch/shared';
@@ -56,7 +57,17 @@ export async function fetchAccount(id: string): Promise<AccountDto> {
   return apiServer<AccountDto>(`/accounts/${id}`);
 }
 
-export type { CustomerDto, VehicleDto, AccountDto };
+export async function fetchServiceCatalog(
+  query: Record<string, string | undefined>,
+  accessToken?: string | null,
+): Promise<ServiceCatalogEntryDto[]> {
+  const qs = toQuery(query);
+  return apiServer<ServiceCatalogEntryDto[]>(`/service-catalog${qs}`, {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export type { CustomerDto, VehicleDto, AccountDto, ServiceCatalogEntryDto };
 
 function toQuery(q: Record<string, string | undefined>): string {
   const entries = Object.entries(q).filter(([, v]) => v !== undefined && v !== '');
