@@ -1,10 +1,14 @@
 import { fetchRecurringSchedules, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
+import { getSessionToken } from '@/lib/auth/session';
 
-export const metadata = { title: 'Recurring billing â€” US Tow DISPATCH' };
+export const metadata = { title: 'Recurring billing — US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
 export default async function RecurringPage(): Promise<JSX.Element> {
-  const result = await tryFetch(() => fetchRecurringSchedules());
+  // Session 9.8 token threading — see /billing/aging/page.tsx for why.
+  const token = await getSessionToken();
+  const result = await tryFetch(() => fetchRecurringSchedules(token));
   const schedules = result.data ?? [];
   return (
     <div className="space-y-4">

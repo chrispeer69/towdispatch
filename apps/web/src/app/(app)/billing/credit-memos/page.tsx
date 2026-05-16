@@ -1,10 +1,14 @@
 import { fetchCreditMemos, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
+import { getSessionToken } from '@/lib/auth/session';
 
-export const metadata = { title: 'Credit memos â€” US Tow DISPATCH' };
+export const metadata = { title: 'Credit memos — US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
 export default async function CreditMemosPage(): Promise<JSX.Element> {
-  const result = await tryFetch(() => fetchCreditMemos());
+  // Session 9.8 token threading — see /billing/aging/page.tsx for why.
+  const token = await getSessionToken();
+  const result = await tryFetch(() => fetchCreditMemos(token));
   const memos = result.data ?? [];
   return (
     <div className="space-y-4">

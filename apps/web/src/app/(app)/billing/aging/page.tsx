@@ -1,8 +1,10 @@
 import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
+import { getSessionToken } from '@/lib/auth/session';
 import type { AgingResponse } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'A/R aging â€” US Tow DISPATCH' };
+export const metadata = { title: 'A/R aging — US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
 function emptyAging(): AgingResponse {
   return {
@@ -21,7 +23,14 @@ function emptyAging(): AgingResponse {
 }
 
 export default async function AgingPage(): Promise<JSX.Element> {
-  const result = await tryFetch(() => fetchAging({}));
+  // Session 9.8 — read cookies at the page level (where Next.js 15
+  // guarantees the AsyncLocalStorage request scope) and pass the token
+  // explicitly through the fetcher. Without this the cookie scope is
+  // lost across the typed-fetcher module hop in production builds, the
+  // API answers 401, and tryFetch swallows it into emptyAging — the
+  // page rendered but showed permanent zeros.
+  const token = await getSessionToken();
+  const result = await tryFetch(() => fetchAging({}, token));
   const aging = result.data ?? emptyAging();
   return (
     <div className="space-y-4">
@@ -69,7 +78,7 @@ export default async function AgingPage(): Promise<JSX.Element> {
           <tbody className="divide-y divide-divider">
             {aging.rows.map((r) => (
               <tr key={`${r.accountId ?? r.customerId ?? 'unk'}`}>
-                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? 'â€”'}</td>
+                <td className="px-4 py-2">{r.accountName ?? r.customerName ?? '—'}</td>
                 <td className="px-4 py-2 text-right font-mono">
                   {formatMoneyCents(r.currentDueCents)}
                 </td>
