@@ -190,6 +190,9 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM customers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM accounts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM rate_sheets WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM service_catalog WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           await c.query(
             `DELETE FROM email_verification_tokens
              WHERE user_id IN (SELECT id FROM users WHERE email = ANY($1::text[]))`,
