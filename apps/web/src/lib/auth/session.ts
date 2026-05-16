@@ -63,6 +63,13 @@ import { ACCESS_COOKIE } from './cookies';
  * and expose the bearer to client JS, defeating the httpOnly posture.
  */
 export const getSessionToken = cache(async (): Promise<string | null> => {
+  const cookieHeader = (await headers()).get('cookie') ?? '';
+  const tokenFromHeader =
+    cookieHeader
+      .split(/;\s*/)
+      .find((c) => c.startsWith(`${ACCESS_COOKIE}=`))
+      ?.slice(ACCESS_COOKIE.length + 1) ?? null;
+  if (tokenFromHeader) return tokenFromHeader;
   return (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
 });
 
