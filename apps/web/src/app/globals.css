@@ -7,31 +7,35 @@
  *
  * The token surface is layered. From top to bottom:
  *
- *  1. NEW role-named brand tokens (--brand-*, --status-*). Stable
- *     across themes — orange-free, TowGrade-aligned royal blue brand.
- *     These never flip.
+ *  1. Brand + status (--brand-*, --status-*). Stable across themes —
+ *     royal blue brand (TowGrade-aligned). These never flip.
  *
- *  2. NEW role-named surface + text tokens for the existing dark
- *     stack (--bg-*, --text-*-on-dark, --text-*-on-light, --bg-divider).
- *     Values are dark-baked by design: every utility that uses these
- *     names (bg-bg-base, text-text-primary-on-dark, …) assumes a
- *     dark background. Renaming those utilities to be theme-neutral
- *     is the follow-up sweep documented in docs/theming.md.
+ *  2. Role tokens for the dispatcher UI surface stack
+ *     (--bg-base, --bg-surface, --bg-surface-elevated, --bg-divider*,
+ *     --text-primary-on-dark, --text-secondary-on-dark). The 600+
+ *     utility usages of `bg-bg-base`, `text-text-primary-on-dark`,
+ *     `border-divider`, etc. all read these. They FLIP per theme:
+ *     :root holds the LIGHT values; .dark restores the dark values.
+ *
+ *     The `-on-dark` suffix in --text-primary-on-dark is historical —
+ *     these classes were named when the app was dark-only, when the
+ *     intent was "primary text colour for use ON a dark background."
+ *     The semantic in this two-theme world is just "primary text
+ *     colour"; the value flips so the colour stays readable against
+ *     whichever theme is active. A rename to drop the suffix is a
+ *     follow-up; the value flip below makes the existing class names
+ *     work correctly in both themes today.
  *
  *  3. shadcn-named semantic tokens (--background, --foreground,
- *     --card, --primary, --ring, …). These DO flip between themes:
- *     :root holds the LIGHT values; .dark overrides with DARK values.
- *     New shadcn primitives (DropdownMenu, Dialog, etc.) consume only
- *     this layer and will render correctly in both themes today.
+ *     --card, --primary, --ring, …). Flip per theme. New shadcn
+ *     primitives consume these.
  *
- *  4. LEGACY hue-named tokens (--orange, --steel, --text-*). Preserved
- *     verbatim so older components still rendering the prior palette
- *     keep compiling. The dark-mode adjustments in .dark are the
- *     pre-existing values from the previous globals.css.
+ *  4. Legacy hue-named tokens (--orange, --steel, --text-*). Preserved
+ *     verbatim for older components.
  *
  * HSL channels (no `hsl()` wrapper) so Tailwind's
  * `hsl(var(--token) / <alpha-value>)` arithmetic produces working
- * `/30` alpha utilities. Do not wrap the channels in `hsl()` here.
+ * `/30` alpha utilities.
  */
 
 :root {
@@ -39,7 +43,7 @@
      1. Brand + status. Stable across themes.
      ───────────────────────────────────────────────────────────────── */
   --brand-primary: 217 76% 44%; /* #1A56C4 royal blue (TowGrade) */
-  --brand-primary-hover: 217 76% 39%; /* #174DB0 10% darker */
+  --brand-primary-hover: 217 76% 39%; /* #174DB0 */
   --brand-primary-text: 0 0% 100%; /* #FFFFFF */
 
   --status-success: 160 84% 39%; /* #10B981 */
@@ -47,47 +51,55 @@
   --status-danger: 0 84% 60%; /* #EF4444 */
 
   /* ─────────────────────────────────────────────────────────────────
-     2. Dark-stack role tokens. Values are dark-baked — utilities like
-        bg-bg-base and text-text-primary-on-dark are still expected to
-        render the dark anchor regardless of theme.
+     2. Dispatcher surface stack — LIGHT values.
+        The 600+ utility usages (`bg-bg-base`, `text-text-primary-
+        on-dark`, `border-divider`) read these. .dark below restores
+        the dark anchor.
+
+        Visual hierarchy in light mode:
+          --bg-base               #F8FAFC  page background (pale slate)
+          --bg-surface            #FFFFFF  sidebar / topbar / cards
+          --bg-surface-elevated   #F1F5F9  hover / inline accents
+          --bg-divider            #E2E8F0  borders / dividers
+          --bg-divider-strong     #CBD5E1  divider hover
+          --text-primary-on-dark  #0F172A  headings / primary text
+          --text-secondary-on-dark #64748B muted body text
      ───────────────────────────────────────────────────────────────── */
-  --bg-base: 222 25% 7%; /* #0E1117 */
-  --bg-surface: 224 26% 15%; /* #1C2333 */
-  --bg-surface-elevated: 225 21% 23%;
-  --bg-marketing: 0 0% 100%;
-  --bg-section: 210 40% 98%;
+  --bg-base: 210 40% 98%; /* #F8FAFC */
+  --bg-surface: 0 0% 100%; /* #FFFFFF */
+  --bg-surface-elevated: 210 40% 96%; /* #F1F5F9 */
+  --bg-marketing: 0 0% 100%; /* #FFFFFF — fixed-light, unchanged */
+  --bg-section: 210 40% 98%; /* #F8FAFC — fixed-light, unchanged */
 
-  --bg-divider: 225 21% 29%;
-  --bg-divider-strong: 225 21% 37%;
+  --bg-divider: 214 32% 91%; /* #E2E8F0 */
+  --bg-divider-strong: 215 25% 80%; /* #CBD5E1 */
 
-  --text-primary-on-dark: 210 40% 96%; /* #F1F5F9 */
-  --text-secondary-on-dark: 215 20% 65%; /* #94A3B8 */
-  --text-primary-on-light: 222 47% 11%; /* #0F172A */
-  --text-secondary-on-light: 215 25% 27%; /* #475569 */
+  --text-primary-on-dark: 222 47% 11%; /* #0F172A */
+  --text-secondary-on-dark: 215 16% 47%; /* #64748B */
+  --text-primary-on-light: 222 47% 11%; /* #0F172A — fixed-light, dark text */
+  --text-secondary-on-light: 215 25% 27%; /* #475569 — fixed-light, slate text */
 
   /* ─────────────────────────────────────────────────────────────────
      3. shadcn semantic tokens — LIGHT theme values.
-        These are the tokens new components should consume. They flip
-        under .dark below.
      ───────────────────────────────────────────────────────────────── */
-  --background: 0 0% 100%; /* #FFFFFF */
-  --foreground: 222 47% 11%; /* #0F172A */
-  --card: 0 0% 100%; /* #FFFFFF */
-  --card-foreground: 222 47% 11%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --background: var(--bg-base); /* page bg */
+  --foreground: var(--text-primary-on-dark); /* primary text */
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary-on-dark);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary-on-dark);
   --primary: var(--brand-primary);
   --primary-foreground: var(--brand-primary-text);
-  --secondary: 210 40% 96%; /* #F1F5F9 */
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%; /* #64748B */
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --secondary: var(--bg-surface-elevated);
+  --secondary-foreground: var(--text-primary-on-dark);
+  --muted: var(--bg-surface-elevated);
+  --muted-foreground: var(--text-secondary-on-dark);
+  --accent: var(--bg-surface-elevated);
+  --accent-foreground: var(--text-primary-on-dark);
   --destructive: var(--status-danger);
   --destructive-foreground: 0 0% 100%;
-  --border: 214 32% 91%; /* #E2E8F0 */
-  --input: 214 32% 91%;
+  --border: var(--bg-divider);
+  --input: var(--bg-divider);
   --ring: var(--brand-primary);
 
   /* ─────────────────────────────────────────────────────────────────
@@ -123,29 +135,30 @@
 }
 
 .dark {
-  /* shadcn semantic tokens flip to DARK values. The dark surface stack
-     anchors on --bg-base / --bg-surface so the new shadcn primitives
-     visually sit on top of the existing dispatcher dark UI. */
-  --background: var(--bg-base);
-  --foreground: var(--text-primary-on-dark);
-  --card: var(--bg-surface);
-  --card-foreground: var(--text-primary-on-dark);
-  --popover: var(--bg-surface);
-  --popover-foreground: var(--text-primary-on-dark);
-  --secondary: var(--bg-surface);
-  --secondary-foreground: var(--text-primary-on-dark);
-  --muted: var(--bg-surface);
-  --muted-foreground: var(--text-secondary-on-dark);
-  --accent: var(--bg-surface-elevated);
-  --accent-foreground: var(--text-primary-on-dark);
-  --border: 224 26% 22%;
-  --input: 224 26% 22%;
-  /* --primary / --primary-foreground / --ring / --destructive don't
-     flip — they're the stable brand + status from the top of :root. */
+  /* ─────────────────────────────────────────────────────────────────
+     Dispatcher surface stack — DARK values. Restores the original
+     dark anchor that the dispatcher UI was designed against.
+     ───────────────────────────────────────────────────────────────── */
+  --bg-base: 222 25% 7%; /* #0E1117 */
+  --bg-surface: 224 26% 15%; /* #1C2333 */
+  --bg-surface-elevated: 225 21% 23%;
+  --bg-divider: 225 21% 29%;
+  --bg-divider-strong: 225 21% 37%;
+
+  --text-primary-on-dark: 210 40% 96%; /* #F1F5F9 */
+  --text-secondary-on-dark: 215 20% 65%; /* #94A3B8 */
+
+  /* shadcn semantic tokens follow the dark stack via the var()
+     references in :root — no explicit re-declaration needed for
+     --background / --foreground / --card / --popover / --secondary /
+     --muted / --accent / --border / --input since they're already
+     `var(--bg-*)` / `var(--text-*-on-dark)` references that pick up
+     the dark values automatically above. The shadcn dark theme is
+     the dispatcher dark theme. */
 
   /* Legacy steel/text adjustments — preserved verbatim from the
-     pre-rewire globals.css so older components keep rendering as they
-     did before this PR. */
+     pre-rewire globals.css so older components keep rendering as
+     they did before. */
   --steel: 225 24% 13%;
   --steel-mid: 225 21% 18%;
   --steel-light: 225 21% 23%;

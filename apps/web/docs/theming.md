@@ -1,10 +1,9 @@
 # Theming — light, dark, and system
 
 This document covers the theme system in `apps/web`: tokens, the toggle
-component, and the known gap between the foundation (which works in
-both themes today) and the existing UI (most of which still bakes the
-dark anchor into class names like `text-text-primary-on-dark` and
-`bg-bg-base`).
+component, and the per-theme value flips that make the existing
+class names (`bg-bg-base`, `text-text-primary-on-dark`, `border-divider`,
+…) render correctly in both themes today.
 
 ## TL;DR
 
@@ -18,11 +17,15 @@ dark anchor into class names like `text-text-primary-on-dark` and
 - Tailwind utilities backed by shadcn-style tokens (`bg-background`,
   `text-foreground`, `bg-card`, `border-border`, `bg-primary`, …) flip
   correctly under `.dark`. New components should consume these.
-- Most of the existing dispatcher UI is wired to dark-anchored tokens
-  (`bg-bg-base`, `text-text-primary-on-dark`, `border-divider`). These
-  do **not** flip and will continue to render the dark stack regardless
-  of theme. Renaming them is the follow-up sweep described in
-  [Known gaps](#known-gaps).
+- **The dispatcher role tokens (`--bg-base`, `--bg-surface`, …,
+  `--text-primary-on-dark`, `--text-secondary-on-dark`,
+  `--bg-divider*`) also flip per theme.** `:root` holds the light
+  values; `.dark` restores the original dark values. So existing
+  utility classes (`bg-bg-base`, `text-text-primary-on-dark`,
+  `border-divider`) work in both themes without renaming the 600+
+  call sites. The `-on-dark` suffix in the token name is historical;
+  the value flips to remain readable against whichever theme is
+  active.
 
 ## Token map
 
@@ -70,24 +73,29 @@ components that still import it keep compiling, but the brand utility
 | `--input` | `#E2E8F0` | `#2A334D` |
 | `--ring` | `#1A56C4` | `#1A56C4` (stable) |
 
-### Dark-stack role tokens (do **not** flip)
+### Dispatcher role tokens (flip per theme)
 
-These are the values utilities like `bg-bg-base` and
-`text-text-primary-on-dark` consume. They are baked dark because the
-class names themselves encode the dark assumption (`-on-dark` is
-literally in the name). They are unchanged in `.dark`.
+The 600+ call sites of `bg-bg-base`, `bg-bg-surface`,
+`text-text-primary-on-dark`, `text-text-secondary-on-dark`, and
+`border-divider*` all read these tokens. They flip under `.dark` so
+the existing utility classes render correctly in both themes without
+renaming the call sites. The `-on-dark` suffix is historical and is
+no longer accurate in light mode; the semantic is now "primary /
+secondary text colour for the current theme."
 
-| Token | Value | Hex |
+| Token | `:root` (light) | `.dark` |
 |---|---|---|
-| `--bg-base` | `222 25% 7%` | `#0E1117` |
-| `--bg-surface` | `224 26% 15%` | `#1C2333` |
-| `--bg-surface-elevated` | `225 21% 23%` | (one step lighter) |
-| `--bg-divider` | `225 21% 29%` | divider line |
-| `--bg-divider-strong` | `225 21% 37%` | divider hover |
-| `--text-primary-on-dark` | `210 40% 96%` | `#F1F5F9` |
-| `--text-secondary-on-dark` | `215 20% 65%` | `#94A3B8` |
-| `--text-primary-on-light` | `222 47% 11%` | `#0F172A` |
-| `--text-secondary-on-light` | `215 25% 27%` | `#475569` |
+| `--bg-base` | `#F8FAFC` (`210 40% 98%`) page background | `#0E1117` (`222 25% 7%`) |
+| `--bg-surface` | `#FFFFFF` (`0 0% 100%`) sidebar / topbar / cards | `#1C2333` (`224 26% 15%`) |
+| `--bg-surface-elevated` | `#F1F5F9` (`210 40% 96%`) hover | `225 21% 23%` |
+| `--bg-divider` | `#E2E8F0` (`214 32% 91%`) | `225 21% 29%` |
+| `--bg-divider-strong` | `#CBD5E1` (`215 25% 80%`) | `225 21% 37%` |
+| `--text-primary-on-dark` | `#0F172A` (`222 47% 11%`) | `#F1F5F9` (`210 40% 96%`) |
+| `--text-secondary-on-dark` | `#64748B` (`215 16% 47%`) | `#94A3B8` (`215 20% 65%`) |
+
+`--text-primary-on-light` and `--text-secondary-on-light` stay dark
+text across both themes (they're for fixed-light surfaces — currently
+unused but preserved for the marketing/landing hero).
 
 ### Legacy hue-named tokens (preserved verbatim)
 
@@ -145,76 +153,38 @@ matches the previous app default.
 about the class mismatch between server render and the post-script
 client DOM.
 
-## Known gaps
+## Known carve-outs
 
-The foundation is two-theme-ready, but most of the existing dispatcher
-UI is wired to dark-anchored tokens. Switching to Light today will
-flip the body chrome (`bg-background` → white, `text-foreground` →
-near-black) and any new shadcn primitives — but it will not flip
-existing cards, sidebars, or topbars that explicitly reference the
-dark stack.
+A small number of surfaces are intentionally not theme-aware — they
+need to look the same regardless of toggle state.
 
-### Files most coupled to the dark anchor
-
-Each of these uses one or more dark-baked token utilities throughout.
-A theme-correct migration requires renaming the class itself (or
-introducing theme-aware aliases that swap based on `.dark`); a value
-change alone is insufficient because the class name encodes the
-assumption.
-
-- `apps/web/src/components/app-shell/sidebar.tsx` — top sidebar:
-  `bg-bg-surface`, `border-divider`, `text-text-primary-on-dark`,
-  `text-text-secondary-on-dark`, `hover:bg-bg-surface-elevated`. Carries
-  the pre-existing `text-text-secondary-on-dark-on-dark` typo — left
-  in place; out of scope for this PR.
-- `apps/web/src/components/app-shell/topbar.tsx` — same suffix family.
-  Carries the same typo.
-- `apps/web/src/app/(app)/layout.tsx` — body class
-  `bg-bg-base text-text-primary-on-dark`. Wraps every authenticated
-  route, so until this layout is theme-aware, Light mode leaves the
-  app shell dark even with the toggle switched.
-- Every `(app)/**` page: most use `bg-bg-surface`,
-  `border-divider`, `text-text-primary-on-dark`. Examples — `dispatch`,
-  `intake`, `jobs`, `billing`, `customers`, `accounts`, `fleet`,
-  `accounting`, the new `settings` shell, and the ecosystem
-  placeholders.
 - `apps/web/src/app/track/[token]/track-client.tsx` — public tracking
-  page. Intentionally dark-themed with white-alpha overlays
-  (`bg-white/10`, `bg-white/20`) over a tenant-branded hero. Left as
-  dark-only; the public tracking page is not in scope for the
-  Light/Dark toggle today.
+  page. Dark-themed with white-alpha overlays (`bg-white/10`,
+  `bg-white/20`) over a tenant-branded hero. The page sets its own
+  background colour from the tenant accent and stays dark regardless
+  of the user toggle.
 - `apps/web/src/app/auth/mfa/enroll/enroll-client.tsx` — contains one
   literal `bg-white` for the TOTP QR code background. Intentional —
-  QR scanners require a white background. Leave as-is.
+  QR scanners require a white background.
 
-### Recommended follow-up
+## Backlog
 
-A subsequent PR should:
-
-1. Audit the `(app)` layout and topbar/sidebar. Either:
-   (a) rename the utilities they use to the shadcn-token equivalents
-   (`bg-card`, `text-foreground`, `border-border`), letting them flip
-   per theme; or
-   (b) introduce per-theme aliases that swap under `.dark`.
-2. Fix the `text-text-secondary-on-dark-on-dark` typo at the same
-   time (it currently silently resolves to no color, since the class
-   doesn't exist in the Tailwind config).
-3. Sweep every `(app)/**` page; the rewrite is mechanical (`-on-dark`
-   → drop the suffix, `bg-bg-base` → `bg-background`, etc.) but it is
-   touching many files and warrants its own review.
-
-### Why ship the foundation alone
-
-- The toggle, anti-flash, provider, and token system are independently
-  useful: new components (shadcn primitives, the Settings shell
-  follow-up, anything built fresh) will be theme-correct out of the
-  box.
-- A one-PR rename of the entire `(app)` tree is high-risk without
-  parallel local-dev verification of every page; ships better as a
-  follow-up so each affected surface can be browser-checked.
-- The user explicitly directed the brand color to **stay royal blue**
-  (TowGrade alignment). That decision is locked in here so the
-  follow-up sweep has a stable target.
+1. **`text-text-secondary-on-dark-on-dark` typo** in
+   `apps/web/src/components/app-shell/sidebar.tsx` and
+   `apps/web/src/components/app-shell/topbar.tsx`. The suffix is
+   doubled. The class doesn't exist in the Tailwind config so it
+   silently resolves to no colour. Pre-existing; not fixed here.
+2. **Rename the role tokens** to drop the `-on-dark` suffix. The
+   value flip in `globals.css` makes the existing classes render
+   correctly in both themes, but the name `text-text-primary-on-dark`
+   is now misleading (it's just "primary text"). A find-and-replace
+   sweep can rename to `text-foreground` (shadcn) or
+   `text-text-primary` (dropping the suffix), but it touches ~600
+   call sites and warrants its own PR.
+3. **`. {` malformed selector** in `globals.css` line ~195. Looks
+   like the class name was stripped, leaving a bare dot. Biome flags
+   it on direct CSS parse, but lint-staged scopes only to
+   TS/TSX/JS/JSX/JSON/MD so commits don't fail on it. Pre-existing.
 
 ## Verification
 
