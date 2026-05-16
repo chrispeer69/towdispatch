@@ -23,6 +23,7 @@ import {
   date,
   index,
   jsonb,
+  numeric,
   pgTable,
   text,
   timestamp,
@@ -116,6 +117,14 @@ export const drivers = pgTable(
      * assigned_yard_id: column today, constraint when the table arrives.
      */
     commissionRuleId: uuid('commission_rule_id'),
+
+    /**
+     * Default percentage of an invoice line this driver earns as commission.
+     * Range 0..100 (enforced by a CHECK in 0025). NULL means "no default
+     * set" — dispatcher enters a value manually at invoice review time.
+     * Read by invoice build (4) as the per-line starting value.
+     */
+    defaultCommissionPct: numeric('default_commission_pct', { precision: 5, scale: 2 }),
 
     notes: text('notes'),
 
