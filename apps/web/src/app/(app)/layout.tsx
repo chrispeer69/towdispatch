@@ -35,7 +35,15 @@ export default async function AppLayout({
         <div className="flex min-h-screen flex-1 flex-col">
           <AppTopbar />
           <main id="main-content" className="flex-1 overflow-y-auto bg-bg-base" tabIndex={-1}>
-            <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-10">{children}</div>
+            {/*
+              Content cap widened from max-w-7xl (1280px) to 1472px (≈+2 in
+              at 96dpi) so the dense Services & Pricing table — and every
+              other dense ops list (jobs, customers, billing/*) — stops
+              crushing columns into each other on wide monitors. Bounded by
+              viewport on smaller screens, so no horizontal scroll added on
+              laptops. Revert to `max-w-7xl` if any page looks too sparse.
+            */}
+            <div className="mx-auto w-full max-w-[1472px] px-6 py-8 md:px-10">{children}</div>
           </main>
         </div>
       </div>
