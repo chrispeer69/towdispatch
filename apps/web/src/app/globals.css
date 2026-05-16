@@ -68,7 +68,9 @@
           --bg-divider            #E3DBC9  borders / dividers (warm)
           --bg-divider-strong     #CABF9E  divider hover
           --text-primary-on-dark  #0F172A  headings / primary text
-          --text-secondary-on-dark #64748B muted body text
+          --text-secondary-on-dark #334155 muted body text (darkened
+                                            from #64748B for readability
+                                            on the warm cream bg)
      ───────────────────────────────────────────────────────────────── */
   --bg-base: 40 36% 94%; /* #F2EBDB warm cream — page background */
   --bg-surface: 42 50% 97%; /* #FAF6EC slightly lighter warm white */
@@ -80,7 +82,9 @@
   --bg-divider-strong: 38 18% 74%; /* #BFAF8F darker beige */
 
   --text-primary-on-dark: 222 47% 11%; /* #0F172A */
-  --text-secondary-on-dark: 215 16% 47%; /* #64748B */
+  --text-secondary-on-dark: 215 25% 27%; /* #334155 slate-700 — darker than the
+                                          stock #64748B so muted text stays
+                                          readable against the warm cream bg. */
   --text-primary-on-light: 222 47% 11%; /* #0F172A — fixed-light, dark text */
   --text-secondary-on-light: 215 25% 27%; /* #475569 — fixed-light, slate text */
 
