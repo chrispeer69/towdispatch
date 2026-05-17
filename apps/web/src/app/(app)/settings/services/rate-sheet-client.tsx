@@ -331,7 +331,7 @@ export function RateSheetClient({ catalog, initialRates }: Props): JSX.Element {
                       {unifiedClasses.map((vc) => (
                         <th
                           key={vc}
-                          className="px-3 py-3 text-right font-mono text-[10px] uppercase tracking-[0.18em]"
+                          className="px-3 py-3 text-center font-mono text-[10px] uppercase tracking-[0.18em]"
                         >
                           {CLASS_LABELS[vc as RateVehicleClass]}
                         </th>
@@ -399,7 +399,7 @@ export function RateSheetClient({ catalog, initialRates }: Props): JSX.Element {
                                   return (
                                     <td
                                       key={vc}
-                                      className="px-3 py-3 text-right text-text-secondary-on-dark/30"
+                                      className="px-3 py-3 text-center text-text-secondary-on-dark/30"
                                     >
                                       —
                                     </td>
@@ -467,7 +467,12 @@ function PriceInput({
     })();
 
   return (
-    <div className={cn('flex items-center justify-end gap-1', spanAll ? 'max-w-[200px]' : '')}>
+    <div
+      className={cn(
+        'flex items-center justify-center gap-1',
+        spanAll ? 'max-w-[200px] mx-auto' : '',
+      )}
+    >
       <span className="font-mono text-[11px] text-text-secondary-on-dark/60">$</span>
       <input
         ref={inputRef}
