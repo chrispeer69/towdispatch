@@ -42,9 +42,11 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * with a flash query param the destination renders as a toast.
  */
 import {
+  type Drivetrain,
   type JobAuthorizedBy,
   type JobServiceType,
   type RateQuote,
+  drivetrainValues,
   jobAuthorizedByValues,
   jobServiceTypeValues,
 } from '@ustowdispatch/shared';
@@ -126,6 +128,7 @@ interface FormState {
   model: string;
   color: string;
   vehicleClass: VehicleClassOption['value'];
+  drivetrain: Drivetrain | '';
   specialInstructions: string;
   // job
   serviceType: JobServiceType;
@@ -160,6 +163,7 @@ const EMPTY: FormState = {
   model: '',
   color: '',
   vehicleClass: 'light_duty',
+  drivetrain: '',
   specialInstructions: '',
   serviceType: 'tow',
   pickupAddress: '',
@@ -212,6 +216,15 @@ export function IntakeClient({
   // Live rate quote.
   const [quote, setQuote] = useState<RateQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
+  /**
+   * Dispatcher-edited override. Once set, takes precedence over the live
+   * engine quote — the panel renders this and the intake POST sends it as
+   * customQuote so the persisted job mirrors what the customer agreed to.
+   * Cleared by the Reset link in the panel.
+   */
+  const [customQuote, setCustomQuote] = useState<RateQuote | null>(null);
+  const [quoteEditorOpen, setQuoteEditorOpen] = useState(false);
+  const effectiveQuote = customQuote ?? quote;
 
   // Has the user typed in the VIN / email fields yet? Used to suppress
   // inline error messages until the dispatcher has had a chance to fill in
@@ -448,6 +461,7 @@ export function IntakeClient({
         ...(form.model.trim() ? { model: form.model.trim() } : {}),
         ...(form.color.trim() ? { color: form.color.trim() } : {}),
         vehicleClass: form.vehicleClass,
+        ...(form.drivetrain ? { drivetrain: form.drivetrain } : {}),
         ...(form.specialInstructions.trim()
           ? { specialInstructions: form.specialInstructions.trim() }
           : {}),
@@ -469,6 +483,7 @@ export function IntakeClient({
       ...(form.authorizedByName.trim() ? { authorizedByName: form.authorizedByName.trim() } : {}),
       ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
       ...(form.skipCustomerSms ? { skipCustomerSms: true } : {}),
+      ...(customQuote ? { customQuote } : {}),
     };
 
     try {
@@ -804,20 +819,40 @@ export function IntakeClient({
               </datalist>
             </Field>
           </div>
-          <Field label="Class">
-            <select
-              tabIndex={0}
-              value={form.vehicleClass}
-              onChange={(e) => update('vehicleClass', e.target.value as FormState['vehicleClass'])}
-              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
-            >
-              {VEHICLE_CLASSES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Class">
+              <select
+                tabIndex={0}
+                value={form.vehicleClass}
+                onChange={(e) =>
+                  update('vehicleClass', e.target.value as FormState['vehicleClass'])
+                }
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              >
+                {VEHICLE_CLASSES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Type">
+              <select
+                tabIndex={0}
+                data-testid="intake-drivetrain"
+                value={form.drivetrain}
+                onChange={(e) => update('drivetrain', e.target.value as FormState['drivetrain'])}
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              >
+                <option value="">Select…</option>
+                {drivetrainValues.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
           <Field label="Special instructions">
             <textarea
               tabIndex={0}
@@ -963,7 +998,23 @@ export function IntakeClient({
             </Field>
           </div>
 
-          <RateQuotePanel quote={quote} loading={quoteLoading} />
+          <RateQuotePanel
+            quote={effectiveQuote}
+            loading={quoteLoading}
+            customized={!!customQuote}
+            onOpenEditor={() => setQuoteEditorOpen(true)}
+            onReset={() => setCustomQuote(null)}
+          />
+          {quoteEditorOpen ? (
+            <InvoiceEditorDialog
+              initial={customQuote ?? quote}
+              onCancel={() => setQuoteEditorOpen(false)}
+              onApply={(edited) => {
+                setCustomQuote(edited);
+                setQuoteEditorOpen(false);
+              }}
+            />
+          ) : null}
 
           <Field label="Notes">
             <textarea
@@ -1246,18 +1297,54 @@ function Badge({ children }: { children: React.ReactNode }): JSX.Element {
 function RateQuotePanel({
   quote,
   loading,
+  customized,
+  onOpenEditor,
+  onReset,
 }: {
   quote: RateQuote | null;
   loading: boolean;
+  customized: boolean;
+  /** Open the invoice editor dialog. Disabled while no quote exists. */
+  onOpenEditor: () => void;
+  /** Drop the dispatcher-edited override and fall back to the engine quote. */
+  onReset: () => void;
 }): JSX.Element {
+  const clickable = quote !== null;
   return (
     <div
       data-testid="intake-rate-quote"
-      className="rounded-[12px] border border-divider bg-bg-base/60 p-3"
+      className={cn(
+        'rounded-[12px] border bg-bg-base/60 p-3 transition-colors',
+        customized ? 'border-brand-primary/70 ring-1 ring-brand-primary/30' : 'border-divider',
+        clickable ? 'cursor-pointer hover:border-brand-primary/60 hover:bg-bg-base/80' : '',
+      )}
+      onClick={clickable ? onOpenEditor : undefined}
+      onKeyDown={(e) => {
+        if (!clickable) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpenEditor();
+        }
+      }}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      aria-label={clickable ? 'Open invoice editor' : undefined}
     >
       <div className="flex items-baseline justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
-          Live quote
+        <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+          {customized ? 'Final quote (edited)' : 'Live quote'}
+          {customized ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReset();
+              }}
+              className="rounded bg-brand-primary/15 px-1.5 py-0.5 text-[9px] text-brand-primary hover:bg-brand-primary/25"
+            >
+              Reset
+            </button>
+          ) : null}
         </span>
         <span
           className={cn(
@@ -1287,11 +1374,217 @@ function RateQuotePanel({
         </p>
       )}
       {quote ? (
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
-          Source: {quote.source} · {quote.distanceMiles.toFixed(2)} mi
+        <p className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
+          <span>
+            Source: {quote.source} · {quote.distanceMiles.toFixed(2)} mi
+          </span>
+          <span className="text-brand-primary">Click to edit →</span>
         </p>
       ) : null}
     </div>
+  );
+}
+
+interface EditableLineItem {
+  /** Stable React key (also persisted as code when not blank). */
+  id: string;
+  code: string;
+  label: string;
+  amountCents: number;
+  unit?: string;
+  quantity?: number;
+}
+
+function InvoiceEditorDialog({
+  initial,
+  onApply,
+  onCancel,
+}: {
+  initial: RateQuote | null;
+  onApply: (quote: RateQuote) => void;
+  onCancel: () => void;
+}): JSX.Element {
+  const dialogRef = React.useRef<HTMLDialogElement | null>(null);
+  React.useEffect(() => {
+    const d = dialogRef.current;
+    if (d && !d.open) d.showModal();
+  }, []);
+
+  const [rows, setRows] = useState<EditableLineItem[]>(() => {
+    if (!initial) return [];
+    return initial.lineItems.map((li, i) => ({
+      id: `${li.code}-${i}`,
+      code: li.code,
+      label: li.label,
+      amountCents: li.amountCents,
+      ...(li.unit !== undefined ? { unit: li.unit } : {}),
+      ...(li.quantity !== undefined ? { quantity: li.quantity } : {}),
+    }));
+  });
+
+  const subtotalCents = rows.reduce(
+    (sum, r) => sum + (Number.isFinite(r.amountCents) ? r.amountCents : 0),
+    0,
+  );
+
+  function updateRow(id: string, patch: Partial<EditableLineItem>): void {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }
+  function removeRow(id: string): void {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+  }
+  function addRow(): void {
+    const id = `custom-${Date.now()}`;
+    setRows((prev) => [...prev, { id, code: id, label: '', amountCents: 0 }]);
+  }
+
+  function apply(): void {
+    if (!initial) return;
+    const lineItems = rows
+      .filter((r) => r.label.trim().length > 0)
+      .map((r) => ({
+        code: r.code.trim() || r.id,
+        label: r.label.trim(),
+        amountCents: Math.round(r.amountCents),
+        ...(r.unit !== undefined ? { unit: r.unit } : {}),
+        ...(r.quantity !== undefined ? { quantity: r.quantity } : {}),
+      }));
+    const subtotal = lineItems.reduce((sum, li) => sum + li.amountCents, 0);
+    const out: RateQuote = {
+      ...initial,
+      lineItems,
+      subtotalCents: subtotal,
+      totalCents: subtotal,
+      calculationTrace: [
+        ...(initial.calculationTrace ?? []),
+        `Dispatcher edited quote on intake; ${rows.length} line item(s).`,
+      ],
+    };
+    onApply(out);
+  }
+
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="invoice-editor-title"
+      onClose={onCancel}
+      className="w-full max-w-2xl rounded-[14px] border border-divider bg-bg-surface p-0 text-text-primary-on-dark shadow-xl backdrop:bg-bg-base/60 backdrop:backdrop-blur"
+    >
+      <div className="p-5">
+        <header className="flex items-start justify-between">
+          <div>
+            <h2
+              id="invoice-editor-title"
+              className="font-condensed text-lg font-extrabold uppercase"
+            >
+              Edit quote
+            </h2>
+            <p className="mt-1 text-xs text-text-secondary-on-dark">
+              Adjust line items, then apply. The customized total ships with this job and is what
+              you'll quote the customer.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Close"
+            className="rounded-md p-1 text-text-secondary-on-dark hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
+          >
+            ✕
+          </button>
+        </header>
+
+        <div className="mt-4 overflow-hidden rounded-[10px] border border-divider">
+          <table className="w-full text-sm">
+            <thead className="bg-bg-surface/60 text-left">
+              <tr className="text-[10px] uppercase tracking-wider text-text-secondary-on-dark">
+                <th className="px-3 py-2">Label</th>
+                <th className="px-3 py-2 text-right">Amount</th>
+                <th className="w-10 px-2 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-divider">
+              {rows.map((r) => (
+                <tr key={r.id}>
+                  <td className="px-3 py-2">
+                    <Input
+                      value={r.label}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        updateRow(r.id, { label: e.target.value })
+                      }
+                      placeholder="Service or fee"
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <Input
+                      value={(r.amountCents / 100).toFixed(2)}
+                      inputMode="decimal"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        const n = Number.parseFloat(e.target.value);
+                        const cents = Number.isFinite(n) ? Math.round(n * 100) : 0;
+                        updateRow(r.id, { amountCents: cents });
+                      }}
+                      className="text-right font-mono"
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <button
+                      type="button"
+                      onClick={() => removeRow(r.id)}
+                      aria-label={`Remove ${r.label || 'row'}`}
+                      className="rounded-md p-1 text-danger transition-colors hover:bg-danger/10"
+                    >
+                      ✕
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="px-3 py-6 text-center text-xs text-text-secondary-on-dark"
+                  >
+                    No line items. Click <strong>Add line</strong> below.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={addRow}
+            className="rounded-md border border-divider px-3 py-1.5 text-xs font-semibold uppercase tracking-wider hover:bg-bg-surface-elevated"
+          >
+            + Add line
+          </button>
+          <div className="text-right">
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark">
+              Total
+            </p>
+            <p className="font-condensed text-2xl font-extrabold text-brand-primary">
+              {formatCents(subtotalCents)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark hover:text-text-primary-on-dark"
+          >
+            Cancel
+          </button>
+          <Button type="button" onClick={apply} disabled={!initial}>
+            Apply as final quote
+          </Button>
+        </div>
+      </div>
+    </dialog>
   );
 }
 

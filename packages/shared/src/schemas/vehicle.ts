@@ -16,7 +16,11 @@ export const vehicleClassValues = [
 ] as const;
 export type VehicleClass = (typeof vehicleClassValues)[number];
 
-export const drivetrainValues = ['FWD', 'RWD', 'AWD', '4WD', 'unknown'] as const;
+// Operator-facing drivetrain choices. EV and Hybrid are powertrain
+// categories that share this select for dispatcher ergonomics — they have
+// real handling implications (battery position, tow-mode requirements)
+// that overlap with what a tow driver cares about from drivetrain.
+export const drivetrainValues = ['2WD', '4WD', 'RWD', 'AWD', 'EV', 'Hybrid'] as const;
 export type Drivetrain = (typeof drivetrainValues)[number];
 
 export const vinSchema = z
@@ -42,7 +46,7 @@ export const vehicleSchema = z.object({
   color: z.string().max(60).nullable(),
   bodyClass: z.string().max(120).nullable(),
   vehicleClass: z.enum(vehicleClassValues),
-  drivetrain: z.enum(drivetrainValues),
+  drivetrain: z.enum(drivetrainValues).nullable(),
   isElectric: z.boolean(),
   isLowClearance: z.boolean(),
   specialInstructions: z.string().max(2000).nullable(),
@@ -89,7 +93,7 @@ export const createVehicleSchema = z
     color: z.string().max(60).optional(),
     bodyClass: z.string().max(120).optional(),
     vehicleClass: z.enum(vehicleClassValues).default('unknown'),
-    drivetrain: z.enum(drivetrainValues).default('unknown'),
+    drivetrain: z.enum(drivetrainValues).optional(),
     isElectric: z.boolean().optional(),
     isLowClearance: z.boolean().optional(),
     specialInstructions: z.string().max(2000).optional(),
@@ -123,7 +127,7 @@ export const updateVehicleSchema = z
     color: z.string().max(60).nullable().optional(),
     bodyClass: z.string().max(120).nullable().optional(),
     vehicleClass: z.enum(vehicleClassValues).optional(),
-    drivetrain: z.enum(drivetrainValues).optional(),
+    drivetrain: z.enum(drivetrainValues).nullable().optional(),
     isElectric: z.boolean().optional(),
     isLowClearance: z.boolean().optional(),
     specialInstructions: z.string().max(2000).nullable().optional(),

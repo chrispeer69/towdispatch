@@ -41,12 +41,12 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
           model: initial.model ?? undefined,
           color: initial.color ?? undefined,
           vehicleClass: initial.vehicleClass,
-          drivetrain: initial.drivetrain,
+          drivetrain: initial.drivetrain ?? undefined,
           isElectric: initial.isElectric,
           isLowClearance: initial.isLowClearance,
           specialInstructions: initial.specialInstructions ?? undefined,
         }
-      : { vehicleClass: 'unknown', drivetrain: 'unknown' },
+      : { vehicleClass: 'unknown' },
   });
 
   async function onSubmit(values: CreateVehiclePayload): Promise<void> {
@@ -154,6 +154,7 @@ export function VehicleForm({ mode, initial }: Props): JSX.Element {
               {...register('drivetrain')}
               className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
             >
+              <option value="">—</option>
               {drivetrainValues.map((v) => (
                 <option key={v} value={v}>
                   {v}

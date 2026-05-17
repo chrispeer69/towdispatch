@@ -38,7 +38,12 @@ export const vehicleClassValues = [
 ] as const;
 export type VehicleClass = (typeof vehicleClassValues)[number];
 
-export const drivetrainValues = ['FWD', 'RWD', 'AWD', '4WD', 'unknown'] as const;
+// Operator-facing drivetrain options. Migration 0027 rewrites the column
+// to allow these values (or NULL) — the older FWD / unknown values are
+// remapped at upgrade time. EV / Hybrid are powertrain categories that
+// dispatchers asked for alongside the drivetrain choices; conflating them
+// is a deliberate UX simplification.
+export const drivetrainValues = ['2WD', '4WD', 'RWD', 'AWD', 'EV', 'Hybrid'] as const;
 export type Drivetrain = (typeof drivetrainValues)[number];
 
 export const vehicles = pgTable(
@@ -62,7 +67,7 @@ export const vehicles = pgTable(
     bodyClass: text('body_class'),
     vehicleClass: text('vehicle_class', { enum: vehicleClassValues }).notNull().default('unknown'),
 
-    drivetrain: text('drivetrain', { enum: drivetrainValues }).notNull().default('unknown'),
+    drivetrain: text('drivetrain', { enum: drivetrainValues }),
     isElectric: boolean('is_electric').notNull().default(false),
     isLowClearance: boolean('is_low_clearance').notNull().default(false),
 

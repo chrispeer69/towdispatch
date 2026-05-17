@@ -245,7 +245,7 @@ const vehiclesForTenant = (slug: string): SeedVehicle[] => {
       model: 'Accord',
       color: 'Silver',
       vehicleClass: 'light_duty',
-      drivetrain: 'FWD',
+      drivetrain: '2WD',
       isElectric: false,
     },
     {
@@ -293,7 +293,7 @@ const vehiclesForTenant = (slug: string): SeedVehicle[] => {
       model: 'Prius',
       color: 'Blue',
       vehicleClass: 'light_duty',
-      drivetrain: 'FWD',
+      drivetrain: '2WD',
       isElectric: false,
     },
     {
