@@ -107,7 +107,7 @@ const SECTIONS: NavSection[] = [
         // keep working. The standalone Drivers entry was removed at the
         // same time — this combined label subsumes it. /fleet/drivers
         // is still reachable by direct URL and via fleet workflows.
-        label: 'TRUCKS/DRIVERS',
+        label: 'Trucks/Drivers',
         href: '/fleet',
         icon: CarFront,
         match: (p) => p.startsWith('/fleet'),
