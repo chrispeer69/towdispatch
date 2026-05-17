@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   Sparkles,
   Truck,
-  Users,
 } from 'lucide-react';
 /**
  * 240px-wide left sidebar. Pulls the active path from `usePathname()` so the
@@ -97,16 +96,15 @@ const SECTIONS: NavSection[] = [
         match: (p) => p.startsWith('/dispatch'),
       },
       {
-        label: 'Fleet',
+        // Renamed from "Fleet" → "TRUCKS/DRIVERS" at user request; the
+        // route stays at /fleet so deep links and the /fleet/* sub-pages
+        // keep working. The standalone Drivers entry was removed at the
+        // same time — this combined label subsumes it. /fleet/drivers
+        // is still reachable by direct URL and via fleet workflows.
+        label: 'TRUCKS/DRIVERS',
         href: '/fleet',
         icon: CarFront,
         match: (p) => p.startsWith('/fleet'),
-      },
-      {
-        label: 'Drivers',
-        href: '/fleet/drivers',
-        icon: Users,
-        match: (p) => p.startsWith('/fleet/drivers'),
       },
     ],
   },
@@ -204,7 +202,23 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   const searchParams = useSearchParams() ?? new URLSearchParams();
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
-      <div className="flex items-center gap-3 border-b border-divider px-5 py-4">
+      {/*
+        Clicking the US Tow DISPATCH wordmark / logo signs the user
+        out and bounces them to the landing page. This is the user's
+        explicit ask — not the conventional "logo = home" gesture.
+        The /logout route handler clears session cookies server-side
+        and then redirects to '/'. Use a plain <a> (not next/link) so
+        the GET request actually hits the route handler instead of
+        being intercepted by client routing. `title` is the
+        discoverability hint on hover; `cursor-pointer` is implicit
+        from the anchor.
+      */}
+      <a
+        href="/logout"
+        title="Sign out"
+        aria-label="Sign out"
+        className="flex items-center gap-3 border-b border-divider px-5 py-4 transition-colors hover:bg-bg-surface-elevated/40"
+      >
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary ">
           <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
             UTD
@@ -216,7 +230,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
           </span>
           <span className="font-extrabold italic uppercase">Dispatch</span>
         </span>
-      </div>
+      </a>
 
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5">
         {SECTIONS.map((section) => (

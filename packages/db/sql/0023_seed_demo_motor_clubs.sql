@@ -14,12 +14,21 @@
 --   r5: bring AAAx BACK visible, with lowercase 'x' (this revision)
 --
 -- The cleanup block below handles every prior state idempotently:
---   - any 'AAAX' (uppercase X) row is renamed to 'AAAx'
---   - any 'AAA' (no suffix) row is renamed to 'AAAx'
---   - any tombstoned 'AAAx' has its deleted_at restored to NULL so the
---     row becomes visible again (keeps row identity / FK references)
+--   - any 'AAAX' (uppercase X) row is soft-deleted — same thing as
+--     AAAx visually; keep lowercase canonical only
+--   - any 'AAA' (no suffix, from r3) row is soft-deleted — also a
+--     duplicate of AAAx
+--   - any tombstoned 'AAAx' has its deleted_at restored to NULL so
+--     the canonical row becomes visible again (keeps row identity
+--     and FK references)
 -- AAAx is also back in the seed VALUES so any tenant that never had
 -- one gets a fresh row.
+--
+-- NOTE on rename vs delete: prior revisions of this migration tried
+-- to UPDATE 'AAAX' → 'AAAx'. That fails the partial unique index
+-- when both an active AAAX AND an active AAAx exist in the same
+-- tenant (the rename would create a duplicate active row). Soft-
+-- delete is the safe equivalent.
 --
 -- Names carry a trailing "x" to mark them as seeded placeholders (vs.
 -- real integrations). Only 'agero' has a wired MotorClubProvider in
@@ -47,29 +56,59 @@
 
 -- ---------- AAA / AAAX / AAAx rename cleanup ----------
 -- Runs BEFORE the seed so the seed's ON CONFLICT skip behaves
--- correctly. Order matters: rename first, then un-soft-delete.
+-- correctly.
 --
--- Step A: collapse any prior variants ('AAA' from r3 / 'AAAX' that
---         a user may have created manually) into the canonical
---         'AAAx' spelling.
+-- IMPORTANT: 'AAAx' (lowercase x) is the canonical name. 'AAAX'
+-- (uppercase X) and 'AAA' (no suffix) are treated as DUPLICATES of
+-- AAAx and removed — they are NOT renamed, because the partial
+-- unique index would block the rename when an active AAAx already
+-- exists in the same tenant (which is the common case after r5
+-- seeded AAAx).
+--
+-- Step A: soft-delete every case / whitespace variant of "AAAX"
+-- that ISN'T the canonical 'AAAx' (lowercase x). UPPER(TRIM(...)) =
+-- 'AAAX' catches: 'AAAX' (uppercase X), 'aaax' (all lowercase),
+-- 'AAAx ' (trailing space), 'aAAX', etc. The TRIM(name) <> 'AAAx'
+-- guard then re-includes the canonical row.
+--
+-- This is intentionally aggressive because the strict exact-match
+-- version of this step left a manually-created 'AAAX' row visible
+-- in production — the user reported AAAx and AAAX showing
+-- side-by-side. Belt-and-braces.
 UPDATE accounts
-   SET name = 'AAAx',
-       account_number = 'MC-AAA',
+   SET deleted_at = NOW(),
        updated_at = NOW()
  WHERE is_motor_club = TRUE
-   AND name IN ('AAA', 'AAAX');
+   AND UPPER(TRIM(name)) = 'AAAX'
+   AND TRIM(name) <> 'AAAx'
+   AND deleted_at IS NULL;
 
--- Step B: restore any soft-deleted 'AAAx' row to active. Each tenant
--- can have at most one tombstoned 'AAAx' (the partial unique index
--- prevents > 1 active 'AAAx' per tenant, and r4's soft-delete only
--- caught active rows), so this UPDATE can't violate the unique
--- constraint.
+-- Step B: soft-delete 'AAA' (no suffix) — duplicate of AAAx from
+-- the r3 intermediate state. Same reasoning as Step A.
 UPDATE accounts
+   SET deleted_at = NOW(),
+       updated_at = NOW()
+ WHERE is_motor_club = TRUE
+   AND name = 'AAA'
+   AND deleted_at IS NULL;
+
+-- Step C: restore any soft-deleted 'AAAx' row to active so the
+-- canonical name is visible. Guard against creating two active
+-- AAAx rows in the same tenant — only un-tombstone when no active
+-- AAAx exists.
+UPDATE accounts AS target
    SET deleted_at = NULL,
        updated_at = NOW()
- WHERE is_motor_club = TRUE
-   AND name = 'AAAx'
-   AND deleted_at IS NOT NULL;
+ WHERE target.is_motor_club = TRUE
+   AND target.name = 'AAAx'
+   AND target.deleted_at IS NOT NULL
+   AND NOT EXISTS (
+     SELECT 1 FROM accounts AS active
+      WHERE active.tenant_id = target.tenant_id
+        AND active.is_motor_club = TRUE
+        AND active.name = 'AAAx'
+        AND active.deleted_at IS NULL
+   );
 
 CREATE OR REPLACE FUNCTION fn_seed_demo_motor_clubs(p_tenant_id uuid)
 RETURNS integer

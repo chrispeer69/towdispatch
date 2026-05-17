@@ -53,6 +53,14 @@ export const users = pgTable(
     role: text('role', { enum: userRoles }).notNull().default('dispatcher'),
     isActive: boolean('is_active').notNull().default(true),
 
+    /**
+     * NULL for global-scope roles (owner/admin/accounting/auditor) and for
+     * yard-scoped roles while yards aren't wired yet. When a yards table is
+     * introduced, manager/dispatcher/driver rows constrain which yards the
+     * user can see; an empty array means "no access".
+     */
+    yardIds: uuid('yard_ids').array(),
+
     totpSecretEncrypted: text('totp_secret_encrypted'),
     mfaEnabled: boolean('mfa_enabled').notNull().default(false),
     mfaEnrolledAt: timestamp('mfa_enrolled_at', { withTimezone: true }),

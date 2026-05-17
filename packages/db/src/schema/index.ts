@@ -1,5 +1,6 @@
 export * from './tenants';
 export * from './users';
+export * from './user-invites';
 export * from './sessions';
 export * from './audit-log';
 export * from './email-verification-tokens';
@@ -23,6 +24,8 @@ export * from './dvirs';
 export * from './maintenance';
 export * from './tracking-links';
 export * from './invoices';
+export * from './invoice-line-commissions';
+export * from './job-driver-assignments';
 export * from './statement-sends';
 export * from './red-alert-sends';
 export * from './stripe-events';

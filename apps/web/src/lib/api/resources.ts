@@ -14,6 +14,9 @@ import type {
   PaginatedVehicles,
   ServiceCatalogEntryDto,
   ServiceRateDto,
+  TenantDto,
+  UserDto,
+  UserInviteDto,
   VehicleDto,
   VehicleWithCustomersDto,
 } from '@ustowdispatch/shared';
@@ -24,11 +27,6 @@ export async function fetchCustomers(
   accessToken?: string | null,
 ): Promise<PaginatedCustomers> {
   const qs = toQuery(query);
-  // Token must be read inline at the page render site and threaded through —
-  // see RequestOpts.accessToken in lib/api/client.ts and BUILD_DECISIONS.md
-  // Session 9.7. Leaving accessToken undefined keeps the legacy inline-read
-  // fallback so non-page callers (route handlers, server actions) behave as
-  // before.
   return apiServer<PaginatedCustomers>(`/customers${qs}`, { accessToken: accessToken ?? null });
 }
 
@@ -84,7 +82,37 @@ export async function fetchAccountRateCard(
   });
 }
 
-export type { CustomerDto, VehicleDto, AccountDto, ServiceCatalogEntryDto, ServiceRateDto };
+export async function fetchTenantCurrent(accessToken?: string | null): Promise<TenantDto> {
+  return apiServer<TenantDto>('/tenants/current', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export async function fetchUsers(accessToken?: string | null): Promise<UserDto[]> {
+  return apiServer<UserDto[]>('/users', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export async function fetchUserInvites(
+  status: 'pending' | 'expired' | 'all',
+  accessToken?: string | null,
+): Promise<UserInviteDto[]> {
+  return apiServer<UserInviteDto[]>(`/users/invites?status=${status}`, {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export type {
+  CustomerDto,
+  VehicleDto,
+  AccountDto,
+  ServiceCatalogEntryDto,
+  ServiceRateDto,
+  TenantDto,
+  UserDto,
+  UserInviteDto,
+};
 
 function toQuery(q: Record<string, string | undefined>): string {
   const entries = Object.entries(q).filter(([, v]) => v !== undefined && v !== '');

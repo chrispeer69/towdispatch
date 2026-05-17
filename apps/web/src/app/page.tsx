@@ -74,7 +74,7 @@ export default function LandingPage(): JSX.Element {
         </div>
 
         <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-text-secondary-on-dark-on-dark/60">
-          No credit card · Self-host or cloud · Open data export
+          AI-powered cloud storage on AWS · Open data export
         </p>
       </section>
 

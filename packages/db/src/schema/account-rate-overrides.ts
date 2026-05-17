@@ -8,7 +8,7 @@
  *   - flat_dollar_discount → override_value_cents is dollars off the master
  *   - percent_discount     → override_percent (0-100) is the % off master
  *
- * A CHECK constraint in 0026 guarantees exactly one of value/percent is in
+ * A CHECK constraint in 0028 guarantees exactly one of value/percent is in
  * use per row, so the rate-engine resolution math is unambiguous.
  *
  * tenant_id is denormalized for RLS; fn_account_rate_overrides_tenant_

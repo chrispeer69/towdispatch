@@ -232,6 +232,9 @@ export async function tearDown(ctx: TestContext): Promise<void> {
              WHERE user_id IN (SELECT id FROM users WHERE email = ANY($1::text[]))`,
             [ctx.createdEmails],
           );
+          // user_invites references users(invited_by) ON DELETE RESTRICT, so
+          // wipe invites for the tenants before deleting the users.
+          await c.query('DELETE FROM user_invites WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM users WHERE email = ANY($1::text[])', [ctx.createdEmails]);
           await c.query('DELETE FROM audit_log WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('ALTER TABLE tenants DISABLE TRIGGER trg_audit_tenants');

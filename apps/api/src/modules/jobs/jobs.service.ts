@@ -31,6 +31,7 @@ import {
   customers,
   driverShifts,
   drivers,
+  jobDriverAssignments,
   jobStatusTransitions,
   jobs,
   trucks,
@@ -39,6 +40,7 @@ import {
 } from '@ustowdispatch/db';
 import {
   type CreateJobIntakePayload,
+  type CreateJobPayload,
   DISPATCH_EVENTS,
   ERROR_CODES,
   type IntakeResultDto,
@@ -317,6 +319,70 @@ export class JobsService {
     });
   }
 
+  /**
+   * Direct job creation against an existing customer + vehicle. Lighter than
+   * createIntake — skips the customer/vehicle resolution and rate-engine
+   * quote, since callers using this path have already done both. Validates
+   * that both rows live in the caller's tenant (RLS handles enforcement;
+   * the explicit lookups give a friendlier 404 than a constraint failure).
+   */
+  async create(ctx: CallerContext, input: CreateJobPayload): Promise<JobDto> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const customerRow = await tx.query.customers.findFirst({
+        where: and(eq(customers.id, input.customerId), isNull(customers.deletedAt)),
+      });
+      if (!customerRow) {
+        throw new NotFoundException({
+          code: ERROR_CODES.NOT_FOUND,
+          message: 'Customer not found',
+        });
+      }
+
+      const vehicleRow = await tx.query.vehicles.findFirst({
+        where: and(eq(vehicles.id, input.vehicleId), isNull(vehicles.deletedAt)),
+      });
+      if (!vehicleRow) {
+        throw new NotFoundException({
+          code: ERROR_CODES.NOT_FOUND,
+          message: 'Vehicle not found',
+        });
+      }
+
+      const jobNumber = await allocateJobNumber(tx, ctx.tenantId, new Date());
+      const id = uuidv7();
+      const [row] = await tx
+        .insert(jobs)
+        .values({
+          id,
+          tenantId: ctx.tenantId,
+          jobNumber,
+          status: 'new',
+          serviceType: input.serviceType,
+          customerId: input.customerId,
+          vehicleId: input.vehicleId,
+          accountId: input.accountId ?? null,
+          pickupAddress: input.pickupAddress,
+          pickupLat: numToText(input.pickupLat),
+          pickupLng: numToText(input.pickupLng),
+          dropoffAddress: input.dropoffAddress ?? null,
+          dropoffLat: numToText(input.dropoffLat),
+          dropoffLng: numToText(input.dropoffLng),
+          authorizedBy: input.authorizedBy,
+          authorizedByName: input.authorizedByName ?? null,
+          rateQuotedCents: 0,
+          rateBreakdown: null,
+          notes: input.notes ?? null,
+          createdByUserId: ctx.userId,
+        })
+        .returning();
+      if (!row) throw new Error('insert jobs .. returning() yielded no row');
+
+      const jobDto = rowToDto(row);
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_CREATED, { job: jobDto });
+      return jobDto;
+    });
+  }
+
   async get(ctx: CallerContext, id: string): Promise<JobDto> {
     const row = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       return tx.query.jobs.findFirst({
@@ -329,6 +395,49 @@ export class JobsService {
 
   async cancel(ctx: CallerContext, id: string, reason: string): Promise<JobDto> {
     return this.transition(ctx, id, 'cancelled', reason);
+  }
+
+  /**
+   * Add a driver to the job's multi-driver crew (Admin Settings build 4).
+   * jobs.assigned_driver_id continues to model the primary driver; this
+   * table extends it to support multi-driver invoices that split
+   * commissions across the full crew. Idempotent — re-adding an existing
+   * driver returns the job unchanged.
+   */
+  async addDriver(
+    ctx: CallerContext,
+    jobId: string,
+    driverId: string,
+    role: string | null,
+  ): Promise<JobDto> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const job = await tx.query.jobs.findFirst({
+        where: and(eq(jobs.id, jobId), isNull(jobs.deletedAt)),
+      });
+      if (!job) throw notFound();
+      const driver = await tx.query.drivers.findFirst({
+        where: and(eq(drivers.id, driverId), isNull(drivers.deletedAt)),
+      });
+      if (!driver) {
+        throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND, message: 'Driver not found' });
+      }
+      const existing = await tx.query.jobDriverAssignments.findFirst({
+        where: and(
+          eq(jobDriverAssignments.jobId, jobId),
+          eq(jobDriverAssignments.driverId, driverId),
+        ),
+      });
+      if (!existing) {
+        await tx.insert(jobDriverAssignments).values({
+          id: uuidv7(),
+          tenantId: ctx.tenantId,
+          jobId,
+          driverId,
+          role: role ?? 'support',
+        });
+      }
+      return rowToDto(job);
+    });
   }
 
   /**

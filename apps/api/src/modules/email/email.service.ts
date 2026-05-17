@@ -106,6 +106,28 @@ export class EmailService {
     });
   }
 
+  async sendUserInviteEmail(opts: {
+    to: string;
+    inviterName: string;
+    tenantName: string;
+    roleLabel: string;
+    token: string;
+  }): Promise<void> {
+    const url = this.urlFor('/accept-invite', { token: opts.token });
+    await this.send({
+      to: opts.to,
+      subject: `You've been invited to ${opts.tenantName} on ${BRAND.productName}`,
+      template: 'user-invite',
+      variables: {
+        ...this.brand(),
+        inviterName: opts.inviterName,
+        tenantName: opts.tenantName,
+        roleLabel: opts.roleLabel,
+        acceptUrl: url,
+      },
+    });
+  }
+
   async sendWelcomeEmail(opts: {
     to: string;
     name: string;

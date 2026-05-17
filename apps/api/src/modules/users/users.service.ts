@@ -108,6 +108,8 @@ export class UsersService {
       if (input.lastName !== undefined) patch.lastName = input.lastName;
       if (input.phone !== undefined) patch.phone = input.phone;
       if (input.role !== undefined) patch.role = input.role;
+      if (input.isActive !== undefined) patch.isActive = input.isActive;
+      if (input.yardIds !== undefined) patch.yardIds = input.yardIds ?? null;
 
       const [row] = await tx.update(users).set(patch).where(eq(users.id, userId)).returning();
       return row;
@@ -166,6 +168,8 @@ function toDto(u: typeof users.$inferSelect): UserDto {
     phone: u.phone,
     role: u.role,
     isActive: u.isActive,
+    mfaEnabled: u.mfaEnabled,
+    yardIds: u.yardIds ?? null,
     lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
     createdAt: u.createdAt.toISOString(),
     updatedAt: u.updatedAt.toISOString(),

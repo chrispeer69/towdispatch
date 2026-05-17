@@ -1,7 +1,9 @@
 import { Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import {
+  type AssignJobDriverPayload,
   type CancelJobPayload,
   type CreateJobIntakePayload,
+  type CreateJobPayload,
   type IntakeResultDto,
   type JobDto,
   type JobListFilters,
@@ -9,8 +11,10 @@ import {
   type QuotePreviewPayload,
   ROLES,
   type RateQuote,
+  assignJobDriverSchema,
   cancelJobSchema,
   createJobIntakeSchema,
+  createJobSchema,
   jobListFiltersSchema,
   quotePreviewSchema,
 } from '@ustowdispatch/shared';
@@ -65,6 +69,21 @@ export class JobsController {
     return this.jobs.createIntake(this.callerCtx(req), body);
   }
 
+  /**
+   * Direct create — caller already has the customer + vehicle IDs.
+   * intake/POST is for the full create-customer-and-vehicle flow; this is
+   * the dispatch-board "+ Job" path and the API path the integration
+   * suite uses when it has already provisioned both rows.
+   */
+  @Post()
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async create(
+    @ZodBody(createJobSchema) body: CreateJobPayload,
+    @Req() req: FastifyRequest,
+  ): Promise<JobDto> {
+    return this.jobs.create(this.callerCtx(req), body);
+  }
+
   @Get(':id')
   async get(
     @ZodParam(idSchema) params: { id: string },
@@ -82,6 +101,23 @@ export class JobsController {
     @Req() req: FastifyRequest,
   ): Promise<JobDto> {
     return this.jobs.cancel(this.callerCtx(req), params.id, body.reason);
+  }
+
+  /**
+   * Add a driver to the job's multi-driver crew. Powers the Invoice
+   * Review "+ Add driver" chip. jobs.assigned_driver_id continues to
+   * model the primary driver — this is for the rest of the crew.
+   * Idempotent: re-adding an existing driver is a no-op.
+   */
+  @Post(':id/drivers')
+  @HttpCode(HttpStatus.OK)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async addDriver(
+    @ZodParam(idSchema) params: { id: string },
+    @ZodBody(assignJobDriverSchema) body: AssignJobDriverPayload,
+    @Req() req: FastifyRequest,
+  ): Promise<JobDto> {
+    return this.jobs.addDriver(this.callerCtx(req), params.id, body.driverId, body.role ?? null);
   }
 
   private callerCtx(req: FastifyRequest): {
