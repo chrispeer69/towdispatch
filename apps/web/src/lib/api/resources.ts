@@ -13,6 +13,7 @@ import type {
   PaginatedVehicles,
   ServiceCatalogEntryDto,
   ServiceRateDto,
+  TenantDto,
   VehicleDto,
   VehicleWithCustomersDto,
 } from '@ustowdispatch/shared';
@@ -74,7 +75,20 @@ export async function fetchServiceRates(accessToken?: string | null): Promise<Se
   });
 }
 
-export type { CustomerDto, VehicleDto, AccountDto, ServiceCatalogEntryDto, ServiceRateDto };
+export async function fetchTenantCurrent(accessToken?: string | null): Promise<TenantDto> {
+  return apiServer<TenantDto>('/tenants/current', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export type {
+  CustomerDto,
+  VehicleDto,
+  AccountDto,
+  ServiceCatalogEntryDto,
+  ServiceRateDto,
+  TenantDto,
+};
 
 function toQuery(q: Record<string, string | undefined>): string {
   const entries = Object.entries(q).filter(([, v]) => v !== undefined && v !== '');
