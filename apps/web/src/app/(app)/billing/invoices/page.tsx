@@ -115,40 +115,56 @@ export default async function InvoicesPage({
             </tr>
           </thead>
           <tbody className="divide-y divide-divider">
-            {list.data.map((inv) => (
-              <tr key={inv.id} className="hover:bg-bg-surface/30">
-                <td className="px-4 py-2 font-mono text-sm">
-                  <Link
-                    href={`/billing/invoices/${inv.id}`}
-                    className="text-brand-primary hover:underline"
-                    data-testid={`invoice-row-${inv.invoiceNumber}`}
-                  >
-                    {inv.invoiceNumber}
-                  </Link>
-                </td>
-                <td className="px-4 py-2">
-                  <span
-                    className="rounded px-2 py-0.5 text-xs uppercase tracking-wider"
-                    data-testid={`invoice-status-${inv.id}`}
-                  >
-                    {invoiceStatusLabel[inv.status]}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-text-secondary-on-dark">{inv.invoiceType}</td>
-                <td className="px-4 py-2 text-text-secondary-on-dark">
-                  {inv.issuedAt ? inv.issuedAt.slice(0, 10) : 'â€”'}
-                </td>
-                <td className="px-4 py-2 text-text-secondary-on-dark">
-                  {inv.dueAt ? inv.dueAt.slice(0, 10) : 'â€”'}
-                </td>
-                <td className="px-4 py-2 text-right font-mono">
-                  {formatMoneyCents(inv.totalCents)}
-                </td>
-                <td className="px-4 py-2 text-right font-mono">
-                  {formatMoneyCents(inv.balanceCents)}
-                </td>
-              </tr>
-            ))}
+            {list.data.map((inv) => {
+              // Drafts route to the two-section Review screen; every
+              // other status goes to the read-only detail page.
+              const href =
+                inv.status === 'draft'
+                  ? `/billing/invoices/${inv.id}/review`
+                  : `/billing/invoices/${inv.id}`;
+              return (
+                <tr key={inv.id} className="hover:bg-bg-surface/30">
+                  <td className="px-4 py-2 font-mono text-sm">
+                    <Link
+                      href={href}
+                      className="text-brand-primary hover:underline"
+                      data-testid={`invoice-row-${inv.invoiceNumber}`}
+                    >
+                      {inv.invoiceNumber}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2">
+                    <span
+                      className="rounded px-2 py-0.5 text-xs uppercase tracking-wider"
+                      data-testid={`invoice-status-${inv.id}`}
+                    >
+                      {invoiceStatusLabel[inv.status]}
+                    </span>
+                    {inv.status === 'draft' ? (
+                      <span
+                        className="ml-2 rounded bg-amber-500/15 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-300"
+                        data-testid={`invoice-needs-review-${inv.id}`}
+                      >
+                        Needs review
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="px-4 py-2 text-text-secondary-on-dark">{inv.invoiceType}</td>
+                  <td className="px-4 py-2 text-text-secondary-on-dark">
+                    {inv.issuedAt ? inv.issuedAt.slice(0, 10) : 'â€”'}
+                  </td>
+                  <td className="px-4 py-2 text-text-secondary-on-dark">
+                    {inv.dueAt ? inv.dueAt.slice(0, 10) : 'â€”'}
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono">
+                    {formatMoneyCents(inv.totalCents)}
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono">
+                    {formatMoneyCents(inv.balanceCents)}
+                  </td>
+                </tr>
+              );
+            })}
             {list.data.length === 0 ? (
               <tr>
                 <td

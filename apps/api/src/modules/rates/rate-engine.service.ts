@@ -26,6 +26,8 @@
  */
 import { Injectable } from '@nestjs/common';
 import {
+  accountRateOverrides,
+  accountServiceAvailability,
   accounts,
   rateSheets,
   serviceCatalog,
@@ -33,6 +35,8 @@ import {
   tenantDefaultRateSheets,
 } from '@ustowdispatch/db';
 import {
+  type AccountRateOverrideType,
+  type AccountServiceAvailabilityValue,
   type JobServiceType,
   type RateLineItem,
   type RateQuote,
@@ -41,8 +45,9 @@ import {
   type SurchargeWindow,
   type VehicleClass,
   rateSheetDefinitionSchema,
+  resolveAccountOverridePriceCents,
 } from '@ustowdispatch/shared';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, or } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 
 /**
@@ -142,6 +147,36 @@ const FALLBACK_DEFINITION: RateSheetDefinition = {
 @Injectable()
 export class RateEngineService {
   constructor(private readonly db: TenantAwareDb) {}
+
+  /**
+   * Read-only resolver for "is this service available for this account?".
+   *
+   * Used by future intake / invoice flows to warn the dispatcher when an
+   * account marked a service as `not_covered` or `pre_approval_required`.
+   * Defaults to `available` when no row exists — accounts opt INTO
+   * restrictions rather than opting in to availability. Build 6 only ships
+   * the resolver; the dispatcher-side prompt belongs to a later build.
+   */
+  async isServiceAvailableForAccount(
+    tenantId: string,
+    userId: string,
+    requestId: string,
+    accountId: string,
+    serviceCatalogId: string,
+  ): Promise<AccountServiceAvailabilityValue> {
+    return this.db.runInTenantContext(
+      { tenantId, userId, requestId },
+      async (tx): Promise<AccountServiceAvailabilityValue> => {
+        const row = await tx.query.accountServiceAvailability.findFirst({
+          where: and(
+            eq(accountServiceAvailability.accountId, accountId),
+            eq(accountServiceAvailability.serviceCatalogId, serviceCatalogId),
+          ),
+        });
+        return row?.availability ?? 'available';
+      },
+    );
+  }
 
   /**
    * Public quote() entry point.
@@ -261,6 +296,40 @@ export class RateEngineService {
           );
         }
 
+        // Step 3b: if an account is in play and that account has an active
+        // override row for (service, vehicle_class), apply it. Three
+        // patterns: flat_price replaces master outright; flat_dollar_discount
+        // subtracts cents; percent_discount applies a % off. The
+        // resolveAccountOverridePriceCents helper in @ustowdispatch/shared
+        // is the single source of truth for the math so the UI mirrors it.
+        let basePriceCents: number | null = masterPriceCents;
+        if (input.accountId) {
+          const override = await resolveAccountOverride(
+            tx,
+            input.accountId,
+            input.serviceType,
+            input.vehicleClass,
+          );
+          if (override) {
+            const resolved = resolveAccountOverridePriceCents(
+              override.overrideType,
+              override.overrideValueCents,
+              override.overridePercent,
+              masterPriceCents,
+            );
+            if (resolved != null) {
+              basePriceCents = resolved;
+              trace.push(
+                `Account override (${override.overrideType}) for ${input.serviceType} / ${input.vehicleClass}: ${resolved}¢ (master was ${masterPriceCents ?? 'unset'}).`,
+              );
+            } else {
+              trace.push(
+                'Account override exists but master is unset; falling back to legacy definition.',
+              );
+            }
+          }
+        }
+
         const service = resolvedDefinition.services.find(
           (s) => s.serviceType === input.serviceType,
         );
@@ -273,14 +342,14 @@ export class RateEngineService {
             lineItems.push({
               code: 'base',
               label: `${labelFor(input.serviceType)} base fee`,
-              amountCents: masterPriceCents ?? fb.baseCents,
+              amountCents: basePriceCents ?? fb.baseCents,
             });
           }
         } else {
           lineItems.push({
             code: 'base',
             label: `${labelFor(input.serviceType)} base fee`,
-            amountCents: masterPriceCents ?? service.baseCents,
+            amountCents: basePriceCents ?? service.baseCents,
           });
           const flat = service.flatFeesByClass[input.vehicleClass];
           if (flat && flat > 0) {
@@ -365,6 +434,64 @@ export class RateEngineService {
  * In every "miss" case the engine falls back to the legacy rateSheets JSON
  * path that was already there before build 2.
  */
+/**
+ * Resolve the active account_rate_overrides row (if any) for a given
+ * (accountId, serviceType, vehicleClass). Returns null when:
+ *   - the JobServiceType doesn't map to a catalog code
+ *   - the tenant has no service_catalog row with that code
+ *   - no active override row exists for the (account, service, class)
+ *
+ * vehicle_class matching tolerates both forms used by the rate-card UI:
+ *   - explicit class for class-dependent services (light_duty, etc.)
+ *   - null OR 'any' for class-independent services
+ */
+interface ResolvedAccountOverride {
+  overrideType: AccountRateOverrideType;
+  overrideValueCents: number;
+  overridePercent: string | null;
+}
+
+async function resolveAccountOverride(
+  tx: Tx,
+  accountId: string,
+  serviceType: JobServiceType,
+  vehicleClass: VehicleClass,
+): Promise<ResolvedAccountOverride | null> {
+  const code = SERVICE_TYPE_CATALOG_CODE[serviceType];
+  if (!code) return null;
+  const catalogRow = await tx.query.serviceCatalog.findFirst({
+    where: and(eq(serviceCatalog.code, code), isNull(serviceCatalog.deletedAt)),
+  });
+  if (!catalogRow) return null;
+
+  const applicable = (catalogRow.applicableVehicleClasses as string[]) ?? [];
+  const isClassIndependent = applicable.length === 0;
+
+  // Class-independent services: match rows with vehicle_class IS NULL OR
+  // 'any'. Class-dependent services: match the explicit class only.
+  const classClause = isClassIndependent
+    ? or(
+        isNull(accountRateOverrides.vehicleClass),
+        eq(accountRateOverrides.vehicleClass, SERVICE_RATE_ANY_CLASS),
+      )
+    : eq(accountRateOverrides.vehicleClass, vehicleClass);
+
+  const row = await tx.query.accountRateOverrides.findFirst({
+    where: and(
+      eq(accountRateOverrides.accountId, accountId),
+      eq(accountRateOverrides.serviceCatalogId, catalogRow.id),
+      eq(accountRateOverrides.isActive, true),
+      classClause,
+    ),
+  });
+  if (!row) return null;
+  return {
+    overrideType: row.overrideType,
+    overrideValueCents: row.overrideValueCents,
+    overridePercent: row.overridePercent,
+  };
+}
+
 async function resolveMasterRateBase(
   tx: Tx,
   serviceType: JobServiceType,

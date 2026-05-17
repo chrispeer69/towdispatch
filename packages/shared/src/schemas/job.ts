@@ -194,6 +194,27 @@ export const createJobIntakeSchema = z
   });
 export type CreateJobIntakePayload = z.infer<typeof createJobIntakeSchema>;
 
+// Direct job creation against an existing customer + vehicle, used when the
+// caller has already resolved both (dispatch board "+ Job" against a repeat
+// customer, integration tests, etc.). createJobIntakeSchema is the heavier
+// intake flow that creates customer/vehicle as part of the same transaction.
+export const createJobSchema = z.object({
+  customerId: z.string().uuid(),
+  vehicleId: z.string().uuid(),
+  serviceType: z.enum(jobServiceTypeValues),
+  pickupAddress: z.string().min(1).max(500),
+  pickupLat: z.number().optional(),
+  pickupLng: z.number().optional(),
+  dropoffAddress: z.string().max(500).optional(),
+  dropoffLat: z.number().optional(),
+  dropoffLng: z.number().optional(),
+  authorizedBy: z.enum(jobAuthorizedByValues).default('customer'),
+  authorizedByName: z.string().max(240).optional(),
+  notes: z.string().max(4000).optional(),
+  accountId: z.string().uuid().optional(),
+});
+export type CreateJobPayload = z.infer<typeof createJobSchema>;
+
 export const quotePreviewSchema = z.object({
   serviceType: z.enum(jobServiceTypeValues),
   vehicleClass: z.enum(vehicleClassValues).default('light_duty'),

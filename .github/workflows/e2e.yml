@@ -65,6 +65,12 @@ jobs:
       - name: Apply migrations
         run: pnpm --filter @ustowdispatch/db migrate
 
+      - name: Build shared
+        run: pnpm --filter @ustowdispatch/shared build
+
+      - name: Build db
+        run: pnpm --filter @ustowdispatch/db build
+
       - name: Build api
         run: pnpm --filter @ustowdispatch/api build
 
@@ -75,6 +81,8 @@ jobs:
         run: pnpm --filter @ustowdispatch/e2e exec playwright install --with-deps chromium
 
       - name: Start API
+        env:
+          NODE_ENV: test
         run: |
           API_PORT=3601 API_HOST=0.0.0.0 nohup node apps/api/dist/apps/api/src/main.js > apps/api/api.log 2>&1 &
           for i in $(seq 1 30); do

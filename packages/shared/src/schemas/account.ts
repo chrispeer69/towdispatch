@@ -7,6 +7,7 @@
  * numeric(12,2); the wire keeps the same fidelity.
  */
 import { z } from 'zod';
+import { accountPaymentTermsValues } from './account-rate-card';
 
 export const billingTermsValues = [
   'net_15',
@@ -54,6 +55,17 @@ export const accountSchema = z.object({
   motorClubNetworkCode: z.string().max(60).nullable(),
   active: z.boolean(),
   notes: z.string().max(4000).nullable(),
+  paymentTerms: z.enum(accountPaymentTermsValues),
+  requiresPhotoBeforeBilling: z.boolean(),
+  requiresAuthorizationCode: z.boolean(),
+  goaPolicy: z.string().nullable(),
+  slaArrivalMinutes: z.number().int().positive().nullable(),
+  afterHoursBillingAllowed: z.boolean(),
+  /**
+   * Days past invoice posted_date before this account's open invoices flip
+   * to past_due. NULL = inherit tenant-wide default. Build 5 / MOAT #7.
+   */
+  delinquencyDaysThreshold: z.number().int().positive().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   deletedAt: z.string().datetime().nullable(),

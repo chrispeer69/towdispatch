@@ -19,6 +19,7 @@ import { EmailModule } from '../email/email.module.js';
 import { BillingDeliveryService } from './billing-delivery.service.js';
 import { BillingController } from './billing.controller.js';
 import { InvoicePdfService } from './invoice-pdf.service.js';
+import { InvoiceReviewService } from './invoice-review.service.js';
 import { InvoicesService } from './invoices.service.js';
 import { JobCompletionListener } from './job-completion.listener.js';
 import { StatementPdfService } from './statement-pdf.service.js';
@@ -28,11 +29,12 @@ import { StatementPdfService } from './statement-pdf.service.js';
   controllers: [BillingController],
   providers: [
     InvoicesService,
+    InvoiceReviewService,
     InvoicePdfService,
     StatementPdfService,
     BillingDeliveryService,
     JobCompletionListener,
   ],
-  exports: [InvoicesService, BillingDeliveryService],
+  exports: [InvoicesService, InvoiceReviewService, BillingDeliveryService, StatementPdfService],
 })
 export class BillingModule {}

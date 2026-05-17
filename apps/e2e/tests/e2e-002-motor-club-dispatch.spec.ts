@@ -44,8 +44,11 @@ test.describe('E2E-002 motor club dispatch (Agero)', () => {
         vehicle: { make: 'Honda', model: 'Civic', year: 2019, plate: 'XYZ-1234' },
       }),
     });
-    expect(dispatchRes.ok, await dispatchRes.text()).toBe(true);
-    const dispatchBody = (await dispatchRes.json()) as { jobId: string };
+    // Read body once — Response bodies are single-use. Pass the raw text to
+    // expect as failure context, then JSON.parse from the same string.
+    const dispatchText = await dispatchRes.text();
+    expect(dispatchRes.ok, dispatchText).toBe(true);
+    const dispatchBody = JSON.parse(dispatchText) as { jobId: string };
     expect(dispatchBody.jobId).toMatch(/[0-9a-f]{8}-/);
 
     // Outbox: the stub recorded the ingest call.

@@ -83,6 +83,12 @@ export class UsersService {
           lastName: input.lastName,
           phone: input.phone ?? null,
           role: (input.role ?? 'dispatcher') as Role,
+          // Build 5 RED ALERT — owners and admins are auto-opted-in at
+          // creation so the very first Monday after a new admin/owner is
+          // added produces a digest without a manual settings round-trip.
+          // Other roles default to false (column default) and must opt in.
+          receivesRedAlert:
+            (input.role ?? 'dispatcher') === 'owner' || (input.role ?? 'dispatcher') === 'admin',
         })
         .returning();
       if (!row) {
@@ -110,6 +116,7 @@ export class UsersService {
       if (input.role !== undefined) patch.role = input.role;
       if (input.isActive !== undefined) patch.isActive = input.isActive;
       if (input.yardIds !== undefined) patch.yardIds = input.yardIds ?? null;
+      if (input.receivesRedAlert !== undefined) patch.receivesRedAlert = input.receivesRedAlert;
 
       const [row] = await tx.update(users).set(patch).where(eq(users.id, userId)).returning();
       return row;
@@ -170,6 +177,7 @@ function toDto(u: typeof users.$inferSelect): UserDto {
     isActive: u.isActive,
     mfaEnabled: u.mfaEnabled,
     yardIds: u.yardIds ?? null,
+    receivesRedAlert: u.receivesRedAlert,
     lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
     createdAt: u.createdAt.toISOString(),
     updatedAt: u.updatedAt.toISOString(),

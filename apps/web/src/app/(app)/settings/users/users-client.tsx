@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { ROLE_VALUES, type Role, type UserDto } from '@ustowdispatch/shared';
-import { Loader2, Lock, Trash2, UserPlus, X } from 'lucide-react';
+import { AlertTriangle, Loader2, Lock, Trash2, UserPlus, X } from 'lucide-react';
 import { type FormEvent, type JSX, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -93,6 +93,7 @@ export function UsersClient({ initial }: Props): JSX.Element {
               <Th>Email</Th>
               <Th>Role</Th>
               <Th>MFA</Th>
+              <Th>RED ALERT</Th>
               <Th>Last login</Th>
               <Th align="right">Actions</Th>
             </tr>
@@ -104,7 +105,7 @@ export function UsersClient({ initial }: Props): JSX.Element {
             {users.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-12 text-center text-sm text-text-secondary-on-dark"
                 >
                   No users in this tenant yet. Click <strong>Add user</strong> to invite the first
@@ -139,8 +140,48 @@ function UserRow({
   onDeactivate: (id: string) => void;
 }): JSX.Element {
   const [savingRole, setSavingRole] = useState(false);
+  const [savingRedAlert, setSavingRedAlert] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
   const [permissionLocked, setPermissionLocked] = useState(false);
+
+  // Owners and admins receive the RED ALERT digest by virtue of role
+  // (mirrors red-alert.service.ts — it always includes them regardless
+  // of the receivesRedAlert flag). Render those rows as a locked
+  // "Always" badge instead of a flippable toggle.
+  const redAlertByRole = user.role === 'owner' || user.role === 'admin';
+
+  async function toggleRedAlert(next: boolean): Promise<void> {
+    if (redAlertByRole) return;
+    setSavingRedAlert(true);
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receivesRedAlert: next }),
+      });
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          setPermissionLocked(true);
+          toast.error('You don’t have permission to change RED ALERT subscriptions.');
+          return;
+        }
+        const body = (await res.json().catch(() => null)) as { message?: string } | null;
+        toast.error(body?.message ?? `Save failed (HTTP ${res.status})`);
+        return;
+      }
+      const updated = (await res.json()) as UserDto;
+      onUpdate(updated);
+      toast.success(
+        updated.receivesRedAlert
+          ? `${updated.firstName} will receive RED ALERT every Monday.`
+          : `${updated.firstName} unsubscribed from RED ALERT.`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setSavingRedAlert(false);
+    }
+  }
 
   async function changeRole(newRole: Role): Promise<void> {
     if (newRole === user.role) return;
@@ -245,6 +286,46 @@ function UserRow({
         <span className="rounded bg-bg-surface-elevated px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-text-secondary-on-dark">
           {user.emailVerifiedAt ? 'User-managed' : '—'}
         </span>
+      </td>
+      <td className="px-4 py-3 align-middle">
+        {redAlertByRole ? (
+          <span
+            className="inline-flex items-center gap-1 rounded bg-status-warning/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-status-warning"
+            title="Owners and admins receive RED ALERT by virtue of role."
+          >
+            <AlertTriangle className="h-3 w-3" />
+            Always
+          </span>
+        ) : (
+          <label
+            className={cn(
+              'inline-flex items-center gap-2 text-xs',
+              savingRedAlert || permissionLocked ? 'opacity-50' : '',
+            )}
+            title={
+              permissionLocked
+                ? 'You don’t have permission to change RED ALERT subscriptions'
+                : user.receivesRedAlert
+                  ? `${user.firstName} receives the Monday 6 a.m. past-due digest.`
+                  : `${user.firstName} is not subscribed to the Monday digest.`
+            }
+          >
+            <input
+              type="checkbox"
+              className="h-4 w-4 cursor-pointer accent-brand-primary"
+              checked={user.receivesRedAlert}
+              disabled={savingRedAlert || permissionLocked}
+              onChange={(e) => toggleRedAlert(e.target.checked)}
+            />
+            {savingRedAlert ? (
+              <Loader2 className="h-3 w-3 animate-spin text-text-secondary-on-dark" />
+            ) : (
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-secondary-on-dark">
+                {user.receivesRedAlert ? 'Subscribed' : 'Off'}
+              </span>
+            )}
+          </label>
+        )}
       </td>
       <td className="px-4 py-3 align-middle text-text-secondary-on-dark">
         {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '—'}

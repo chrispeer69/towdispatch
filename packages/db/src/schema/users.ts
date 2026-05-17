@@ -72,6 +72,14 @@ export const users = pgTable(
     lockedUntil: timestamp('locked_until', { withTimezone: true }),
     lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 
+    /**
+     * Opt-in flag for the Monday 6:00 AM RED ALERT past-due email
+     * (Build 5 — MOAT #7). Owners are auto-set to true at creation and
+     * by migration backfill. Admins receive by role regardless. Other
+     * roles must explicitly opt in via /settings/notifications.
+     */
+    receivesRedAlert: boolean('receives_red_alert').notNull().default(false),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

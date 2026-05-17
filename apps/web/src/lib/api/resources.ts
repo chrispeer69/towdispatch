@@ -6,6 +6,7 @@
  */
 import type {
   AccountDto,
+  AccountRateCardDto,
   CustomerDto,
   CustomerWithVehiclesDto,
   PaginatedAccounts,
@@ -68,6 +69,15 @@ export async function fetchServiceCatalog(
 
 export async function fetchServiceRates(accessToken?: string | null): Promise<ServiceRateDto[]> {
   return apiServer<ServiceRateDto[]>('/service-rates', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export async function fetchAccountRateCard(
+  accountId: string,
+  accessToken?: string | null,
+): Promise<AccountRateCardDto> {
+  return apiServer<AccountRateCardDto>(`/accounts/${accountId}/rate-card`, {
     accessToken: accessToken ?? null,
   });
 }
