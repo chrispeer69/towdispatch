@@ -40,7 +40,7 @@
  * component example does — and what fixes the bounce.
  */
 import { cookies, headers } from 'next/headers';
-import { ACCESS_COOKIE, REFRESH_COOKIE, setSessionCookies } from '../auth/cookies';
+import { ACCESS_COOKIE, REFRESH_COOKIE, getSessionToken, setSessionCookies } from '../auth/cookies';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -113,6 +113,8 @@ interface RequestOpts<TBody> {
 
 async function resolveAccessToken(opts: RequestOpts<any>): Promise<string | null> {
   if (opts.accessToken !== undefined) return opts.accessToken;
+  const cached = await getSessionToken();
+  if (cached) return cached;
   const cookieHeader = (await headers()).get('cookie') ?? '';
   const tokenFromHeader =
     cookieHeader

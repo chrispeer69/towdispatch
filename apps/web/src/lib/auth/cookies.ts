@@ -4,10 +4,22 @@
  * SameSite=Strict to keep CSRF risk minimal — the access cookie is Lax so the
  * dashboard works behind a Stripe-style external redirect.
  */
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
+import { cache } from 'react';
 
 export const ACCESS_COOKIE = 'tc_at';
 export const REFRESH_COOKIE = 'tc_rt';
+
+export const getSessionToken = cache(async (): Promise<string | null> => {
+  const cookieHeader = (await headers()).get('cookie') ?? '';
+  const tokenFromHeader =
+    cookieHeader
+      .split(/;\s*/)
+      .find((c) => c.startsWith(`${ACCESS_COOKIE}=`))
+      ?.slice(ACCESS_COOKIE.length + 1) ?? null;
+  if (tokenFromHeader) return tokenFromHeader;
+  return (await cookies()).get(ACCESS_COOKIE)?.value ?? null;
+});
 // Short-lived bridge cookies that hold the JWT returned by /auth/login when
 // the response is mfa_setup_required or mfa_required. The page-level MFA
 // proxies read these and forward the value to the backend. The token itself

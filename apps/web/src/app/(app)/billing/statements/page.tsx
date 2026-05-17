@@ -1,13 +1,15 @@
 import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
+import { getSessionToken } from '@/lib/auth/session';
 import type { PaginatedAccounts } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'Statements â€” US Tow DISPATCH' };
+export const metadata = { title: 'Statements — US Tow DISPATCH' };
 
 const EMPTY_ACCOUNTS: PaginatedAccounts = { data: [], total: 0, page: 1, perPage: 100 };
 
 export default async function StatementsPage(): Promise<JSX.Element> {
-  const result = await tryFetch(() => fetchAccounts({ perPage: '100' }));
+  const token = await getSessionToken();
+  const result = await tryFetch(() => fetchAccounts({ perPage: '100' }, token));
   const accounts = result.data ?? EMPTY_ACCOUNTS;
   return (
     <div className="space-y-4">
