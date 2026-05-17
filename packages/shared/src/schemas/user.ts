@@ -23,6 +23,13 @@ export const userSchema = z.object({
   isActive: z.boolean(),
   mfaEnabled: z.boolean().optional(),
   yardIds: z.array(z.string().uuid()).nullable().optional(),
+  /**
+   * Build 5 RED ALERT cron — Monday 06:00 past-due email digest.
+   * Owners and admins receive by virtue of role; other roles must
+   * opt in. Backed by the users.receives_red_alert column added in
+   * migration 0029.
+   */
+  receivesRedAlert: z.boolean(),
   lastLoginAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -48,5 +55,6 @@ export const updateUserSchema = createUserSchema
   .omit({ password: true })
   .extend({
     isActive: z.boolean().optional(),
+    receivesRedAlert: z.boolean().optional(),
   });
 export type UpdateUserPayload = z.infer<typeof updateUserSchema>;
