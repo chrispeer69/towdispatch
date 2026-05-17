@@ -32,14 +32,23 @@
 
 BEGIN;
 
+-- 1) Drop the (possibly non-existent) check constraint so we can rewrite values.
 ALTER TABLE vehicles DROP CONSTRAINT IF EXISTS vehicles_drivetrain_check;
 
-UPDATE vehicles SET drivetrain = '2WD'  WHERE drivetrain = 'FWD';
-UPDATE vehicles SET drivetrain = NULL   WHERE drivetrain = 'unknown';
-
+-- 2) Loosen the column BEFORE writing NULLs into it. The original column was
+--    NOT NULL DEFAULT 'unknown'; the UPDATE to NULL below would otherwise
+--    fail with "null value in column 'drivetrain' violates not-null
+--    constraint" on production data. Idempotent: DROP DEFAULT and DROP NOT
+--    NULL are no-ops on a column that already has them dropped.
 ALTER TABLE vehicles ALTER COLUMN drivetrain DROP DEFAULT;
 ALTER TABLE vehicles ALTER COLUMN drivetrain DROP NOT NULL;
 
+-- 3) Remap legacy values. Both UPDATEs are no-ops on the second run because
+--    the first run already rewrote the matching rows.
+UPDATE vehicles SET drivetrain = '2WD'  WHERE drivetrain = 'FWD';
+UPDATE vehicles SET drivetrain = NULL   WHERE drivetrain = 'unknown';
+
+-- 4) Re-add the new check constraint with the new value set.
 ALTER TABLE vehicles
   ADD CONSTRAINT vehicles_drivetrain_check
   CHECK (drivetrain IS NULL OR drivetrain IN ('2WD', '4WD', 'RWD', 'AWD', 'EV', 'Hybrid'));
