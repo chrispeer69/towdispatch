@@ -14,7 +14,7 @@
  * (Rate Card tab vs Service Availability tab) only send the section they
  * are saving. Tenant + cross-account-FK isolation comes from the DB's
  * row-level security + the BEFORE-INSERT trigger
- * fn_account_rate_overrides_tenant_consistency (see migration 0026).
+ * fn_account_rate_overrides_tenant_consistency (see migration 0028).
  */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {

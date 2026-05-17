@@ -29,9 +29,12 @@ import {
   accounts,
   creditMemos,
   customers,
+  drivers,
+  invoiceLineCommissions,
   invoiceLineItems,
   invoiceTaxes,
   invoices,
+  jobDriverAssignments,
   jobs,
   payments,
   recurringBillingSchedules,
@@ -339,9 +342,112 @@ export class InvoicesService {
       }
 
       const totals = await this.recomputeTotals(tx, ctx.tenantId, inv.id);
+      // Seed per-line driver commissions for the dispatcher review screen
+      // (Admin Settings build 4). Idempotent — re-running generateFromJob
+      // is a no-op for lines that already have commissions.
+      await this.seedDraftCommissions(tx, ctx, totals.id, jobId);
       const final = await this.assembleWithDetails(tx, totals.id);
       return { invoice: final, created: true };
     });
+  }
+
+  /**
+   * Seed per-line driver commission rows for a draft invoice from the
+   * job's assigned drivers. Idempotent: lines that already have
+   * commissions are skipped, so re-running generateFromJob is safe.
+   *
+   * Single-driver lines use that driver's default_commission_pct (or
+   * 100 if NULL). Multi-driver lines split evenly to total 100% with
+   * any rounding remainder absorbed by the first driver.
+   */
+  async seedDraftCommissions(
+    tx: Tx,
+    ctx: CallerContext,
+    invoiceId: string,
+    jobId: string,
+  ): Promise<void> {
+    const job = await tx.query.jobs.findFirst({ where: eq(jobs.id, jobId) });
+    if (!job) return;
+
+    const crew = await tx.query.jobDriverAssignments.findMany({
+      where: eq(jobDriverAssignments.jobId, jobId),
+    });
+    const driverIds = new Set<string>();
+    if (job.assignedDriverId) driverIds.add(job.assignedDriverId);
+    for (const c of crew) driverIds.add(c.driverId);
+    if (driverIds.size === 0) return;
+
+    // Record the primary driver in job_driver_assignments so future
+    // reviews see the full crew.
+    if (job.assignedDriverId && !crew.some((c) => c.driverId === job.assignedDriverId)) {
+      try {
+        await tx.insert(jobDriverAssignments).values({
+          id: uuidv7(),
+          tenantId: ctx.tenantId,
+          jobId,
+          driverId: job.assignedDriverId,
+          role: 'primary',
+        });
+      } catch {
+        // Race-safe: another caller may have inserted concurrently.
+      }
+    }
+
+    const driverList = await tx.query.drivers.findMany({
+      where: inArray(drivers.id, Array.from(driverIds)),
+    });
+    if (driverList.length === 0) return;
+
+    const lineRows = await tx.query.invoiceLineItems.findMany({
+      where: eq(invoiceLineItems.invoiceId, invoiceId),
+    });
+    if (lineRows.length === 0) return;
+
+    const existing = await tx.query.invoiceLineCommissions.findMany({
+      where: eq(invoiceLineCommissions.invoiceId, invoiceId),
+    });
+    const linesWithComms = new Set(existing.map((c) => c.invoiceLineItemId));
+
+    const N = driverList.length;
+    for (const line of lineRows) {
+      if (linesWithComms.has(line.id)) continue;
+      if (N === 1) {
+        const [d] = driverList;
+        if (!d) continue;
+        const pct =
+          d.defaultCommissionPct !== null && d.defaultCommissionPct !== undefined
+            ? Number(d.defaultCommissionPct)
+            : 100;
+        await tx.insert(invoiceLineCommissions).values({
+          id: uuidv7(),
+          tenantId: ctx.tenantId,
+          invoiceId,
+          invoiceLineItemId: line.id,
+          driverId: d.id,
+          commissionPct: String(pct.toFixed(2)),
+          commissionAmountCents: 0,
+          createdBy: ctx.userId,
+        });
+      } else {
+        const evenPct = Math.floor((100 / N) * 100) / 100;
+        const remainder = Math.round((100 - evenPct * N) * 100) / 100;
+        let first = true;
+        for (const d of driverList) {
+          const pct = evenPct + (first ? remainder : 0);
+          first = false;
+          await tx.insert(invoiceLineCommissions).values({
+            id: uuidv7(),
+            tenantId: ctx.tenantId,
+            invoiceId,
+            invoiceLineItemId: line.id,
+            driverId: d.id,
+            commissionPct: String(pct.toFixed(2)),
+            commissionAmountCents: 0,
+            createdBy: ctx.userId,
+          });
+        }
+      }
+    }
   }
 
   async update(

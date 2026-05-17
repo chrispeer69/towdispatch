@@ -1,5 +1,5 @@
 -- =====================================================================
--- 0026_account_overrides_and_terms.sql  (Admin Settings — build 6 of 7)
+-- 0028_account_overrides_and_terms.sql  (Admin Settings — build 6 of 7)
 --
 -- Per-account pricing overrides + service availability + contract terms.
 --
