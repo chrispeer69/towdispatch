@@ -66,7 +66,7 @@ import {
   dueDaysForTerms,
   termsFromAccountBilling,
 } from '@ustowdispatch/shared';
-import { and, asc, desc, eq, gte, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { AccountingService } from '../accounting/accounting.service.js';
 import {
@@ -812,13 +812,13 @@ export class InvoicesService {
       const customerNames = new Map<string, string>();
       if (accountIds.length) {
         const accts = await tx.query.accounts.findMany({
-          where: sql`${accounts.id} = ANY(${accountIds}::uuid[])`,
+          where: inArray(accounts.id, accountIds),
         });
         for (const a of accts) accountNames.set(a.id, a.name);
       }
       if (customerIds.length) {
         const cust = await tx.query.customers.findMany({
-          where: sql`${customers.id} = ANY(${customerIds}::uuid[])`,
+          where: inArray(customers.id, customerIds),
         });
         for (const c of cust) customerNames.set(c.id, c.name);
       }
