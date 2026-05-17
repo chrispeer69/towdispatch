@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   Sparkles,
   Truck,
-  Users,
 } from 'lucide-react';
 /**
  * 240px-wide left sidebar. Pulls the active path from `usePathname()` so the
@@ -97,16 +96,15 @@ const SECTIONS: NavSection[] = [
         match: (p) => p.startsWith('/dispatch'),
       },
       {
-        label: 'Fleet',
+        // Renamed from "Fleet" → "TRUCKS/DRIVERS" at user request; the
+        // route stays at /fleet so deep links and the /fleet/* sub-pages
+        // keep working. The standalone Drivers entry was removed at the
+        // same time — this combined label subsumes it. /fleet/drivers
+        // is still reachable by direct URL and via fleet workflows.
+        label: 'TRUCKS/DRIVERS',
         href: '/fleet',
         icon: CarFront,
         match: (p) => p.startsWith('/fleet'),
-      },
-      {
-        label: 'Drivers',
-        href: '/fleet/drivers',
-        icon: Users,
-        match: (p) => p.startsWith('/fleet/drivers'),
       },
     ],
   },
