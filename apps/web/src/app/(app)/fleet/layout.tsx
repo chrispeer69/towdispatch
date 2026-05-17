@@ -7,7 +7,7 @@ export default function FleetLayout({ children }: { children: React.ReactNode })
     <div className="space-y-6">
       <header>
         <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">
-          Fleet
+          Trucks/Drivers
         </h1>
         <p className="mt-1 text-sm text-text-secondary-on-dark">
           Trucks, drivers, expirations, maintenance, DVIR.

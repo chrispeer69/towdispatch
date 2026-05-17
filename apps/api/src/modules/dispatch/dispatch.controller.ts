@@ -135,6 +135,7 @@ export class DispatchController {
     active: JobDto[];
     recentlyCompleted: JobDto[];
     roster: DriverRosterRow[];
+    completedTodayByDriver: Record<string, number>;
   }> {
     const ctx = this.callerCtx(req);
     const [board, roster] = await Promise.all([

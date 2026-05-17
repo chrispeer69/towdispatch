@@ -3,7 +3,15 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  type LatLng,
+  formatMiles,
+  geocodeAddress,
+  haversineMiles,
+  isUsableMapboxToken,
+} from '@/lib/geocoding';
 import { cn } from '@/lib/utils';
+import { COMMON_MAKES, STANDARD_COLORS, modelsForMake } from './vehicle-options';
 const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
@@ -166,11 +174,35 @@ const EMPTY: FormState = {
   skipCustomerSms: false,
 };
 
-export function IntakeClient(): JSX.Element {
+interface StatePickerOption {
+  value: string;
+  label: string;
+  group: 'priority' | 'other';
+}
+
+interface IntakeClientProps {
+  /** Tenant's office address, joined to a single line. null when company
+   *  profile hasn't been filled out yet — distance hints just stay hidden. */
+  officeAddress: string | null;
+  /** NEXT_PUBLIC_MAPBOX_TOKEN, or null if missing / still on the placeholder. */
+  mapboxToken: string | null;
+  /** US states pre-sorted with the tenant's home + secondary states first. */
+  stateOptions: StatePickerOption[];
+}
+
+export function IntakeClient({
+  officeAddress,
+  mapboxToken,
+  stateOptions,
+}: IntakeClientProps): JSX.Element {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Geocoded office origin — resolved once on mount. Stays null if either
+  // the tenant has no physical address yet or geocoding fails.
+  const [officeCoord, setOfficeCoord] = useState<LatLng | null>(null);
+  const geocodingEnabled = isUsableMapboxToken(mapboxToken);
 
   // Existing-record detection. We only care about the simplest hit: when a
   // phone or plate exactly matches a record this tenant already has.
@@ -474,21 +506,84 @@ export function IntakeClient(): JSX.Element {
     }
   }
 
-  // -------- geolocation helper for the pickup field --------
-  async function fillPickupFromGeolocation(): Promise<void> {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
-    await new Promise<void>((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          update('pickupLat', pos.coords.latitude.toFixed(6));
-          update('pickupLng', pos.coords.longitude.toFixed(6));
-          resolve();
-        },
-        () => resolve(),
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 },
-      );
+  // -------- office origin geocode (once) --------
+  useEffect(() => {
+    if (!geocodingEnabled || !officeAddress || !mapboxToken) return;
+    const controller = new AbortController();
+    void geocodeAddress(officeAddress, mapboxToken, controller.signal).then((coord) => {
+      if (coord) setOfficeCoord(coord);
     });
-  }
+    return () => controller.abort();
+  }, [geocodingEnabled, officeAddress, mapboxToken]);
+
+  // -------- pickup geocode (debounced) --------
+  useEffect(() => {
+    if (!geocodingEnabled || !mapboxToken) return;
+    const query = form.pickupAddress.trim();
+    if (query.length < 4) return;
+    const controller = new AbortController();
+    const handle = setTimeout(() => {
+      void geocodeAddress(query, mapboxToken, controller.signal).then((coord) => {
+        if (!coord) return;
+        // Only overwrite if the dispatcher hasn't typed an explicit override.
+        setForm((prev) => {
+          if (prev.pickupAddress.trim() !== query) return prev;
+          return {
+            ...prev,
+            pickupLat: coord.lat.toFixed(6),
+            pickupLng: coord.lng.toFixed(6),
+          };
+        });
+      });
+    }, 600);
+    return () => {
+      controller.abort();
+      clearTimeout(handle);
+    };
+  }, [form.pickupAddress, geocodingEnabled, mapboxToken]);
+
+  // -------- dropoff geocode (debounced) --------
+  useEffect(() => {
+    if (!geocodingEnabled || !mapboxToken) return;
+    const query = form.dropoffAddress.trim();
+    if (query.length < 4) return;
+    const controller = new AbortController();
+    const handle = setTimeout(() => {
+      void geocodeAddress(query, mapboxToken, controller.signal).then((coord) => {
+        if (!coord) return;
+        setForm((prev) => {
+          if (prev.dropoffAddress.trim() !== query) return prev;
+          return {
+            ...prev,
+            dropoffLat: coord.lat.toFixed(6),
+            dropoffLng: coord.lng.toFixed(6),
+          };
+        });
+      });
+    }, 600);
+    return () => {
+      controller.abort();
+      clearTimeout(handle);
+    };
+  }, [form.dropoffAddress, geocodingEnabled, mapboxToken]);
+
+  // -------- derived distance hints --------
+  const pickupCoord = useMemo<LatLng | null>(() => {
+    const lat = Number.parseFloat(form.pickupLat);
+    const lng = Number.parseFloat(form.pickupLng);
+    return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+  }, [form.pickupLat, form.pickupLng]);
+
+  const dropoffCoord = useMemo<LatLng | null>(() => {
+    const lat = Number.parseFloat(form.dropoffLat);
+    const lng = Number.parseFloat(form.dropoffLng);
+    return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+  }, [form.dropoffLat, form.dropoffLng]);
+
+  const officeToPickupMiles =
+    officeCoord && pickupCoord ? haversineMiles(officeCoord, pickupCoord) : null;
+  const pickupToDropoffMiles =
+    pickupCoord && dropoffCoord ? haversineMiles(pickupCoord, dropoffCoord) : null;
 
   return (
     <form
@@ -577,16 +672,39 @@ export function IntakeClient(): JSX.Element {
             </div>
             <div className="space-y-1.5">
               <Label>State</Label>
-              <Input
+              <select
                 tabIndex={0}
-                placeholder="OH"
-                maxLength={2}
+                data-testid="intake-plate-state"
                 value={form.plateState}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  update('plateState', e.target.value.toUpperCase())
-                }
-                autoComplete="off"
-              />
+                onChange={(e) => update('plateState', e.target.value)}
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark focus-visible:border-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+              >
+                <option value="">—</option>
+                {(() => {
+                  const priority = stateOptions.filter((s) => s.group === 'priority');
+                  const other = stateOptions.filter((s) => s.group === 'other');
+                  return (
+                    <>
+                      {priority.length > 0 ? (
+                        <optgroup label="Home & nearby">
+                          {priority.map((s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ) : null}
+                      <optgroup label="All states">
+                        {other.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </>
+                  );
+                })()}
+              </select>
             </div>
           </div>
           {existingVehicleSummary ? (
@@ -631,28 +749,59 @@ export function IntakeClient(): JSX.Element {
               />
             </Field>
             <Field label="Color">
-              <Input
+              <select
                 tabIndex={0}
-                placeholder="Blue"
+                data-testid="intake-color"
                 value={form.color}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => update('color', e.target.value)}
-              />
+                onChange={(e) => update('color', e.target.value)}
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              >
+                <option value="">Select color…</option>
+                {STANDARD_COLORS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Make">
               <Input
                 tabIndex={0}
                 placeholder="Honda"
+                list="intake-make-options"
+                data-testid="intake-make"
                 value={form.make}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => update('make', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const next = e.target.value;
+                  // Changing make invalidates the currently-selected model so
+                  // the dispatcher doesn't ship a Honda Camry by accident.
+                  setForm((prev) => ({
+                    ...prev,
+                    make: next,
+                    model: prev.make === next ? prev.model : '',
+                  }));
+                }}
               />
+              <datalist id="intake-make-options">
+                {COMMON_MAKES.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </Field>
             <Field label="Model">
               <Input
                 tabIndex={0}
                 placeholder="Civic"
+                list="intake-model-options"
+                data-testid="intake-model"
                 value={form.model}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('model', e.target.value)}
               />
+              <datalist id="intake-model-options">
+                {modelsForMake(form.make).map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </Field>
           </div>
           <Field label="Class">
@@ -715,7 +864,16 @@ export function IntakeClient(): JSX.Element {
                 update('pickupAddress', e.target.value)
               }
             />
-            <div className="mt-2 grid grid-cols-3 gap-2">
+            <DistanceHint
+              data-testid="intake-pickup-distance"
+              enabled={geocodingEnabled}
+              originLabel="office"
+              miles={officeToPickupMiles}
+              originMissing={!officeAddress}
+              addressFilled={form.pickupAddress.trim().length >= 4}
+              originUnresolved={!!officeAddress && officeCoord === null}
+            />
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <Input
                 tabIndex={0}
                 placeholder="Lat"
@@ -730,14 +888,6 @@ export function IntakeClient(): JSX.Element {
                 value={form.pickupLng}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('pickupLng', e.target.value)}
               />
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => void fillPickupFromGeolocation()}
-              >
-                Use my location
-              </Button>
             </div>
           </Field>
 
@@ -753,6 +903,15 @@ export function IntakeClient(): JSX.Element {
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   update('dropoffAddress', e.target.value)
                 }
+              />
+              <DistanceHint
+                data-testid="intake-dropoff-distance"
+                enabled={geocodingEnabled}
+                originLabel="pickup"
+                miles={pickupToDropoffMiles}
+                originMissing={pickupCoord === null}
+                addressFilled={form.dropoffAddress.trim().length >= 4}
+                originUnresolved={false}
               />
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Input
@@ -912,6 +1071,58 @@ function Field({
       {enhanced}
     </div>
   );
+}
+
+/**
+ * Inline hint rendered just below an address input that shows the haversine
+ * distance from a known origin once both coordinates are resolved. Stays
+ * silent (renders nothing) unless we have something useful to say — empty
+ * field, geocoding disabled, or origin missing all collapse the slot so it
+ * doesn't take vertical space.
+ */
+function DistanceHint({
+  enabled,
+  originLabel,
+  miles,
+  originMissing,
+  addressFilled,
+  originUnresolved,
+  'data-testid': testId,
+}: {
+  enabled: boolean;
+  originLabel: 'office' | 'pickup';
+  miles: number | null;
+  /** True when the upstream origin coords aren't available (e.g. no pickup yet). */
+  originMissing: boolean;
+  /** True when the address text has been typed in (so we can show a "geocoding…" state). */
+  addressFilled: boolean;
+  /** True when the office address exists but Mapbox hasn't returned coords yet. */
+  originUnresolved: boolean;
+  'data-testid'?: string;
+}): JSX.Element | null {
+  if (!enabled) return null;
+  if (miles != null) {
+    return (
+      <p
+        data-testid={testId}
+        className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark"
+      >
+        <MapPin className="mr-1 inline h-3 w-3 text-brand-primary" />
+        {formatMiles(miles)} from {originLabel}
+      </p>
+    );
+  }
+  if (addressFilled && (originUnresolved || (!originMissing && miles === null))) {
+    return (
+      <p
+        data-testid={testId}
+        className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60"
+      >
+        Resolving distance…
+      </p>
+    );
+  }
+  return null;
 }
 
 function AdditionalContactInfo({

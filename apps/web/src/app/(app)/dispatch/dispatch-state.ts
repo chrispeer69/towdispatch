@@ -15,6 +15,12 @@ export interface DispatchSnapshot {
   active: JobDto[];
   recentlyCompleted: JobDto[];
   roster: DriverRosterRow[];
+  /**
+   * driverId -> completed-today tow count. Server-supplied; the dispatcher
+   * UI surfaces this as a chip next to each driver's name in the Active
+   * panel. Optional so older snapshots (e.g. cached preview) don't crash.
+   */
+  completedTodayByDriver?: Record<string, number>;
 }
 
 export interface DispatchState extends DispatchSnapshot {
@@ -55,6 +61,7 @@ export const initialState: DispatchState = {
   active: [],
   recentlyCompleted: [],
   roster: [],
+  completedTodayByDriver: {},
   pending: {},
   toast: null,
 };
@@ -74,22 +81,36 @@ function classifyJob(job: JobDto): 'queue' | 'active' | 'recently_completed' | '
 }
 
 function placeJob(state: DispatchState, job: JobDto): DispatchState {
-  const queue = state.queue.filter((j) => j.id !== job.id);
-  const active = state.active.filter((j) => j.id !== job.id);
-  const recentlyCompleted = state.recentlyCompleted.filter((j) => j.id !== job.id);
-  const dest = classifyJob(job);
+  // Carry forward joined customer/vehicle from the prior in-state copy.
+  // Socket events (job-assigned, job-status-changed, commit-after-assign)
+  // re-publish a plain JobDto without the dispatch-board joins, so without
+  // this merge the Active panel would lose the "LastName · year make model"
+  // line on every status transition.
+  const prior = findJob(state, job.id);
+  const merged: JobDto =
+    prior && (prior.customer !== undefined || prior.vehicle !== undefined)
+      ? {
+          ...job,
+          customer: job.customer ?? prior.customer,
+          vehicle: job.vehicle ?? prior.vehicle,
+        }
+      : job;
+  const queue = state.queue.filter((j) => j.id !== merged.id);
+  const active = state.active.filter((j) => j.id !== merged.id);
+  const recentlyCompleted = state.recentlyCompleted.filter((j) => j.id !== merged.id);
+  const dest = classifyJob(merged);
   if (dest === 'queue') {
-    return { ...state, queue: [...queue, job], active, recentlyCompleted };
+    return { ...state, queue: [...queue, merged], active, recentlyCompleted };
   }
   if (dest === 'active') {
-    return { ...state, queue, active: [...active, job], recentlyCompleted };
+    return { ...state, queue, active: [...active, merged], recentlyCompleted };
   }
   if (dest === 'recently_completed') {
     return {
       ...state,
       queue,
       active,
-      recentlyCompleted: [job, ...recentlyCompleted].slice(0, 10),
+      recentlyCompleted: [merged, ...recentlyCompleted].slice(0, 10),
     };
   }
   return { ...state, queue, active, recentlyCompleted };

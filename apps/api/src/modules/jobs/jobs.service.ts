@@ -449,6 +449,12 @@ export class JobsService {
     queue: JobDto[];
     active: JobDto[];
     recentlyCompleted: JobDto[];
+    /**
+     * driverId -> count of jobs that reached status='completed' today (UTC).
+     * Dispatcher UI renders this as a chip next to the driver's name so
+     * supervisors see throughput at a glance.
+     */
+    completedTodayByDriver: Record<string, number>;
   }> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       const queueRows = await tx.query.jobs.findMany({
@@ -457,14 +463,44 @@ export class JobsService {
         limit: 200,
       });
 
-      const activeRows = await tx.query.jobs.findMany({
-        where: and(
-          inArray(jobs.status, ['dispatched', 'enroute', 'on_scene', 'in_progress']),
-          isNull(jobs.deletedAt),
-        ),
-        orderBy: (t, { asc }) => [asc(t.assignedAt), asc(t.createdAt)],
-        limit: 200,
-      });
+      // Active rows ship with joined customer + vehicle snapshots so the
+      // dispatcher's Active panel can render "#JOB · LastName · year make
+      // model" without a per-row follow-up fetch.
+      const activeJoinedRows = await tx
+        .select({
+          job: jobs,
+          customerId: customers.id,
+          customerName: customers.name,
+          vehicleId: vehicles.id,
+          vehicleYear: vehicles.year,
+          vehicleMake: vehicles.make,
+          vehicleModel: vehicles.model,
+        })
+        .from(jobs)
+        .leftJoin(customers, eq(customers.id, jobs.customerId))
+        .leftJoin(vehicles, eq(vehicles.id, jobs.vehicleId))
+        .where(
+          and(
+            inArray(jobs.status, ['dispatched', 'enroute', 'on_scene', 'in_progress']),
+            isNull(jobs.deletedAt),
+          ),
+        )
+        .orderBy(jobs.assignedAt, jobs.createdAt)
+        .limit(200);
+
+      const active = activeJoinedRows.map((r) =>
+        rowToDto(r.job, {
+          customer: r.customerId ? { id: r.customerId, name: r.customerName ?? '' } : null,
+          vehicle: r.vehicleId
+            ? {
+                id: r.vehicleId,
+                year: r.vehicleYear ?? null,
+                make: r.vehicleMake ?? null,
+                model: r.vehicleModel ?? null,
+              }
+            : null,
+        }),
+      );
 
       const startOfDay = new Date();
       startOfDay.setUTCHours(0, 0, 0, 0);
@@ -478,10 +514,34 @@ export class JobsService {
         limit: 10,
       });
 
+      // Throughput-per-driver, today (UTC). Runs uncapped — the recentlyCompleted
+      // list above caps at 10 for the closed-jobs ribbon, but the count chip
+      // next to a driver's name must reflect every completed job.
+      const completedTodayRows = await tx
+        .select({
+          driverId: jobs.assignedDriverId,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(jobs)
+        .where(
+          and(
+            eq(jobs.status, 'completed'),
+            isNull(jobs.deletedAt),
+            sql`${jobs.updatedAt} >= ${startOfDay.toISOString()}`,
+            sql`${jobs.assignedDriverId} IS NOT NULL`,
+          ),
+        )
+        .groupBy(jobs.assignedDriverId);
+      const completedTodayByDriver: Record<string, number> = {};
+      for (const row of completedTodayRows) {
+        if (row.driverId) completedTodayByDriver[row.driverId] = row.count;
+      }
+
       return {
-        queue: queueRows.map(rowToDto),
-        active: activeRows.map(rowToDto),
-        recentlyCompleted: recentlyCompletedRows.map(rowToDto),
+        queue: queueRows.map((j) => rowToDto(j)),
+        active,
+        recentlyCompleted: recentlyCompletedRows.map((j) => rowToDto(j)),
+        completedTodayByDriver,
       };
     });
   }
@@ -997,8 +1057,18 @@ function textToNum(s: string | null): number | null {
 const notFound = (): NotFoundException =>
   new NotFoundException({ code: ERROR_CODES.NOT_FOUND, message: 'Job not found' });
 
-function rowToDto(j: typeof jobs.$inferSelect): JobDto {
-  return {
+interface JobJoinedRefs {
+  customer?: { id: string; name: string } | null;
+  vehicle?: {
+    id: string;
+    year: number | null;
+    make: string | null;
+    model: string | null;
+  } | null;
+}
+
+function rowToDto(j: typeof jobs.$inferSelect, joined?: JobJoinedRefs): JobDto {
+  const dto: JobDto = {
     id: j.id,
     tenantId: j.tenantId,
     jobNumber: j.jobNumber,
@@ -1028,4 +1098,7 @@ function rowToDto(j: typeof jobs.$inferSelect): JobDto {
     updatedAt: j.updatedAt.toISOString(),
     deletedAt: j.deletedAt ? j.deletedAt.toISOString() : null,
   };
+  if (joined?.customer !== undefined) dto.customer = joined.customer;
+  if (joined?.vehicle !== undefined) dto.vehicle = joined.vehicle;
+  return dto;
 }

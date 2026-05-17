@@ -423,35 +423,160 @@ export function QueuePane({
   );
 }
 
+/**
+ * Active job lifecycle order, presented top-to-bottom within each driver
+ * group. "In tow" (in_progress) is most urgent for a dispatcher to monitor
+ * so it leads, then on-scene → enroute → dispatched. New jobs that haven't
+ * been dispatched yet live in the Queue pane, not here.
+ */
+const ACTIVE_STATUS_ORDER = ['in_progress', 'on_scene', 'enroute', 'dispatched'] as const;
+type ActiveStatus = (typeof ACTIVE_STATUS_ORDER)[number];
+
+const ACTIVE_STATUS_LABEL: Record<ActiveStatus, string> = {
+  in_progress: 'In tow',
+  on_scene: 'On scene',
+  enroute: 'Enroute',
+  dispatched: 'Dispatched',
+};
+
+const ACTIVE_STATUS_TONE: Record<ActiveStatus, string> = {
+  in_progress: 'bg-brand-primary/20 text-brand-primary',
+  on_scene: 'bg-ok/20 text-ok',
+  enroute: 'bg-info/20 text-info',
+  dispatched: 'bg-bg-surface-elevated text-text-secondary-on-dark',
+};
+
+function lastNameOf(name: string | null | undefined): string {
+  if (!name) return '';
+  const trimmed = name.trim();
+  if (!trimmed) return '';
+  const tokens = trimmed.split(/\s+/);
+  return tokens[tokens.length - 1] ?? trimmed;
+}
+
+function vehicleSummary(v: NonNullable<JobDto['vehicle']>): string {
+  const parts: string[] = [];
+  if (v.year != null) parts.push(String(v.year));
+  if (v.make) parts.push(v.make);
+  if (v.model) parts.push(v.model);
+  return parts.join(' ');
+}
+
+function isActiveStatus(s: string): s is ActiveStatus {
+  return (ACTIVE_STATUS_ORDER as readonly string[]).includes(s);
+}
+
+function ActiveJobRow({ job }: { job: JobDto }): JSX.Element {
+  const tone = isActiveStatus(job.status)
+    ? ACTIVE_STATUS_TONE[job.status]
+    : ACTIVE_STATUS_TONE.dispatched;
+  const label = isActiveStatus(job.status)
+    ? ACTIVE_STATUS_LABEL[job.status]
+    : job.status.replace('_', ' ');
+  const last = lastNameOf(job.customer?.name);
+  const veh = job.vehicle ? vehicleSummary(job.vehicle) : '';
+  return (
+    <div
+      data-testid={`job-card-${job.id}`}
+      data-status={job.status}
+      data-service={job.serviceType}
+      className="flex items-center gap-2 rounded-md border border-divider bg-bg-base/60 px-2 py-1 text-xs"
+    >
+      <span className="font-mono text-[11px] text-text-primary-on-dark">#{job.jobNumber}</span>
+      <span className="min-w-0 flex-1 truncate text-text-primary-on-dark">
+        {last ? <span className="font-semibold">{last}</span> : null}
+        {last && veh ? <span className="text-text-secondary-on-dark"> · </span> : null}
+        {veh ? <span className="text-text-secondary-on-dark">{veh}</span> : null}
+        {!last && !veh ? (
+          <span className="text-text-secondary-on-dark">{job.pickupAddress}</span>
+        ) : null}
+      </span>
+      <span
+        className={`shrink-0 rounded-full px-1.5 py-0.5 font-condensed text-[9px] font-extrabold uppercase tracking-widest ${tone}`}
+      >
+        {label}
+      </span>
+      <span className="shrink-0">
+        <TrackingBadge jobId={job.id} jobNumber={job.jobNumber} canRevoke />
+      </span>
+    </div>
+  );
+}
+
+interface DriverGroup {
+  driverId: string | null;
+  driverName: string;
+  jobs: JobDto[];
+}
+
+function groupActiveByDriver(jobs: JobDto[], roster: DriverRosterRow[]): DriverGroup[] {
+  const byId = new Map<string, { name: string; firstName: string; lastName: string }>();
+  for (const r of roster) {
+    byId.set(r.driver.id, {
+      name: `${r.driver.firstName} ${r.driver.lastName}`.trim(),
+      firstName: r.driver.firstName,
+      lastName: r.driver.lastName,
+    });
+  }
+  const buckets = new Map<string, JobDto[]>();
+  for (const j of jobs) {
+    const key = j.assignedDriverId ?? '__unassigned';
+    const arr = buckets.get(key);
+    if (arr) arr.push(j);
+    else buckets.set(key, [j]);
+  }
+  const result: DriverGroup[] = [];
+  for (const [key, list] of buckets.entries()) {
+    if (key === '__unassigned') continue;
+    const ref = byId.get(key);
+    result.push({
+      driverId: key,
+      driverName: ref?.name ?? 'Unknown driver',
+      jobs: list,
+    });
+  }
+  result.sort((a, b) => a.driverName.localeCompare(b.driverName));
+  const unassigned = buckets.get('__unassigned');
+  if (unassigned?.length) {
+    result.push({ driverId: null, driverName: 'Unassigned', jobs: unassigned });
+  }
+  // Within each group, order by the active-status lifecycle.
+  for (const g of result) {
+    const rank = new Map<string, number>(ACTIVE_STATUS_ORDER.map((s, i) => [s, i]));
+    g.jobs.sort((a, b) => {
+      const ra = rank.get(a.status) ?? 99;
+      const rb = rank.get(b.status) ?? 99;
+      if (ra !== rb) return ra - rb;
+      return a.jobNumber.localeCompare(b.jobNumber);
+    });
+  }
+  return result;
+}
+
 export function ActivePane({
   jobs,
-  draggable = true,
+  roster,
+  completedTodayByDriver,
+  selectedDriverId,
+  onSelectDriver,
   className,
 }: {
   jobs: JobDto[];
-  /**
-   * On the live dispatch page (no roster/queue panes present) the active job
-   * cards are read-only — disable drag so users don't grab cards that have
-   * nowhere to drop.
-   */
-  draggable?: boolean;
+  roster: DriverRosterRow[];
+  completedTodayByDriver: Record<string, number>;
+  /** When non-null, the matching driver's header is highlighted. */
+  selectedDriverId?: string | null;
+  /** Called with the toggled driverId (or null on deselect). */
+  onSelectDriver?: (driverId: string | null) => void;
   className?: string;
 }): JSX.Element {
-  const groups: Record<string, JobDto[]> = {
-    dispatched: [],
-    enroute: [],
-    on_scene: [],
-    in_progress: [],
-  };
-  for (const j of jobs) {
-    if (groups[j.status]) groups[j.status]?.push(j);
-  }
+  const groups = groupActiveByDriver(jobs, roster);
   return (
     <section
       data-testid="dispatch-active"
-      className={`rounded-[14px] border border-divider bg-bg-surface/40 p-4 ${className ?? ''}`}
+      className={`rounded-[14px] border border-divider bg-bg-surface/40 p-3 ${className ?? ''}`}
     >
-      <header className="flex items-center justify-between pb-3">
+      <header className="flex items-center justify-between pb-2">
         <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           Active jobs
         </h2>
@@ -459,32 +584,65 @@ export function ActivePane({
           {jobs.length}
         </span>
       </header>
-      <div className="space-y-4">
-        {(['dispatched', 'enroute', 'on_scene', 'in_progress'] as const).map((status) => {
-          const group = groups[status] ?? [];
-          if (group.length === 0) return null;
-          return (
-            <div key={status}>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-text-secondary-on-dark">
-                {status.replace('_', ' ')}
-              </p>
-              <ul className="space-y-2">
-                {group.map((job) => (
-                  <li key={job.id} className="space-y-1">
-                    <JobCard job={job} compact draggable={draggable} />
-                    <div className="flex justify-end pr-1">
-                      <TrackingBadge jobId={job.id} jobNumber={job.jobNumber} canRevoke />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-        {jobs.length === 0 ? (
-          <EmptyState icon={<Truck className="h-5 w-5" />} label="No active jobs" />
-        ) : null}
-      </div>
+      {jobs.length === 0 ? (
+        <EmptyState icon={<Truck className="h-5 w-5" />} label="No active jobs" />
+      ) : (
+        <div className="space-y-2">
+          {groups.map((g) => {
+            const isSelected = g.driverId !== null && g.driverId === selectedDriverId;
+            const completed = g.driverId ? (completedTodayByDriver[g.driverId] ?? 0) : 0;
+            const headerCls = isSelected
+              ? 'bg-brand-primary text-white'
+              : 'bg-bg-surface-elevated/60 text-text-primary-on-dark hover:bg-bg-surface-elevated';
+            return (
+              <div key={g.driverId ?? 'unassigned'} className="space-y-0.5">
+                {g.driverId ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelectDriver?.(isSelected ? null : g.driverId)}
+                    aria-pressed={isSelected}
+                    className={`flex w-full items-center justify-between gap-2 rounded-md px-2 py-1 text-left transition-colors ${headerCls}`}
+                    data-testid={`active-driver-${g.driverId}`}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate font-condensed text-sm font-extrabold uppercase tracking-wide">
+                        {g.driverName}
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-ok/20 text-ok'
+                        }`}
+                        title={`${completed} ${completed === 1 ? 'tow' : 'tows'} completed today`}
+                      >
+                        {completed} done
+                      </span>
+                    </span>
+                    <span className="shrink-0 rounded-full bg-black/10 px-1.5 py-0.5 text-[10px] font-bold">
+                      {g.jobs.length}
+                    </span>
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 rounded-md bg-bg-surface-elevated/40 px-2 py-1">
+                    <span className="font-condensed text-xs font-extrabold uppercase tracking-wider text-text-secondary-on-dark">
+                      {g.driverName}
+                    </span>
+                    <span className="rounded-full bg-black/10 px-1.5 py-0.5 text-[10px] font-bold text-text-secondary-on-dark">
+                      {g.jobs.length}
+                    </span>
+                  </div>
+                )}
+                <ul className="space-y-0.5 pl-1">
+                  {g.jobs.map((job) => (
+                    <li key={job.id}>
+                      <ActiveJobRow job={job} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
@@ -527,12 +685,29 @@ export function RosterPane({
 export function MapPane({
   mapboxToken,
   state,
+  /**
+   * When set, the map filters down to that driver's roster row plus only the
+   * jobs assigned to them (or unassigned queue jobs are hidden entirely).
+   * Click the highlighted driver header again to clear focus.
+   */
+  focusedDriverId,
   className,
 }: {
   mapboxToken: string | null;
   state: { roster: DriverRosterRow[]; queue: JobDto[]; active: JobDto[] };
+  focusedDriverId?: string | null;
   className?: string;
 }): JSX.Element {
+  const allJobs = [...state.queue, ...state.active];
+  const filteredRoster = focusedDriverId
+    ? state.roster.filter((r) => r.driver.id === focusedDriverId)
+    : state.roster;
+  const filteredJobs = focusedDriverId
+    ? allJobs.filter((j) => j.assignedDriverId === focusedDriverId)
+    : allJobs;
+  const focusedName = focusedDriverId
+    ? state.roster.find((r) => r.driver.id === focusedDriverId)
+    : null;
   return (
     <section
       data-testid="dispatch-map"
@@ -541,16 +716,17 @@ export function MapPane({
       <header className="flex items-center justify-between pb-3">
         <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
           Map
+          {focusedName ? (
+            <span className="ml-2 rounded-full bg-brand-primary/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brand-primary">
+              Focused: {focusedName.driver.firstName} {focusedName.driver.lastName}
+            </span>
+          ) : null}
         </h2>
         <span className="text-xs text-text-secondary-on-dark">
           <MapPin className="inline h-3.5 w-3.5" /> Mapbox
         </span>
       </header>
-      <DispatchMap
-        token={mapboxToken}
-        roster={state.roster}
-        jobs={[...state.queue, ...state.active]}
-      />
+      <DispatchMap token={mapboxToken} roster={filteredRoster} jobs={filteredJobs} />
     </section>
   );
 }
