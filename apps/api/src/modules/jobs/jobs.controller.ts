@@ -3,6 +3,7 @@ import {
   type AssignJobDriverPayload,
   type CancelJobPayload,
   type CreateJobIntakePayload,
+  type CreateJobPayload,
   type IntakeResultDto,
   type JobDto,
   type JobListFilters,
@@ -13,6 +14,7 @@ import {
   assignJobDriverSchema,
   cancelJobSchema,
   createJobIntakeSchema,
+  createJobSchema,
   jobListFiltersSchema,
   quotePreviewSchema,
 } from '@ustowdispatch/shared';
@@ -65,6 +67,21 @@ export class JobsController {
     @Req() req: FastifyRequest,
   ): Promise<IntakeResultDto> {
     return this.jobs.createIntake(this.callerCtx(req), body);
+  }
+
+  /**
+   * Direct create — caller already has the customer + vehicle IDs.
+   * intake/POST is for the full create-customer-and-vehicle flow; this is
+   * the dispatch-board "+ Job" path and the API path the integration
+   * suite uses when it has already provisioned both rows.
+   */
+  @Post()
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async create(
+    @ZodBody(createJobSchema) body: CreateJobPayload,
+    @Req() req: FastifyRequest,
+  ): Promise<JobDto> {
+    return this.jobs.create(this.callerCtx(req), body);
   }
 
   @Get(':id')
