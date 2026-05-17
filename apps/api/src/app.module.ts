@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module.js';
 import { IntegrationsModule } from './integrations/integrations.module.js';
 import { MotorClubModule } from './integrations/motor-club/motor-club.module.js';
 import { NotificationModule } from './integrations/notification/notification.module.js';
+import { AccountRateCardsModule } from './modules/account-rate-cards/account-rate-cards.module.js';
 import { AccountingModule } from './modules/accounting/accounting.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
@@ -49,6 +50,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     TenantsModule,
     UsersModule,
     AccountsModule,
+    AccountRateCardsModule,
     CustomersModule,
     VehiclesModule,
     RatesModule,
