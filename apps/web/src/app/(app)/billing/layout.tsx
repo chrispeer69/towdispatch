@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 /**
  * /billing layout — sticky tab strip across invoices/payments/aging/etc.
@@ -19,13 +18,13 @@ export default function BillingLayout({ children }: { children: ReactNode }): JS
     <div className="space-y-4">
       <nav aria-label="Billing tabs" className="flex flex-wrap gap-2 border-b border-divider pb-2">
         {TABS.map((t) => (
-          <Link
+          <a
             key={t.href}
             href={t.href}
             className="rounded-md px-3 py-1.5 text-sm text-text-secondary-on-dark hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
           >
             {t.label}
-          </Link>
+          </a>
         ))}
       </nav>
       {children}

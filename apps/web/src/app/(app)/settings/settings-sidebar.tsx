@@ -9,7 +9,6 @@
  * /settings/users/123 still keeps the Users tab highlighted.
  */
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { JSX } from 'react';
 import { SETTINGS_TABS, settingsTabHref } from './tabs';
@@ -27,7 +26,7 @@ export function SettingsSidebar(): JSX.Element {
           const isActive = pathname === href || pathname.startsWith(`${href}/`);
           return (
             <li key={tab.slug}>
-              <Link
+              <a
                 href={href}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
@@ -44,7 +43,7 @@ export function SettingsSidebar(): JSX.Element {
                   />
                 ) : null}
                 <span className="text-sm font-medium">{tab.label}</span>
-              </Link>
+              </a>
             </li>
           );
         })}

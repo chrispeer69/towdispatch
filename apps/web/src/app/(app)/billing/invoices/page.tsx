@@ -1,4 +1,5 @@
 import { fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
+import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
@@ -19,14 +20,19 @@ export default async function InvoicesPage({
   searchParams: Promise<SearchParams>;
 }): Promise<JSX.Element> {
   const params = await searchParams;
-  // Combine Session 9.7 cached layout read with Session 9.8 token threading.
   const token = await getSessionToken();
-  const list = await fetchInvoices({
-    status: params.status,
-    search: params.search,
-    limit: params.limit ?? '50',
-    offset: params.offset ?? '0',
-  }, token);
+  const result = await tryFetch(() =>
+    fetchInvoices(
+      {
+        status: params.status,
+        search: params.search,
+        limit: params.limit ?? '50',
+        offset: params.offset ?? '0',
+      },
+      token,
+    ),
+  );
+  const list = result.data ?? { data: [], total: 0, limit: 50, offset: 0 };
 
   return (
     <div className="space-y-6">

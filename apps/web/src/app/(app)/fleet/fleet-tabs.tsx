@@ -1,7 +1,6 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -34,7 +33,7 @@ export function FleetTabs(): JSX.Element {
       {TABS.map((t) => {
         const active = t.match(pathname);
         return (
-          <Link
+          <a
             key={t.href}
             href={t.href}
             className={cn(
@@ -45,7 +44,7 @@ export function FleetTabs(): JSX.Element {
             )}
           >
             {t.label}
-          </Link>
+          </a>
         );
       })}
     </nav>
