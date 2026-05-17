@@ -112,7 +112,9 @@ describe('resolveCurveMultiplier', () => {
     for (let dow = 0; dow < 7; dow++) {
       grid.push(Array(24).fill(1.0));
     }
-    grid[6]![20] = 1.15; // Saturday 8 PM
+    const sat = grid[6];
+    if (!sat) throw new Error('grid setup failed');
+    sat[20] = 1.15; // Saturday 8 PM
     const m = resolveCurveMultiplier(grid, '7x24', 6, 20);
     expect(m).toBe(1.15);
   });

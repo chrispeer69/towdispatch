@@ -156,15 +156,21 @@ function ReportTable({ rows }: { rows: Array<Record<string, unknown>> }): JSX.El
           </tr>
         </thead>
         <tbody className="divide-y divide-divider">
-          {rows.map((r, i) => (
-            <tr key={i}>
-              {headers.map((h) => (
-                <td key={h} className="px-3 py-2">
-                  {String((r as Record<string, unknown>)[h] ?? '')}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {rows.map((r, i) => {
+            const firstCol = headers[0];
+            const stableKey = firstCol
+              ? `${i}-${String((r as Record<string, unknown>)[firstCol] ?? '')}`
+              : `row-${i}`;
+            return (
+              <tr key={stableKey}>
+                {headers.map((h) => (
+                  <td key={h} className="px-3 py-2">
+                    {String((r as Record<string, unknown>)[h] ?? '')}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

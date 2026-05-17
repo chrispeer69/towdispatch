@@ -186,7 +186,7 @@ export class DynamicPricingReportsService {
   toCsv<T extends Record<string, unknown>>(rows: T[]): string {
     if (rows.length === 0) return '';
     const headers = Object.keys(rows[0] as Record<string, unknown>);
-    const escape = (v: unknown): string => {
+    const escapeCsv = (v: unknown): string => {
       if (v === null || v === undefined) return '';
       const s = String(v);
       if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
@@ -194,7 +194,7 @@ export class DynamicPricingReportsService {
     };
     const lines = [headers.join(',')];
     for (const row of rows) {
-      lines.push(headers.map((h) => escape((row as Record<string, unknown>)[h])).join(','));
+      lines.push(headers.map((h) => escapeCsv((row as Record<string, unknown>)[h])).join(','));
     }
     return lines.join('\n');
   }

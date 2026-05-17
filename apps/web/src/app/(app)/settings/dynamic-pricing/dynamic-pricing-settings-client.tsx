@@ -148,10 +148,14 @@ export function DynamicPricingSettingsClient({
         <h3 className="font-semibold">Cap & Demand Surge Thresholds</h3>
         <div className="grid gap-3 md:grid-cols-3">
           <div>
-            <label className="block text-xs font-mono uppercase tracking-[0.18em] text-text-secondary-on-dark">
+            <label
+              htmlFor="dyn-cap-multiplier"
+              className="block text-xs font-mono uppercase tracking-[0.18em] text-text-secondary-on-dark"
+            >
               Cap multiplier
             </label>
             <Input
+              id="dyn-cap-multiplier"
               type="number"
               min={1}
               max={10}
@@ -165,13 +169,13 @@ export function DynamicPricingSettingsClient({
               }}
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-xs font-mono uppercase tracking-[0.18em] text-text-secondary-on-dark">
+          <fieldset className="md:col-span-2 border-0 p-0 m-0">
+            <legend className="block text-xs font-mono uppercase tracking-[0.18em] text-text-secondary-on-dark">
               Demand surge thresholds (% of baseline) → multipliers
-            </label>
+            </legend>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {settings.demandSurgeThresholds.map((thr, i) => (
-                <div key={i} className="flex gap-1 text-xs">
+                <div key={`tier-${i}-${thr}`} className="flex gap-1 text-xs">
                   <Input
                     type="number"
                     min={101}
@@ -191,7 +195,7 @@ export function DynamicPricingSettingsClient({
                 </div>
               ))}
             </div>
-          </div>
+          </fieldset>
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input
