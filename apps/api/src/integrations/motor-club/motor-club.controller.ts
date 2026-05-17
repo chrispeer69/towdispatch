@@ -10,9 +10,22 @@
  * mode (NODE_ENV=test or AGERO_INBOUND_HMAC_DISABLED=1) skips the
  * check so E2E can drive it without a real signing key.
  */
-import { BadRequestException, Body, Controller, Get, Post } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Post,
+} from '@nestjs/common';
+import { dynamicPricingTiers, tenants, uuidv7 } from '@ustowdispatch/db';
+import { dynamicPricingTenantSettingsSchema } from '@ustowdispatch/shared';
+import { and, eq, isNull } from 'drizzle-orm';
+import { z } from 'zod';
 import { Public } from '../../common/decorators/public.decorator.js';
+import { ZodParam } from '../../common/decorators/zod.decorator.js';
 import { TransactionRunner } from '../../database/transaction-runner.service.js';
 import { AgeroStubProvider } from './agero-stub.provider.js';
 
@@ -40,7 +53,13 @@ export class MotorClubController {
    */
   @Public()
   @Post('dispatch')
-  async dispatch(@Body() payload: InboundDispatchPayload): Promise<{ jobId: string }> {
+  async dispatch(
+    @Body() payload: InboundDispatchPayload,
+  ): Promise<{
+    jobId: string;
+    stormSurgeOfferAvailable?: boolean;
+    stormSurge?: { tierName: string | null; multiplier: number | null };
+  }> {
     if (!payload.tenantId || !payload.externalId) {
       throw new BadRequestException({
         code: 'BAD_REQUEST',
@@ -124,7 +143,92 @@ export class MotorClubController {
       );
     });
 
-    return { jobId };
+    // Storm Surge Offer Engine (Moat #1) — if the tenant has the flag
+    // enabled AND any active Weather tier with multiplier >= 1.5x, surface
+    // an offer the operator can extend to the customer (higher-priced
+    // direct dispatch in lieu of the lower motor-club rate). The operator
+    // accepts/declines via /motor-club/agero/storm-surge-offer/:jobId/*.
+    let stormSurgeOfferAvailable = false;
+    let stormSurgeMultiplier: number | null = null;
+    let stormSurgeTierName: string | null = null;
+    await this.admin.runAsAdmin({}, async (db) => {
+      const tenant = await db.query.tenants.findFirst({
+        where: eq(tenants.id, payload.tenantId),
+      });
+      const settings = parseDynPricingSettings(tenant?.settings);
+      if (settings.motorClubStormSurgeEnabled) {
+        const weatherTiers = await db.query.dynamicPricingTiers.findMany({
+          where: and(
+            eq(dynamicPricingTiers.tenantId, payload.tenantId),
+            eq(dynamicPricingTiers.category, 'weather'),
+            eq(dynamicPricingTiers.isActive, true),
+            isNull(dynamicPricingTiers.deletedAt),
+          ),
+        });
+        const max = weatherTiers.reduce<{ name: string; m: number } | null>((acc, t) => {
+          const m = Number(t.multiplier);
+          if (m >= 1.5 && (!acc || m > acc.m)) return { name: t.name, m };
+          return acc;
+        }, null);
+        if (max) {
+          stormSurgeOfferAvailable = true;
+          stormSurgeMultiplier = max.m;
+          stormSurgeTierName = max.name;
+        }
+      }
+    });
+
+    return {
+      jobId,
+      stormSurgeOfferAvailable,
+      ...(stormSurgeOfferAvailable
+        ? {
+            stormSurge: {
+              tierName: stormSurgeTierName,
+              multiplier: stormSurgeMultiplier,
+            },
+          }
+        : {}),
+    };
+  }
+
+  /**
+   * Storm Surge offer accept. Records the operator's choice on the job's
+   * notes for audit; the full state-machine wiring (rate adjustment, etc.)
+   * is a follow-up build per the spec.
+   */
+  @Post('storm-surge-offer/:jobId/accept')
+  @HttpCode(HttpStatus.OK)
+  async acceptStormSurge(
+    @ZodParam(z.object({ jobId: z.string().uuid() })) params: { jobId: string },
+  ): Promise<{ jobId: string; accepted: true }> {
+    await this.admin.runAsAdmin({}, async (_db, client) => {
+      const res = await client.query(
+        `UPDATE jobs SET notes = COALESCE(notes, '') || E'\nstorm-surge: accepted', updated_at = now() WHERE id = $1`,
+        [params.jobId],
+      );
+      if (res.rowCount === 0) {
+        throw new NotFoundException({ code: 'NOT_FOUND', message: 'Job not found' });
+      }
+    });
+    return { jobId: params.jobId, accepted: true };
+  }
+
+  @Post('storm-surge-offer/:jobId/decline')
+  @HttpCode(HttpStatus.OK)
+  async declineStormSurge(
+    @ZodParam(z.object({ jobId: z.string().uuid() })) params: { jobId: string },
+  ): Promise<{ jobId: string; declined: true }> {
+    await this.admin.runAsAdmin({}, async (_db, client) => {
+      const res = await client.query(
+        `UPDATE jobs SET notes = COALESCE(notes, '') || E'\nstorm-surge: declined', updated_at = now() WHERE id = $1`,
+        [params.jobId],
+      );
+      if (res.rowCount === 0) {
+        throw new NotFoundException({ code: 'NOT_FOUND', message: 'Job not found' });
+      }
+    });
+    return { jobId: params.jobId, declined: true };
   }
 
   /**
@@ -139,4 +243,11 @@ export class MotorClubController {
     }
     return this.stub.getOutbox().map(({ op, externalId, at }) => ({ op, externalId, at }));
   }
+}
+
+function parseDynPricingSettings(settings: unknown) {
+  const obj = (settings as Record<string, unknown> | null) ?? null;
+  const candidate = obj?.dynamicPricing ?? {};
+  const parsed = dynamicPricingTenantSettingsSchema.safeParse(candidate);
+  return parsed.success ? parsed.data : dynamicPricingTenantSettingsSchema.parse({});
 }
