@@ -316,8 +316,20 @@ export function RateSheetClient({ catalog, initialRates }: Props): JSX.Element {
                   <colgroup>
                     <col className="w-[28%]" />
                     <col className="w-[14%]" />
+                    {/*
+                      Each class column gets EXACTLY the same width — the
+                      remaining 58% split evenly across however many
+                      vehicle-class columns are active. Without an
+                      explicit width, the browser auto-sizes based on
+                      content and the columns drift apart (a row with a
+                      colspan'd "spans-all" input vs rows with three
+                      separate inputs makes the auto-layout inconsistent).
+                      Equal widths guarantee Light / Medium / Heavy
+                      headers and value cells stack neatly under each
+                      other.
+                    */}
                     {unifiedClasses.map((vc) => (
-                      <col key={vc} />
+                      <col key={vc} style={{ width: `${58 / unifiedClasses.length}%` }} />
                     ))}
                   </colgroup>
                   <thead className="border-b border-divider text-left text-text-secondary-on-dark/60">
@@ -466,14 +478,21 @@ function PriceInput({
       return serverCents !== parsed;
     })();
 
+  // The outer wrapper is a fixed-width box centered in the cell via
+  // mx-auto. The $ glyph is absolutely positioned INSIDE the input
+  // (not in the flex flow next to it) so it doesn't shift the
+  // input's horizontal center relative to the column. Result: the
+  // input's center === the cell's center === the header text's
+  // center, so Light / Medium / Heavy line up cleanly with the
+  // values below them.
   return (
-    <div
-      className={cn(
-        'flex items-center justify-center gap-1',
-        spanAll ? 'max-w-[200px] mx-auto' : '',
-      )}
-    >
-      <span className="font-mono text-[11px] text-text-secondary-on-dark/60">$</span>
+    <div className={cn('relative mx-auto w-full', spanAll ? 'max-w-[200px]' : 'max-w-[110px]')}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 font-mono text-[11px] text-text-secondary-on-dark/60"
+      >
+        $
+      </span>
       <input
         ref={inputRef}
         data-cell-key={cellKey}
@@ -491,7 +510,7 @@ function PriceInput({
         }}
         aria-invalid={hasError || undefined}
         className={cn(
-          'h-9 w-full max-w-[110px] rounded-[8px] border bg-bg-surface px-2 text-right font-mono text-sm text-text-primary-on-dark transition-colors focus:outline-none focus:ring-1',
+          'h-9 w-full rounded-[8px] border bg-bg-surface pl-5 pr-2 text-right font-mono text-sm text-text-primary-on-dark transition-colors focus:outline-none focus:ring-1',
           hasError
             ? 'border-danger/60 focus:border-danger focus:ring-danger/30'
             : isDirty
