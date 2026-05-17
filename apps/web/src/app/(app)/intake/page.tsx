@@ -2,6 +2,7 @@ import { tryFetch } from '@/lib/api/client';
 import { fetchTenantCurrent } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/cookies';
 import { getOptionalUser } from '@/lib/auth/session';
+import { type UsState, buildPrioritizedStateList } from '@ustowdispatch/shared';
 import { IntakeClient } from './intake-client';
 
 export const metadata = { title: 'Call Intake â€” US Tow DISPATCH' };
@@ -49,9 +50,24 @@ export default async function IntakePage(): Promise<JSX.Element> {
   const token = await getSessionToken();
   const tenantResult = await tryFetch(() => fetchTenantCurrent(token));
   const settings = tenantResult.data?.settings as
-    | { physical_address?: CompanyAddressLike }
+    | {
+        physical_address?: CompanyAddressLike;
+        secondary_states?: unknown;
+      }
     | undefined;
   const officeAddress = formatOfficeAddress(settings?.physical_address);
+
+  // Build the prioritized plate-state list once on the server so it ships
+  // pre-sorted to the client. Falls back to a plain alphabetical list when
+  // the tenant hasn't set a home state yet.
+  const homeState =
+    typeof settings?.physical_address?.state === 'string'
+      ? (settings.physical_address.state as UsState)
+      : null;
+  const secondaryStates = Array.isArray(settings?.secondary_states)
+    ? (settings?.secondary_states.filter((s): s is UsState => typeof s === 'string') as UsState[])
+    : [];
+  const stateOptions = buildPrioritizedStateList(homeState, secondaryStates);
 
   const rawToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
   const mapboxToken = rawToken && !rawToken.startsWith('pk.placeholder') ? rawToken : null;
@@ -71,7 +87,11 @@ export default async function IntakePage(): Promise<JSX.Element> {
           Tab to advance Â· Cmd/Ctrl+Enter to dispatch
         </span>
       </header>
-      <IntakeClient officeAddress={officeAddress} mapboxToken={mapboxToken} />
+      <IntakeClient
+        officeAddress={officeAddress}
+        mapboxToken={mapboxToken}
+        stateOptions={stateOptions}
+      />
     </div>
   );
 }

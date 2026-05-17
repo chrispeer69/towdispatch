@@ -31,11 +31,57 @@
 import { z } from 'zod';
 
 const US_STATE_VALUES = [
-  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI',
-  'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN',
-  'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH',
-  'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA',
-  'WV', 'WI', 'WY',
+  'AL',
+  'AK',
+  'AZ',
+  'AR',
+  'CA',
+  'CO',
+  'CT',
+  'DE',
+  'DC',
+  'FL',
+  'GA',
+  'HI',
+  'ID',
+  'IL',
+  'IN',
+  'IA',
+  'KS',
+  'KY',
+  'LA',
+  'ME',
+  'MD',
+  'MA',
+  'MI',
+  'MN',
+  'MS',
+  'MO',
+  'MT',
+  'NE',
+  'NV',
+  'NH',
+  'NJ',
+  'NM',
+  'NY',
+  'NC',
+  'ND',
+  'OH',
+  'OK',
+  'OR',
+  'PA',
+  'RI',
+  'SC',
+  'SD',
+  'TN',
+  'TX',
+  'UT',
+  'VT',
+  'VA',
+  'WA',
+  'WV',
+  'WI',
+  'WY',
 ] as const;
 
 export const US_STATES = US_STATE_VALUES;
@@ -47,14 +93,10 @@ const e164Schema = z
   .regex(/^\+[1-9]\d{7,14}$/, 'Phone must be in E.164 format (e.g. +15551234567)');
 
 /** Stored as the literal "##-#######" the IRS prints. */
-const einSchema = z
-  .string()
-  .regex(/^\d{2}-\d{7}$/, 'EIN must be formatted NN-NNNNNNN');
+const einSchema = z.string().regex(/^\d{2}-\d{7}$/, 'EIN must be formatted NN-NNNNNNN');
 
 /** 5-digit or 5+4 ZIP. */
-const zipSchema = z
-  .string()
-  .regex(/^\d{5}(-\d{4})?$/, 'ZIP must be 5 digits or 5+4');
+const zipSchema = z.string().regex(/^\d{5}(-\d{4})?$/, 'ZIP must be 5 digits or 5+4');
 
 /** Hex RGB with leading "#". */
 const hexColorSchema = z
@@ -62,9 +104,7 @@ const hexColorSchema = z
   .regex(/^#[0-9A-Fa-f]{6}$/, 'Brand color must be a 6-digit hex code like #1E40AF');
 
 /** HH:MM 24-hour. */
-const hhmmSchema = z
-  .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM (24h)');
+const hhmmSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM (24h)');
 
 export const addressSchema = z.object({
   street_1: z.string().min(1).max(120),
@@ -127,6 +167,13 @@ export const companyProfileSettingsSchema = z.object({
   owner_name: z.string().min(1).max(120),
   owner_mobile: e164Schema,
   default_lien_state: z.enum(US_STATE_VALUES),
+  /**
+   * Extra US states the operator works regularly (border-state coverage).
+   * Surfaces alongside the home state at the top of plate-state pickers on
+   * intake, so dispatchers don't scroll through 50 entries on every call.
+   * Optional; capped at 10 to keep the prioritized header short.
+   */
+  secondary_states: z.array(z.enum(US_STATE_VALUES)).max(10).optional(),
 });
 
 export type CompanyProfileSettings = z.infer<typeof companyProfileSettingsSchema>;
@@ -162,3 +209,42 @@ export const companyProfilePatchSchema = z
   );
 
 export type CompanyProfilePatchPayload = z.infer<typeof companyProfilePatchSchema>;
+
+/**
+ * Build a US-state list with the tenant's home state first, secondary states
+ * next (dedup-preserved), and the remaining states alphabetical after a
+ * divider. The plate-state picker on intake uses this to cut scrolling for
+ * the typical case (home state is 95% of the work) while still keeping the
+ * full list available below.
+ *
+ * Returns an array of `{ value, label, group }` objects. `group: 'priority'`
+ * marks the home + secondary entries; `group: 'other'` marks the rest.
+ */
+export interface StatePickerOption {
+  value: UsState;
+  label: UsState;
+  group: 'priority' | 'other';
+}
+
+export function buildPrioritizedStateList(
+  homeState: UsState | null | undefined,
+  secondaryStates: readonly UsState[] = [],
+): StatePickerOption[] {
+  const priority: UsState[] = [];
+  if (homeState && (US_STATE_VALUES as readonly string[]).includes(homeState)) {
+    priority.push(homeState);
+  }
+  for (const s of secondaryStates) {
+    if (priority.includes(s)) continue;
+    if (!(US_STATE_VALUES as readonly string[]).includes(s)) continue;
+    priority.push(s);
+  }
+  const prioritySet = new Set<UsState>(priority);
+  const others = US_STATE_VALUES.filter((s) => !prioritySet.has(s))
+    .slice()
+    .sort();
+  return [
+    ...priority.map((s) => ({ value: s, label: s, group: 'priority' as const })),
+    ...others.map((s) => ({ value: s, label: s, group: 'other' as const })),
+  ];
+}

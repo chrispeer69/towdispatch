@@ -43,7 +43,15 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ALL_TIMEZONES, US_TIMEZONES } from './timezones';
 
-const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+const DAYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const;
 
 const DAY_LABELS: Record<(typeof DAYS)[number], string> = {
   monday: 'Monday',
@@ -362,14 +370,40 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
             ))}
           </select>
         </Field>
+
+        <Field label="Secondary Plate States" error={errs.settings?.secondary_states?.message}>
+          <p className="-mt-1 mb-2 text-xs text-text-secondary-on-dark">
+            Border states where calls come in regularly. These appear at the top of the plate-state
+            picker on intake (after the home state), so dispatchers skip the alphabetical scroll on
+            most calls.
+          </p>
+          <SecondaryStatesPicker
+            disabled={!canEdit}
+            value={form.watch('settings.secondary_states') ?? []}
+            homeState={form.watch('settings.physical_address.state') ?? null}
+            onChange={(next) =>
+              form.setValue(
+                'settings.secondary_states',
+                next as CompanyProfilePatchPayload['settings'] extends infer S
+                  ? S extends { secondary_states?: infer A }
+                    ? A
+                    : never
+                  : never,
+                {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                },
+              )
+            }
+          />
+        </Field>
       </Section>
 
       {canEdit ? (
         <div
-          className={
-            'fixed inset-x-0 bottom-0 z-20 border-t border-divider bg-bg-base/95 px-6 py-3 backdrop-blur transition-opacity ' +
-            (dirty ? 'opacity-100' : 'pointer-events-none opacity-0')
-          }
+          className={`fixed inset-x-0 bottom-0 z-20 border-t border-divider bg-bg-base/95 px-6 py-3 backdrop-blur transition-opacity ${
+            dirty ? 'opacity-100' : 'pointer-events-none opacity-0'
+          }`}
         >
           <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
             <p className="text-xs text-text-secondary-on-dark">You have unsaved changes.</p>
@@ -397,6 +431,75 @@ interface SectionProps {
   title: string;
   description: string;
   children: ReactNode;
+}
+
+/**
+ * Multi-select for the optional `secondary_states` field. A scrollable
+ * grid of 50 checkboxes — admins toggle the states they cover regularly.
+ * The home state (from the physical_address.state field) is shown as a
+ * disabled "Home" pill so it's clear it's always at the top of intake
+ * pickers and doesn't need to be re-selected here.
+ */
+function SecondaryStatesPicker({
+  disabled,
+  value,
+  homeState,
+  onChange,
+}: {
+  disabled: boolean;
+  value: string[];
+  homeState: string | null;
+  onChange: (next: string[]) => void;
+}): JSX.Element {
+  const home = homeState && (US_STATES as readonly string[]).includes(homeState) ? homeState : null;
+  function toggle(s: string): void {
+    if (disabled) return;
+    if (s === home) return;
+    const has = value.includes(s);
+    const next = has ? value.filter((x) => x !== s) : [...value, s];
+    onChange(next);
+  }
+  return (
+    <div className="space-y-2">
+      {home ? (
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark">
+          Home state{' '}
+          <span className="ml-1 rounded bg-brand-primary/15 px-1.5 py-0.5 text-brand-primary">
+            {home}
+          </span>{' '}
+          is always pinned first.
+        </p>
+      ) : null}
+      <div className="grid grid-cols-5 gap-1.5 rounded-[10px] border border-divider bg-bg-base/40 p-2 md:grid-cols-10">
+        {US_STATES.map((s) => {
+          const isHome = s === home;
+          const isSelected = isHome || value.includes(s);
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => toggle(s)}
+              disabled={disabled || isHome}
+              aria-pressed={isSelected}
+              className={`rounded-md border px-1.5 py-1 font-mono text-[11px] font-semibold transition-colors ${
+                isHome
+                  ? 'cursor-not-allowed border-brand-primary bg-brand-primary/15 text-brand-primary'
+                  : isSelected
+                    ? 'border-brand-primary bg-brand-primary/15 text-brand-primary hover:bg-brand-primary/25'
+                    : 'border-divider bg-bg-surface text-text-secondary-on-dark hover:border-divider-strong hover:text-text-primary-on-dark'
+              }${disabled && !isHome ? ' cursor-not-allowed opacity-50' : ''}`}
+              title={isHome ? 'Home state — set via Physical Address' : s}
+            >
+              {s}
+            </button>
+          );
+        })}
+      </div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark/60">
+        {value.length} of 10 selected
+      </p>
+    </div>
+  );
 }
 
 function Section({ title, description, children }: SectionProps): JSX.Element {
@@ -445,9 +548,9 @@ function Field({ label, required, hint, error, children }: FieldProps): JSX.Elem
 interface AddressFieldsProps {
   namePrefix: 'settings.physical_address' | 'settings.mailing_address';
   disabled: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form register has a recursive type that explodes when narrowed; the API contract is enforced at the schema layer.
   register: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: matching shape of useForm.formState.errors which is generic.
   errors: any;
 }
 
@@ -504,7 +607,7 @@ function AddressFields({
 
 interface BusinessHoursGridProps {
   disabled: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: useForm's generic type can't be reused as a prop type without explicit re-typing — accepted here for parity with AddressFields.
   form: any;
 }
 
@@ -604,8 +707,8 @@ function PermissionLockedNotice(): JSX.Element {
           You don&rsquo;t have permission to edit Company Profile
         </p>
         <p className="mt-1 text-text-secondary-on-dark">
-          Editing the company profile is gated to Owner and Admin roles. Ask an admin to switch
-          your role or save the change on your behalf.
+          Editing the company profile is gated to Owner and Admin roles. Ask an admin to switch your
+          role or save the change on your behalf.
         </p>
       </div>
     </div>
@@ -633,35 +736,41 @@ function hydrate(tenant: TenantDto): FormValues {
       owner_name: pickString(s.owner_name) ?? '',
       owner_mobile: pickString(s.owner_mobile) ?? '',
       default_lien_state: (pickString(s.default_lien_state) ?? 'OH') as never,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      secondary_states: pickStringArray(s.secondary_states),
+      // biome-ignore lint/suspicious/noExplicitAny: the partial-vs-full settings union from Zod doesn't carry through react-hook-form's deep generics — cast at the seam.
     } as any,
   };
+}
+
+function pickStringArray(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.filter((x): x is string => typeof x === 'string');
 }
 
 function pickString(v: unknown): string | null {
   return typeof v === 'string' ? v : null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: shape is enforced downstream by the form's Zod resolver, the seam intentionally accepts unknown jsonb.
 function pickAddress(v: unknown): any | null {
   if (typeof v !== 'object' || v === null) return null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: paired with the function's any return.
   return v as any;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: shape enforced by Zod resolver; jsonb is unknown at the seam.
 function pickBusinessHours(v: unknown): any | null {
   if (typeof v !== 'object' || v === null) return null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: paired with the function's any return.
   return v as any;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: returns a literal-typed empty value the resolver then narrows.
 function blankAddress(): any {
   return { street_1: '', city: '', state: '' as never, zip: '' };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: returns the default-hours shape the resolver narrows back to BusinessHours.
 function defaultBusinessHours(): any {
   return {
     monday: { closed: false, open: '08:00', close: '17:00' },

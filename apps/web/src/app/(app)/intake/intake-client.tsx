@@ -174,15 +174,27 @@ const EMPTY: FormState = {
   skipCustomerSms: false,
 };
 
+interface StatePickerOption {
+  value: string;
+  label: string;
+  group: 'priority' | 'other';
+}
+
 interface IntakeClientProps {
   /** Tenant's office address, joined to a single line. null when company
    *  profile hasn't been filled out yet — distance hints just stay hidden. */
   officeAddress: string | null;
   /** NEXT_PUBLIC_MAPBOX_TOKEN, or null if missing / still on the placeholder. */
   mapboxToken: string | null;
+  /** US states pre-sorted with the tenant's home + secondary states first. */
+  stateOptions: StatePickerOption[];
 }
 
-export function IntakeClient({ officeAddress, mapboxToken }: IntakeClientProps): JSX.Element {
+export function IntakeClient({
+  officeAddress,
+  mapboxToken,
+  stateOptions,
+}: IntakeClientProps): JSX.Element {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -660,16 +672,39 @@ export function IntakeClient({ officeAddress, mapboxToken }: IntakeClientProps):
             </div>
             <div className="space-y-1.5">
               <Label>State</Label>
-              <Input
+              <select
                 tabIndex={0}
-                placeholder="OH"
-                maxLength={2}
+                data-testid="intake-plate-state"
                 value={form.plateState}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  update('plateState', e.target.value.toUpperCase())
-                }
-                autoComplete="off"
-              />
+                onChange={(e) => update('plateState', e.target.value)}
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark focus-visible:border-brand-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+              >
+                <option value="">—</option>
+                {(() => {
+                  const priority = stateOptions.filter((s) => s.group === 'priority');
+                  const other = stateOptions.filter((s) => s.group === 'other');
+                  return (
+                    <>
+                      {priority.length > 0 ? (
+                        <optgroup label="Home & nearby">
+                          {priority.map((s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ) : null}
+                      <optgroup label="All states">
+                        {other.map((s) => (
+                          <option key={s.value} value={s.value}>
+                            {s.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </>
+                  );
+                })()}
+              </select>
             </div>
           </div>
           {existingVehicleSummary ? (
