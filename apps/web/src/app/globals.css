@@ -42,8 +42,8 @@
   /* ─────────────────────────────────────────────────────────────────
      1. Brand + status. Stable across themes.
      ───────────────────────────────────────────────────────────────── */
-  --brand-primary: 217 76% 44%; /* #1A56C4 royal blue (TowGrade) */
-  --brand-primary-hover: 217 76% 39%; /* #174DB0 */
+  --brand-primary: 217 76% 34%; /* #144399 royal blue (TowGrade) — darkened */
+  --brand-primary-hover: 217 76% 29%; /* #103882 */
   --brand-primary-text: 0 0% 100%; /* #FFFFFF */
 
   --status-success: 160 84% 39%; /* #10B981 */
@@ -62,24 +62,24 @@
         cards still pop forward off the background.
 
         Visual hierarchy in light mode:
-          --bg-base               #F7F2E9  page background (warm cream)
-          --bg-surface            #FCF9F2  sidebar / topbar / cards
-          --bg-surface-elevated   #EDE6D6  hover / inline accents
-          --bg-divider            #E3DBC9  borders / dividers (warm)
-          --bg-divider-strong     #CABF9E  divider hover
+          --bg-base               #DFD2AE  page background (warm cream)
+          --bg-surface            #E9DDB6  sidebar / topbar / cards
+          --bg-surface-elevated   #CFC29F  hover / inline accents
+          --bg-divider            #BEAF8B  borders / dividers (warm)
+          --bg-divider-strong     #A39265  divider hover
           --text-primary-on-dark  #0F172A  headings / primary text
           --text-secondary-on-dark #334155 muted body text (darkened
                                             from #64748B for readability
                                             on the warm cream bg)
      ───────────────────────────────────────────────────────────────── */
-  --bg-base: 40 36% 94%; /* #F2EBDB warm cream — page background */
-  --bg-surface: 42 50% 97%; /* #FAF6EC slightly lighter warm white */
-  --bg-surface-elevated: 38 30% 89%; /* #E5DCC7 warm beige hover */
+  --bg-base: 40 36% 84%; /* #DFD2AE warm cream — page background */
+  --bg-surface: 42 50% 87%; /* #E9DDB6 slightly lighter warm white */
+  --bg-surface-elevated: 38 30% 78%; /* #CFC29F warm beige hover */
   --bg-marketing: 0 0% 100%; /* #FFFFFF — fixed-light, unchanged */
   --bg-section: 210 40% 98%; /* #F8FAFC — fixed-light, unchanged */
 
-  --bg-divider: 38 22% 84%; /* #D8CDB3 warm beige border */
-  --bg-divider-strong: 38 18% 74%; /* #BFAF8F darker beige */
+  --bg-divider: 38 22% 74%; /* #BEAF8B warm beige border */
+  --bg-divider-strong: 38 18% 64%; /* #A39265 darker beige */
 
   --text-primary-on-dark: 222 47% 11%; /* #0F172A */
   --text-secondary-on-dark: 215 25% 27%; /* #334155 slate-700 — darker than the
