@@ -167,6 +167,21 @@ export const configSchema = z.object({
     .string()
     .optional()
     .default('verifier-token-session12-default-dev-value'),
+
+  // Moat #1 — Dynamic Pricing Engine. The crons (weather poller, demand
+  // surge sampler, auto-revert) are gated by an env flag so local dev / CI
+  // doesn't hammer NOAA every hour. NOAA's API does not require a key but
+  // a contact User-Agent is recommended; OpenWeatherMap is the fallback
+  // when NOAA times out or returns 5xx (set the API key to enable).
+  DYNAMIC_PRICING_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  NOAA_USER_AGENT: z
+    .string()
+    .optional()
+    .default('ustowdispatch-api (ops@ustowdispatch.cloud)'),
+  OPENWEATHERMAP_API_KEY: z.string().optional().default(''),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

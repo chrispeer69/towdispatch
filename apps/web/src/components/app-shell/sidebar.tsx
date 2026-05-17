@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Sparkles,
   Truck,
+  Zap,
 } from 'lucide-react';
 /**
  * 240px-wide left sidebar. Pulls the active path from `usePathname()` so the
@@ -111,6 +112,16 @@ const SECTIONS: NavSection[] = [
         href: '/fleet',
         icon: CarFront,
         match: (p) => p.startsWith('/fleet'),
+      },
+      {
+        // Moat #1 — Dynamic Pricing Engine Control Panel. Top-level so
+        // the operator can see active tiers, today's pulse, and recent
+        // overrides at a glance. Configuration lives under
+        // /settings/dynamic-pricing.
+        label: 'Dynamic Pricing',
+        href: '/dynamic-pricing',
+        icon: Zap,
+        match: (p) => p.startsWith('/dynamic-pricing'),
       },
     ],
   },
