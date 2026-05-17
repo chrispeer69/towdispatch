@@ -1141,6 +1141,48 @@ export class AuthService {
     });
   }
 
+  /**
+   * Mint a full session for a user that already exists. Used by the
+   * accept-invite flow (UserInvitesController.accept), which has already
+   * created the user inside the right tenant context and just needs a
+   * signed access/refresh pair + the standard AuthenticatedResponse shape.
+   *
+   * Deliberately bypasses the MFA gate: receiving the emailed invite token
+   * proved ownership, and the invite flow is the canonical way an
+   * OWNER/ADMIN onboards new operators — forcing MFA setup here would make
+   * the first login impossible until separate enrollment lands.
+   */
+  async issueSessionForUser(
+    input: {
+      tenantId: string;
+      userId: string;
+      role: string;
+      tenantName: string;
+      tenantSlug: string;
+      user: typeof users.$inferSelect;
+    },
+    meta: AuthRequestMeta,
+  ): Promise<AuthenticatedResponse> {
+    const tokens = await this.issueTokens(
+      { tenantId: input.tenantId, userId: input.userId, role: input.role },
+      meta,
+      null,
+    );
+    return {
+      status: 'authenticated',
+      user: this.toUserDto(input.user),
+      tenant: {
+        id: input.tenantId,
+        slug: input.tenantSlug,
+        name: input.tenantName,
+        status: 'active',
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
+    };
+  }
+
   private toUserDto(u: typeof users.$inferSelect): AuthUserDto {
     return {
       id: u.id,

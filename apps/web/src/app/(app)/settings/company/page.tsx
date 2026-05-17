@@ -1,15 +1,22 @@
 /**
- * /settings/company — live editor for the caller's tenant profile.
+ * /settings/company — Company Profile page (Admin Settings build 7 of 7).
  *
- * Reads the current tenant via GET /tenants/current (any
- * authenticated role can see it). The form mutation is gated to
- * OWNER + ADMIN at the API; the form's client component surfaces
- * the 403 as a clear permission banner instead of failing silently.
+ * The 17-field editor lives in CompanyProfileForm. This file handles:
+ *   - Auth: pulls the current user via requireUser() so we can pass the
+ *     caller's role down to the form (the form decides edit vs read-only).
+ *   - Authorization gate: roles outside the edit/read sets are bounced to
+ *     /forbidden rather than rendered into a read-only form (we don't
+ *     want to leak the field shape to drivers).
+ *   - Tenant fetch: GET /tenants/current, surfaced via a warning card on
+ *     load failure so the page doesn't crash if the API hiccups.
  */
 import { tryFetch } from '@/lib/api/client';
 import { fetchTenantCurrent } from '@/lib/api/resources';
-import { getSessionToken } from '@/lib/auth/session';
+import { requireUser } from '@/lib/auth/session';
+import { getSessionToken } from '@/lib/auth/cookies';
+import { ROLES, type Role } from '@ustowdispatch/shared';
 import { AlertTriangle } from 'lucide-react';
+import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
 import { CompanyProfileForm } from './company-profile-form';
@@ -19,7 +26,20 @@ const TAB = findSettingsTab('company');
 export const metadata = { title: 'Company Profile — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
+const VIEW_ROLES: readonly Role[] = [
+  ROLES.OWNER,
+  ROLES.ADMIN,
+  ROLES.MANAGER,
+  ROLES.ACCOUNTING,
+];
+
 export default async function CompanyProfilePage(): Promise<JSX.Element> {
+  const me = await requireUser();
+  const role = me.user.role as Role;
+  if (!VIEW_ROLES.includes(role)) {
+    redirect('/forbidden');
+  }
+
   const token = await getSessionToken();
   const result = await tryFetch(() => fetchTenantCurrent(token));
 
@@ -46,7 +66,7 @@ export default async function CompanyProfilePage(): Promise<JSX.Element> {
           </div>
         </div>
       ) : (
-        <CompanyProfileForm initial={result.data} />
+        <CompanyProfileForm initial={result.data} callerRole={role} />
       )}
     </div>
   );

@@ -1,19 +1,15 @@
 import { Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
-import { ROLES, type TenantDto } from '@ustowdispatch/shared';
+import {
+  type CompanyProfilePatchPayload,
+  ROLES,
+  type TenantDto,
+  companyProfilePatchSchema,
+} from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
-import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodBody } from '../../common/decorators/zod.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { TenantsService } from './tenants.service.js';
-
-const updateBodySchema = z
-  .object({
-    name: z.string().min(1).max(120).optional(),
-    settings: z.record(z.unknown()).optional(),
-  })
-  .strict();
-type UpdateBody = z.infer<typeof updateBodySchema>;
 
 @UseGuards(RolesGuard)
 @Controller('tenants')
@@ -28,7 +24,7 @@ export class TenantsController {
   @Patch('current')
   @Roles(ROLES.OWNER, ROLES.ADMIN)
   async update(
-    @ZodBody(updateBodySchema) body: UpdateBody,
+    @ZodBody(companyProfilePatchSchema) body: CompanyProfilePatchPayload,
     @Req() req: FastifyRequest,
   ): Promise<TenantDto> {
     return this.tenants.updateCurrent(this.callerCtx(req), body);
