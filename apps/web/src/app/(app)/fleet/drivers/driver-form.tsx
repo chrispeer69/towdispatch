@@ -1,5 +1,6 @@
 'use client';
 
+import { useUser } from '@/components/app-shell/session-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   type CreateDriverPayload,
   type DriverDto,
+  ROLES,
+  type Role,
   createDriverSchema,
   driverCdlClassValues,
   driverCertificationValues,
@@ -18,6 +21,8 @@ import { useState } from 'react';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
+const COMMISSION_EDIT_ROLES: ReadonlySet<Role> = new Set([ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER]);
+
 interface Props {
   mode: 'create' | 'edit';
   initial?: DriverDto;
@@ -25,6 +30,8 @@ interface Props {
 
 export function DriverForm({ mode, initial }: Props): JSX.Element {
   const router = useRouter();
+  const user = useUser();
+  const canEditCommission = COMMISSION_EDIT_ROLES.has(user.role as Role);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     register,
@@ -51,6 +58,7 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
           certifications: initial.certifications ?? undefined,
           hiredAt: initial.hiredAt ?? undefined,
           employmentStatus: initial.employmentStatus,
+          defaultCommissionPct: initial.defaultCommissionPct ?? undefined,
           notes: initial.notes ?? undefined,
         }
       : { firstName: '', lastName: '', cdlClass: 'none', employmentStatus: 'active' },
@@ -176,6 +184,34 @@ export function DriverForm({ mode, initial }: Props): JSX.Element {
         </fieldset>
       </Section>
 
+      {canEditCommission ? (
+        <Section title="Commission Settings">
+          <Field
+            label="Default Commission Rate"
+            error={errors.defaultCommissionPct?.message}
+            helper="This is the default rate applied to each invoice line item assigned to this driver. Dispatcher can adjust per-line during invoice review."
+          >
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                data-testid="driver-default-commission-pct"
+                placeholder={initial?.defaultCommissionPct == null ? 'Not set' : undefined}
+                {...register('defaultCommissionPct', {
+                  setValueAs: (v) =>
+                    v === '' || v === null || Number.isNaN(Number(v)) ? undefined : Number(v),
+                })}
+              />
+              <span className="text-sm text-text-secondary-on-dark">
+                % of invoice line items by default
+              </span>
+            </div>
+          </Field>
+        </Section>
+      ) : null}
+
       <Section title="Notes">
         <textarea
           {...register('notes')}
@@ -219,20 +255,25 @@ function Section({
 function Field({
   label,
   error,
+  helper,
   children,
 }: {
   label: string;
   error?: string | undefined;
+  helper?: string | undefined;
   children: React.ReactNode;
 }): JSX.Element {
   const id = React.useId();
   const errorId = `${id}-error`;
+  const helperId = `${id}-helper`;
   let enhanced: React.ReactNode = children;
   if (React.isValidElement(children)) {
     const extra: Record<string, string | boolean> = { id };
     if (error) {
       extra['aria-describedby'] = errorId;
       extra['aria-invalid'] = true;
+    } else if (helper) {
+      extra['aria-describedby'] = helperId;
     }
     enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
   }
@@ -243,6 +284,10 @@ function Field({
       {error ? (
         <p id={errorId} className="text-xs text-red-400">
           {error}
+        </p>
+      ) : helper ? (
+        <p id={helperId} className="text-xs text-text-secondary-on-dark">
+          {helper}
         </p>
       ) : null}
     </div>

@@ -405,6 +405,7 @@ function driverRowToDto(d: typeof drivers.$inferSelect): DriverDto {
     employmentStatus: d.employmentStatus,
     assignedYardId: d.assignedYardId,
     commissionRuleId: d.commissionRuleId,
+    defaultCommissionPct: d.defaultCommissionPct === null ? null : Number(d.defaultCommissionPct),
     notes: d.notes,
     active: d.active,
     createdAt: d.createdAt.toISOString(),

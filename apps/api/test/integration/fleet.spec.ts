@@ -132,6 +132,62 @@ describeIfDb('Fleet integration', () => {
     expect(body.data).toHaveLength(0);
   });
 
+  // ---------------- default_commission_pct (Admin Settings build 3) ----------------
+  it('PATCH defaultCommissionPct persists and is returned on GET', async () => {
+    const id = created.driverIds[0] as string;
+    const patch = await app.inject({
+      method: 'PATCH',
+      url: `/fleet/drivers/${id}`,
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: { defaultCommissionPct: 25.5 },
+    });
+    expect(patch.statusCode).toBe(200);
+    const patched = patch.json() as { defaultCommissionPct: number | null };
+    expect(patched.defaultCommissionPct).toBe(25.5);
+
+    const get = await app.inject({
+      method: 'GET',
+      url: `/fleet/drivers/${id}`,
+      headers: auth(session.accessToken),
+    });
+    expect(get.statusCode).toBe(200);
+    const fetched = get.json() as { defaultCommissionPct: number | null };
+    expect(fetched.defaultCommissionPct).toBe(25.5);
+  });
+
+  it('PATCH defaultCommissionPct = 150 is rejected (range)', async () => {
+    const id = created.driverIds[0] as string;
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/fleet/drivers/${id}`,
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: { defaultCommissionPct: 150 },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('PATCH defaultCommissionPct = -5 is rejected (range)', async () => {
+    const id = created.driverIds[0] as string;
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/fleet/drivers/${id}`,
+      headers: { ...auth(session.accessToken), 'content-type': 'application/json' },
+      payload: { defaultCommissionPct: -5 },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('cross-tenant PATCH on a driver is blocked by RLS', async () => {
+    const id = created.driverIds[0] as string;
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/fleet/drivers/${id}`,
+      headers: { ...auth(attacker.accessToken), 'content-type': 'application/json' },
+      payload: { defaultCommissionPct: 99 },
+    });
+    expect(res.statusCode).toBe(404);
+  });
+
   // ---------------- assignments ----------------
   it('assigns a driver to a truck', async () => {
     const res = await app.inject({

@@ -62,6 +62,13 @@ export const driverSchema = z.object({
   employmentStatus: z.enum(driverEmploymentStatusValues),
   assignedYardId: z.string().uuid().nullable(),
   commissionRuleId: z.string().uuid().nullable(),
+  /**
+   * Default invoice-line commission rate for this driver, 0..100 (two
+   * decimals). NULL means "no default set" — dispatcher enters per-line
+   * during invoice review. Server-only field: never returned by the
+   * driver-mobile / /me surface.
+   */
+  defaultCommissionPct: z.number().min(0).max(100).nullable(),
   notes: z.string().nullable(),
   active: z.boolean(),
   createdAt: z.string().datetime(),
@@ -92,6 +99,7 @@ export const createDriverSchema = z.object({
   employmentStatus: z.enum(driverEmploymentStatusValues).default('active'),
   assignedYardId: z.string().uuid().optional(),
   commissionRuleId: z.string().uuid().optional(),
+  defaultCommissionPct: z.number().min(0).max(100).optional(),
   notes: z.string().max(4000).optional(),
 });
 export type CreateDriverPayload = z.infer<typeof createDriverSchema>;
@@ -119,6 +127,7 @@ export const updateDriverSchema = z
     employmentStatus: z.enum(driverEmploymentStatusValues).optional(),
     assignedYardId: z.string().uuid().nullable().optional(),
     commissionRuleId: z.string().uuid().nullable().optional(),
+    defaultCommissionPct: z.number().min(0).max(100).nullable().optional(),
     notes: z.string().max(4000).nullable().optional(),
     active: z.boolean().optional(),
   })
