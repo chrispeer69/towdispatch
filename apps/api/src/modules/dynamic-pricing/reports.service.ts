@@ -23,7 +23,7 @@ import type {
   TierPerformanceRow,
   YearOverYearGated,
 } from '@ustowdispatch/shared';
-import { and, asc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
+import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 
 interface CallerCtx {
@@ -204,10 +204,7 @@ export class DynamicPricingReportsService {
    * already in apps/api/package.json (used by Build 5). We compose a
    * Buffer and let the controller set Content-Type / Content-Disposition.
    */
-  async toXlsx<T extends Record<string, unknown>>(
-    sheetName: string,
-    rows: T[],
-  ): Promise<Buffer> {
+  async toXlsx<T extends Record<string, unknown>>(sheetName: string, rows: T[]): Promise<Buffer> {
     // Lazy import to keep cold-start small.
     const ExcelJS = await import('exceljs');
     const wb = new ExcelJS.Workbook();

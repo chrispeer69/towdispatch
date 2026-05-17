@@ -30,7 +30,9 @@ export const createDynamicPricingOverrideSchema = z
       });
     }
   });
-export type CreateDynamicPricingOverridePayload = z.infer<typeof createDynamicPricingOverrideSchema>;
+export type CreateDynamicPricingOverridePayload = z.infer<
+  typeof createDynamicPricingOverrideSchema
+>;
 
 export const dynamicPricingOverrideDtoSchema = z.object({
   id: z.string().uuid(),

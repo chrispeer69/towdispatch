@@ -91,9 +91,7 @@ export class AutoRevertService {
             );
         }
         if (expired.length > 0) {
-          this.log.log(
-            `auto-revert: deactivated ${expired.length} tier(s) for tenant ${tenantId}`,
-          );
+          this.log.log(`auto-revert: deactivated ${expired.length} tier(s) for tenant ${tenantId}`);
         }
         return expired.length;
       },

@@ -57,7 +57,13 @@ export class PulseAggregatorService {
         // concurrent acceptances on the same day don't clobber each other.
         const byTierPatch: Record<
           string,
-          { name: string; category: string; multiplier: number; contributionCents: number; acceptedCount: number }
+          {
+            name: string;
+            category: string;
+            multiplier: number;
+            contributionCents: number;
+            acceptedCount: number;
+          }
         > = {};
         for (const t of input.appliedTiers) {
           byTierPatch[t.tierId] = {
@@ -116,13 +122,17 @@ export class PulseAggregatorService {
       }
       const std = Number(row.standardRevenueCents);
       const upliftPct = std > 0 ? (Number(row.deltaCents) / std) * 100 : 0;
-      const byTierMap = (row.byTier as Record<string, {
-        name: string;
-        category: string;
-        multiplier: number;
-        contributionCents: number;
-        acceptedCount: number;
-      }>) ?? {};
+      const byTierMap =
+        (row.byTier as Record<
+          string,
+          {
+            name: string;
+            category: string;
+            multiplier: number;
+            contributionCents: number;
+            acceptedCount: number;
+          }
+        >) ?? {};
       const byTier = Object.entries(byTierMap).map(([tierId, t]) => ({
         tierId,
         name: t.name,

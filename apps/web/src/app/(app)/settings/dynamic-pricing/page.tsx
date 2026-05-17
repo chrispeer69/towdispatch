@@ -1,3 +1,4 @@
+import { tryFetch } from '@/lib/api/client';
 /**
  * /settings/dynamic-pricing — operator-facing configuration surface for
  * the Dynamic Pricing Engine (Moat #1).
@@ -11,7 +12,6 @@ import {
   fetchNoaaMappings,
   fetchTiers,
 } from '@/lib/api/dynamic-pricing';
-import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 import type {
   DynamicPricingHolidayDto,

@@ -36,8 +36,7 @@ export const clientCreateTier = (body: CreateDynamicPricingTierPayload) =>
 export const clientUpdateTier = (id: string, body: UpdateDynamicPricingTierPayload) =>
   bff<DynamicPricingTierDto>(`tiers/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 
-export const clientDeleteTier = (id: string) =>
-  bff<void>(`tiers/${id}`, { method: 'DELETE' });
+export const clientDeleteTier = (id: string) => bff<void>(`tiers/${id}`, { method: 'DELETE' });
 
 export const clientActivateTier = (id: string, reason?: string) =>
   bff<DynamicPricingTierDto>(`tiers/${id}/activate`, {
@@ -51,28 +50,20 @@ export const clientDeactivateTier = (id: string, reason?: string) =>
     body: JSON.stringify({ reason }),
   });
 
-export const clientCreateOverride = (
-  jobId: string,
-  body: CreateDynamicPricingOverridePayload,
-) => bff(`overrides/${jobId}`, { method: 'POST', body: JSON.stringify(body) });
+export const clientCreateOverride = (jobId: string, body: CreateDynamicPricingOverridePayload) =>
+  bff(`overrides/${jobId}`, { method: 'POST', body: JSON.stringify(body) });
 
-export const clientUpdateNoaaMapping = (
-  id: string,
-  body: UpdateDynamicPricingNoaaMappingPayload,
-) =>
+export const clientUpdateNoaaMapping = (id: string, body: UpdateDynamicPricingNoaaMappingPayload) =>
   bff(`noaa-mappings/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 
-export const clientCreateNoaaMapping = (
-  body: CreateDynamicPricingNoaaMappingPayload,
-) => bff(`noaa-mappings`, { method: 'POST', body: JSON.stringify(body) });
+export const clientCreateNoaaMapping = (body: CreateDynamicPricingNoaaMappingPayload) =>
+  bff('noaa-mappings', { method: 'POST', body: JSON.stringify(body) });
 
 export const clientCreateHoliday = (body: CreateDynamicPricingHolidayPayload) =>
   bff('holidays', { method: 'POST', body: JSON.stringify(body) });
 
-export const clientUpdateHoliday = (
-  id: string,
-  body: UpdateDynamicPricingHolidayPayload,
-) => bff(`holidays/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+export const clientUpdateHoliday = (id: string, body: UpdateDynamicPricingHolidayPayload) =>
+  bff(`holidays/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 
 export const clientUpdateSettings = (body: Partial<DynamicPricingTenantSettings>) =>
   bff<DynamicPricingTenantSettings>('settings', {
@@ -80,10 +71,8 @@ export const clientUpdateSettings = (body: Partial<DynamicPricingTenantSettings>
     body: JSON.stringify(body),
   });
 
-export const clientApproveDemandSurge = (
-  id: string,
-  body: ApproveDemandSurgeSuggestionPayload,
-) => bff(`demand-surge/suggestions/${id}/approve`, { method: 'POST', body: JSON.stringify(body) });
+export const clientApproveDemandSurge = (id: string, body: ApproveDemandSurgeSuggestionPayload) =>
+  bff(`demand-surge/suggestions/${id}/approve`, { method: 'POST', body: JSON.stringify(body) });
 
 export const clientDismissDemandSurge = (id: string) =>
   bff<void>(`demand-surge/suggestions/${id}/dismiss`, { method: 'POST' });

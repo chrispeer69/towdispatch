@@ -14,22 +14,21 @@
  */
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import {
-  dynamicPricingDemandSurgeSuggestions,
-  jobs,
-  tenants,
-  uuidv7,
-} from '@ustowdispatch/db';
+import { dynamicPricingDemandSurgeSuggestions, jobs, tenants, uuidv7 } from '@ustowdispatch/db';
 import {
   DEFAULT_DEMAND_SURGE_MULTIPLIERS,
   DEFAULT_DEMAND_SURGE_THRESHOLDS,
-  type DynamicPricingTenantSettings,
 } from '@ustowdispatch/shared';
 import { and, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import { ConfigService } from '../../config/config.service.js';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { TransactionRunner } from '../../database/transaction-runner.service.js';
-import { localDow, localHour, pickDemandSurgeTier, trailingBaseline } from './dynamic-pricing-helpers.js';
+import {
+  localDow,
+  localHour,
+  pickDemandSurgeTier,
+  trailingBaseline,
+} from './dynamic-pricing-helpers.js';
 import { parseDynamicPricingSettings } from './tier-resolution.service.js';
 
 const SYSTEM_USER_UUID = '00000000-0000-0000-0000-000000000000';
@@ -100,20 +99,14 @@ export class DemandSurgeService {
             .select({ c: sql<number>`count(*)::int` })
             .from(jobs)
             .where(
-              and(
-                gte(jobs.createdAt, fromUtc),
-                lte(jobs.createdAt, toUtc),
-                isNull(jobs.deletedAt),
-              ),
+              and(gte(jobs.createdAt, fromUtc), lte(jobs.createdAt, toUtc), isNull(jobs.deletedAt)),
             );
           const c = cellRows[0]?.c ?? 0;
           cells.push(c);
         }
         const baseline = trailingBaseline(cells);
         if (baseline === null) {
-          this.log.debug(
-            `DemandSurge ${tenantId} dow=${dow} h=${hour}: no baseline history yet`,
-          );
+          this.log.debug(`DemandSurge ${tenantId} dow=${dow} h=${hour}: no baseline history yet`);
           return 0;
         }
         const thresholds =

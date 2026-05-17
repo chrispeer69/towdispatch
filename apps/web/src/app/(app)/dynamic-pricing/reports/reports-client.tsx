@@ -48,10 +48,9 @@ export function ReportsClient(): JSX.Element {
   async function run() {
     setBusy(true);
     try {
-      const res = await fetch(
-        `/api/dynamic-pricing/reports/${selected}?${buildQuery('json')}`,
-        { cache: 'no-store' },
-      );
+      const res = await fetch(`/api/dynamic-pricing/reports/${selected}?${buildQuery('json')}`, {
+        cache: 'no-store',
+      });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { message?: string } | null;
         throw new Error(body?.message ?? `Run failed (${res.status})`);
@@ -94,7 +93,9 @@ export function ReportsClient(): JSX.Element {
 
       <div className="md:col-span-2 space-y-3">
         <div className="rounded-lg border border-divider bg-bg-surface p-4">
-          <h2 className="font-condensed text-lg font-bold uppercase">{REPORTS.find((r) => r.id === selected)?.label}</h2>
+          <h2 className="font-condensed text-lg font-bold uppercase">
+            {REPORTS.find((r) => r.id === selected)?.label}
+          </h2>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div>
               <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">

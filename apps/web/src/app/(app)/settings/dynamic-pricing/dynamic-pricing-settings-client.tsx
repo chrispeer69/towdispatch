@@ -9,8 +9,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  clientCreateHoliday,
-  clientCreateNoaaMapping,
   clientUpdateHoliday,
   clientUpdateNoaaMapping,
   clientUpdateSettings,
@@ -79,17 +77,14 @@ export function DynamicPricingSettingsClient({
 }: Props): JSX.Element {
   const [settings, setSettings] = useState(initialSettings);
   const [savingSettings, setSavingSettings] = useState(false);
-  const [openCategory, setOpenCategory] = useState<typeof CATEGORIES[number]['key'] | null>(null);
+  const [openCategory, setOpenCategory] = useState<(typeof CATEGORIES)[number]['key'] | null>(null);
 
-  const tiersByCategory = initialTiers.reduce<Record<string, DynamicPricingTierDto[]>>(
-    (acc, t) => {
-      const arr = acc[t.category] ?? [];
-      arr.push(t);
-      acc[t.category] = arr;
-      return acc;
-    },
-    {},
-  );
+  const tiersByCategory = initialTiers.reduce<Record<string, DynamicPricingTierDto[]>>((acc, t) => {
+    const arr = acc[t.category] ?? [];
+    arr.push(t);
+    acc[t.category] = arr;
+    return acc;
+  }, {});
 
   async function patchSettings(patch: Partial<DynamicPricingTenantSettings>): Promise<void> {
     setSavingSettings(true);
@@ -146,9 +141,7 @@ export function DynamicPricingSettingsClient({
         })}
       </section>
 
-      {openCategory === 'weather' ? (
-        <NoaaMappingsEditor initial={initialMappings} />
-      ) : null}
+      {openCategory === 'weather' ? <NoaaMappingsEditor initial={initialMappings} /> : null}
       {openCategory === 'calendar' ? <HolidayEditor initial={initialHolidays} /> : null}
 
       <section className="rounded-[14px] border border-divider bg-bg-surface p-4 space-y-3">
@@ -218,17 +211,20 @@ export function DynamicPricingSettingsClient({
   );
 }
 
-function NoaaMappingsEditor({
-  initial,
-}: { initial: DynamicPricingNoaaMappingDto[] }): JSX.Element {
+function NoaaMappingsEditor({ initial }: { initial: DynamicPricingNoaaMappingDto[] }): JSX.Element {
   const [rows, setRows] = useState(initial);
   const [busy, setBusy] = useState(false);
 
-  async function patchRow(id: string, patch: { multiplier?: number; isEnabled?: boolean }): Promise<void> {
+  async function patchRow(
+    id: string,
+    patch: { multiplier?: number; isEnabled?: boolean },
+  ): Promise<void> {
     setBusy(true);
     try {
       const next = await clientUpdateNoaaMapping(id, patch);
-      setRows((prev) => prev.map((r) => (r.id === id ? next as DynamicPricingNoaaMappingDto : r)));
+      setRows((prev) =>
+        prev.map((r) => (r.id === id ? (next as DynamicPricingNoaaMappingDto) : r)),
+      );
       toast.success('Saved');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Save failed');
@@ -276,17 +272,18 @@ function NoaaMappingsEditor({
   );
 }
 
-function HolidayEditor({
-  initial,
-}: { initial: DynamicPricingHolidayDto[] }): JSX.Element {
+function HolidayEditor({ initial }: { initial: DynamicPricingHolidayDto[] }): JSX.Element {
   const [rows, setRows] = useState(initial);
   const [busy, setBusy] = useState(false);
 
-  async function patchRow(id: string, patch: { multiplier?: number; isEnabled?: boolean }): Promise<void> {
+  async function patchRow(
+    id: string,
+    patch: { multiplier?: number; isEnabled?: boolean },
+  ): Promise<void> {
     setBusy(true);
     try {
       const next = await clientUpdateHoliday(id, patch);
-      setRows((prev) => prev.map((r) => (r.id === id ? next as DynamicPricingHolidayDto : r)));
+      setRows((prev) => prev.map((r) => (r.id === id ? (next as DynamicPricingHolidayDto) : r)));
       toast.success('Saved');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Save failed');

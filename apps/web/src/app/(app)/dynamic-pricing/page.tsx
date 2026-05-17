@@ -1,3 +1,4 @@
+import { tryFetch } from '@/lib/api/client';
 /**
  * /dynamic-pricing — top-level Control Panel for the Dynamic Pricing
  * Engine (Moat #1).
@@ -21,7 +22,6 @@ import {
   fetchTierPerformanceReport,
   fetchTiers,
 } from '@/lib/api/dynamic-pricing';
-import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 import type {
   DynamicPricingDemandSurgeSuggestionDto,
@@ -58,15 +58,17 @@ export default async function DynamicPricingControlPanelPage(): Promise<JSX.Elem
   return (
     <ControlPanelClient
       tiers={(tiersR.data ?? []) as DynamicPricingTierDto[]}
-      pulse={(pulseR.data ?? {
-        date: '',
-        revenueCents: 0,
-        standardRevenueCents: 0,
-        deltaCents: 0,
-        upliftPct: 0,
-        acceptedQuoteCount: 0,
-        byTier: [],
-      }) as DynamicPricingPulseToday}
+      pulse={
+        (pulseR.data ?? {
+          date: '',
+          revenueCents: 0,
+          standardRevenueCents: 0,
+          deltaCents: 0,
+          upliftPct: 0,
+          acceptedQuoteCount: 0,
+          byTier: [],
+        }) as DynamicPricingPulseToday
+      }
       suggestions={(suggestionsR.data ?? []) as DynamicPricingDemandSurgeSuggestionDto[]}
       history={(historyR.data ?? []) as TierHistoryRow[]}
       overrides={(overrideR.data ?? []) as OverrideReportRow[]}

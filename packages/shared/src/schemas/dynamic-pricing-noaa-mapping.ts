@@ -54,7 +54,8 @@ export type CreateDynamicPricingNoaaMappingPayload = z.infer<
   typeof createDynamicPricingNoaaMappingSchema
 >;
 
-export const updateDynamicPricingNoaaMappingSchema = createDynamicPricingNoaaMappingSchema.partial();
+export const updateDynamicPricingNoaaMappingSchema =
+  createDynamicPricingNoaaMappingSchema.partial();
 export type UpdateDynamicPricingNoaaMappingPayload = z.infer<
   typeof updateDynamicPricingNoaaMappingSchema
 >;

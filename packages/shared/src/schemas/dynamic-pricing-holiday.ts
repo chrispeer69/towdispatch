@@ -21,7 +21,12 @@ export const dynamicPricingHolidayDateSpecSchema = z.union([
   z.object({
     month: z.number().int().min(1).max(12),
     weekday: z.number().int().min(0).max(6),
-    ordinal: z.number().int().min(-1).max(5).refine((v) => v !== 0, 'ordinal cannot be 0'),
+    ordinal: z
+      .number()
+      .int()
+      .min(-1)
+      .max(5)
+      .refine((v) => v !== 0, 'ordinal cannot be 0'),
   }),
 ]);
 export type DynamicPricingHolidayDateSpec = z.infer<typeof dynamicPricingHolidayDateSpecSchema>;
@@ -60,18 +65,88 @@ export const DEFAULT_US_HOLIDAYS: ReadonlyArray<{
   dateSpec: DynamicPricingHolidayDateSpec;
   multiplier: number;
 }> = [
-  { name: "New Year's Eve", occurrence: 'fixed_date', dateSpec: { month: 12, day: 31 }, multiplier: 1.8 },
-  { name: "New Year's Day", occurrence: 'fixed_date', dateSpec: { month: 1, day: 1 }, multiplier: 2.0 },
-  { name: 'MLK Day', occurrence: 'nth_weekday', dateSpec: { month: 1, weekday: 1, ordinal: 3 }, multiplier: 1.2 },
-  { name: 'Presidents Day', occurrence: 'nth_weekday', dateSpec: { month: 2, weekday: 1, ordinal: 3 }, multiplier: 1.2 },
-  { name: 'Memorial Day', occurrence: 'nth_weekday', dateSpec: { month: 5, weekday: 1, ordinal: -1 }, multiplier: 1.3 },
-  { name: 'Juneteenth', occurrence: 'fixed_date', dateSpec: { month: 6, day: 19 }, multiplier: 1.2 },
-  { name: 'Independence Day', occurrence: 'fixed_date', dateSpec: { month: 7, day: 4 }, multiplier: 1.5 },
-  { name: 'Labor Day', occurrence: 'nth_weekday', dateSpec: { month: 9, weekday: 1, ordinal: 1 }, multiplier: 1.3 },
-  { name: 'Columbus Day', occurrence: 'nth_weekday', dateSpec: { month: 10, weekday: 1, ordinal: 2 }, multiplier: 1.2 },
-  { name: 'Veterans Day', occurrence: 'fixed_date', dateSpec: { month: 11, day: 11 }, multiplier: 1.2 },
-  { name: 'Thanksgiving', occurrence: 'nth_weekday', dateSpec: { month: 11, weekday: 4, ordinal: 4 }, multiplier: 1.5 },
-  { name: 'Day After Thanksgiving', occurrence: 'nth_weekday', dateSpec: { month: 11, weekday: 5, ordinal: 4 }, multiplier: 1.3 },
-  { name: 'Christmas Eve', occurrence: 'fixed_date', dateSpec: { month: 12, day: 24 }, multiplier: 1.5 },
-  { name: 'Christmas Day', occurrence: 'fixed_date', dateSpec: { month: 12, day: 25 }, multiplier: 2.0 },
+  {
+    name: "New Year's Eve",
+    occurrence: 'fixed_date',
+    dateSpec: { month: 12, day: 31 },
+    multiplier: 1.8,
+  },
+  {
+    name: "New Year's Day",
+    occurrence: 'fixed_date',
+    dateSpec: { month: 1, day: 1 },
+    multiplier: 2.0,
+  },
+  {
+    name: 'MLK Day',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 1, weekday: 1, ordinal: 3 },
+    multiplier: 1.2,
+  },
+  {
+    name: 'Presidents Day',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 2, weekday: 1, ordinal: 3 },
+    multiplier: 1.2,
+  },
+  {
+    name: 'Memorial Day',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 5, weekday: 1, ordinal: -1 },
+    multiplier: 1.3,
+  },
+  {
+    name: 'Juneteenth',
+    occurrence: 'fixed_date',
+    dateSpec: { month: 6, day: 19 },
+    multiplier: 1.2,
+  },
+  {
+    name: 'Independence Day',
+    occurrence: 'fixed_date',
+    dateSpec: { month: 7, day: 4 },
+    multiplier: 1.5,
+  },
+  {
+    name: 'Labor Day',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 9, weekday: 1, ordinal: 1 },
+    multiplier: 1.3,
+  },
+  {
+    name: 'Columbus Day',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 10, weekday: 1, ordinal: 2 },
+    multiplier: 1.2,
+  },
+  {
+    name: 'Veterans Day',
+    occurrence: 'fixed_date',
+    dateSpec: { month: 11, day: 11 },
+    multiplier: 1.2,
+  },
+  {
+    name: 'Thanksgiving',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 11, weekday: 4, ordinal: 4 },
+    multiplier: 1.5,
+  },
+  {
+    name: 'Day After Thanksgiving',
+    occurrence: 'nth_weekday',
+    dateSpec: { month: 11, weekday: 5, ordinal: 4 },
+    multiplier: 1.3,
+  },
+  {
+    name: 'Christmas Eve',
+    occurrence: 'fixed_date',
+    dateSpec: { month: 12, day: 24 },
+    multiplier: 1.5,
+  },
+  {
+    name: 'Christmas Day',
+    occurrence: 'fixed_date',
+    dateSpec: { month: 12, day: 25 },
+    multiplier: 2.0,
+  },
 ];

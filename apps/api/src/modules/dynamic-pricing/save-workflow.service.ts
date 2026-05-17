@@ -61,9 +61,7 @@ export class SaveWorkflowService {
         });
       }
       const discountPct = SAVE_STEP_DISCOUNT_PCT.save_step_1 ?? 0;
-      const offeredPriceCents = Math.round(
-        Number(job.rateQuotedCents) * (1 - discountPct / 100),
-      );
+      const offeredPriceCents = Math.round(Number(job.rateQuotedCents) * (1 - discountPct / 100));
       // Step 1 is recorded as "offered" — accepted=false until customer
       // takes it.
       await tx.insert(quoteSaveWorkflowEvents).values({

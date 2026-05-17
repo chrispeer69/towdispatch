@@ -82,14 +82,18 @@ export function ControlPanelClient({
 
   const activeTiers = tierState.filter((t) => t.isActive && !t.deletedAt);
   const scheduled = tierState.filter(
-    (t) => !t.isActive && !t.deletedAt && t.schedule?.startAt && new Date(t.schedule.startAt) > new Date(),
+    (t) =>
+      !t.isActive &&
+      !t.deletedAt &&
+      t.schedule?.startAt &&
+      new Date(t.schedule.startAt) > new Date(),
   );
 
   async function deactivate(id: string) {
     setBusyId(id);
     try {
       const next = await clientDeactivateTier(id, 'manual deactivation');
-      setTierState((prev) => prev.map((t) => (t.id === id ? next as DynamicPricingTierDto : t)));
+      setTierState((prev) => prev.map((t) => (t.id === id ? (next as DynamicPricingTierDto) : t)));
       toast.success('Tier deactivated');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Deactivate failed');
@@ -144,14 +148,21 @@ export function ControlPanelClient({
           </div>
           <ul className="space-y-2 text-sm">
             {suggestionState.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-divider bg-bg-surface px-3 py-2">
+              <li
+                key={s.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded border border-divider bg-bg-surface px-3 py-2"
+              >
                 <span>
                   {s.thresholdPct}% threshold — current {s.currentJobs} jobs vs baseline{' '}
                   {Number(s.baselineJobs).toFixed(2)} → suggest {s.suggestedMultiplier}×
                 </span>
                 <div className="flex gap-2">
                   <Button onClick={() => approve(s.id)} disabled={busyId === s.id}>
-                    {busyId === s.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="mr-1 h-3 w-3" />}{' '}
+                    {busyId === s.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-1 h-3 w-3" />
+                    )}{' '}
                     Approve
                   </Button>
                   <Button variant="ghost" onClick={() => dismiss(s.id)} disabled={busyId === s.id}>
@@ -173,7 +184,10 @@ export function ControlPanelClient({
             {activeTiers.map((t) => {
               const Icon = CATEGORY_ICON[t.category] ?? Star;
               return (
-                <li key={t.id} className="flex items-center justify-between gap-2 rounded border border-divider bg-bg-surface-elevated px-3 py-2 text-sm">
+                <li
+                  key={t.id}
+                  className="flex items-center justify-between gap-2 rounded border border-divider bg-bg-surface-elevated px-3 py-2 text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <Icon className="h-4 w-4 text-brand-primary" />
                     <span className="font-medium">{t.name}</span>
@@ -182,7 +196,11 @@ export function ControlPanelClient({
                     </span>
                     <span className="font-mono text-xs">{t.multiplier}×</span>
                   </div>
-                  <Button variant="ghost" onClick={() => deactivate(t.id)} disabled={busyId === t.id}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => deactivate(t.id)}
+                    disabled={busyId === t.id}
+                  >
                     {busyId === t.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Deactivate'}
                   </Button>
                 </li>
@@ -213,12 +231,16 @@ export function ControlPanelClient({
       <section className="rounded-[14px] border border-divider bg-bg-surface p-4 space-y-2">
         <h2 className="font-semibold">3. Recent tier history (last 24 hours)</h2>
         {history.length === 0 ? (
-          <p className="text-sm text-text-secondary-on-dark">No tier activity in the last 24 hours.</p>
+          <p className="text-sm text-text-secondary-on-dark">
+            No tier activity in the last 24 hours.
+          </p>
         ) : (
           <ul className="space-y-1 max-h-72 overflow-y-auto text-sm">
             {history.slice(0, 30).map((h) => (
               <li key={h.activationId}>
-                <span className="font-mono text-xs text-text-secondary-on-dark">{fmtRel(h.activatedAt)}</span>{' '}
+                <span className="font-mono text-xs text-text-secondary-on-dark">
+                  {fmtRel(h.activatedAt)}
+                </span>{' '}
                 — {h.tierName} ({h.category}) {h.deactivatedAt ? '⇨ deactivated' : '⇨ activated'}
               </li>
             ))}
@@ -299,7 +321,8 @@ export function ControlPanelClient({
                   {p.tierName} ({p.category})
                 </span>
                 <span className="font-mono text-xs">
-                  {p.acceptedCount}× → {fmtMoney(p.revenueCents)} (avg {p.averageMultiplier.toFixed(2)}×)
+                  {p.acceptedCount}× → {fmtMoney(p.revenueCents)} (avg{' '}
+                  {p.averageMultiplier.toFixed(2)}×)
                 </span>
               </li>
             ))}

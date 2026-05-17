@@ -94,7 +94,10 @@ export function applyStackToBase(
     const t = sortedTiers[i];
     if (!t) continue;
     const marg = Math.max(t.multiplier - 1, 0);
-    const share = i === sortedTiers.length - 1 ? totalDelta - allocated : Math.round(totalDelta * (marg / totalMarginal));
+    const share =
+      i === sortedTiers.length - 1
+        ? totalDelta - allocated
+        : Math.round(totalDelta * (marg / totalMarginal));
     perTier.set(t.tierId, share);
     allocated += share;
   }
@@ -224,7 +227,7 @@ export function localHour(when: Date, ianaTz: string): number {
     hour: '2-digit',
     hour12: false,
   });
-  const v = parseInt(fmt.format(when), 10);
+  const v = Number.parseInt(fmt.format(when), 10);
   return Number.isFinite(v) ? v % 24 : 0;
 }
 

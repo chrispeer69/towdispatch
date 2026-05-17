@@ -13,16 +13,13 @@
  * to all authenticated roles for simplicity; writes are gated.
  */
 import {
-  Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Patch,
   Post,
-  Query,
   Req,
   Res,
   UseGuards,
@@ -62,8 +59,8 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodBody, ZodParam, ZodQuery } from '../../common/decorators/zod.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { DynamicPricingService } from './dynamic-pricing.service.js';
-import { DynamicPricingReportsService } from './reports.service.js';
 import { PulseAggregatorService } from './pulse-aggregator.service.js';
+import { DynamicPricingReportsService } from './reports.service.js';
 import { SaveWorkflowService } from './save-workflow.service.js';
 
 const idParam = z.object({ id: z.string().uuid() });
@@ -201,7 +198,8 @@ export class DynamicPricingController {
   @Patch('settings')
   @Roles(ROLES.OWNER, ROLES.ADMIN)
   async patchTenantSettings(
-    @ZodBody(dynamicPricingTenantSettingsSchema.partial()) body: Partial<DynamicPricingTenantSettings>,
+    @ZodBody(dynamicPricingTenantSettingsSchema.partial())
+    body: Partial<DynamicPricingTenantSettings>,
     @Req() req: FastifyRequest,
   ) {
     return this.service.updateTenantSettings(this.callerCtx(req), body);
@@ -357,10 +355,7 @@ async function sendReport<T extends Record<string, unknown>>(
   }
   if (format === 'xlsx') {
     const buf = await reports.toXlsx(filenameStem, rows);
-    res.header(
-      'content-type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
+    res.header('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.header('content-disposition', `attachment; filename="${filenameStem}.xlsx"`);
     res.send(buf);
     return;

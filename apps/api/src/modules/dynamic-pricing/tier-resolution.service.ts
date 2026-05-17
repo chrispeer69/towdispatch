@@ -17,11 +17,7 @@
  * tier system.
  */
 import { Injectable } from '@nestjs/common';
-import {
-  dynamicPricingCurves,
-  dynamicPricingTiers,
-  tenants,
-} from '@ustowdispatch/db';
+import { dynamicPricingCurves, dynamicPricingTiers, tenants } from '@ustowdispatch/db';
 import {
   type DynamicPricingCategory,
   type DynamicPricingCurveData,
@@ -32,13 +28,13 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import {
+  type StackingResult,
+  type TierForStack,
   applyStackToBase,
   localDow,
   localHour,
   resolveCurveMultiplier,
   stackTiers,
-  type StackingResult,
-  type TierForStack,
 } from './dynamic-pricing-helpers.js';
 
 export interface ResolveContext {
@@ -85,10 +81,7 @@ export class TierResolutionService {
 
         // Load all currently-active tiers for the tenant (RLS will filter).
         const activeTiers = await tx.query.dynamicPricingTiers.findMany({
-          where: and(
-            eq(dynamicPricingTiers.isActive, true),
-            isNull(dynamicPricingTiers.deletedAt),
-          ),
+          where: and(eq(dynamicPricingTiers.isActive, true), isNull(dynamicPricingTiers.deletedAt)),
         });
 
         // Filter by yard scope.
@@ -160,9 +153,7 @@ export class TierResolutionService {
  * column is jsonb; we tolerate missing or partial config and let zod fill
  * in defaults from the tenant-settings schema.
  */
-export function parseDynamicPricingSettings(
-  settings: unknown,
-): DynamicPricingTenantSettings {
+export function parseDynamicPricingSettings(settings: unknown): DynamicPricingTenantSettings {
   const obj = (settings as Record<string, unknown> | null) ?? null;
   const candidate = obj?.dynamicPricing ?? {};
   const parsed = dynamicPricingTenantSettingsSchema.safeParse(candidate);

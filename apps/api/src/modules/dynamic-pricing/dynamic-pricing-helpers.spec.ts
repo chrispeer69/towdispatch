@@ -62,20 +62,14 @@ describe('stackTiers', () => {
   });
 
   it('does not cap below the raw product when within cap', () => {
-    const r = stackTiers(
-      [{ tierId: 'a', name: 'W', category: 'weather', multiplier: 1.2 }],
-      3.0,
-    );
+    const r = stackTiers([{ tierId: 'a', name: 'W', category: 'weather', multiplier: 1.2 }], 3.0);
     expect(r.capped).toBe(false);
   });
 });
 
 describe('applyStackToBase', () => {
   it('returns base unchanged for empty stack', () => {
-    const r = applyStackToBase(
-      10000,
-      stackTiers([], 3.0),
-    );
+    const r = applyStackToBase(10000, stackTiers([], 3.0));
     expect(r.finalCents).toBe(10000);
   });
 

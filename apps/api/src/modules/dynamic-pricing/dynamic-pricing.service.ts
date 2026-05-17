@@ -21,24 +21,24 @@ import {
   uuidv7,
 } from '@ustowdispatch/db';
 import {
+  type CreateDynamicPricingHolidayPayload,
+  type CreateDynamicPricingNoaaMappingPayload,
+  type CreateDynamicPricingOverridePayload,
+  type CreateDynamicPricingTierPayload,
   DEFAULT_NOAA_MAPPINGS,
   DEFAULT_US_HOLIDAYS,
+  type DynamicPricingDemandSurgeSuggestionDto,
   type DynamicPricingHolidayDto,
   type DynamicPricingNoaaMappingDto,
+  type DynamicPricingOverrideDto,
   type DynamicPricingTenantSettings,
   type DynamicPricingTierDto,
-  type DynamicPricingDemandSurgeSuggestionDto,
-  type CreateDynamicPricingTierPayload,
-  type UpdateDynamicPricingTierPayload,
-  type CreateDynamicPricingNoaaMappingPayload,
-  type UpdateDynamicPricingNoaaMappingPayload,
-  type CreateDynamicPricingHolidayPayload,
   type UpdateDynamicPricingHolidayPayload,
-  type CreateDynamicPricingOverridePayload,
-  type DynamicPricingOverrideDto,
+  type UpdateDynamicPricingNoaaMappingPayload,
+  type UpdateDynamicPricingTierPayload,
   dynamicPricingTenantSettingsSchema,
 } from '@ustowdispatch/shared';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { TierResolutionService } from './tier-resolution.service.js';
 
@@ -116,12 +116,7 @@ export class DynamicPricingService {
       const [row] = await tx
         .update(dynamicPricingTiers)
         .set(patch)
-        .where(
-          and(
-            eq(dynamicPricingTiers.id, tierId),
-            isNull(dynamicPricingTiers.deletedAt),
-          ),
-        )
+        .where(and(eq(dynamicPricingTiers.id, tierId), isNull(dynamicPricingTiers.deletedAt)))
         .returning();
       if (!row) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Tier not found' });
       return toTierDto(row);

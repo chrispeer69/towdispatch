@@ -1,9 +1,3 @@
-/**
- * Server-side typed fetchers for the Dynamic Pricing Engine. Mirrors
- * the AR/Account Rate Cards patterns: every call goes through apiServer
- * so the access cookie stays server-only.
- */
-import { apiServer } from './client';
 import type {
   DynamicPricingDemandSurgeSuggestionDto,
   DynamicPricingHolidayDto,
@@ -11,11 +5,17 @@ import type {
   DynamicPricingPulseToday,
   DynamicPricingTenantSettings,
   DynamicPricingTierDto,
+  OverrideReportRow,
   TierHistoryRow,
   TierPerformanceRow,
-  OverrideReportRow,
   YearOverYearGated,
 } from '@ustowdispatch/shared';
+/**
+ * Server-side typed fetchers for the Dynamic Pricing Engine. Mirrors
+ * the AR/Account Rate Cards patterns: every call goes through apiServer
+ * so the access cookie stays server-only.
+ */
+import { apiServer } from './client';
 
 export async function fetchTiers(token?: string | null): Promise<DynamicPricingTierDto[]> {
   return apiServer<DynamicPricingTierDto[]>('/dynamic-pricing/tiers', {
@@ -23,9 +23,7 @@ export async function fetchTiers(token?: string | null): Promise<DynamicPricingT
   });
 }
 
-export async function fetchPulseToday(
-  token?: string | null,
-): Promise<DynamicPricingPulseToday> {
+export async function fetchPulseToday(token?: string | null): Promise<DynamicPricingPulseToday> {
   return apiServer<DynamicPricingPulseToday>('/dynamic-pricing/pulse/today', {
     accessToken: token ?? null,
   });
@@ -39,9 +37,7 @@ export async function fetchNoaaMappings(
   });
 }
 
-export async function fetchHolidays(
-  token?: string | null,
-): Promise<DynamicPricingHolidayDto[]> {
+export async function fetchHolidays(token?: string | null): Promise<DynamicPricingHolidayDto[]> {
   return apiServer<DynamicPricingHolidayDto[]>('/dynamic-pricing/holidays', {
     accessToken: token ?? null,
   });
@@ -105,9 +101,7 @@ export async function fetchOverrideReport(
   });
 }
 
-export async function fetchYearOverYearGate(
-  token?: string | null,
-): Promise<YearOverYearGated> {
+export async function fetchYearOverYearGate(token?: string | null): Promise<YearOverYearGated> {
   return apiServer<YearOverYearGated>('/dynamic-pricing/reports/year-over-year', {
     accessToken: token ?? null,
   });

@@ -5,11 +5,7 @@
  */
 import { z } from 'zod';
 
-export const dynamicPricingDemandSurgeStatusValues = [
-  'pending',
-  'approved',
-  'dismissed',
-] as const;
+export const dynamicPricingDemandSurgeStatusValues = ['pending', 'approved', 'dismissed'] as const;
 export type DynamicPricingDemandSurgeStatus =
   (typeof dynamicPricingDemandSurgeStatusValues)[number];
 
@@ -47,7 +43,10 @@ export const DEFAULT_DEMAND_SURGE_MULTIPLIERS = [1.3, 1.6, 2.0] as const;
 /** Tenant-level dynamic-pricing config that lives on tenants.settings.dynamicPricing */
 export const dynamicPricingTenantSettingsSchema = z.object({
   capMultiplier: z.number().positive().max(10).default(3.0),
-  demandSurgeThresholds: z.array(z.number().int().min(101).max(1000)).length(3).default([150, 200, 300]),
+  demandSurgeThresholds: z
+    .array(z.number().int().min(101).max(1000))
+    .length(3)
+    .default([150, 200, 300]),
   demandSurgeMultipliers: z.array(z.number().positive().max(10)).length(3).default([1.3, 1.6, 2.0]),
   motorClubStormSurgeEnabled: z.boolean().default(false),
 });

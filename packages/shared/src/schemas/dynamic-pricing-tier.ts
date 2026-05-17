@@ -50,11 +50,9 @@ export const createDynamicPricingTierSchema = z
   .strict();
 export type CreateDynamicPricingTierPayload = z.infer<typeof createDynamicPricingTierSchema>;
 
-export const updateDynamicPricingTierSchema = createDynamicPricingTierSchema
-  .partial()
-  .extend({
-    autoRevertAt: z.string().datetime().nullable().optional(),
-  });
+export const updateDynamicPricingTierSchema = createDynamicPricingTierSchema.partial().extend({
+  autoRevertAt: z.string().datetime().nullable().optional(),
+});
 export type UpdateDynamicPricingTierPayload = z.infer<typeof updateDynamicPricingTierSchema>;
 
 export const activateDynamicPricingTierSchema = z
