@@ -11,6 +11,7 @@ import {
   isUsableMapboxToken,
 } from '@/lib/geocoding';
 import { cn } from '@/lib/utils';
+import { COMMON_MAKES, STANDARD_COLORS, modelsForMake } from './vehicle-options';
 const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /**
@@ -713,28 +714,59 @@ export function IntakeClient({ officeAddress, mapboxToken }: IntakeClientProps):
               />
             </Field>
             <Field label="Color">
-              <Input
+              <select
                 tabIndex={0}
-                placeholder="Blue"
+                data-testid="intake-color"
                 value={form.color}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => update('color', e.target.value)}
-              />
+                onChange={(e) => update('color', e.target.value)}
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              >
+                <option value="">Select color…</option>
+                {STANDARD_COLORS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Make">
               <Input
                 tabIndex={0}
                 placeholder="Honda"
+                list="intake-make-options"
+                data-testid="intake-make"
                 value={form.make}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => update('make', e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const next = e.target.value;
+                  // Changing make invalidates the currently-selected model so
+                  // the dispatcher doesn't ship a Honda Camry by accident.
+                  setForm((prev) => ({
+                    ...prev,
+                    make: next,
+                    model: prev.make === next ? prev.model : '',
+                  }));
+                }}
               />
+              <datalist id="intake-make-options">
+                {COMMON_MAKES.map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </Field>
             <Field label="Model">
               <Input
                 tabIndex={0}
                 placeholder="Civic"
+                list="intake-model-options"
+                data-testid="intake-model"
                 value={form.model}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => update('model', e.target.value)}
               />
+              <datalist id="intake-model-options">
+                {modelsForMake(form.make).map((m) => (
+                  <option key={m} value={m} />
+                ))}
+              </datalist>
             </Field>
           </div>
           <Field label="Class">
