@@ -109,6 +109,14 @@ export const jobs = pgTable(
     rateQuotedCents: bigint('rate_quoted_cents', { mode: 'number' }).notNull().default(0),
     rateBreakdown: jsonb('rate_breakdown'),
 
+    /**
+     * Quote-freeze snapshot (Moat #1 Dynamic Pricing). When a quote moves to
+     * the `dispatched` lifecycle state, the rate-engine final price is
+     * snapshotted here. Subsequent live tier changes do NOT re-price the
+     * accepted quote in either direction. Null until acceptance.
+     */
+    frozenPriceCents: bigint('frozen_price_cents', { mode: 'number' }),
+
     notes: text('notes'),
 
     cancelledReason: text('cancelled_reason'),
