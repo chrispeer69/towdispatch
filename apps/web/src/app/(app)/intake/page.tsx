@@ -1,3 +1,6 @@
+import { tryFetch } from '@/lib/api/client';
+import { fetchTenantCurrent } from '@/lib/api/resources';
+import { getSessionToken } from '@/lib/auth/cookies';
 import { getOptionalUser } from '@/lib/auth/session';
 import { IntakeClient } from './intake-client';
 
@@ -11,10 +14,48 @@ export const metadata = { title: 'Call Intake â€” US Tow DISPATCH' };
  * using the non-throwing getOptionalUser() so a transient /auth/me flake
  * cannot redirect this page out from under a layout that already streamed an
  * authenticated shell. See lib/auth/session.ts for the chokepoint.
+ *
+ * Also fetches tenant.settings.physical_address up front so the client can
+ * compute "X mi from office" hints next to the pickup field without an extra
+ * client-side round trip. Read-only — the form never writes back here.
  */
+interface CompanyAddressLike {
+  street_1?: unknown;
+  street_2?: unknown;
+  city?: unknown;
+  state?: unknown;
+  zip?: unknown;
+}
+
+function formatOfficeAddress(addr: CompanyAddressLike | null | undefined): string | null {
+  if (!addr || typeof addr !== 'object') return null;
+  const parts = [
+    typeof addr.street_1 === 'string' ? addr.street_1 : '',
+    typeof addr.city === 'string' ? addr.city : '',
+    typeof addr.state === 'string' ? addr.state : '',
+    typeof addr.zip === 'string' ? addr.zip : '',
+  ].filter(Boolean);
+  if (parts.length === 0) return null;
+  return parts.join(', ');
+}
+
 export default async function IntakePage(): Promise<JSX.Element> {
   const session = await getOptionalUser();
   const tenantName = session?.tenant.name ?? '';
+
+  // tryFetch swallows 4xx so a missing physical_address (e.g. the company
+  // profile hasn't been filled out yet) just leaves us with no office origin
+  // — the form still works, distance hints just won't render.
+  const token = await getSessionToken();
+  const tenantResult = await tryFetch(() => fetchTenantCurrent(token));
+  const settings = tenantResult.data?.settings as
+    | { physical_address?: CompanyAddressLike }
+    | undefined;
+  const officeAddress = formatOfficeAddress(settings?.physical_address);
+
+  const rawToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
+  const mapboxToken = rawToken && !rawToken.startsWith('pk.placeholder') ? rawToken : null;
+
   return (
     <div className="space-y-5">
       <header className="flex items-end justify-between">
@@ -30,7 +71,7 @@ export default async function IntakePage(): Promise<JSX.Element> {
           Tab to advance Â· Cmd/Ctrl+Enter to dispatch
         </span>
       </header>
-      <IntakeClient />
+      <IntakeClient officeAddress={officeAddress} mapboxToken={mapboxToken} />
     </div>
   );
 }
