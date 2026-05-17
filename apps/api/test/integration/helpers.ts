@@ -188,6 +188,17 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM import_runs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM vehicles WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM customers WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          // Build 6 account-rate-cards: account_rate_overrides cascades
+          // when accounts are deleted, but service_catalog has
+          // ON DELETE RESTRICT — so wipe overrides + availability before
+          // service_catalog below.
+          await c.query('DELETE FROM account_rate_overrides WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query(
+            'DELETE FROM account_service_availability WHERE tenant_id = ANY($1::uuid[])',
+            [tenantIds],
+          );
           await c.query('DELETE FROM accounts WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM rate_sheets WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           // service_rates first — FK to service_catalog with ON DELETE CASCADE
