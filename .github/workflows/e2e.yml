@@ -65,6 +65,9 @@ jobs:
       - name: Apply migrations
         run: pnpm --filter @ustowdispatch/db migrate
 
+      - name: Build shared
+        run: pnpm --filter @ustowdispatch/shared build
+
       - name: Build api
         run: pnpm --filter @ustowdispatch/api build
 
