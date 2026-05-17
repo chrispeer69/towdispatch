@@ -35,8 +35,12 @@ test.describe('E2E-001 driver job lifecycle', () => {
       phone: `+1310555${Math.floor(Math.random() * 9000 + 1000)}`,
       email: `cust-${suffix}@spec.test`,
     });
-    expect(custRes.ok, await custRes.text()).toBe(true);
-    const cust = (await custRes.clone().json()) as { id: string };
+    // Read each response body exactly once. Response bodies are single-use,
+    // so the failure-context text() and the success-path json() share the
+    // same text — JSON.parse it from the captured string.
+    const custText = await custRes.text();
+    expect(custRes.ok, custText).toBe(true);
+    const cust = JSON.parse(custText) as { id: string };
 
     const vehRes = await apiPost('/vehicles', dispatcher.accessToken, {
       customerId: cust.id,
@@ -45,8 +49,9 @@ test.describe('E2E-001 driver job lifecycle', () => {
       model: 'Camry',
       vin: `1HGCM82633A${Math.floor(Math.random() * 900000 + 100000)}`,
     });
-    expect(vehRes.ok, await vehRes.text()).toBe(true);
-    const veh = (await vehRes.clone().json()) as { id: string };
+    const vehText = await vehRes.text();
+    expect(vehRes.ok, vehText).toBe(true);
+    const veh = JSON.parse(vehText) as { id: string };
 
     const jobRes = await apiPost('/jobs', dispatcher.accessToken, {
       customerId: cust.id,
@@ -55,8 +60,9 @@ test.describe('E2E-001 driver job lifecycle', () => {
       pickupAddress: '123 E2E Way, Brooklyn NY',
       authorizedBy: 'customer',
     });
-    expect(jobRes.ok, await jobRes.text()).toBe(true);
-    const job = (await jobRes.clone().json()) as { id: string; status: string };
+    const jobText = await jobRes.text();
+    expect(jobRes.ok, jobText).toBe(true);
+    const job = JSON.parse(jobText) as { id: string; status: string };
     expect(job.status).toBe('new');
 
     const fetched = await apiGet(`/jobs/${job.id}`, dispatcher.accessToken);

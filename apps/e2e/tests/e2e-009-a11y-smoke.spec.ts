@@ -56,10 +56,6 @@ test.describe('E2E-009 axe-core a11y smoke', () => {
       const results = await new AxeBuilder({ page })
         // WCAG 2.1 AA + best practices. Color-contrast is included.
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'])
-        // The dispatch map uses Mapbox which has known minor a11y
-        // shortcomings we can't fix without a vendor change. Disable
-        // the specific check that fires inside the Mapbox canvas.
-        .disableRules(['canvas'])
         .analyze();
 
       for (const v of results.violations) {
