@@ -35,6 +35,6 @@ import { StatementPdfService } from './statement-pdf.service.js';
     BillingDeliveryService,
     JobCompletionListener,
   ],
-  exports: [InvoicesService, InvoiceReviewService, BillingDeliveryService],
+  exports: [InvoicesService, InvoiceReviewService, BillingDeliveryService, StatementPdfService],
 })
 export class BillingModule {}
