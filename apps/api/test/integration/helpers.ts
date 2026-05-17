@@ -145,6 +145,15 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           // / credit_memos / invoices reference jobs/customers/accounts, and
           // invoices.tenant_id has ON DELETE RESTRICT — so they MUST be cleared
           // before the tenant DELETE below.
+          // Build 5 audit tables — statement_sends + red_alert_sends. Both
+          // reference accounts (statement_sends) / tenants and use
+          // ON DELETE RESTRICT on tenant_id, so clear first.
+          await c.query('DELETE FROM red_alert_sends WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM statement_sends WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           await c.query('DELETE FROM payments WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM invoice_taxes WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM invoice_line_items WHERE tenant_id = ANY($1::uuid[])', [

@@ -258,6 +258,7 @@ function toDto(a: typeof accounts.$inferSelect): AccountDto {
     goaPolicy: a.goaPolicy,
     slaArrivalMinutes: a.slaArrivalMinutes,
     afterHoursBillingAllowed: a.afterHoursBillingAllowed,
+    delinquencyDaysThreshold: a.delinquencyDaysThreshold,
     createdAt: a.createdAt.toISOString(),
     updatedAt: a.updatedAt.toISOString(),
     deletedAt: a.deletedAt ? a.deletedAt.toISOString() : null,

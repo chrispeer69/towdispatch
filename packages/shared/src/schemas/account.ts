@@ -61,6 +61,11 @@ export const accountSchema = z.object({
   goaPolicy: z.string().nullable(),
   slaArrivalMinutes: z.number().int().positive().nullable(),
   afterHoursBillingAllowed: z.boolean(),
+  /**
+   * Days past invoice posted_date before this account's open invoices flip
+   * to past_due. NULL = inherit tenant-wide default. Build 5 / MOAT #7.
+   */
+  delinquencyDaysThreshold: z.number().int().positive().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   deletedAt: z.string().datetime().nullable(),

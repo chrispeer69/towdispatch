@@ -297,6 +297,8 @@ export class AccountRateCardsService {
       if (input.slaArrivalMinutes !== undefined) patch.slaArrivalMinutes = input.slaArrivalMinutes;
       if (input.afterHoursBillingAllowed !== undefined)
         patch.afterHoursBillingAllowed = input.afterHoursBillingAllowed;
+      if (input.delinquencyDaysThreshold !== undefined)
+        patch.delinquencyDaysThreshold = input.delinquencyDaysThreshold;
 
       const result = await tx
         .update(accounts)

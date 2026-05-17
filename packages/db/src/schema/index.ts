@@ -26,6 +26,8 @@ export * from './tracking-links';
 export * from './invoices';
 export * from './invoice-line-commissions';
 export * from './job-driver-assignments';
+export * from './statement-sends';
+export * from './red-alert-sends';
 export * from './stripe-events';
 export * from './accounting-connections';
 export * from './account-mappings';

@@ -1,235 +1,235 @@
 'use client';
 
 /**
- * /settings/invoice-defaults — preferences capture under
- * tenants.settings.invoiceDefaults (jsonb). Same pattern as
- * /settings/tax-fees: persists, but the invoicing pipeline doesn't
- * read these yet — invoice generation still uses column defaults
- * (terms = 'net_30') and hard-coded strings.
+ * Tenant-wide invoice defaults form. Six fields persisted on
+ * tenants.settings.invoiceDefaults (jsonb):
  *
- * When the billing service is updated to consult tenant settings,
- * these values start applying to new invoices automatically.
+ *   defaultDelinquencyDays           int     default 30
+ *   cashCustomerDelinquencyDays      int     default 7
+ *   defaultInvoiceTerms              enum    default net_30
+ *   invoiceNumberPrefix              text    default "INV-"
+ *   invoiceFooterText                text    default ""
+ *   paymentInstructionsText          text    default ""
+ *
+ * Owners/admins can save; lower roles see the form fields but the
+ * save button is disabled. Per-account thresholds (Contract Terms tab)
+ * override the tenant default per account.
  */
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { type InvoiceTerms, type TenantDto, invoiceTermsValues } from '@ustowdispatch/shared';
-import { Lock } from 'lucide-react';
-import { type FormEvent, type JSX, useState } from 'react';
+import { clientUpdateInvoiceDefaults } from '@/lib/api/ar-client';
+import {
+  type TenantInvoiceDefaults,
+  type UpdateTenantInvoiceDefaultsPayload,
+  invoiceTermsValues,
+} from '@ustowdispatch/shared';
+import { type JSX, useState } from 'react';
 import { toast } from 'sonner';
 
-interface Props {
-  initial: TenantDto;
-}
-
-interface InvoiceDefaults {
-  terms?: InvoiceTerms;
-  numberPrefix?: string;
-  footerText?: string;
-  paymentInstructions?: string;
-  emailSubjectTemplate?: string;
-}
-
-const TERMS_LABEL: Record<InvoiceTerms, string> = {
+const TERMS_LABELS: Record<(typeof invoiceTermsValues)[number], string> = {
   due_on_receipt: 'Due on receipt',
   net_15: 'Net 15',
   net_30: 'Net 30',
   net_45: 'Net 45',
   net_60: 'Net 60',
-  cod: 'COD (cash on delivery)',
+  cod: 'COD',
   prepay: 'Prepay',
 };
 
-function readInvoiceDefaults(tenant: TenantDto): InvoiceDefaults {
-  return (
-    (tenant.settings as { invoiceDefaults?: InvoiceDefaults } | undefined)?.invoiceDefaults ?? {}
-  );
-}
+export function InvoiceDefaultsForm({
+  initial,
+  errorMessage,
+}: {
+  initial: TenantInvoiceDefaults;
+  errorMessage: string | null;
+}): JSX.Element {
+  const [draft, setDraft] = useState(initial);
+  const [original, setOriginal] = useState(initial);
+  const [saving, setSaving] = useState(false);
 
-export function InvoiceDefaultsForm({ initial }: Props): JSX.Element {
-  const [tenant, setTenant] = useState<TenantDto>(initial);
-  const current = readInvoiceDefaults(tenant);
+  const isDirty = JSON.stringify(draft) !== JSON.stringify(original);
 
-  const [terms, setTerms] = useState<InvoiceTerms>(current.terms ?? 'net_30');
-  const [numberPrefix, setNumberPrefix] = useState(current.numberPrefix ?? '');
-  const [footerText, setFooterText] = useState(current.footerText ?? '');
-  const [paymentInstructions, setPaymentInstructions] = useState(current.paymentInstructions ?? '');
-  const [emailSubjectTemplate, setEmailSubjectTemplate] = useState(
-    current.emailSubjectTemplate ?? '',
-  );
+  const set = <K extends keyof TenantInvoiceDefaults>(k: K, v: TenantInvoiceDefaults[K]): void => {
+    setDraft((prev) => ({ ...prev, [k]: v }));
+  };
 
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [permissionLocked, setPermissionLocked] = useState(false);
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    const next: InvoiceDefaults = { terms };
-    if (numberPrefix.trim()) next.numberPrefix = numberPrefix.trim();
-    if (footerText.trim()) next.footerText = footerText.trim();
-    if (paymentInstructions.trim()) next.paymentInstructions = paymentInstructions.trim();
-    if (emailSubjectTemplate.trim()) next.emailSubjectTemplate = emailSubjectTemplate.trim();
-
-    const existingSettings = (tenant.settings ?? {}) as Record<string, unknown>;
-    const nextSettings = { ...existingSettings, invoiceDefaults: next };
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/tenants/current', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings: nextSettings }),
-      });
-      if (!res.ok) {
-        if (res.status === 401 || res.status === 403) {
-          setPermissionLocked(true);
-          return;
-        }
-        const body = (await res.json().catch(() => null)) as { message?: string } | null;
-        setErrorMessage(body?.message ?? `Save failed (HTTP ${res.status})`);
-        return;
-      }
-      const updated = (await res.json()) as TenantDto;
-      setTenant(updated);
-      toast.success('Invoice defaults saved.');
-    } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Save failed');
-    } finally {
-      setSubmitting(false);
+  const onSave = async (): Promise<void> => {
+    if (!isDirty) return;
+    if (draft.defaultDelinquencyDays <= 0 || draft.cashCustomerDelinquencyDays <= 0) {
+      toast.error('Delinquency days must be positive integers.');
+      return;
     }
-  }
-
-  if (permissionLocked) {
-    return (
-      <div
-        role="alert"
-        className="flex items-start gap-3 rounded-[14px] border border-status-warning/40 bg-status-warning/10 px-4 py-3 text-sm"
-      >
-        <Lock className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" />
-        <div>
-          <p className="font-semibold text-text-primary-on-dark">
-            You don&rsquo;t have permission to edit invoice defaults
-          </p>
-          <p className="mt-1 text-text-secondary-on-dark">
-            Editing tenant-level settings is gated to Owner and Admin roles.
-          </p>
-        </div>
-      </div>
-    );
-  }
+    setSaving(true);
+    try {
+      const payload: UpdateTenantInvoiceDefaultsPayload = {
+        defaultDelinquencyDays: draft.defaultDelinquencyDays,
+        cashCustomerDelinquencyDays: draft.cashCustomerDelinquencyDays,
+        defaultInvoiceTerms: draft.defaultInvoiceTerms,
+        invoiceNumberPrefix: draft.invoiceNumberPrefix,
+        invoiceFooterText: draft.invoiceFooterText,
+        paymentInstructionsText: draft.paymentInstructionsText,
+      };
+      const updated = await clientUpdateInvoiceDefaults(payload);
+      setOriginal(updated);
+      setDraft(updated);
+      toast.success('Invoice defaults saved');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <section className="rounded-[14px] border border-status-warning/30 bg-status-warning/5 p-4 text-sm">
-        <p className="font-semibold text-text-primary-on-dark">
-          Preferences capture, not enforcement
-        </p>
-        <p className="mt-1 text-text-secondary-on-dark">
-          These values save to <code className="font-mono">tenants.settings.invoiceDefaults</code>{' '}
-          and persist across sessions. The invoicing pipeline doesn&rsquo;t read them yet — invoice
-          generation still uses column defaults (
-          <code className="font-mono">terms = &lsquo;net_30&rsquo;</code>) and hard-coded PDF
-          strings. The values you save here become live when the billing service is updated to
-          consult tenant settings.
-        </p>
-      </section>
+    <form
+      className="space-y-5"
+      data-testid="invoice-defaults-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void onSave();
+      }}
+    >
+      {errorMessage ? (
+        <div className="rounded-[10px] border border-status-warning/40 bg-status-warning/10 px-3 py-2 text-xs text-status-warning">
+          {errorMessage}
+        </div>
+      ) : null}
 
-      <section className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
-        <header>
-          <h2 className="font-semibold text-text-primary-on-dark">Defaults</h2>
-        </header>
+      <fieldset className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
+        <legend className="px-1 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
+          Delinquency
+        </legend>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field
+            label="Default days until past due"
+            help="Applies to accounts without their own threshold. Industry typical: 30."
+          >
+            <Input
+              type="number"
+              min={1}
+              value={String(draft.defaultDelinquencyDays)}
+              onChange={(e) => set('defaultDelinquencyDays', Number(e.target.value))}
+            />
+          </Field>
+          <Field
+            label="Cash customer days until past due"
+            help="Applies when the invoice has no account (walk-up / cash). Industry typical: 7."
+          >
+            <Input
+              type="number"
+              min={1}
+              value={String(draft.cashCustomerDelinquencyDays)}
+              onChange={(e) => set('cashCustomerDelinquencyDays', Number(e.target.value))}
+            />
+          </Field>
+        </div>
+      </fieldset>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="default-terms">Default payment terms</Label>
+      <fieldset className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
+        <legend className="px-1 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
+          Invoice generation
+        </legend>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Default invoice terms">
             <select
-              id="default-terms"
-              value={terms}
-              onChange={(e) => setTerms(e.target.value as InvoiceTerms)}
-              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              value={draft.defaultInvoiceTerms}
+              onChange={(e) =>
+                set(
+                  'defaultInvoiceTerms',
+                  e.target.value as TenantInvoiceDefaults['defaultInvoiceTerms'],
+                )
+              }
+              className="w-full rounded-[8px] border border-divider bg-bg-base px-2 py-2 text-sm"
             >
-              {invoiceTermsValues.map((t) => (
-                <option key={t} value={t}>
-                  {TERMS_LABEL[t]}
+              {invoiceTermsValues.map((v) => (
+                <option key={v} value={v}>
+                  {TERMS_LABELS[v]}
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="number-prefix">Invoice number prefix</Label>
-            <Input
-              id="number-prefix"
-              type="text"
-              value={numberPrefix}
-              onChange={(e) => setNumberPrefix(e.target.value.toUpperCase())}
-              placeholder="ROAD, ACME, etc."
-              maxLength={8}
-            />
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-secondary-on-dark">
-              Up to 8 chars. Will be uppercased and stamped before the sequence number.
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="footer-text">PDF footer text</Label>
-          <textarea
-            id="footer-text"
-            value={footerText}
-            onChange={(e) => setFooterText(e.target.value)}
-            placeholder="Thank you for your business."
-            rows={2}
-            maxLength={500}
-            className="w-full resize-y rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark focus:outline-none focus:ring-1 focus:ring-brand-primary/40 focus:border-brand-primary/60"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="payment-instructions">Payment instructions</Label>
-          <textarea
-            id="payment-instructions"
-            value={paymentInstructions}
-            onChange={(e) => setPaymentInstructions(e.target.value)}
-            placeholder="Mail checks to … or pay online at …"
-            rows={3}
-            maxLength={1000}
-            className="w-full resize-y rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm text-text-primary-on-dark focus:outline-none focus:ring-1 focus:ring-brand-primary/40 focus:border-brand-primary/60"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="email-subject">Invoice email subject template</Label>
-          <Input
-            id="email-subject"
-            type="text"
-            value={emailSubjectTemplate}
-            onChange={(e) => setEmailSubjectTemplate(e.target.value)}
-            placeholder="Invoice {invoiceNumber} from {tenantName}"
-            maxLength={200}
-          />
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-secondary-on-dark">
-            Tokens: {'{invoiceNumber}'}, {'{tenantName}'}, {'{customerName}'}
-          </p>
-        </div>
-
-        {errorMessage ? (
-          <p
-            role="alert"
-            className="rounded-[10px] border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+          </Field>
+          <Field
+            label="Invoice number prefix"
+            help="Prepended to the per-tenant sequence. Default: INV-"
           >
-            {errorMessage}
-          </p>
-        ) : null}
-
-        <div className="flex items-center gap-3">
-          <Button type="submit" disabled={submitting}>
-            {submitting ? 'Saving…' : 'Save invoice defaults'}
-          </Button>
+            <Input
+              value={draft.invoiceNumberPrefix}
+              onChange={(e) => set('invoiceNumberPrefix', e.target.value)}
+              maxLength={20}
+            />
+          </Field>
         </div>
-      </section>
+      </fieldset>
+
+      <fieldset className="space-y-4 rounded-[14px] border border-divider bg-bg-surface p-5">
+        <legend className="px-1 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
+          Document text
+        </legend>
+        <Field
+          label="Invoice footer text"
+          help="Rendered on every invoice PDF + emailed invoice body."
+        >
+          <textarea
+            rows={3}
+            value={draft.invoiceFooterText}
+            onChange={(e) => set('invoiceFooterText', e.target.value)}
+            className="w-full rounded-[8px] border border-divider bg-bg-base px-2 py-2 text-sm"
+            maxLength={4000}
+          />
+        </Field>
+        <Field
+          label="Payment instructions text"
+          help="Rendered on the invoice PDF + the customer-facing email."
+        >
+          <textarea
+            rows={4}
+            value={draft.paymentInstructionsText}
+            onChange={(e) => set('paymentInstructionsText', e.target.value)}
+            className="w-full rounded-[8px] border border-divider bg-bg-base px-2 py-2 text-sm"
+            maxLength={4000}
+            placeholder="e.g. Mail checks to: PO Box 123, Anytown USA. Or pay online at the link provided."
+          />
+        </Field>
+      </fieldset>
+
+      <div className="flex items-center justify-end gap-2">
+        {isDirty ? (
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-amber">
+            Unsaved changes
+          </span>
+        ) : null}
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={saving || !isDirty}
+          onClick={() => setDraft(original)}
+        >
+          Discard
+        </Button>
+        <Button type="submit" disabled={saving || !isDirty}>
+          {saving ? 'Saving…' : 'Save'}
+        </Button>
+      </div>
     </form>
+  );
+}
+
+function Field({
+  label,
+  help,
+  children,
+}: {
+  label: string;
+  help?: string;
+  children: React.ReactNode;
+}): JSX.Element {
+  return (
+    <div className="space-y-1.5">
+      <span className="block font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
+        {label}
+      </span>
+      {children}
+      {help ? <p className="text-[11px] text-text-secondary-on-dark">{help}</p> : null}
+    </div>
   );
 }
