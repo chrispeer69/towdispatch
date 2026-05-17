@@ -6,21 +6,18 @@ import { usePathname } from 'next/navigation';
 /**
  * Sub-nav for the /fleet shell. Sits below the page title on every fleet
  * page, mirroring the visual density of the dispatch board's filter row.
+ *
+ * Expirations, Maintenance, and DVIR tabs were removed at user request —
+ * those workflows are owned by US Tow Fleet (the dedicated fleet-management
+ * SaaS in the Blue Collar AI ecosystem). The /fleet/expirations,
+ * /fleet/maintenance, and /fleet/dvirs routes still exist for direct-URL
+ * access and any deep links, but they're no longer surfaced from the
+ * sub-nav. When the US Tow Fleet integration ships, those routes will
+ * either redirect to the SaaS or be removed entirely.
  */
 const TABS: Array<{ href: string; label: string; match: (p: string) => boolean }> = [
   { href: '/fleet/trucks', label: 'Trucks', match: (p) => p.startsWith('/fleet/trucks') },
   { href: '/fleet/drivers', label: 'Drivers', match: (p) => p.startsWith('/fleet/drivers') },
-  {
-    href: '/fleet/expirations',
-    label: 'Expirations',
-    match: (p) => p.startsWith('/fleet/expirations'),
-  },
-  {
-    href: '/fleet/maintenance',
-    label: 'Maintenance',
-    match: (p) => p.startsWith('/fleet/maintenance'),
-  },
-  { href: '/fleet/dvirs', label: 'DVIR', match: (p) => p.startsWith('/fleet/dvirs') },
 ];
 
 export function FleetTabs(): JSX.Element {
