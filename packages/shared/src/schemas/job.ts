@@ -227,6 +227,25 @@ export const jobSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   deletedAt: z.string().datetime().nullable(),
+  // Optional joined snapshots for surfaces (dispatch board) that need to
+  // render customer / vehicle details without a second fetch. Producers
+  // that don't have the joins handy can omit these.
+  customer: z
+    .object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+    .nullable()
+    .optional(),
+  vehicle: z
+    .object({
+      id: z.string().uuid(),
+      year: z.number().int().nullable(),
+      make: z.string().nullable(),
+      model: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
 });
 export type JobDto = z.infer<typeof jobSchema>;
 

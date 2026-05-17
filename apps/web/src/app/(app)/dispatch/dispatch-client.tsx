@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { ActivePane, ConnectionPill, MapPane, useDispatchBoard } from './dispatch-shared';
 /**
  * Live Dispatch — read-only operations view: Active jobs on the far left,
@@ -24,6 +25,9 @@ export function DispatchClient({
   smsHint = null,
 }: Props): JSX.Element {
   const { state, connected } = useDispatchBoard(initialSnapshot);
+  // Driver focus: clicking a driver header in the Active panel narrows the
+  // map to that driver's row + jobs. Toggle off by clicking again.
+  const [focusedDriverId, setFocusedDriverId] = useState<string | null>(null);
 
   return (
     <div className="space-y-4" data-testid="dispatch-board">
@@ -75,8 +79,20 @@ export function DispatchClient({
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <ActivePane jobs={state.active} draggable={false} className="lg:col-span-3" />
-        <MapPane mapboxToken={mapboxToken} state={state} className="lg:col-span-9" />
+        <ActivePane
+          jobs={state.active}
+          roster={state.roster}
+          completedTodayByDriver={state.completedTodayByDriver ?? {}}
+          selectedDriverId={focusedDriverId}
+          onSelectDriver={setFocusedDriverId}
+          className="lg:col-span-3"
+        />
+        <MapPane
+          mapboxToken={mapboxToken}
+          state={state}
+          focusedDriverId={focusedDriverId}
+          className="lg:col-span-9"
+        />
       </div>
     </div>
   );
