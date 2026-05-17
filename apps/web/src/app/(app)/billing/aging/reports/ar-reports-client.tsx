@@ -8,7 +8,7 @@
  */
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { clientRunReport, reportDownloadUrl } from '@/lib/api/ar';
+import { clientRunReport, reportDownloadUrl } from '@/lib/api/ar-client';
 import { type ArReportId, type ArReportResponse } from '@ustowdispatch/shared';
 import { FileSpreadsheet, FileText, Play, Printer } from 'lucide-react';
 import { type JSX, useState } from 'react';

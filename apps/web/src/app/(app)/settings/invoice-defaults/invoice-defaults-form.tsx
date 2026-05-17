@@ -17,7 +17,7 @@
  */
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { clientUpdateInvoiceDefaults } from '@/lib/api/ar';
+import { clientUpdateInvoiceDefaults } from '@/lib/api/ar-client';
 import {
   type TenantInvoiceDefaults,
   type UpdateTenantInvoiceDefaultsPayload,

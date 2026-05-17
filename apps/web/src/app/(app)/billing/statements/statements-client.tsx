@@ -8,7 +8,7 @@
  */
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { clientSendStatement } from '@/lib/api/ar';
+import { clientSendStatement } from '@/lib/api/ar-client';
 import type { StatementPreviewResponse, StatementSendDto } from '@ustowdispatch/shared';
 import { Download, Eye, Mail, Printer, RefreshCw, X } from 'lucide-react';
 import { type JSX, useState } from 'react';
