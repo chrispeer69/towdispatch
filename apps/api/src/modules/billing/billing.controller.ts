@@ -33,12 +33,15 @@ import {
   type CreditMemoDto,
   type InvoiceDto,
   type InvoiceFilters,
+  type InvoiceReviewDto,
   type InvoiceWithDetailsDto,
   type PaymentDto,
   type PaymentFilters,
+  type PostInvoiceResponse,
   ROLES,
   type RecordPaymentPayload,
   type RecurringScheduleDto,
+  type UpdateInvoiceReviewPayload,
   type VoidInvoicePayload,
   agingFiltersSchema,
   createCreditMemoSchema,
@@ -48,6 +51,7 @@ import {
   invoiceFiltersSchema,
   paymentFiltersSchema,
   recordPaymentSchema,
+  updateInvoiceReviewPayloadSchema,
   updateInvoiceSchema,
   voidInvoiceSchema,
 } from '@ustowdispatch/shared';
@@ -57,6 +61,7 @@ import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodBody, ZodParam, ZodQuery } from '../../common/decorators/zod.decorator.js';
 import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { BillingDeliveryService } from './billing-delivery.service.js';
+import { InvoiceReviewService } from './invoice-review.service.js';
 import { InvoicesService } from './invoices.service.js';
 
 const idSchema = z.object({ id: z.string().uuid() });
@@ -78,6 +83,7 @@ export class BillingController {
   constructor(
     private readonly invoices: InvoicesService,
     private readonly delivery: BillingDeliveryService,
+    private readonly review: InvoiceReviewService,
   ) {}
 
   // ----- invoices -----
@@ -186,6 +192,53 @@ export class BillingController {
       .header('content-type', 'application/pdf')
       .header('content-disposition', `inline; filename="${result.invoice.invoiceNumber}.pdf"`)
       .send(result.bytes);
+  }
+
+  // ----- review (draft only) -----
+
+  /**
+   * Two-section dispatcher review payload for a draft invoice:
+   * customer-facing lines + per-line driver commissions + assigned crew.
+   * Driver-role callers are explicitly excluded.
+   */
+  @Get('invoices/:id/review')
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.ACCOUNTING)
+  async getReview(
+    @ZodParam(idSchema) params: { id: string },
+    @Req() req: FastifyRequest,
+  ): Promise<InvoiceReviewDto> {
+    return this.review.getReview(this.ctx(req), params.id);
+  }
+
+  /**
+   * Atomic edits to a draft invoice's lines + commissions in a single
+   * transaction. Posted invoices are read-only and use a 400/state
+   * response. Validated server-side (commission sums ≤ 100) plus the DB
+   * trigger as a hard guarantee.
+   */
+  @Patch('invoices/:id/review')
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async patchReview(
+    @ZodParam(idSchema) params: { id: string },
+    @ZodBody(updateInvoiceReviewPayloadSchema) body: UpdateInvoiceReviewPayload,
+    @Req() req: FastifyRequest,
+  ): Promise<InvoiceReviewDto> {
+    return this.review.updateReview(this.ctx(req), params.id, body);
+  }
+
+  /**
+   * Atomically transition draft → posted: freeze commission cents,
+   * allocate the INV-YYYY-NNNN number, set issuedAt, fire the
+   * accounting sync. Idempotent — 409 if already past draft.
+   */
+  @Post('invoices/:id/post')
+  @HttpCode(HttpStatus.OK)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async postInvoice(
+    @ZodParam(idSchema) params: { id: string },
+    @Req() req: FastifyRequest,
+  ): Promise<PostInvoiceResponse> {
+    return this.review.postInvoice(this.ctx(req), params.id);
   }
 
   // ----- line items -----
