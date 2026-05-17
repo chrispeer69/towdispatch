@@ -1,55 +1,51 @@
+/**
+ * /billing/statements — Statement generation surface (Build 5 Part 3).
+ *
+ * Two stacked sections:
+ *   1. "Generate New Statement" — pick account, date range, invoice
+ *      filter, click Preview to see the preview modal/inline render,
+ *      then Email / Download / Print.
+ *   2. "Recent Statement Sends" — table of recent statement_sends
+ *      audit rows, with Resend + Download PDF actions.
+ *
+ * Replaces the previous minimal /billing/statements page (which only
+ * exposed a per-account PDF link).
+ */
+import { fetchRecentStatementSends } from '@/lib/api/ar';
 import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/session';
-import type { PaginatedAccounts } from '@ustowdispatch/shared';
+import type { AccountDto, StatementSendDto } from '@ustowdispatch/shared';
+import { StatementsClient } from './statements-client';
 
 export const metadata = { title: 'Statements — US Tow DISPATCH' };
+export const dynamic = 'force-dynamic';
 
-const EMPTY_ACCOUNTS: PaginatedAccounts = { data: [], total: 0, page: 1, perPage: 100 };
-
-export default async function StatementsPage(): Promise<JSX.Element> {
+export default async function StatementsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}): Promise<JSX.Element> {
+  const sp = await searchParams;
   const token = await getSessionToken();
-  const result = await tryFetch(() => fetchAccounts({ perPage: '100' }, token));
-  const accounts = result.data ?? EMPTY_ACCOUNTS;
+
+  const [accountsResult, sendsResult] = await Promise.all([
+    tryFetch(() => fetchAccounts({ perPage: '200' }, token)),
+    tryFetch(() => fetchRecentStatementSends(token)),
+  ]);
+
+  const accounts: AccountDto[] = accountsResult.data?.data ?? [];
+  const sends: StatementSendDto[] = sendsResult.data ?? [];
+
   return (
-    <div className="space-y-4">
-      <header>
-        <h1 className="font-condensed text-xl font-extrabold uppercase tracking-tight">
-          Statements
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary-on-dark">
-          Generate a statement of account PDF for any account with open invoices.
-        </p>
-      </header>
-      <ul className="divide-y divide-divider rounded-lg border border-divider">
-        {accounts.data.map((a) => (
-          <li
-            key={a.id}
-            className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
-            data-testid={`account-row-${a.id}`}
-          >
-            <div>
-              <p className="font-medium">{a.name}</p>
-              <p className="text-text-secondary-on-dark">{a.billingTerms}</p>
-            </div>
-            <div className="flex gap-2">
-              <a
-                href={`/api/billing/statements/${a.id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-md bg-bg-surface-elevated px-3 py-1.5 text-sm hover:bg-divider"
-              >
-                PDF
-              </a>
-            </div>
-          </li>
-        ))}
-        {accounts.data.length === 0 ? (
-          <li className="px-4 py-6 text-center text-text-secondary-on-dark-on-dark/60">
-            No accounts.
-          </li>
-        ) : null}
-      </ul>
-    </div>
+    <StatementsClient
+      accounts={accounts.map((a) => ({
+        id: a.id,
+        name: a.name,
+        billingEmail: a.apContactEmail ?? a.billingEmail ?? null,
+      }))}
+      recentSends={sends}
+      preselectedAccountId={sp.accountId ?? null}
+    />
   );
 }

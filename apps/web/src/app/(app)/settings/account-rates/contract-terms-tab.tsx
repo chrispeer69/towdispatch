@@ -30,6 +30,7 @@ type Draft = {
   goaPolicy: string;
   slaArrivalMinutes: string;
   afterHoursBillingAllowed: boolean;
+  delinquencyDaysThreshold: string;
 };
 
 function accountToDraft(a: AccountDto | AccountContractTermsDto): Draft {
@@ -40,6 +41,8 @@ function accountToDraft(a: AccountDto | AccountContractTermsDto): Draft {
     goaPolicy: a.goaPolicy ?? '',
     slaArrivalMinutes: a.slaArrivalMinutes != null ? String(a.slaArrivalMinutes) : '',
     afterHoursBillingAllowed: a.afterHoursBillingAllowed,
+    delinquencyDaysThreshold:
+      a.delinquencyDaysThreshold != null ? String(a.delinquencyDaysThreshold) : '',
   };
 }
 
@@ -92,6 +95,15 @@ export function ContractTermsTab({ accountId }: Props): JSX.Element {
       toast.error('SLA arrival minutes must be a positive integer or blank.');
       return;
     }
+    const delinquencyTrim = draft.delinquencyDaysThreshold.trim();
+    const delinquencyParsed = delinquencyTrim === '' ? null : Number.parseInt(delinquencyTrim, 10);
+    if (
+      delinquencyParsed != null &&
+      (!Number.isInteger(delinquencyParsed) || delinquencyParsed <= 0)
+    ) {
+      toast.error('Days until past due must be a positive integer or blank.');
+      return;
+    }
 
     const payload: Record<string, unknown> = {
       paymentTerms: draft.paymentTerms,
@@ -100,6 +112,7 @@ export function ContractTermsTab({ accountId }: Props): JSX.Element {
       goaPolicy: draft.goaPolicy.trim() === '' ? null : draft.goaPolicy.trim(),
       slaArrivalMinutes: slaParsed,
       afterHoursBillingAllowed: draft.afterHoursBillingAllowed,
+      delinquencyDaysThreshold: delinquencyParsed,
     };
 
     setSaving(true);
@@ -188,6 +201,27 @@ export function ContractTermsTab({ accountId }: Props): JSX.Element {
               onChange={(e) => update('slaArrivalMinutes', e.target.value)}
             />
           </div>
+        </div>
+        <div className="space-y-1.5">
+          <label
+            htmlFor="contract-delinquency-days"
+            className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark"
+          >
+            Days until past due
+          </label>
+          <Input
+            id="contract-delinquency-days"
+            type="number"
+            min={1}
+            placeholder="Inherit tenant default (30)"
+            value={draft.delinquencyDaysThreshold}
+            onChange={(e) => update('delinquencyDaysThreshold', e.target.value)}
+          />
+          <p className="text-[11px] text-text-secondary-on-dark">
+            How many days after the invoice posted date before this account&apos;s invoices are
+            flagged as past due. Industry typical: Agero 7, AAA 15, Allstate 14, Honk 10. Leave
+            blank to inherit the tenant default.
+          </p>
         </div>
         <div className="space-y-1.5">
           <label
