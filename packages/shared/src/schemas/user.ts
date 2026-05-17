@@ -21,6 +21,8 @@ export const userSchema = z.object({
   phone: z.string().max(40).nullable(),
   role: z.enum(ROLE_VALUES),
   isActive: z.boolean(),
+  mfaEnabled: z.boolean().optional(),
+  yardIds: z.array(z.string().uuid()).nullable().optional(),
   lastLoginAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -36,9 +38,15 @@ export const createUserSchema = z.object({
   lastName: z.string().min(1).max(120),
   phone: z.string().max(40).optional(),
   role: z.enum(ROLE_VALUES).default('dispatcher'),
+  yardIds: z.array(z.string().uuid()).max(50).optional(),
 });
 
 export type CreateUserPayload = z.infer<typeof createUserSchema>;
 
-export const updateUserSchema = createUserSchema.partial().omit({ password: true });
+export const updateUserSchema = createUserSchema
+  .partial()
+  .omit({ password: true })
+  .extend({
+    isActive: z.boolean().optional(),
+  });
 export type UpdateUserPayload = z.infer<typeof updateUserSchema>;

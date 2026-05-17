@@ -1,5 +1,7 @@
 export * from './tenant';
+export * from './company-profile';
 export * from './user';
+export * from './user-invite';
 export * from './session';
 export * from './auth';
 export * from './account';
