@@ -39,6 +39,12 @@ export const SETTINGS_TABS = [
     description: 'Default terms, number prefix, payment instructions, and PDF footer text.',
   },
   {
+    slug: 'dynamic-pricing',
+    label: 'Dynamic Pricing',
+    description:
+      'Configure the five tier categories — Weather, Traffic, Calendar, Time of Day, Special Events.',
+  },
+  {
     slug: 'users',
     label: 'Users & Permissions',
     description: 'Invite users, assign roles, and manage MFA and account lockout.',
