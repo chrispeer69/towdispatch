@@ -229,6 +229,35 @@ export class EmailService {
   }
 
   /**
+   * Build 5 (RED ALERT cron). Send a fully pre-rendered HTML+text
+   * email without going through a Handlebars template. The RED ALERT
+   * body is dynamic and built inline (it includes a per-row past-due
+   * table), so the template engine would add nothing.
+   *
+   * Throws on send failure so the caller can record status='failed'
+   * in red_alert_sends + retry on the next hourly tick.
+   */
+  async sendRawEmail(opts: {
+    to: string;
+    subject: string;
+    html: string;
+    text: string;
+  }): Promise<void> {
+    const result = await this.attemptSend({
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
+      template: 'raw',
+    });
+    if (!result.ok) {
+      throw new Error(
+        `raw email send failed provider=${result.provider} status=${result.statusCode ?? 'n/a'} attempts=${result.attempts} reason=${result.errorMessage ?? 'unknown'}`,
+      );
+    }
+  }
+
+  /**
    * Used by the diagnostic endpoint (POST /admin/email/test). Renders the
    * email-verification template against canned variables and returns the
    * full provider response so the operator can see SendGrid's status / body

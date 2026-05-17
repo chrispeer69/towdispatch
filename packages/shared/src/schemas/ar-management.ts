@@ -50,34 +50,41 @@ export type ArStatusFilter = (typeof arStatusFilterValues)[number];
 export const arDateFieldValues = ['issued_at', 'due_at', 'created_at', 'paid_at'] as const;
 export type ArDateField = (typeof arDateFieldValues)[number];
 
-const csvList = (raw: string): string[] =>
-  raw
+/**
+ * Parse the wire-format comma-separated list (queries can't easily
+ * encode arrays). Empty / undefined returns undefined; unknown
+ * entries are dropped silently (the client may name a status that
+ * doesn't exist in this build).
+ */
+export function parseArStatusesCsv(raw: string | undefined): ArStatusFilter[] | undefined {
+  if (!raw || raw.trim().length === 0) return undefined;
+  const values = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .filter((s): s is ArStatusFilter => (arStatusFilterValues as readonly string[]).includes(s));
+  return values.length > 0 ? values : undefined;
+}
+
+export function parseUuidCsv(raw: string | undefined): string[] | undefined {
+  if (!raw || raw.trim().length === 0) return undefined;
+  const values = raw
     .split(',')
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+  return values.length > 0 ? values : undefined;
+}
 
 export const arSearchFiltersSchema = z.object({
-  /** Comma-separated list. Omit for "all statuses". */
-  statuses: z
-    .string()
-    .optional()
-    .transform((v) =>
-      v
-        ? csvList(v).filter((s): s is ArStatusFilter =>
-            (arStatusFilterValues as readonly string[]).includes(s),
-          )
-        : undefined,
-    ),
+  /** Comma-separated ArStatusFilter list. Server expands client-side via parseArStatusesCsv. */
+  statuses: z.string().max(200).optional(),
   dateField: z.enum(arDateFieldValues).default('issued_at'),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
   /** Customer-side fuzzy: matches customer name, account name, or invoice number. */
   q: z.string().max(120).optional(),
   /** Comma-separated account UUIDs. */
-  accountIds: z
-    .string()
-    .optional()
-    .transform((v) => (v ? csvList(v) : undefined)),
+  accountIds: z.string().max(2000).optional(),
   minAmountCents: z.coerce.number().int().nonnegative().optional(),
   maxAmountCents: z.coerce.number().int().nonnegative().optional(),
   limit: z.coerce.number().int().min(1).max(500).default(50),

@@ -25,6 +25,8 @@ import {
   type ArSearchResponse,
   type ArSearchRow,
   type InvoiceStatus,
+  parseArStatusesCsv,
+  parseUuidCsv,
   resolveDelinquencyDays,
 } from '@ustowdispatch/shared';
 import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
@@ -68,8 +70,9 @@ export class ArSearchService {
       if (filters.dateFrom) conds.push(gte(dateColumn, new Date(filters.dateFrom)));
       if (filters.dateTo) conds.push(lte(dateColumn, new Date(filters.dateTo)));
 
-      if (filters.accountIds && filters.accountIds.length > 0) {
-        conds.push(inArray(invoices.accountId, filters.accountIds));
+      const accountIdsFilter = parseUuidCsv(filters.accountIds);
+      if (accountIdsFilter && accountIdsFilter.length > 0) {
+        conds.push(inArray(invoices.accountId, accountIdsFilter));
       }
       if (filters.minAmountCents !== undefined) {
         conds.push(sql`${invoices.totalCents} >= ${filters.minAmountCents}`);
@@ -99,7 +102,7 @@ export class ArSearchService {
       // without a complex CASE. We push that down into the application
       // layer: the SQL filter is permissive (the candidate set), then
       // we drop rows that don't pass past_due semantics post-query.
-      const statusFilter = filters.statuses ?? null;
+      const statusFilter = parseArStatusesCsv(filters.statuses);
       const realStatuses: InvoiceStatus[] = [];
       let wantsPastDue = false;
       if (statusFilter) {
@@ -245,11 +248,9 @@ export class ArSearchService {
         // states above) — drop rows that aren't past_due.
         assembled = assembled.filter((r) => r.isPastDue);
       } else if (statusFilter && wantsPastDue) {
-        // Mixed: keep rows that match real statuses OR are past_due.
+        const sFilter: readonly string[] = statusFilter;
         assembled = assembled.filter(
-          (r) =>
-            statusFilter.includes(r.status as never) ||
-            (r.isPastDue && statusFilter.includes('past_due')),
+          (r) => sFilter.includes(r.status) || (r.isPastDue && sFilter.includes('past_due')),
         );
       }
 
@@ -292,7 +293,7 @@ export class ArSearchService {
    */
   async listPastDueInvoices(ctx: CallerContext): Promise<ArSearchRow[]> {
     const result = await this.search(ctx, {
-      statuses: ['past_due'],
+      statuses: 'past_due',
       dateField: 'issued_at',
       limit: 500,
       offset: 0,

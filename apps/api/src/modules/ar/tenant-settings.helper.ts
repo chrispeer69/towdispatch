@@ -45,13 +45,19 @@ export function readInvoiceDefaults(
 
 export function mergeInvoiceDefaults(
   settings: Record<string, unknown> | null | undefined,
-  patch: Partial<TenantInvoiceDefaults>,
+  patch: { [K in keyof TenantInvoiceDefaults]?: TenantInvoiceDefaults[K] | undefined },
 ): Record<string, unknown> {
   const base = (settings ?? {}) as Record<string, unknown>;
   const current = readInvoiceDefaults(base);
+  const cleanPatch: Partial<TenantInvoiceDefaults> = {};
+  for (const [k, v] of Object.entries(patch) as [keyof TenantInvoiceDefaults, unknown][]) {
+    if (v !== undefined) {
+      (cleanPatch as Record<string, unknown>)[k] = v;
+    }
+  }
   return {
     ...base,
-    [SETTINGS_KEY]: { ...current, ...patch },
+    [SETTINGS_KEY]: { ...current, ...cleanPatch },
   };
 }
 
