@@ -65,13 +65,22 @@
 -- exists in the same tenant (which is the common case after r5
 -- seeded AAAx).
 --
--- Step A: soft-delete 'AAAX' (uppercase X) — same thing as AAAx
--- visually; keep the lowercase canonical row only.
+-- Step A: soft-delete every case / whitespace variant of "AAAX"
+-- that ISN'T the canonical 'AAAx' (lowercase x). UPPER(TRIM(...)) =
+-- 'AAAX' catches: 'AAAX' (uppercase X), 'aaax' (all lowercase),
+-- 'AAAx ' (trailing space), 'aAAX', etc. The TRIM(name) <> 'AAAx'
+-- guard then re-includes the canonical row.
+--
+-- This is intentionally aggressive because the strict exact-match
+-- version of this step left a manually-created 'AAAX' row visible
+-- in production — the user reported AAAx and AAAX showing
+-- side-by-side. Belt-and-braces.
 UPDATE accounts
    SET deleted_at = NOW(),
        updated_at = NOW()
  WHERE is_motor_club = TRUE
-   AND name = 'AAAX'
+   AND UPPER(TRIM(name)) = 'AAAX'
+   AND TRIM(name) <> 'AAAx'
    AND deleted_at IS NULL;
 
 -- Step B: soft-delete 'AAA' (no suffix) — duplicate of AAAx from
