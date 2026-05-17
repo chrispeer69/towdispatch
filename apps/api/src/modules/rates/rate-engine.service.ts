@@ -49,6 +49,7 @@ import {
 } from '@ustowdispatch/shared';
 import { and, eq, isNull, or } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
+import { TierResolutionService } from '../dynamic-pricing/tier-resolution.service.js';
 
 /**
  * Canonical mapping from the legacy JobServiceType (the dispatch intake
@@ -146,7 +147,10 @@ const FALLBACK_DEFINITION: RateSheetDefinition = {
 
 @Injectable()
 export class RateEngineService {
-  constructor(private readonly db: TenantAwareDb) {}
+  constructor(
+    private readonly db: TenantAwareDb,
+    private readonly tierResolver: TierResolutionService,
+  ) {}
 
   /**
    * Read-only resolver for "is this service available for this account?".
@@ -402,8 +406,63 @@ export class RateEngineService {
           lineItems.push({ code: li.code, label: li.label, amountCents: li.amountCents });
         }
 
-        const subtotalCents = lineItems.reduce((acc, li) => acc + li.amountCents, 0);
-        const totalCents = subtotalCents;
+                const subtotalCents = lineItems.reduce((acc, li) => acc + li.amountCents, 0);
+
+        // Dynamic Pricing (Moat #1) — resolve the active tier stack and
+        // apply it to the subtotal. The spec says the quote response
+        // surfaces the per-tier breakdown via `dynamicPricing` and rolls
+        // a single net total to QBO. We add an in-line line item so the
+        // existing line-item UI can render the surge clearly.
+        const stack = await this.tierResolver.resolveStack({
+          tenantId: input.tenantId,
+          userId: input.userId,
+          requestId: input.requestId,
+          baseCents: subtotalCents,
+        });
+
+        let totalCents = subtotalCents;
+        let dynamicPricingBreakdown:
+          | {
+              baseCents: number;
+              finalCents: number;
+              cappedAt: number | null;
+              capMultiplier: number;
+              tiers: Array<{
+                tierId: string;
+                name: string;
+                category: string;
+                multiplier: number;
+                contributionCents: number;
+              }>;
+            }
+          | null = null;
+        if (stack.tiers.length > 0 && stack.finalCents > subtotalCents) {
+          const surgeCents = stack.finalCents - subtotalCents;
+          lineItems.push({
+            code: 'DYNAMIC_PRICING',
+            label: `Dynamic pricing (${stack.tiers.map((t) => t.name).join(' + ')})`,
+            amountCents: surgeCents,
+          });
+          trace.push(
+            `Dynamic pricing applied: ${stack.tiers.length} tier(s) × effective ${stack.effectiveMultiplier.toFixed(
+              3,
+            )}×${stack.capped ? ` (capped at ${stack.capMultiplier})` : ''} → +${surgeCents}¢.`,
+          );
+          totalCents = stack.finalCents;
+          dynamicPricingBreakdown = {
+            baseCents: subtotalCents,
+            finalCents: stack.finalCents,
+            cappedAt: stack.capped ? stack.capMultiplier : null,
+            capMultiplier: stack.capMultiplier,
+            tiers: stack.tiers.map((t) => ({
+              tierId: t.tierId,
+              name: t.name,
+              category: t.category,
+              multiplier: t.multiplier,
+              contributionCents: t.contributionCents,
+            })),
+          };
+        }
 
         return {
           serviceType: input.serviceType,
@@ -417,6 +476,7 @@ export class RateEngineService {
           totalCents,
           calculationTrace: trace,
           currency: 'USD',
+          dynamicPricing: dynamicPricingBreakdown,
         };
       },
     );

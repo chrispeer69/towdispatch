@@ -194,6 +194,18 @@ export class ConfigService {
     };
   }
 
+  get dynamicPricing(): {
+    cronEnabled: boolean;
+    noaaUserAgent: string;
+    openWeatherMapApiKey: string;
+  } {
+    return {
+      cronEnabled: this.config.DYNAMIC_PRICING_CRON_ENABLED,
+      noaaUserAgent: this.config.NOAA_USER_AGENT,
+      openWeatherMapApiKey: this.config.OPENWEATHERMAP_API_KEY,
+    };
+  }
+
   get quickbooks(): {
     clientId: string;
     clientSecret: string;

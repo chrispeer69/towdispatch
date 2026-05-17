@@ -85,6 +85,31 @@ export const rateQuoteSchema = z.object({
   /** Free-form trace: ordered list of decisions the engine made. Surfaced in audit. */
   calculationTrace: z.array(z.string()),
   currency: z.literal('USD').default('USD'),
+  /**
+   * Dynamic Pricing block (Moat #1). Populated when one or more dynamic
+   * pricing tiers are active for the caller's tenant. The `lineItems`
+   * above already include any dynamic-pricing surcharge as a single rolled
+   * line; this block exposes the per-tier breakdown for transparency. Null
+   * when no tiers are active.
+   */
+  dynamicPricing: z
+    .object({
+      baseCents: z.number().int(),
+      finalCents: z.number().int(),
+      cappedAt: z.number().nullable(),
+      capMultiplier: z.number(),
+      tiers: z.array(
+        z.object({
+          tierId: z.string().uuid(),
+          name: z.string(),
+          category: z.string(),
+          multiplier: z.number(),
+          contributionCents: z.number().int(),
+        }),
+      ),
+    })
+    .nullable()
+    .optional(),
 });
 export type RateQuote = z.infer<typeof rateQuoteSchema>;
 
