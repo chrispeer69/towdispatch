@@ -74,6 +74,22 @@ export class MotorClubController {
     // because the inbound caller is a third party, not a tenant user.
     const jobId = uuidv7();
     await this.admin.runAsAdmin({}, async (_db, client) => {
+      // Allocate a job_number in the YYYYMMDD-NNNN format the
+      // jobs_job_number_format check constraint enforces, using the
+      // same job_number_sequences table jobs.service.ts uses.
+      const now = new Date();
+      const dayKey = `${now.getUTCFullYear()}${String(now.getUTCMonth() + 1).padStart(2, '0')}${String(now.getUTCDate()).padStart(2, '0')}`;
+      const seqRes = await client.query<{ last_seq: string | number }>(
+        `INSERT INTO job_number_sequences (tenant_id, day_key, last_seq, updated_at)
+         VALUES ($1::uuid, $2, 1, now())
+         ON CONFLICT (tenant_id, day_key)
+         DO UPDATE SET last_seq = job_number_sequences.last_seq + 1, updated_at = now()
+         RETURNING last_seq`,
+        [payload.tenantId, dayKey],
+      );
+      const seq = Number(seqRes.rows[0]?.last_seq ?? 0);
+      const jobNumber = `${dayKey}-${String(seq).padStart(4, '0')}`;
+
       await client.query(
         `INSERT INTO jobs (
             id, tenant_id, job_number, status, service_type,
@@ -89,7 +105,7 @@ export class MotorClubController {
         [
           jobId,
           payload.tenantId,
-          `AGE-${Date.now().toString(36)}`,
+          jobNumber,
           payload.service,
           payload.pickup.address,
           payload.externalId,
