@@ -1,5 +1,5 @@
 -- =====================================================================
--- 0027_drivetrain_enum_rewrite.sql
+-- 0030_drivetrain_enum_rewrite.sql
 --
 -- Replace the legacy drivetrain enum (FWD/RWD/AWD/4WD/unknown) with the
 -- operator-facing set the intake form actually exposes: 2WD, 4WD, RWD,
@@ -9,14 +9,25 @@
 --
 -- Data remap:
 --   FWD     → 2WD  (front-wheel-drive is the most common "2WD" car)
---   RWD     → RWD
---   AWD     → AWD
---   4WD     → 4WD
---   unknown → NULL  (the field is now optional)
+--   RWD     → RWD  (no change)
+--   AWD     → AWD  (no change)
+--   4WD     → 4WD  (no change)
+--   unknown → NULL (the field is now optional)
 --
--- The legacy enum's check constraint is named vehicles_drivetrain_check
--- by Postgres convention (table_column_check). If your earlier migration
--- gave it a different name, swap it in below.
+-- Idempotent: the migration runner re-applies all .sql files on every
+-- deploy. DROP CONSTRAINT IF EXISTS + ADD CONSTRAINT (the only piece
+-- that's not natively idempotent in Postgres) is sequenced inside the
+-- same transaction, so re-runs are safe — the constraint is dropped
+-- before being re-added.
+--
+-- Down (rollback):
+--   ALTER TABLE vehicles DROP CONSTRAINT IF EXISTS vehicles_drivetrain_check;
+--   UPDATE vehicles SET drivetrain = 'FWD'     WHERE drivetrain = '2WD';
+--   UPDATE vehicles SET drivetrain = 'unknown' WHERE drivetrain IS NULL;
+--   ALTER TABLE vehicles ALTER COLUMN drivetrain SET NOT NULL;
+--   ALTER TABLE vehicles ALTER COLUMN drivetrain SET DEFAULT 'unknown';
+--   ALTER TABLE vehicles ADD  CONSTRAINT vehicles_drivetrain_check
+--     CHECK (drivetrain IN ('FWD','RWD','AWD','4WD','unknown'));
 -- =====================================================================
 
 BEGIN;
