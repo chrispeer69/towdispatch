@@ -94,6 +94,10 @@ export class DynamicPricingReportsService {
       const conds = [] as Parameters<typeof and>[number][];
       if (range.from) conds.push(gte(invoiceLineDynamicPricingAudit.createdAt, range.from));
       if (range.to) conds.push(lte(invoiceLineDynamicPricingAudit.createdAt, range.to));
+      // Postgres can't ORDER BY the alias of an aggregate computed inside
+      // a Drizzle sql tag (the alias is emitted as the JS field name, not
+      // the snake_case form). Inline the aggregate expression in ORDER BY
+      // so the planner resolves it correctly.
       const rows = await tx
         .select({
           tierId: dynamicPricingTiers.id,
@@ -110,7 +114,7 @@ export class DynamicPricingReportsService {
         )
         .where(conds.length > 0 ? and(...conds) : undefined)
         .groupBy(dynamicPricingTiers.id, dynamicPricingTiers.name, dynamicPricingTiers.category)
-        .orderBy(sql`revenue_cents desc`);
+        .orderBy(sql`coalesce(sum(${invoiceLineDynamicPricingAudit.contributionCents}), 0) desc`);
 
       // Override count + decline count per tier come from the override
       // table (we count overrides where the snapshot includes this tier).
@@ -147,6 +151,8 @@ export class DynamicPricingReportsService {
         .from(dynamicPricingOverrides)
         .where(conds.length > 0 ? and(...conds) : undefined)
         .groupBy(dynamicPricingOverrides.reasonCode)
+        // count(*) is unambiguous; alias-less ORDER BY is fine here, but
+        // we keep it explicit for symmetry.
         .orderBy(sql`count(*) desc`);
       return rows.map((r) => ({
         reasonCode: r.reasonCode,
