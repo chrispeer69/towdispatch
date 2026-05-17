@@ -68,6 +68,9 @@ jobs:
       - name: Build shared
         run: pnpm --filter @ustowdispatch/shared build
 
+      - name: Build db
+        run: pnpm --filter @ustowdispatch/db build
+
       - name: Build api
         run: pnpm --filter @ustowdispatch/api build
 
