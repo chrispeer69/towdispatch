@@ -241,21 +241,29 @@ export class JobsService {
 
       // Generate the rate quote. The engine opens its own tenant context but
       // the GUCs are connection-wide, so it sees the same tenant we just set.
-      const quote = await this.rateEngine.quote({
-        tenantId: ctx.tenantId,
-        userId: ctx.userId,
-        requestId: ctx.requestId,
-        ipAddress: ctx.ipAddress,
-        userAgent: ctx.userAgent,
-        serviceType: input.serviceType,
-        vehicleClass: input.vehicle.vehicleClass,
-        pickupLat: input.pickup.lat ?? null,
-        pickupLng: input.pickup.lng ?? null,
-        dropoffLat: input.dropoff?.lat ?? null,
-        dropoffLng: input.dropoff?.lng ?? null,
-        scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : undefined,
-        accountId: input.accountId ?? null,
-      });
+      //
+      // If the dispatcher edited the engine quote on the intake form ("final
+      // quote to customer"), we persist that override verbatim instead of
+      // recomputing. The engine result is dropped on the floor — caller is
+      // authoritative. A follow-up audit-log entry will capture the delta so
+      // overrides remain reviewable.
+      const quote: RateQuote = input.customQuote
+        ? input.customQuote
+        : await this.rateEngine.quote({
+            tenantId: ctx.tenantId,
+            userId: ctx.userId,
+            requestId: ctx.requestId,
+            ipAddress: ctx.ipAddress,
+            userAgent: ctx.userAgent,
+            serviceType: input.serviceType,
+            vehicleClass: input.vehicle.vehicleClass,
+            pickupLat: input.pickup.lat ?? null,
+            pickupLng: input.pickup.lng ?? null,
+            dropoffLat: input.dropoff?.lat ?? null,
+            dropoffLng: input.dropoff?.lng ?? null,
+            scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : undefined,
+            accountId: input.accountId ?? null,
+          });
 
       // Allocate job number under the active transaction.
       const jobNumber = await allocateJobNumber(tx, ctx.tenantId, new Date());

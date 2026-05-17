@@ -176,6 +176,17 @@ export const createJobIntakeSchema = z
      * honors it. The dispatcher can override later via the resend endpoint.
      */
     skipCustomerSms: z.boolean().optional(),
+    /**
+     * Dispatcher-edited quote override. When present, the API persists this
+     * verbatim instead of recomputing via the rate engine. The engine still
+     * runs first to seed defaults on the intake form — this is the post-edit
+     * snapshot the dispatcher confirmed with the customer.
+     *
+     * Open to abuse if used naively; gated to OWNER/ADMIN/MANAGER/DISPATCHER
+     * at the controller layer (same roles that create intake today). A
+     * follow-up audit-log entry will record the override delta.
+     */
+    customQuote: rateQuoteSchema.optional(),
   })
   .refine((v) => v.serviceType !== 'tow' || v.dropoff !== undefined, {
     message: 'Dropoff is required for tow service',
