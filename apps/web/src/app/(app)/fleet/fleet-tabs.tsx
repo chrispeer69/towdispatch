@@ -3,6 +3,9 @@
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 
+// Deploy trigger 2026-05-17 — force Railway redeploy after the
+// previous push didn't pick up the TRUCKS/DRIVERS trim.
+
 /**
  * Sub-nav for the /fleet shell. Sits below the page title on every fleet
  * page, mirroring the visual density of the dispatch board's filter row.
