@@ -139,7 +139,7 @@ export class VehiclesService {
             color: input.color ?? null,
             bodyClass: input.bodyClass ?? null,
             vehicleClass: input.vehicleClass,
-            drivetrain: input.drivetrain,
+            drivetrain: input.drivetrain ?? null,
             isElectric: input.isElectric ?? false,
             isLowClearance: input.isLowClearance ?? false,
             specialInstructions: input.specialInstructions ?? null,

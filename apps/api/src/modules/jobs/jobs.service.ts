@@ -861,7 +861,7 @@ async function findOrCreateVehicle(
       model: v.model ?? null,
       color: v.color ?? null,
       vehicleClass: v.vehicleClass,
-      drivetrain: 'unknown',
+      drivetrain: v.drivetrain ?? null,
       isElectric: false,
       isLowClearance: false,
       specialInstructions: v.specialInstructions ?? null,

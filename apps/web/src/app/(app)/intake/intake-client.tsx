@@ -42,9 +42,11 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * with a flash query param the destination renders as a toast.
  */
 import {
+  type Drivetrain,
   type JobAuthorizedBy,
   type JobServiceType,
   type RateQuote,
+  drivetrainValues,
   jobAuthorizedByValues,
   jobServiceTypeValues,
 } from '@ustowdispatch/shared';
@@ -126,6 +128,7 @@ interface FormState {
   model: string;
   color: string;
   vehicleClass: VehicleClassOption['value'];
+  drivetrain: Drivetrain | '';
   specialInstructions: string;
   // job
   serviceType: JobServiceType;
@@ -160,6 +163,7 @@ const EMPTY: FormState = {
   model: '',
   color: '',
   vehicleClass: 'light_duty',
+  drivetrain: '',
   specialInstructions: '',
   serviceType: 'tow',
   pickupAddress: '',
@@ -448,6 +452,7 @@ export function IntakeClient({
         ...(form.model.trim() ? { model: form.model.trim() } : {}),
         ...(form.color.trim() ? { color: form.color.trim() } : {}),
         vehicleClass: form.vehicleClass,
+        ...(form.drivetrain ? { drivetrain: form.drivetrain } : {}),
         ...(form.specialInstructions.trim()
           ? { specialInstructions: form.specialInstructions.trim() }
           : {}),
@@ -804,20 +809,40 @@ export function IntakeClient({
               </datalist>
             </Field>
           </div>
-          <Field label="Class">
-            <select
-              tabIndex={0}
-              value={form.vehicleClass}
-              onChange={(e) => update('vehicleClass', e.target.value as FormState['vehicleClass'])}
-              className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
-            >
-              {VEHICLE_CLASSES.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Class">
+              <select
+                tabIndex={0}
+                value={form.vehicleClass}
+                onChange={(e) =>
+                  update('vehicleClass', e.target.value as FormState['vehicleClass'])
+                }
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              >
+                {VEHICLE_CLASSES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Type">
+              <select
+                tabIndex={0}
+                data-testid="intake-drivetrain"
+                value={form.drivetrain}
+                onChange={(e) => update('drivetrain', e.target.value as FormState['drivetrain'])}
+                className="h-11 w-full rounded-[10px] border border-divider bg-bg-surface px-3 text-sm text-text-primary-on-dark"
+              >
+                <option value="">Select…</option>
+                {drivetrainValues.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
           <Field label="Special instructions">
             <textarea
               tabIndex={0}

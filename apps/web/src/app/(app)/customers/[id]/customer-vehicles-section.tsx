@@ -56,7 +56,6 @@ export function CustomerVehiclesSection({ customerId, vehicles }: Props): JSX.El
     try {
       const payload: Record<string, unknown> = {
         vehicleClass: 'unknown',
-        drivetrain: 'unknown',
       };
       if (form.year) payload.year = Number(form.year);
       if (form.make) payload.make = form.make;

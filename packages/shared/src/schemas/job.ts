@@ -12,9 +12,9 @@
  */
 import { z } from 'zod';
 import { phoneE164Schema } from './customer';
-import { vehicleClassValues, vinSchema } from './vehicle';
-export { vehicleClassValues } from './vehicle';
-export type { VehicleClass } from './vehicle';
+import { drivetrainValues, vehicleClassValues, vinSchema } from './vehicle';
+export { drivetrainValues, vehicleClassValues } from './vehicle';
+export type { Drivetrain, VehicleClass } from './vehicle';
 
 export const jobStatusValues = [
   'new',
@@ -112,6 +112,7 @@ const intakeVehicleSchema = z.object({
   model: z.string().max(120).optional(),
   color: z.string().max(60).optional(),
   vehicleClass: z.enum(vehicleClassValues).default('light_duty'),
+  drivetrain: z.enum(drivetrainValues).optional(),
   specialInstructions: z.string().max(2000).optional(),
 });
 export type IntakeVehicleInput = z.infer<typeof intakeVehicleSchema>;
