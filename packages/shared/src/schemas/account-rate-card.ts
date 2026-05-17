@@ -238,6 +238,12 @@ export const accountContractTermsDtoSchema = z.object({
   goaPolicy: z.string().nullable(),
   slaArrivalMinutes: z.number().int().positive().nullable(),
   afterHoursBillingAllowed: z.boolean(),
+  /**
+   * Build 5 / MOAT #7. Days past posted_date before this account's
+   * invoices flag as past_due. NULL = inherit tenant default
+   * (tenants.settings.default_delinquency_days, default 30).
+   */
+  delinquencyDaysThreshold: z.number().int().positive().nullable(),
 });
 export type AccountContractTermsDto = z.infer<typeof accountContractTermsDtoSchema>;
 
@@ -248,6 +254,7 @@ export const updateAccountContractTermsSchema = z.object({
   goaPolicy: z.string().max(4000).nullable().optional(),
   slaArrivalMinutes: z.number().int().positive().nullable().optional(),
   afterHoursBillingAllowed: z.boolean().optional(),
+  delinquencyDaysThreshold: z.number().int().positive().nullable().optional(),
 });
 export type UpdateAccountContractTermsPayload = z.infer<typeof updateAccountContractTermsSchema>;
 

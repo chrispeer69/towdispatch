@@ -99,6 +99,15 @@ export const accounts = pgTable(
     slaArrivalMinutes: integer('sla_arrival_minutes'),
     afterHoursBillingAllowed: boolean('after_hours_billing_allowed').notNull().default(true),
 
+    /**
+     * Days past invoice posted_date before this account's open invoices are
+     * flagged as past due (Build 5 — MOAT #7 RED ALERT). NULL = inherit the
+     * tenant-wide default from tenants.settings.default_delinquency_days
+     * (which itself defaults to 30 if unset). Cash customers use a separate
+     * tenant default (cash_customer_delinquency_days, default 7).
+     */
+    delinquencyDaysThreshold: integer('delinquency_days_threshold'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

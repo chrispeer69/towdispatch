@@ -22,6 +22,7 @@ export * from './dispatch-events';
 export * from './maps-provider';
 export * from './tracking';
 export * from './billing';
+export * from './ar-management';
 export * from './stripe-payments';
 export * from './accounting';
 export * from './chat';
