@@ -31,6 +31,7 @@ import {
   customers,
   driverShifts,
   drivers,
+  jobDriverAssignments,
   jobStatusTransitions,
   jobs,
   trucks,
@@ -329,6 +330,49 @@ export class JobsService {
 
   async cancel(ctx: CallerContext, id: string, reason: string): Promise<JobDto> {
     return this.transition(ctx, id, 'cancelled', reason);
+  }
+
+  /**
+   * Add a driver to the job's multi-driver crew (Admin Settings build 4).
+   * jobs.assigned_driver_id continues to model the primary driver; this
+   * table extends it to support multi-driver invoices that split
+   * commissions across the full crew. Idempotent — re-adding an existing
+   * driver returns the job unchanged.
+   */
+  async addDriver(
+    ctx: CallerContext,
+    jobId: string,
+    driverId: string,
+    role: string | null,
+  ): Promise<JobDto> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const job = await tx.query.jobs.findFirst({
+        where: and(eq(jobs.id, jobId), isNull(jobs.deletedAt)),
+      });
+      if (!job) throw notFound();
+      const driver = await tx.query.drivers.findFirst({
+        where: and(eq(drivers.id, driverId), isNull(drivers.deletedAt)),
+      });
+      if (!driver) {
+        throw new NotFoundException({ code: ERROR_CODES.NOT_FOUND, message: 'Driver not found' });
+      }
+      const existing = await tx.query.jobDriverAssignments.findFirst({
+        where: and(
+          eq(jobDriverAssignments.jobId, jobId),
+          eq(jobDriverAssignments.driverId, driverId),
+        ),
+      });
+      if (!existing) {
+        await tx.insert(jobDriverAssignments).values({
+          id: uuidv7(),
+          tenantId: ctx.tenantId,
+          jobId,
+          driverId,
+          role: role ?? 'support',
+        });
+      }
+      return rowToDto(job);
+    });
   }
 
   /**

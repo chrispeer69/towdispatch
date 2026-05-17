@@ -27,3 +27,5 @@ export * from './accounting-connections';
 export * from './account-mappings';
 export * from './sync-jobs';
 export * from './chat';
+export * from './invoice-line-commissions';
+export * from './job-driver-assignments';

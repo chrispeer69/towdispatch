@@ -1,5 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import {
+  type AssignJobDriverPayload,
   type CancelJobPayload,
   type CreateJobIntakePayload,
   type IntakeResultDto,
@@ -9,6 +10,7 @@ import {
   type QuotePreviewPayload,
   ROLES,
   type RateQuote,
+  assignJobDriverSchema,
   cancelJobSchema,
   createJobIntakeSchema,
   jobListFiltersSchema,
@@ -82,6 +84,23 @@ export class JobsController {
     @Req() req: FastifyRequest,
   ): Promise<JobDto> {
     return this.jobs.cancel(this.callerCtx(req), params.id, body.reason);
+  }
+
+  /**
+   * Add a driver to the job's multi-driver crew. Powers the Invoice
+   * Review "+ Add driver" chip. jobs.assigned_driver_id continues to
+   * model the primary driver — this is for the rest of the crew.
+   * Idempotent: re-adding an existing driver is a no-op.
+   */
+  @Post(':id/drivers')
+  @HttpCode(HttpStatus.OK)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async addDriver(
+    @ZodParam(idSchema) params: { id: string },
+    @ZodBody(assignJobDriverSchema) body: AssignJobDriverPayload,
+    @Req() req: FastifyRequest,
+  ): Promise<JobDto> {
+    return this.jobs.addDriver(this.callerCtx(req), params.id, body.driverId, body.role ?? null);
   }
 
   private callerCtx(req: FastifyRequest): {

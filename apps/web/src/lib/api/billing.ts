@@ -7,6 +7,7 @@ import type {
   AgingResponse,
   CreditMemoDto,
   InvoiceDto,
+  InvoiceReviewDto,
   InvoiceWithDetailsDto,
   PaymentDto,
   RecurringScheduleDto,
@@ -35,6 +36,15 @@ export async function fetchInvoices(
 
 export async function fetchInvoice(id: string): Promise<InvoiceWithDetailsDto> {
   return apiServer<InvoiceWithDetailsDto>(`/billing/invoices/${id}`);
+}
+
+export async function fetchInvoiceReview(
+  id: string,
+  accessToken?: string | null,
+): Promise<InvoiceReviewDto> {
+  return apiServer<InvoiceReviewDto>(`/billing/invoices/${id}/review`, {
+    accessToken: accessToken ?? null,
+  });
 }
 
 export async function fetchPayments(
