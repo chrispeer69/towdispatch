@@ -94,21 +94,26 @@ export class ConfigService {
     accessSecret: string;
     refreshSecret: string;
     mfaSecret: string;
+    driverSecret: string;
     accessTtl: string;
     refreshTtl: string;
+    driverTtl: string;
     issuer: string;
     audience: string;
   } {
-    // Domain-separate the access/refresh/mfa secrets from a single JWT_SECRET
-    // so an attacker who somehow obtained a refresh-token forgery oracle
-    // can't trivially mint access tokens. Explicit overrides win when set.
+    // Domain-separate the access/refresh/mfa/driver secrets from a single
+    // JWT_SECRET so an attacker who somehow obtained a refresh-token
+    // forgery oracle can't trivially mint access tokens. Explicit
+    // overrides win when set.
     const base = this.config.JWT_SECRET;
     return {
       accessSecret: this.config.JWT_ACCESS_SECRET || `${base}::access`,
       refreshSecret: this.config.JWT_REFRESH_SECRET || `${base}::refresh`,
       mfaSecret: this.config.JWT_MFA_SECRET || `${base}::mfa`,
+      driverSecret: this.config.JWT_DRIVER_SECRET || `${base}::driver`,
       accessTtl: this.config.JWT_ACCESS_TTL,
       refreshTtl: this.config.JWT_REFRESH_TTL,
+      driverTtl: this.config.JWT_DRIVER_TTL,
       issuer: this.config.JWT_ISSUER,
       audience: this.config.JWT_AUDIENCE,
     };
@@ -288,5 +293,33 @@ export class ConfigService {
 
   get mapboxAccessToken(): string {
     return this.config.MAPBOX_ACCESS_TOKEN;
+  }
+
+  /**
+   * Driver Experience S3 settings. `configured` is true only when both
+   * bucket and region are set; otherwise the evidence module falls back
+   * to LocalStubEvidenceStorageProvider so the API still boots cleanly
+   * in dev without real S3 creds.
+   */
+  get s3Evidence(): {
+    bucket: string;
+    region: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    endpoint: string;
+    forcePathStyle: boolean;
+    configured: boolean;
+  } {
+    const bucket = this.config.S3_BUCKET;
+    const region = this.config.S3_REGION;
+    return {
+      bucket,
+      region,
+      accessKeyId: this.config.S3_ACCESS_KEY_ID,
+      secretAccessKey: this.config.S3_SECRET_ACCESS_KEY,
+      endpoint: this.config.S3_ENDPOINT,
+      forcePathStyle: this.config.S3_FORCE_PATH_STYLE,
+      configured: !!bucket && !!region,
+    };
   }
 }

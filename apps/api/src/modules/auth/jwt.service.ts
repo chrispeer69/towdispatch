@@ -25,14 +25,27 @@ export interface MfaChallengeClaims extends JWTPayload {
   mfa_setup?: true;
 }
 
+/**
+ * Driver-app session claims. Audience suffix `-driver` keeps the driver
+ * keyspace fully separate from the operator access tokens — they can't be
+ * accidentally accepted by JwtAuthGuard, and vice versa.
+ */
+export interface DriverAccessClaims extends JWTPayload {
+  sub: 'driver';
+  driverId: string;
+  tid: string;
+}
+
 @Injectable()
 export class JwtService {
   private readonly accessKey: Uint8Array;
   private readonly mfaKey: Uint8Array;
+  private readonly driverKey: Uint8Array;
 
   constructor(private readonly config: ConfigService) {
     this.accessKey = new TextEncoder().encode(config.jwt.accessSecret);
     this.mfaKey = new TextEncoder().encode(config.jwt.mfaSecret);
+    this.driverKey = new TextEncoder().encode(config.jwt.driverSecret);
   }
 
   async signAccess(claims: {
@@ -133,6 +146,42 @@ export class JwtService {
 
   refreshTtlSeconds(): number {
     return parseDuration(this.config.jwt.refreshTtl);
+  }
+
+  driverTtlSeconds(): number {
+    return parseDuration(this.config.jwt.driverTtl);
+  }
+
+  /**
+   * Driver-app session token. `sub` is the literal string 'driver' (the
+   * subject is the role, not the user — the linked human is identified by
+   * `driverId`). Audience `…-driver` keeps the keyspace separate from
+   * operator access tokens.
+   */
+  async signDriver(claims: { driverId: string; tid: string; jti: string }): Promise<string> {
+    return new SignJWT({ ...claims, sub: 'driver' })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(`${this.config.jwt.audience}-driver`)
+      .setExpirationTime(this.config.jwt.driverTtl)
+      .sign(this.driverKey);
+  }
+
+  async verifyDriver(token: string): Promise<DriverAccessClaims> {
+    const { payload } = await jwtVerify(token, this.driverKey, {
+      issuer: this.config.jwt.issuer,
+      audience: `${this.config.jwt.audience}-driver`,
+      algorithms: ['HS256'],
+    });
+    if (
+      payload.sub !== 'driver' ||
+      typeof payload.tid !== 'string' ||
+      typeof payload.driverId !== 'string'
+    ) {
+      throw new Error('Invalid driver token');
+    }
+    return payload as DriverAccessClaims;
   }
 }
 

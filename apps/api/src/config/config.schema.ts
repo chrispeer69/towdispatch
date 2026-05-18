@@ -37,8 +37,21 @@ export const configSchema = z.object({
   JWT_ACCESS_SECRET: z.string().optional(),
   JWT_REFRESH_SECRET: z.string().optional(),
   JWT_MFA_SECRET: z.string().optional(),
+  /**
+   * Optional override for the driver-app JWT signing secret. When unset,
+   * derived from JWT_SECRET via ::driver suffix (same pattern as
+   * accessSecret/refreshSecret). Domain-separated so a leaked operator
+   * token oracle can't mint driver tokens or vice-versa.
+   */
+  JWT_DRIVER_SECRET: z.string().optional(),
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('30d'),
+  /**
+   * Driver-app session length. Default 12h covers a typical wrecker shift
+   * (incl. a long lunch / extra stop) but expires before a forgotten
+   * device sitting in the truck overnight could be used by a stranger.
+   */
+  JWT_DRIVER_TTL: z.string().default('12h'),
   JWT_ISSUER: z.string().default('ustowdispatch'),
   JWT_AUDIENCE: z.string().default('ustowdispatch-api'),
 
@@ -168,6 +181,22 @@ export const configSchema = z.object({
     .optional()
     .default('verifier-token-session12-default-dev-value'),
 
+  // Driver Experience (Session 2) — S3 for job evidence (photos, videos,
+  // signatures). When S3_BUCKET is set the API mints real presigned PUT
+  // URLs and clients upload directly to S3, bypassing the API for the
+  // bytes. When unset, a LocalStubEvidenceStorageProvider hands out fake
+  // URLs so dev / CI exercise the full HTTP shape without S3 creds.
+  S3_BUCKET: z.string().optional().default(''),
+  S3_REGION: z.string().optional().default(''),
+  S3_ACCESS_KEY_ID: z.string().optional().default(''),
+  S3_SECRET_ACCESS_KEY: z.string().optional().default(''),
+  /** S3-compatible endpoint override (MinIO / R2). Leave blank for AWS. */
+  S3_ENDPOINT: z.string().optional().default(''),
+  S3_FORCE_PATH_STYLE: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+
   // Moat #1 — Dynamic Pricing Engine. The crons (weather poller, demand
   // surge sampler, auto-revert) are gated by an env flag so local dev / CI
   // doesn't hammer NOAA every hour. NOAA's API does not require a key but
@@ -177,10 +206,7 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
-  NOAA_USER_AGENT: z
-    .string()
-    .optional()
-    .default('ustowdispatch-api (ops@ustowdispatch.cloud)'),
+  NOAA_USER_AGENT: z.string().optional().default('ustowdispatch-api (ops@ustowdispatch.cloud)'),
   OPENWEATHERMAP_API_KEY: z.string().optional().default(''),
 });
 

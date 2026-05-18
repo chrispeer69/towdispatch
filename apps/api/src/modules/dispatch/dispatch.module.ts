@@ -18,6 +18,11 @@ import { DriversService } from './drivers.service.js';
   imports: [JobsModule, AuthModule, FleetModule],
   controllers: [DispatchController],
   providers: [DriversService, DriverMobileService, DispatchGateway],
-  exports: [DispatchGateway],
+  // DriversService is exported so DriverExperienceModule's
+  // DriverShiftService can reuse the existing startShift/endShift
+  // logic instead of duplicating shift creation. Adding it to the
+  // public surface is intentional — see Session 2 driver-shift
+  // service for the consumer.
+  exports: [DispatchGateway, DriversService],
 })
 export class DispatchModule {}
