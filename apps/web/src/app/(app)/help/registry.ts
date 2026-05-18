@@ -78,7 +78,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
   {
     slug: 'getting-started',
     title: 'Getting Started',
-    blurb: 'Stand up your tenant, invite users, and connect the integrations your team will rely on.',
+    blurb:
+      'Stand up your tenant, invite users, and connect the integrations your team will rely on.',
     icon: Rocket,
     tone: 'orange',
     documents: [
@@ -121,7 +122,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'connect-quickbooks',
         title: 'Connecting QuickBooks Online',
-        summary: 'OAuth-connect QBO so closed invoices push to your QuickBooks ledger automatically.',
+        summary:
+          'OAuth-connect QBO so closed invoices push to your QuickBooks ledger automatically.',
         audience: ['owner', 'admin', 'accounting'],
         status: 'live',
         estimatedMinutes: 6,
@@ -132,14 +134,16 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
   {
     slug: 'daily-operations',
     title: 'Daily Operations',
-    blurb: 'How dispatchers and drivers run a normal day — call intake, dispatch board, shifts, and field documentation.',
+    blurb:
+      'How dispatchers and drivers run a normal day — call intake, dispatch board, shifts, and field documentation.',
     icon: Truck,
     tone: 'blue',
     documents: [
       {
         slug: 'call-intake',
         title: 'The Call Intake Workflow: From Phone Call to Dispatch',
-        summary: 'Capture customer + vehicle + service in under 60 seconds with the live quote box.',
+        summary:
+          'Capture customer + vehicle + service in under 60 seconds with the live quote box.',
         audience: ['dispatcher'],
         status: 'planned',
         estimatedMinutes: 7,
@@ -147,7 +151,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'live-dispatch-board',
         title: 'Managing the Live Dispatch Board',
-        summary: 'Read the board, drag jobs to drivers, monitor ETAs, and respond to status changes.',
+        summary:
+          'Read the board, drag jobs to drivers, monitor ETAs, and respond to status changes.',
         audience: ['dispatcher', 'manager'],
         status: 'planned',
         estimatedMinutes: 8,
@@ -155,7 +160,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'assigning-drivers',
         title: 'Assigning and Reassigning Drivers',
-        summary: 'How driver assignments flow from /assign-jobs to the dispatch board, and how to swap.',
+        summary:
+          'How driver assignments flow from /assign-jobs to the dispatch board, and how to swap.',
         audience: ['dispatcher', 'manager'],
         status: 'planned',
         estimatedMinutes: 5,
@@ -167,6 +173,16 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
         audience: ['driver', 'manager'],
         status: 'planned',
         estimatedMinutes: 6,
+      },
+      {
+        slug: 'driver-signin-and-briefing',
+        title: 'Driver Sign-In and Daily Briefing',
+        summary:
+          'How to PIN into the driver app, acknowledge the daily briefing, start your shift, and prove DVIR completion before taking jobs.',
+        audience: ['driver', 'manager'],
+        status: 'live',
+        estimatedMinutes: 6,
+        lastUpdatedAt: '2026-05-18',
       },
       {
         slug: 'capturing-evidence',
@@ -181,7 +197,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
   {
     slug: 'billing-finance',
     title: 'Billing & Finance',
-    blurb: 'For accounting teams: generate invoices, take payments, manage past-due, and close the month.',
+    blurb:
+      'For accounting teams: generate invoices, take payments, manage past-due, and close the month.',
     icon: Wallet,
     tone: 'green',
     documents: [
@@ -204,7 +221,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'ar-aging-workspace',
         title: 'The A/R Aging Workspace: Managing Past Due Accounts',
-        summary: 'Filter, triage, and act on overdue invoices. Bulk reminders. Account-level focus.',
+        summary:
+          'Filter, triage, and act on overdue invoices. Bulk reminders. Account-level focus.',
         audience: ['accounting'],
         status: 'planned',
         estimatedMinutes: 8,
@@ -230,14 +248,16 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
   {
     slug: 'advanced-features',
     title: 'Advanced Features & Moats',
-    blurb: 'Differentiating capabilities: Dynamic Pricing, motor-club tier offers, account rate cards, and more.',
+    blurb:
+      'Differentiating capabilities: Dynamic Pricing, motor-club tier offers, account rate cards, and more.',
     icon: Zap,
     tone: 'violet',
     documents: [
       {
         slug: 'dynamic-pricing',
         title: 'Dynamic Pricing: How to Configure and Activate Tiers',
-        summary: 'Five tier categories, multiplicative stacking, the 3.0× cap, and the operator override flow.',
+        summary:
+          'Five tier categories, multiplicative stacking, the 3.0× cap, and the operator override flow.',
         audience: ['owner', 'admin', 'manager'],
         status: 'planned',
         estimatedMinutes: 12,
@@ -245,7 +265,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'tier-offer-composer',
         title: 'The Tier Offer Composer: Negotiating with Motor Clubs',
-        summary: 'Compose, send, and track event-pricing offers to your motor-club account managers.',
+        summary:
+          'Compose, send, and track event-pricing offers to your motor-club account managers.',
         audience: ['owner', 'admin'],
         status: 'planned',
         estimatedMinutes: 9,
@@ -253,7 +274,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'account-rate-cards',
         title: 'Account Rate Cards: Managing Commercial Pricing',
-        summary: 'Per-account base rates, per-mile rates, and how account overrides interact with default rates.',
+        summary:
+          'Per-account base rates, per-mile rates, and how account overrides interact with default rates.',
         audience: ['owner', 'admin'],
         status: 'planned',
         estimatedMinutes: 7,
@@ -261,7 +283,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'impound-yard-operations',
         title: 'Impound & Storage Yard Operations',
-        summary: 'Phase 2 module: storage rate sheets, hold types, lien notice ladders, and auction prep.',
+        summary:
+          'Phase 2 module: storage rate sheets, hold types, lien notice ladders, and auction prep.',
         audience: ['owner', 'admin', 'accounting'],
         status: 'planned',
         estimatedMinutes: 12,
@@ -271,7 +294,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
   {
     slug: 'company-policies',
     title: 'Company Policies & Procedures',
-    blurb: 'Editable templates you can adapt for your business: refund policy, dispute procedures, conduct standards.',
+    blurb:
+      'Editable templates you can adapt for your business: refund policy, dispute procedures, conduct standards.',
     icon: Shield,
     tone: 'tan',
     documents: [
@@ -294,7 +318,8 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
       {
         slug: 'driver-conduct',
         title: 'Driver Conduct & Safety Standards',
-        summary: 'Editable driver conduct policy template, suitable for the daily-briefing video script.',
+        summary:
+          'Editable driver conduct policy template, suitable for the daily-briefing video script.',
         audience: ['owner', 'admin', 'manager'],
         status: 'planned',
         estimatedMinutes: 8,

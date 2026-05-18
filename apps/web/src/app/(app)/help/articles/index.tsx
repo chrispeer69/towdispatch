@@ -16,10 +16,11 @@
  * the build step is simpler without an MDX pipeline.
  */
 import type { JSX } from 'react';
+import { DriverSigninAndBriefingArticle } from './daily-operations';
 import {
+  CompanyProfileArticle,
   ConnectQuickbooksArticle,
   ConnectStripeArticle,
-  CompanyProfileArticle,
   InvitingUsersArticle,
   SystemRequirementsArticle,
 } from './getting-started';
@@ -35,6 +36,7 @@ const ARTICLE_REGISTRY: Record<string, () => JSX.Element> = {
   'getting-started/inviting-users': InvitingUsersArticle,
   'getting-started/connect-stripe': ConnectStripeArticle,
   'getting-started/connect-quickbooks': ConnectQuickbooksArticle,
+  'daily-operations/driver-signin-and-briefing': DriverSigninAndBriefingArticle,
 };
 
 export function findArticle(key: ArticleKey): (() => JSX.Element) | null {

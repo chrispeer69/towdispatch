@@ -31,6 +31,10 @@ const buttonVariants = cva(
         default: 'h-10 px-4',
         sm: 'h-8 px-3 text-xs',
         lg: 'h-12 px-6 text-base',
+        // Touch-first 56px height for the driver app. Every primary
+        // action in /driver/* must use this size so the hit area is
+        // forgiving on a 5-inch screen in a moving truck.
+        touch: 'h-14 px-6 text-base',
         icon: 'h-9 w-9',
       },
     },
