@@ -196,6 +196,12 @@ export class DriversService {
       }
 
       const id = uuidv7();
+      // When the actor is a driver (role null = driver-app path, or
+      // role 'driver' = operator-side driver user), createdBy must be
+      // null because the driver's id is NOT a users(id) — the FK
+      // constraint on created_by references users(id). The driver_id
+      // column on the row itself provides full traceability.
+      const isDriverActor = ctx.role === null || ctx.role === ROLES.DRIVER;
       const [row] = await tx
         .insert(driverShifts)
         .values({
@@ -204,7 +210,7 @@ export class DriversService {
           driverId: input.driverId,
           truckId: input.truckId ?? null,
           status: 'available',
-          createdBy: ctx.userId,
+          createdBy: isDriverActor ? null : ctx.userId,
         })
         .returning();
       if (!row) throw new Error('insert driver_shifts .. returning() yielded no row');

@@ -28,6 +28,8 @@ import {
 import { DriverEvidenceService } from './driver-evidence.service.js';
 import { DriverFieldPaymentController } from './driver-field-payment.controller.js';
 import { DriverFieldPaymentService } from './driver-field-payment.service.js';
+import { DriverJobsController } from './driver-jobs.controller.js';
+import { DriverJobsService } from './driver-jobs.service.js';
 import { DriverOfflineSyncController } from './driver-offline-sync.controller.js';
 import { DriverOfflineSyncService } from './driver-offline-sync.service.js';
 import { DriverOrOperatorAuthGuard } from './driver-or-operator-auth.guard.js';
@@ -37,6 +39,8 @@ import { DriverShiftController } from './driver-shift.controller.js';
 import { DriverShiftService } from './driver-shift.service.js';
 import { DriverTelemetryController } from './driver-telemetry.controller.js';
 import { DriverTelemetryService } from './driver-telemetry.service.js';
+import { DriverTrucksController } from './driver-trucks.controller.js';
+import { DriverTrucksService } from './driver-trucks.service.js';
 import type { EvidenceStorageProvider } from './evidence-storage/evidence-storage.provider.js';
 import { EVIDENCE_STORAGE_PROVIDER } from './evidence-storage/evidence-storage.tokens.js';
 import { LocalStubEvidenceStorageProvider } from './evidence-storage/local-stub-evidence-storage.provider.js';
@@ -56,6 +60,8 @@ import { StubStripeTerminalProvider } from './stripe-terminal/stub-stripe-termin
     DriverFieldPaymentController,
     DriverTelemetryController,
     DriverOfflineSyncController,
+    DriverJobsController,
+    DriverTrucksController,
   ],
   providers: [
     DriverAuthService,
@@ -68,6 +74,8 @@ import { StubStripeTerminalProvider } from './stripe-terminal/stub-stripe-termin
     DriverFieldPaymentService,
     DriverTelemetryService,
     DriverOfflineSyncService,
+    DriverJobsService,
+    DriverTrucksService,
     {
       provide: EVIDENCE_STORAGE_PROVIDER,
       inject: [ConfigService],
