@@ -1,72 +1,78 @@
 /**
- * /help — the help center landing.
+ * /help — Help Center landing.
  *
- * Today this is a placeholder with two cards: Training Documents and
- * Chat Support, both marked "Coming soon". When training docs ship,
- * the first card becomes a list of articles / a search box / an
- * embedded knowledge-base; the second card swaps to a chat-request
- * widget (Intercom / Crisp / our own minimal form).
+ * Renders the five top-level training-document categories defined in the
+ * Help Center Architecture (May 17, 2026). Each category links to a
+ * sub-page that lists every document in that category. Per-document
+ * articles will fill in over the coming weeks; today most documents are
+ * marked "Coming soon" and only the structure is browsable.
  *
- * Routed from the topbar question-mark button — see
- * apps/web/src/components/app-shell/topbar.tsx.
+ * The shape of this page is locked by `registry.ts`. To add a new document,
+ * append to the appropriate category's `documents` array there.
  */
-import { BookOpen, MessageSquare } from 'lucide-react';
+import { HELP_CENTER_CATEGORIES, getHelpCenterStats } from './registry';
+import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Help center — US Tow DISPATCH' };
+export const metadata = { title: 'Help Center — US Tow DISPATCH' };
+
+const TONE_ACCENT: Record<string, string> = {
+  orange: 'text-brand-primary bg-brand-primary/15 border-brand-primary/20',
+  blue: 'text-info bg-info/15 border-info/20',
+  green: 'text-ok bg-ok/15 border-ok/20',
+  violet: 'text-violet bg-violet/15 border-violet/20',
+  red: 'text-danger bg-danger/15 border-danger/20',
+  tan: 'text-tan bg-tan/15 border-tan/20',
+};
 
 export default function HelpCenterPage(): JSX.Element {
+  const stats = getHelpCenterStats();
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <header className="space-y-2">
+    <div className="mx-auto max-w-5xl space-y-8">
+      <header className="space-y-3">
         <h1 className="font-condensed text-3xl font-extrabold uppercase leading-none tracking-tight md:text-4xl">
           Help center
         </h1>
         <p className="max-w-prose text-sm text-text-secondary-on-dark">
-          Training documents and live chat support will live here. Both are in flight — pick the
-          card below that matches what you need and we&rsquo;ll route you there when it&rsquo;s
-          ready.
+          Step-by-step training documents for everyone who uses US Tow DISPATCH. Choose a category
+          below to see the guides available for your role. Documents marked "Coming soon" are on
+          the roadmap and will be filled in over the coming weeks.
+        </p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary-on-dark/60">
+          {stats.liveDocuments} live · {stats.plannedDocuments} coming soon · {stats.totalDocuments}{' '}
+          total
         </p>
       </header>
 
-      <section className="rounded-[14px] border border-divider bg-bg-surface p-5">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-bg-surface-elevated text-brand-primary">
-            <BookOpen className="h-4 w-4" />
-          </span>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-text-primary-on-dark">Training documents</h2>
-              <span className="rounded-full bg-bg-surface-elevated px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
-                Coming soon
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-text-secondary-on-dark">
-              Step-by-step guides for call intake, dispatch, billing, fleet, and accounting.
-              Searchable, role-tagged (Dispatcher / Driver / Admin), and printable.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-[14px] border border-divider bg-bg-surface p-5">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-bg-surface-elevated text-brand-primary">
-            <MessageSquare className="h-4 w-4" />
-          </span>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="font-semibold text-text-primary-on-dark">Chat support</h2>
-              <span className="rounded-full bg-bg-surface-elevated px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
-                Coming soon
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-text-secondary-on-dark">
-              Open a chat request to the US Tow DISPATCH support team. Replies on business days,
-              priority for production-blocking issues.
-            </p>
-          </div>
-        </div>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {HELP_CENTER_CATEGORIES.map((category) => {
+          const Icon = category.icon;
+          const accent = TONE_ACCENT[category.tone] ?? TONE_ACCENT.orange;
+          return (
+            <Link
+              key={category.slug}
+              href={`/help/${category.slug}`}
+              className="group rounded-[14px] border border-divider bg-bg-surface p-5 transition hover:border-brand-primary/40 hover:bg-bg-surface-elevated/30"
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] border ${accent}`}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div className="flex-1">
+                  <h2 className="font-condensed text-lg font-extrabold uppercase tracking-wide text-text-primary-on-dark group-hover:text-brand-primary">
+                    {category.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-text-secondary-on-dark">{category.blurb}</p>
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark/60">
+                    {category.documents.length} documents
+                  </p>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </section>
 
       <p className="text-xs text-text-secondary-on-dark">
