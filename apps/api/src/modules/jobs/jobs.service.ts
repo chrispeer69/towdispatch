@@ -34,6 +34,7 @@ import {
   jobDriverAssignments,
   jobStatusTransitions,
   jobs,
+  tenants,
   trucks,
   uuidv7,
   vehicles,
@@ -55,6 +56,7 @@ import {
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { CustomersService } from '../customers/customers.service.js';
+import { DirectionsService } from '../directions/directions.service.js';
 import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 import { RateEngineService } from '../rates/rate-engine.service.js';
 import {
@@ -78,7 +80,33 @@ export class JobsService {
     private readonly customers: CustomersService,
     private readonly rateEngine: RateEngineService,
     private readonly events: DispatchEventsService,
+    private readonly directions: DirectionsService,
   ) {}
+
+  /**
+   * Read the dispatch yard coordinate from tenant settings (Phase 1 wiring
+   * before the impound module's yards table lands). Operators set this once
+   * via Settings → Company; intake uses it as the origin for enroute miles.
+   */
+  private async readDispatchYardCoord(tx: Tx, tenantId: string): Promise<{ lat: number; lng: number } | null> {
+    const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, tenantId) });
+    const settings = (t?.settings as Record<string, unknown> | null) ?? null;
+    const yard = settings?.dispatchYardCoord as { lat?: number; lng?: number } | undefined;
+    if (yard && typeof yard.lat === 'number' && typeof yard.lng === 'number') {
+      return { lat: yard.lat, lng: yard.lng };
+    }
+    return null;
+  }
+
+  /**
+   * Whether the tenant has elected the Google Routes provider for distance.
+   * Defaults to false (Mapbox) when unset.
+   */
+  private async readUseGoogleForDistance(tx: Tx, tenantId: string): Promise<boolean> {
+    const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, tenantId) });
+    const settings = (t?.settings as Record<string, unknown> | null) ?? null;
+    return Boolean(settings?.useGoogleForDistance);
+  }
 
   /**
    * Paginated list backing the /jobs index page. Joins customer name, the
@@ -270,6 +298,25 @@ export class JobsService {
       // Allocate job number under the active transaction.
       const jobNumber = await allocateJobNumber(tx, ctx.tenantId, new Date());
 
+      // Compute road miles when we have the coordinates. Yard origin pulled
+      // from tenant settings (Phase 2 will switch to a real yards table).
+      const yardCoord = await this.readDispatchYardCoord(tx, ctx.tenantId);
+      const useGoogle = await this.readUseGoogleForDistance(tx, ctx.tenantId);
+      const pickupCoord =
+        typeof input.pickup.lat === 'number' && typeof input.pickup.lng === 'number'
+          ? { lat: input.pickup.lat, lng: input.pickup.lng }
+          : null;
+      const dropoffCoord =
+        input.dropoff && typeof input.dropoff.lat === 'number' && typeof input.dropoff.lng === 'number'
+          ? { lat: input.dropoff.lat, lng: input.dropoff.lng }
+          : null;
+      const miles = await this.directions.computeJobMiles({
+        yardCoord,
+        pickupCoord,
+        dropoffCoord,
+        useGoogle,
+      });
+
       // Insert the job.
       const id = uuidv7();
       const [row] = await tx
@@ -293,6 +340,8 @@ export class JobsService {
           authorizedByName: input.authorizedByName ?? null,
           rateQuotedCents: quote.totalCents,
           rateBreakdown: quote,
+          enrouteMiles: miles.enrouteMiles !== null ? String(miles.enrouteMiles) : null,
+          intowMiles: miles.intowMiles !== null ? String(miles.intowMiles) : null,
           notes: composeIntakeNotes(input.notes, !!input.skipCustomerSms),
           createdByUserId: ctx.userId,
         })
@@ -357,6 +406,26 @@ export class JobsService {
       }
 
       const jobNumber = await allocateJobNumber(tx, ctx.tenantId, new Date());
+
+      // Compute road miles when we have coordinates. Same behavior as the
+      // intake path; deferred to a private helper to keep both paths in sync.
+      const yardCoord = await this.readDispatchYardCoord(tx, ctx.tenantId);
+      const useGoogle = await this.readUseGoogleForDistance(tx, ctx.tenantId);
+      const pickupCoord =
+        typeof input.pickupLat === 'number' && typeof input.pickupLng === 'number'
+          ? { lat: input.pickupLat, lng: input.pickupLng }
+          : null;
+      const dropoffCoord =
+        typeof input.dropoffLat === 'number' && typeof input.dropoffLng === 'number'
+          ? { lat: input.dropoffLat, lng: input.dropoffLng }
+          : null;
+      const miles = await this.directions.computeJobMiles({
+        yardCoord,
+        pickupCoord,
+        dropoffCoord,
+        useGoogle,
+      });
+
       const id = uuidv7();
       const [row] = await tx
         .insert(jobs)
@@ -379,6 +448,8 @@ export class JobsService {
           authorizedByName: input.authorizedByName ?? null,
           rateQuotedCents: 0,
           rateBreakdown: null,
+          enrouteMiles: miles.enrouteMiles !== null ? String(miles.enrouteMiles) : null,
+          intowMiles: miles.intowMiles !== null ? String(miles.intowMiles) : null,
           notes: input.notes ?? null,
           createdByUserId: ctx.userId,
         })
