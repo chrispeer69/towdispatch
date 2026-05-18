@@ -31,6 +31,7 @@ import {
   bigint,
   index,
   jsonb,
+  numeric,
   pgTable,
   primaryKey,
   text,
@@ -116,6 +117,20 @@ export const jobs = pgTable(
      * accepted quote in either direction. Null until acceptance.
      */
     frozenPriceCents: bigint('frozen_price_cents', { mode: 'number' }),
+
+    /**
+     * Road-mile tracking (added 2026-05-17). enroute_miles is the dispatch-
+     * yard-to-pickup distance; intow_miles is the pickup-to-dropoff distance.
+     * Both computed at job creation via the directions service (Mapbox
+     * default, Google fallback per tenant flag) and read by the rate engine
+     * to generate per-mile invoice line items. Nullable: jobs created before
+     * this migration have null values; jobs without a dispatch yard have a
+     * null enroute_miles; non-tow jobs have a null intow_miles.
+     */
+    enrouteMiles: numeric('enroute_miles', { precision: 8, scale: 2 }),
+    intowMiles: numeric('intow_miles', { precision: 8, scale: 2 }),
+    /** Yard the truck dispatches from — origin for the enroute leg. */
+    dispatchYardId: uuid('dispatch_yard_id'),
 
     notes: text('notes'),
 

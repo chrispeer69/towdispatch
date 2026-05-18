@@ -79,3 +79,87 @@ export function formatMiles(miles: number): string {
   if (miles < 10) return `${miles.toFixed(1)} mi`;
   return `${Math.round(miles)} mi`;
 }
+
+/**
+ * Address suggestion for the autocomplete dropdown. Captures the structured
+ * address components plus the lat/lng so the caller can use them directly
+ * (no second geocode round-trip needed).
+ */
+export interface AddressSuggestion {
+  /** Human-readable full address: "2346 Main St, Columbus, OH 43210" */
+  fullAddress: string;
+  /** Just the place-name component for terse rendering: "2346 Main St" */
+  placeName: string;
+  /** City + region context: "Columbus, Ohio 43210" */
+  context: string;
+  lat: number;
+  lng: number;
+  /** Mapbox feature id for tracking; can be sent back to the API for analytics */
+  mapboxId: string;
+}
+
+/**
+ * Address autocomplete via the Mapbox Forward Geocoding API. Returns up to
+ * `limit` ranked suggestions for the typed query. Country-biased to US; if
+ * `proximity` is supplied (e.g., the operator's primary yard lat/lng), the
+ * API ranks nearby matches higher. Cancellable via signal.
+ *
+ * Cost note: Mapbox bills geocoding by *session*, not by request. A rapid
+ * sequence of typeahead calls from one user counts as one session as long
+ * as the user picks a result within ~60 seconds. Debounce on the caller
+ * side to keep API volume low.
+ */
+export async function searchAddresses(
+  query: string,
+  token: string,
+  options: { limit?: number; signal?: AbortSignal; proximity?: LatLng } = {},
+): Promise<AddressSuggestion[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 3) return [];
+  if (!isUsableMapboxToken(token)) return [];
+  const limit = options.limit ?? 5;
+  let url =
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(trimmed)}.json` +
+    `?access_token=${encodeURIComponent(token)}&country=us&limit=${limit}&autocomplete=true&types=address,place,postcode`;
+  if (options.proximity) {
+    url += `&proximity=${options.proximity.lng},${options.proximity.lat}`;
+  }
+  try {
+    const res = await fetch(url, options.signal ? { signal: options.signal } : {});
+    if (!res.ok) return [];
+    const body = (await res.json()) as {
+      features?: Array<{
+        id?: string;
+        place_name?: string;
+        text?: string;
+        center?: [number, number];
+        context?: Array<{ text?: string }>;
+      }>;
+    };
+    const features = body.features ?? [];
+    const out: AddressSuggestion[] = [];
+    for (const f of features) {
+      const center = f.center;
+      if (!center || center.length < 2) continue;
+      const [lng, lat] = center;
+      if (typeof lat !== 'number' || typeof lng !== 'number') continue;
+      const fullAddress = f.place_name ?? '';
+      const placeName = f.text ?? fullAddress;
+      const context = (f.context ?? [])
+        .map((c) => c.text)
+        .filter((s): s is string => Boolean(s))
+        .join(', ');
+      out.push({
+        fullAddress,
+        placeName,
+        context,
+        lat,
+        lng,
+        mapboxId: f.id ?? '',
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
