@@ -1,34 +1,61 @@
 /**
- * Daily Operations article bodies. Each article follows the standard
- * five-section template (Purpose / Prerequisites / Step-by-Step / Common
- * Mistakes / Related Documents).
+ * Daily Operations article bodies.
+ *
+ * Each export is a React component rendered inside the article surface
+ * wrapper. Articles follow the Manus-grade deep structure template:
+ *   1. Overview (the concept and the why)
+ *   2. When to use what (decision panels)
+ *   3. Worked Examples (step-by-step with real-world context)
+ *   4. Troubleshooting Tree (branching diagnoses)
+ *   5. FAQ
+ *   6. Related Concepts
  */
+import { CustomerLink, JobLink } from '@/components/ui/entity-link';
 import Link from 'next/link';
 import type { JSX, ReactNode } from 'react';
 
+// =====================================================================
+// Shared building blocks (copied from getting-started.tsx for isolation)
+// =====================================================================
+
 function H2({ children }: { children: ReactNode }): JSX.Element {
   return (
-    <h2 className="font-condensed mt-8 text-2xl font-extrabold uppercase tracking-tight text-text-primary-on-dark">
+    <h2 className="font-condensed mt-12 text-3xl font-extrabold uppercase tracking-tight text-text-primary-on-dark">
       {children}
     </h2>
   );
 }
+
 function H3({ children }: { children: ReactNode }): JSX.Element {
-  return <h3 className="mt-6 text-base font-semibold text-text-primary-on-dark">{children}</h3>;
+  return (
+    <h3 className="font-condensed mt-8 text-xl font-extrabold uppercase tracking-wide text-text-primary-on-dark">
+      {children}
+    </h3>
+  );
 }
+
+function H4({ children }: { children: ReactNode }): JSX.Element {
+  return (
+    <h4 className="mt-6 text-base font-semibold text-text-primary-on-dark">{children}</h4>
+  );
+}
+
 function P({ children }: { children: ReactNode }): JSX.Element {
-  return <p className="mt-3 text-sm leading-7 text-text-primary-on-dark/90">{children}</p>;
+  return <p className="mt-4 text-sm leading-7 text-text-primary-on-dark/90">{children}</p>;
 }
+
 function Em({ children }: { children: ReactNode }): JSX.Element {
   return <strong className="font-semibold text-text-primary-on-dark">{children}</strong>;
 }
+
 function Code({ children }: { children: ReactNode }): JSX.Element {
   return (
-    <code className="rounded bg-bg-surface-elevated px-1 py-0.5 font-mono text-[12px] text-brand-primary">
+    <code className="rounded bg-bg-surface-elevated px-1.5 py-0.5 font-mono text-[12px] text-brand-primary">
       {children}
     </code>
   );
 }
+
 function Callout({
   tone = 'info',
   title,
@@ -45,229 +72,263 @@ function Callout({
         ? 'border-ok/40 bg-ok/10'
         : 'border-info/40 bg-info/10';
   return (
-    <div className={`mt-4 rounded-[10px] border ${accent} p-4`}>
-      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark">
+    <div className={`mt-6 rounded-[10px] border ${accent} p-5`}>
+      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
         {title}
       </p>
-      <div className="mt-1 text-sm leading-7 text-text-primary-on-dark/90">{children}</div>
+      <div className="mt-2 text-sm leading-7 text-text-primary-on-dark/90">{children}</div>
     </div>
   );
 }
+
 function OrderedList({ children }: { children: ReactNode }): JSX.Element {
   return (
-    <ol className="mt-3 list-decimal space-y-2 pl-6 text-sm leading-7 text-text-primary-on-dark/90">
+    <ol className="mt-4 list-decimal space-y-3 pl-6 text-sm leading-7 text-text-primary-on-dark/90">
       {children}
     </ol>
   );
 }
+
 function UnorderedList({ children }: { children: ReactNode }): JSX.Element {
   return (
-    <ul className="mt-3 list-disc space-y-2 pl-6 text-sm leading-7 text-text-primary-on-dark/90">
+    <ul className="mt-4 list-disc space-y-3 pl-6 text-sm leading-7 text-text-primary-on-dark/90">
       {children}
     </ul>
   );
 }
+
 function RelatedDoc({ href, title }: { href: string; title: string }): JSX.Element {
   return (
-    <Link href={href} className="text-brand-primary hover:underline">
+    <Link href={href} className="text-brand-primary hover:underline underline-offset-2 transition-colors">
       {title}
     </Link>
   );
 }
 
-export function DriverSigninAndBriefingArticle(): JSX.Element {
+// =====================================================================
+// Article 1 — The Call Intake Workflow
+// =====================================================================
+
+export function CallIntakeArticle(): JSX.Element {
   return (
-    <article>
-      <H2>Purpose</H2>
+    <div className="pb-12">
       <P>
-        Every shift in US Tow DISPATCH starts in the same place: the driver signs into the in-truck
-        app with a 4-digit PIN, acknowledges the daily briefing if one has been published, and
-        completes a pre-trip vehicle inspection. This article walks a driver through that 90-second
-        sequence and shows managers exactly what's recorded on the office side so the audit trail
-        holds up under DOT or insurance scrutiny.
+        The <Em>Call Intake</Em> form is the front door of your operation. It is designed for speed: when a customer is stranded on the side of a highway, your dispatcher needs to capture the vehicle, location, and service type, generate an accurate price quote, and dispatch a truck in under 60 seconds.
       </P>
       <P>
-        The driver app lives at <Code>/driver</Code> in a browser. It works on any phone or tablet
-        running iOS Safari or Chrome — Android Chrome is the dispatcher-issued default. Sign-in is a
-        separate session from the operator dashboard; a driver who is also a dispatcher will sign
-        into each surface independently with different credentials.
+        This guide covers the concepts behind the intake flow, when to use different intake paths, and provides a complete worked example of a live call.
       </P>
 
-      <H2>Prerequisites</H2>
-      <UnorderedList>
-        <li>
-          The driver record exists in{' '}
-          <RelatedDoc href="/admin/drivers" title="Settings → Drivers" /> and is marked active.
-        </li>
-        <li>
-          A 4-digit PIN has been enrolled by an OWNER/ADMIN/MANAGER on the office side. New drivers
-          receive a "Set your PIN" prompt the first time they sign in — they tell dispatch the
-          digits in person.
-        </li>
-        <li>
-          The driver knows the <Em>workshop slug</Em>. It's the short lowercase identifier for the
-          towing company — typically the same slug used on the dispatcher login page.
-        </li>
-        <li>
-          The driver is qualified to operate at least one truck (Settings → Fleet → Trucks → Driver
-          Qualifications).
-        </li>
-      </UnorderedList>
-
-      <H2>Step-by-Step Guide</H2>
-
-      <H3>1. Open the driver app</H3>
+      <H2>Overview</H2>
       <P>
-        On the phone or dashboard tablet, open the browser and navigate to the company's URL
-        followed by <Code>/driver</Code>. Example: <Code>https://app.ustowdispatch.com/driver</Code>
-        . Bookmark this for one-tap access. Drivers should add this to the home screen so it
-        launches in full-screen mode.
+        US Tow DISPATCH separates the <Em>quote</Em> from the <Em>job</Em>. As you type into the intake form, the <Em>Live Quote Box</Em> on the right side of the screen updates instantly. It reads the customer type (Cash vs. Account), the vehicle class (Light Duty vs. Heavy Duty), the service type, and the computed road miles, then runs them through your rate engine. 
+      </P>
+      <P>
+        You can quote a customer without saving anything. Only when you click <Code>Create Job</Code> does the system generate a job number, save the customer record, and push the call to the Live Dispatch Board.
       </P>
 
-      <H3>2. Enter the workshop slug</H3>
-      <P>
-        First-time use only — the slug is remembered between sessions. Type the slug exactly
-        (lowercase, dashes allowed) and tap <Em>Next</Em>. If the slug is wrong the app surfaces a
-        friendly <Em>"We couldn't find that workshop"</Em> error.
-      </P>
-      <Callout tone="tip" title="Tip">
-        Dispatchers should print the slug on a sticker stuck to the dashboard mount. Drivers
-        shouldn't have to memorize a URL.
+      <Callout tone="tip" title="The Golden Rule of Intake">
+        Start with the <Em>Phone Number</Em>. When you type a phone number, the system instantly searches your database. If the customer has called before, their name, email, and previous vehicles populate automatically. This saves 20 seconds of typing on repeat callers.
       </Callout>
 
-      <H3>3. Tap your name</H3>
+      <H2>When to use what</H2>
       <P>
-        The picker shows every active driver for the workshop, alphabetized by last name. Each row
-        is a 56-pixel tap target — designed for use with gloves on. Tap your name (or the "Not me"
-        link to go back).
+        The intake form adapts to the type of customer calling. The very first choice you make—the <Em>Customer Type</Em> toggle—changes how the rest of the form behaves.
       </P>
 
-      <H3>4. Enter your 4-digit PIN</H3>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="rounded-[10px] border border-divider bg-bg-surface-elevated/20 p-5">
+          <h4 className="font-condensed text-lg font-extrabold uppercase tracking-wide text-text-primary-on-dark">
+            Cash Customer
+          </h4>
+          <p className="mt-2 text-sm text-text-secondary-on-dark">
+            Use for private individuals paying out of pocket.
+          </p>
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-text-secondary-on-dark">
+            <li>Uses your default Master Rate Sheet.</li>
+            <li>Dynamic Pricing tiers (weather, time of day) apply automatically.</li>
+            <li>Payment is expected at the scene or via emailed checkout link.</li>
+          </ul>
+        </div>
+        <div className="rounded-[10px] border border-divider bg-bg-surface-elevated/20 p-5">
+          <h4 className="font-condensed text-lg font-extrabold uppercase tracking-wide text-text-primary-on-dark">
+            Account / Motor Club
+          </h4>
+          <p className="mt-2 text-sm text-text-secondary-on-dark">
+            Use for Agero, Allstate, AAA, police departments, or commercial fleets.
+          </p>
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-text-secondary-on-dark">
+            <li>Requires selecting the specific Account from a dropdown.</li>
+            <li>Uses the Account's custom rate card (overriding the Master Rate Sheet).</li>
+            <li>Bypasses standard Dynamic Pricing unless the account has specifically opted in to a Tier Offer.</li>
+            <li>Billed via invoice on net terms.</li>
+          </ul>
+        </div>
+      </div>
+
+      <H2>Worked Example: A Cash Tow Call</H2>
       <P>
-        The on-screen keypad replaces the native keyboard so the driver doesn't fight predictive
-        text. Five wrong PINs in a fifteen-minute window locks the account for 30 minutes — the app
-        shows a countdown and a <Em>Call dispatch</Em> button so dispatch can clear the lock
-        immediately (Settings → Drivers → Clear PIN lockout).
+        Let's walk through a real-world scenario. The phone rings. The caller is Maria, whose 2020 Toyota Camry broke down at Easton Town Center and needs a tow to Buckeye Auto Repair.
       </P>
 
-      <H3>5. Acknowledge the daily briefing</H3>
-      <P>
-        If an admin published a briefing for today, the driver sees an unmissable banner. The banner
-        shows the admin's written message, an embedded video (if any), and a single checkbox:{' '}
-        <Em>"I have read and watched the briefing for today."</Em> The acknowledge button is
-        disabled until that box is checked.
-      </P>
-      <P>
-        Acknowledgment records the driver's id, the briefing id, the timestamp, IP, and user agent.
-        That ledger is the legal proof that the driver saw the safety alert — keep it intact in
-        audits.
-      </P>
-      <Callout tone="info" title="What if no briefing is shown?">
-        That just means the admin hasn't published one for the day. Drivers proceed straight to the
-        shift control card. A green pill (<Em>✓ Today's briefing acknowledged</Em>) appears at the
-        top of the workspace once the day's briefing has been acknowledged.
-      </Callout>
+      <H3>Step 1: Customer Identity</H3>
+      <OrderedList>
+        <li>
+          Leave the Customer Type as <Code>Cash</Code>.
+        </li>
+        <li>
+          Ask for her phone number and type it into the <Em>Phone</Em> field: <Code>614-555-0199</Code>.
+        </li>
+        <li>
+          Because she hasn't called before, no record pops up. Type her name: <Code>Maria Sanchez</Code>.
+        </li>
+      </OrderedList>
 
-      <H3>6. Start your shift</H3>
-      <P>
-        Tap <Em>Start shift</Em>. A dialog lists every truck the driver is qualified to operate. Tap
-        the truck for the day. The app calls
-        <Code>POST /driver-shifts/check-in</Code> with the chosen truck id; GPS tracking begins
-        immediately and the dispatcher sees the truck light up on the dispatch board.
-      </P>
+      <H3>Step 2: Vehicle Details</H3>
+      <OrderedList>
+        <li>
+          Ask for the vehicle year, make, and model. Type <Code>2020</Code>, <Code>Toyota</Code>, <Code>Camry</Code>.
+        </li>
+        <li>
+          <Em>Optional but recommended:</Em> Ask for the license plate and state. Type <Code>OH</Code> and <Code>AAA1234</Code>. This is crucial if the vehicle ends up in your impound yard later.
+        </li>
+        <li>
+          The system automatically classifies a Camry as <Code>Light Duty</Code>. You do not need to change the Vehicle Class dropdown.
+        </li>
+      </OrderedList>
 
-      <H3>7. Capture the pre-trip inspection</H3>
+      <H3>Step 3: Service and Location</H3>
+      <OrderedList>
+        <li>
+          Select <Code>Tow</Code> from the Service Type buttons.
+        </li>
+        <li>
+          In the <Em>Pickup</Em> field, start typing <Code>Easton Town</Code>. The Mapbox autocomplete dropdown appears. Click the suggestion for Easton Town Center. The system instantly captures the GPS coordinates.
+        </li>
+        <li>
+          In the <Em>Dropoff</Em> field, start typing <Code>Buckeye Auto Repair</Code> and select the matching address.
+        </li>
+      </OrderedList>
+
+      <H3>Step 4: The Live Quote</H3>
       <P>
-        Until the DVIR is captured for the active shift, the driver
-        <Em>cannot</Em> open jobs. The pre-trip page walks through four accordions:
+        Look at the right side of your screen. The Live Quote Box has already done the math:
       </P>
       <UnorderedList>
-        <li>
-          <Em>Exterior:</Em> lights, mirrors, body damage.
-        </li>
-        <li>
-          <Em>Tires, brakes, wheels:</Em> tread, pressure, brake hold.
-        </li>
-        <li>
-          <Em>Wrecker equipment:</Em> boom, cables, hooks, warning lights.
-        </li>
-        <li>
-          <Em>Safety & cab:</Em> horn, wipers, fluids, first-aid kit.
-        </li>
+        <li>It added the Light Duty Tow base fee.</li>
+        <li>It calculated the road miles from Easton Town Center to Buckeye Auto Repair.</li>
+        <li>It subtracted your "free miles included" and applied your per-mile rate to the remainder.</li>
+        <li>If it's currently raining and you have a Weather tier active, it applied the 1.2× multiplier.</li>
       </UnorderedList>
       <P>
-        Each item is one tap: <Em>Pass</Em>, <Em>N/A</Em>, or <Em>Fail</Em>. A <Em>Fail</Em> opens a
-        note field and a camera capture — both are required to record the fail. If any{' '}
-        <Em>brakes</Em>, <Em>tires</Em>, <Em>warning lights</Em>, or <Em>cables/chains</Em> item
-        fails, the truck is flagged <Em>DVIR fail — see admin</Em> and the driver is hard-blocked
-        from jobs until dispatch clears the truck.
+        You can now read the total to Maria: <Em>"Maria, the total for that tow will be $145.00. Should I send a truck?"</Em>
       </P>
 
-      <H3>8. Take your first job</H3>
+      <H3>Step 5: Dispatch</H3>
+      <OrderedList>
+        <li>
+          Maria says yes. Click the <Code>Create Job</Code> button.
+        </li>
+        <li>
+          The screen clears, a success toast appears with the new Job Number, and the job instantly appears on the Live Dispatch Board in the <Em>New</Em> column, ready for a driver assignment.
+        </li>
+      </OrderedList>
+
+      <H2>Troubleshooting Tree</H2>
       <P>
-        With the DVIR captured and the briefing acknowledged, the workspace shows the active job
-        list. Tap a job to open the job execution screen — that's where state transitions, photo
-        evidence, signature capture, and field payment live.
+        When things don't behave as expected during a fast-moving call, use this branching guide to find the fix.
       </P>
 
-      <H2>Common Mistakes & Troubleshooting</H2>
+      <div className="mt-6 space-y-4">
+        <div className="rounded-[10px] border border-divider bg-bg-surface p-5">
+          <H4>Symptom: The Live Quote says $0.00</H4>
+          <UnorderedList>
+            <li>
+              <Em>Is the Customer Type set to Account?</Em> If yes, you must select an Account from the dropdown. If the selected account has no rate card configured, the quote defaults to zero.
+            </li>
+            <li>
+              <Em>Is the Service Type selected?</Em> The quote engine cannot run until it knows whether it's pricing a Tow, a Jump Start, or a Lockout.
+            </li>
+            <li>
+              <Em>Are the addresses complete?</Em> If you typed an address manually without clicking a dropdown suggestion, the system may not have captured the GPS coordinates required to calculate mileage.
+            </li>
+          </UnorderedList>
+        </div>
 
-      <H3>"My PIN keeps failing"</H3>
-      <P>
-        After five wrong attempts the account locks for 30 minutes. The driver sees a countdown on{' '}
-        <Code>/driver/locked</Code>. To unlock immediately, dispatch opens the driver record and
-        clicks <Em>Clear PIN lockout</Em>. If the driver has actually forgotten the PIN, dispatch
-        rotates it (Settings → Drivers → Rotate PIN) and tells the driver the new digits in person.
-      </P>
+        <div className="rounded-[10px] border border-divider bg-bg-surface p-5">
+          <H4>Symptom: The mileage seems wrong</H4>
+          <UnorderedList>
+            <li>
+              <Em>Did you enter a Dispatch Yard in your Company Profile?</Em> The system calculates "Enroute Miles" (deadhead from your yard to the pickup). If you haven't set your yard's address in <Em>Settings → Company</Em>, the system cannot calculate enroute miles and will only bill for the in-tow leg.
+            </li>
+            <li>
+              <Em>Is it an air-mile vs. road-mile difference?</Em> The intake form displays a quick "straight-line" distance hint next to the address box for speed. The actual invoice and rate quote use true road miles calculated via the Mapbox Directions API, which accounts for roads and one-ways. The quote box is always the accurate number.
+            </li>
+          </UnorderedList>
+        </div>
 
-      <H3>"I can't see any trucks in the Start Shift dialog"</H3>
-      <P>
-        The driver isn't qualified on any active truck. Dispatch adds the qualification at Settings
-        → Fleet → Trucks → Driver Qualifications, or from the driver's profile page. Refresh the
-        workspace once added.
-      </P>
+        <div className="rounded-[10px] border border-divider bg-bg-surface p-5">
+          <H4>Symptom: I need to override the quoted price</H4>
+          <P>
+            Sometimes the engine quotes $145, but the customer only has $120 cash and your manager approves the discount. 
+          </P>
+          <UnorderedList>
+            <li>
+              Click the <Code>Edit</Code> icon next to the Total in the Live Quote Box.
+            </li>
+            <li>
+              Enter <Code>120.00</Code> as the new total.
+            </li>
+            <li>
+              Select a Reason Code (e.g., "Manager Approved Discount"). This ensures the discrepancy is logged for the accounting team and won't trigger an audit flag later.
+            </li>
+          </UnorderedList>
+        </div>
+      </div>
 
-      <H3>"The pre-trip page says 'Start a shift before submitting'"</H3>
-      <P>
-        The DVIR is bound to a shift. Pick the truck from the workspace first; then tap{' '}
-        <Em>Start DVIR</Em>.
-      </P>
+      <H2>FAQ</H2>
+      <div className="space-y-4 mt-6">
+        <div>
+          <strong className="block text-text-primary-on-dark">Do I have to enter the VIN?</strong>
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
+            No. The VIN is optional at intake. If you don't have it, the driver can scan the VIN barcode with their mobile app when they arrive on scene, and the system will automatically decode the year, make, and model and update the job record.
+          </p>
+        </div>
+        <div>
+          <strong className="block text-text-primary-on-dark">What if the customer doesn't know the exact address?</strong>
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
+            The Mapbox autocomplete supports landmarks and intersections. You can type "I-71 North MM 110" or "Target at Easton" and the system will resolve the closest GPS coordinates.
+          </p>
+        </div>
+        <div>
+          <strong className="block text-text-primary-on-dark">Can I send an SMS tracking link from intake?</strong>
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
+            Yes. By default, when you click Create Job, the system sends an SMS to the customer's phone number with a magic link to track their tow. If the caller is not the vehicle owner (e.g., a parent calling for a child), you can check the "Skip SMS" box before creating the job to prevent confusing texts.
+          </p>
+        </div>
+      </div>
 
-      <H3>"I marked something as Fail but the app won't let me submit"</H3>
-      <P>
-        Failed items require a free-text note (max 500 characters) and at least one photo (camera
-        capture). Scroll inside the accordion and complete both.
-      </P>
-
-      <H3>"My connection dropped mid-shift"</H3>
-      <P>
-        Every mutation — status transitions, photo uploads, payment intents — is buffered to the
-        local queue when offline. The pending count shows up as a chip at the top of every page.
-        When the connection comes back the queue replays automatically; the driver can also tap
-        <Em>Offline queue → Retry all</Em> from the workspace quick actions.
-      </P>
-
-      <H2>Related Documents</H2>
+      <H2>Related Concepts</H2>
       <UnorderedList>
         <li>
           <RelatedDoc
-            href="/help/daily-operations/driver-shift-dvir"
-            title="Driver Shift Check-In and DVIRs (deep-dive)"
+            href="/help/daily-operations/live-dispatch-board"
+            title="Managing the Live Dispatch Board"
           />
         </li>
         <li>
           <RelatedDoc
-            href="/help/daily-operations/capturing-evidence"
-            title="Capturing Field Evidence (Photos, Videos, Signatures)"
+            href="/help/advanced-features/account-rate-cards"
+            title="Account Rate Cards: Managing Commercial Pricing"
           />
         </li>
         <li>
           <RelatedDoc
-            href="/help/getting-started/inviting-users"
-            title="Inviting Users (and enrolling drivers)"
+            href="/help/advanced-features/dynamic-pricing"
+            title="Dynamic Pricing: How to Configure and Activate Tiers"
           />
         </li>
       </UnorderedList>
-    </article>
+    </div>
   );
 }
