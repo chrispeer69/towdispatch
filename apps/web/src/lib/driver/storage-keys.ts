@@ -6,6 +6,7 @@
 export const DRIVER_JWT_KEY = 'driver_jwt';
 export const DRIVER_PROFILE_KEY = 'driver_profile';
 export const DRIVER_TENANT_SLUG_KEY = 'driver_tenant_slug';
+export const DRIVER_TENANT_CODE_KEY = 'driver_tenant_code';
 export const DRIVER_OFFLINE_QUEUE_KEY = 'driver_offline_queue';
 export const DRIVER_BRIEFING_LOCAL_ACK_KEY = 'driver_briefing_local_ack';
 
@@ -17,6 +18,7 @@ export const DRIVER_STORAGE_KEYS = [
   DRIVER_JWT_KEY,
   DRIVER_PROFILE_KEY,
   DRIVER_TENANT_SLUG_KEY,
+  DRIVER_TENANT_CODE_KEY,
   DRIVER_OFFLINE_QUEUE_KEY,
   DRIVER_BRIEFING_LOCAL_ACK_KEY,
 ] as const;

@@ -12,6 +12,13 @@ export const tenantSlugSchema = z
 export const tenantSchema = z.object({
   id: z.string().uuid(),
   slug: tenantSlugSchema,
+  /**
+   * 6-digit numeric company code shown on Settings → Company so the
+   * dispatcher can give it to drivers. Drivers enter it on /driver/login
+   * (or follow a /driver/d/[code] link) instead of having to know the
+   * URL slug. Auto-assigned by migration 0034 + DB-side trigger.
+   */
+  companyCode: z.string().regex(/^\d{6}$/),
   name: z.string().min(1).max(120),
   status: z.enum(TENANT_STATUS_VALUES),
   settings: z.record(z.unknown()).default({}),

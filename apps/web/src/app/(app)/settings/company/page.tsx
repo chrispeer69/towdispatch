@@ -20,6 +20,7 @@ import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
 import { CompanyProfileForm } from './company-profile-form';
+import { DriverAccessPanel } from './driver-access-panel';
 
 const TAB = findSettingsTab('company');
 
@@ -66,7 +67,10 @@ export default async function CompanyProfilePage(): Promise<JSX.Element> {
           </div>
         </div>
       ) : (
-        <CompanyProfileForm initial={result.data} callerRole={role} />
+        <>
+          <DriverAccessPanel companyCode={result.data.companyCode} />
+          <CompanyProfileForm initial={result.data} callerRole={role} />
+        </>
       )}
     </div>
   );

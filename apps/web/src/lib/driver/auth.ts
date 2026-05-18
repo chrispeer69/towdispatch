@@ -13,7 +13,12 @@
  * Documented as a Session 3 judgment call in the PR.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { DRIVER_JWT_KEY, DRIVER_PROFILE_KEY, DRIVER_TENANT_SLUG_KEY } from './storage-keys';
+import {
+  DRIVER_JWT_KEY,
+  DRIVER_PROFILE_KEY,
+  DRIVER_TENANT_CODE_KEY,
+  DRIVER_TENANT_SLUG_KEY,
+} from './storage-keys';
 
 export interface DriverProfile {
   driverId: string;
@@ -61,6 +66,22 @@ export function clearDriverSessionStorage(): void {
 export function readTenantSlugHint(): string | null {
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem(DRIVER_TENANT_SLUG_KEY);
+}
+
+/**
+ * 6-digit company-code hint persisted from the last successful tenant
+ * lookup. Used by /driver/login to skip the code-entry step when the
+ * driver has signed in on this device before, and by the /driver/d/[code]
+ * vanity URL handler to remember the code without asking again.
+ */
+export function readTenantCodeHint(): string | null {
+  if (typeof window === 'undefined') return null;
+  return window.localStorage.getItem(DRIVER_TENANT_CODE_KEY);
+}
+
+export function persistTenantCode(code: string): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(DRIVER_TENANT_CODE_KEY, code);
 }
 
 export function useDriverAuth(): DriverAuthState & {

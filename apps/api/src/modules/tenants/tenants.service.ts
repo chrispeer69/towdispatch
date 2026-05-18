@@ -132,6 +132,7 @@ function toDto(t: typeof tenants.$inferSelect): TenantDto {
   return {
     id: t.id,
     slug: t.slug,
+    companyCode: t.companyCode,
     name: t.name,
     status: t.status,
     settings: (t.settings as Record<string, unknown>) ?? {},
