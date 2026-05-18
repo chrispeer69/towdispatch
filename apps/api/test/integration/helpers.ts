@@ -44,6 +44,7 @@ export function ensureTestEnv(): void {
   process.env.JWT_ACCESS_SECRET ??= 'test-access-secret-with-at-least-32-chars-long';
   process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-with-at-least-32-chars-long';
   process.env.JWT_MFA_SECRET ??= 'test-mfa-secret-with-at-least-32-chars-long';
+  process.env.JWT_DRIVER_SECRET ??= 'test-driver-secret-with-at-least-32-chars-long';
   process.env.TOTP_ENCRYPTION_KEY ??= 'test-totp-encryption-key-32+-chars-long';
   // Tests do many signups + intakes against a single API instance; bump the
   // throttler so a busy test file does not 429 itself. The dedicated auth
@@ -168,6 +169,31 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM invoice_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          // Driver Experience (Session 1/2) — must clear before jobs / drivers /
+          // trucks because every table has tenant_id ON DELETE RESTRICT and
+          // most carry FK references back to jobs/drivers/trucks/shifts.
+          await c.query('DELETE FROM driver_telemetry_events WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM driver_offline_actions WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query(
+            'DELETE FROM driver_pretrip_inspections WHERE tenant_id = ANY($1::uuid[])',
+            [tenantIds],
+          );
+          await c.query(
+            'DELETE FROM driver_briefing_acknowledgments WHERE tenant_id = ANY($1::uuid[])',
+            [tenantIds],
+          );
+          await c.query('DELETE FROM driver_daily_briefings WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM driver_pins WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM job_field_payments WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM job_evidence WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           // Session 5 dispatch leaves: job_status_transitions and
           // driver_shifts both reference jobs/drivers/trucks.
           await c.query('DELETE FROM job_status_transitions WHERE tenant_id = ANY($1::uuid[])', [
