@@ -56,8 +56,9 @@ test.describe('E2E-011 driver web workspace happy path', () => {
       employeeNumber: '101',
       active: true,
     });
-    expect(driverRes.ok, await driverRes.text()).toBeTruthy();
-    const driver = (await driverRes.json()) as { id: string };
+    const driverBody = await driverRes.text();
+    expect(driverRes.ok, driverBody).toBeTruthy();
+    const driver = JSON.parse(driverBody) as { id: string };
 
     // Create a truck
     const truckRes = await apiPost('/fleet/trucks', ownerToken, {
@@ -66,8 +67,9 @@ test.describe('E2E-011 driver web workspace happy path', () => {
       model: '337',
       truckType: 'rollback_light',
     });
-    expect(truckRes.ok, await truckRes.text()).toBeTruthy();
-    const truck = (await truckRes.json()) as { id: string };
+    const truckBody = await truckRes.text();
+    expect(truckRes.ok, truckBody).toBeTruthy();
+    const truck = JSON.parse(truckBody) as { id: string };
 
     // Assign driver to truck
     const assignRes = await apiPost('/fleet/assignments', ownerToken, {
@@ -75,14 +77,16 @@ test.describe('E2E-011 driver web workspace happy path', () => {
       truckId: truck.id,
       isPrimary: true,
     });
-    expect(assignRes.ok, await assignRes.text()).toBeTruthy();
+    const assignBody = await assignRes.text();
+    expect(assignRes.ok, assignBody).toBeTruthy();
 
     // Set driver PIN (operator endpoint)
     const pinRes = await apiPost('/driver-auth/set-pin', ownerToken, {
       driverId: driver.id,
       pin: '4242',
     });
-    expect(pinRes.ok, await pinRes.text()).toBeTruthy();
+    const pinBody = await pinRes.text();
+    expect(pinRes.ok, pinBody).toBeTruthy();
 
     // Now switch to the driver JWT path -----------------------------
     const listRes = await fetch(`${API_BASE}/driver-auth/list-drivers`, {
@@ -103,8 +107,9 @@ test.describe('E2E-011 driver web workspace happy path', () => {
         tenantSlug: owner.tenant.slug,
       }),
     });
-    expect(loginRes.ok, await loginRes.text()).toBeTruthy();
-    const login = (await loginRes.json()) as DriverLoginResponse;
+    const loginBody = await loginRes.text();
+    expect(loginRes.ok, loginBody).toBeTruthy();
+    const login = JSON.parse(loginBody) as DriverLoginResponse;
     expect(login.accessToken).toBeTruthy();
     const driverJwt = login.accessToken;
 
@@ -118,8 +123,9 @@ test.describe('E2E-011 driver web workspace happy path', () => {
       headers: driverHeaders,
       body: JSON.stringify({ truckId: truck.id }),
     });
-    expect(checkInRes.ok, await checkInRes.text()).toBeTruthy();
-    const shift = (await checkInRes.json()) as { id: string; truckId: string };
+    const checkInBody = await checkInRes.text();
+    expect(checkInRes.ok, checkInBody).toBeTruthy();
+    const shift = JSON.parse(checkInBody) as { id: string; truckId: string };
     expect(shift.truckId).toBe(truck.id);
 
     // Pre-trip — single-item all-pass DVIR
@@ -137,13 +143,15 @@ test.describe('E2E-011 driver web workspace happy path', () => {
         submittedAt: new Date().toISOString(),
       }),
     });
-    expect(pretripRes.ok, await pretripRes.text()).toBeTruthy();
+    const pretripBody = await pretripRes.text();
+    expect(pretripRes.ok, pretripBody).toBeTruthy();
 
     // Check shift can be ended cleanly.
     const endRes = await fetch(`${API_BASE}/driver-shifts/check-out`, {
       method: 'POST',
       headers: driverHeaders,
     });
-    expect(endRes.ok, await endRes.text()).toBeTruthy();
+    const endBody = await endRes.text();
+    expect(endRes.ok, endBody).toBeTruthy();
   });
 });
