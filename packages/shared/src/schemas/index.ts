@@ -37,3 +37,6 @@ export * from './dynamic-pricing-demand-surge';
 export * from './stripe-payments';
 export * from './accounting';
 export * from './chat';
+// Driver Experience (Session 1) — DTOs + create/update payloads for the
+// eight new tables backing the in-truck driver app.
+export * from './driver-experience';

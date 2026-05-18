@@ -43,3 +43,13 @@ export * from './accounting-connections';
 export * from './account-mappings';
 export * from './sync-jobs';
 export * from './chat';
+// Driver Experience (Session 1) — schema foundation for the in-truck app.
+// Tables defined in packages/db/sql/0033_driver_experience.sql.
+export * from './driver-pins';
+export * from './driver-daily-briefings';
+export * from './driver-briefing-acknowledgments';
+export * from './driver-pretrip-inspections';
+export * from './driver-telemetry-events';
+export * from './job-evidence';
+export * from './job-field-payments';
+export * from './driver-offline-actions';
