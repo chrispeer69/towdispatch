@@ -75,3 +75,23 @@ Competitors proxy media uploads through their API servers, leading to crashes du
 
 **Launch Headline:**
 > "End damage disputes forever. 60-second walk-around video capture that uploads in the background, proving exactly what the car looked like before you hooked it."
+
+---
+
+## 6. ClaimShield — Damage Claim Equity Module
+
+**Status:** ❌ Planned (Architecture Build Report drafted May 2026)
+
+**The Capability:**
+A full-lifecycle damage claim management module that captures every motor-club damage allegation as a first-class object in US Tow DISPATCH. Each claim file aggregates the operator's evidence (driver photos, walkaround video, BOL, GPS timestamps), imports the motor club's documents and photos for permanent record, captures driver and customer statements, walks the operator through a guided defense-building workflow, and provides a structured settlement-offer and payment-structure negotiation tracker. Every alliance member gets a one-click consultation request to founder Chris Peer (a 30-year motor club damage-claim expert) for guidance on contested or 50/50 claims.
+
+**The Moat:**
+Damage claims silently bleed an estimated $5,000 to $30,000 per year from a typical mid-size operator's margin. Motor clubs deduct money from operator accounts without authorization, force settlements without due process, and offer no transparency. Towbook and Tracker provide no defense-building tools. Most operators have no leverage and no expertise. ClaimShield gives every alliance member access to **expert-grade claim defense**, **structured negotiation**, and **collective audit power** that no competitor can ship — because the expert layer (Chris Peer's decades of motor club negotiation experience) is human knowledge that legacy platforms cannot replicate without hiring an industry veteran. Over time, the expert decisions feed an AI-assisted adjudication layer that gets smarter with every claim across the alliance.
+
+**Launch Headline:**
+> "Most towing platforms help you take photos. Ours wins the dispute."
+
+**Alternate Headlines:**
+> "Damage claim equity for every operator, every motor club, every claim."
+>
+> "Stop losing $5,000 a year to motor club deductions you didn't know about."
