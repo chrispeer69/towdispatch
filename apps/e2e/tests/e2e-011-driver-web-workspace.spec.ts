@@ -65,7 +65,7 @@ test.describe('E2E-011 driver web workspace happy path', () => {
       unitNumber: 'T-101',
       make: 'Peterbilt',
       model: '337',
-      truckType: 'rollback_light',
+      truckType: 'light_duty',
     });
     const truckBody = await truckRes.text();
     expect(truckRes.ok, truckBody).toBeTruthy();
