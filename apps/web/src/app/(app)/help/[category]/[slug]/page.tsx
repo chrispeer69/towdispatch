@@ -7,6 +7,7 @@
  * document by editing this file (or splitting it later as the registry
  * grows).
  */
+import { findArticle } from '../../articles';
 import { findDocument, HELP_CENTER_CATEGORIES } from '../../registry';
 import { ArrowLeft, Clock } from 'lucide-react';
 import Link from 'next/link';
@@ -71,15 +72,26 @@ export default async function HelpDocumentPage({
       </header>
 
       {document.status === 'live' ? (
-        <div className="prose prose-invert max-w-none rounded-[14px] border border-divider bg-bg-surface p-6 text-text-primary-on-dark">
-          <p className="text-sm text-text-secondary-on-dark">
-            This document is live but its content has not yet been wired into this scaffold. The
-            content registry (apps/web/src/app/(app)/help/registry.ts) marks it as ready, but the
-            article body lives in this page. Edit{' '}
-            <code>apps/web/src/app/(app)/help/[category]/[slug]/page.tsx</code> to replace this
-            placeholder with the real article.
-          </p>
-        </div>
+        (() => {
+          const Article = findArticle({ category: category.slug, slug: document.slug });
+          if (Article) {
+            return (
+              <div className="max-w-none rounded-[14px] border border-divider bg-bg-surface p-6">
+                <Article />
+              </div>
+            );
+          }
+          return (
+            <div className="max-w-none rounded-[14px] border border-divider bg-bg-surface p-6">
+              <p className="text-sm text-text-secondary-on-dark">
+                This document is marked live but its article body component has not been
+                registered. Add an entry to{' '}
+                <code>apps/web/src/app/(app)/help/articles/index.tsx</code> mapping{' '}
+                <code>{`${category.slug}/${document.slug}`}</code> to the article component.
+              </p>
+            </div>
+          );
+        })()
       ) : (
         <div className="rounded-[14px] border border-dashed border-divider bg-bg-surface/50 p-6 text-center">
           <p className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
