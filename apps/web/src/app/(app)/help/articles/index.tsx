@@ -16,7 +16,23 @@
  * the build step is simpler without an MDX pipeline.
  */
 import type { JSX } from 'react';
+import { TierOfferComposerArticle } from './advanced-features-composer';
+import { DynamicPricingArticle } from './advanced-features-dynamic-pricing';
+import { ImpoundYardArticle } from './advanced-features-impound';
+import { AccountRateCardsArticle } from './advanced-features-rates';
+import { DriverConductArticle } from './company-policies-conduct';
+import { DamageClaimArticle } from './company-policies-damage';
+import { RefundPolicyArticle } from './company-policies-refund';
 import { CallIntakeArticle } from './daily-operations';
+import { AssigningDriversArticle } from './daily-operations-assigning';
+import { LiveDispatchBoardArticle } from './daily-operations-dispatch';
+import { CapturingEvidenceArticle } from './daily-operations-evidence';
+import { DriverShiftArticle } from './daily-operations-shift';
+import { GeneratingInvoicesArticle } from './billing-finance-invoices';
+import { ArAgingArticle } from './billing-finance-ar';
+import { CardPaymentsArticle } from './billing-finance-payments';
+import { RedAlertArticle } from './billing-finance-red-alert';
+import { StatementGenerationArticle } from './billing-finance-statements';
 import {
   ConnectQuickbooksArticle,
   ConnectStripeArticle,
@@ -37,6 +53,22 @@ const ARTICLE_REGISTRY: Record<string, () => JSX.Element> = {
   'getting-started/connect-stripe': ConnectStripeArticle,
   'getting-started/connect-quickbooks': ConnectQuickbooksArticle,
   'daily-operations/call-intake': CallIntakeArticle,
+  'daily-operations/live-dispatch-board': LiveDispatchBoardArticle,
+  'daily-operations/assigning-drivers': AssigningDriversArticle,
+  'daily-operations/driver-shift-dvir': DriverShiftArticle,
+  'daily-operations/capturing-evidence': CapturingEvidenceArticle,
+  'billing-finance/generating-invoices': GeneratingInvoicesArticle,
+  'billing-finance/card-payments': CardPaymentsArticle,
+  'billing-finance/ar-aging-workspace': ArAgingArticle,
+  'billing-finance/statement-generation': StatementGenerationArticle,
+  'billing-finance/red-alert-workflow': RedAlertArticle,
+  'advanced-features/dynamic-pricing': DynamicPricingArticle,
+  'advanced-features/tier-offer-composer': TierOfferComposerArticle,
+  'advanced-features/account-rate-cards': AccountRateCardsArticle,
+  'advanced-features/impound-yard-operations': ImpoundYardArticle,
+  'company-policies/refund-policy-template': RefundPolicyArticle,
+  'company-policies/damage-claim-procedure': DamageClaimArticle,
+  'company-policies/driver-conduct': DriverConductArticle,
 };
 
 export function findArticle(key: ArticleKey): (() => JSX.Element) | null {
