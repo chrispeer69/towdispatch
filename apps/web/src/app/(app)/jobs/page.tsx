@@ -1,4 +1,5 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
+import { CustomerLink, JobLink, VehicleLink } from '@/components/ui/entity-link';
 import type {
   JobListItemDto,
   JobServiceType,
@@ -140,14 +141,24 @@ export default async function JobsPage({
               <tbody className="divide-y divide-divider">
                 {list.data.map((job) => (
                   <tr key={job.id} className="hover:bg-bg-surface-elevated/20">
-                    <td className="px-4 py-2 font-mono text-xs text-text-secondary-on-dark">
-                      {formatCreatedAt(job.createdAt)}
+                    <td className="px-4 py-2 font-mono text-xs">
+                      <JobLink jobId={job.id}>{formatCreatedAt(job.createdAt)}</JobLink>
                     </td>
-                    <td className="px-4 py-2 font-medium text-text-primary-on-dark">
-                      {job.customer?.name ?? 'â€”'}
+                    <td className="px-4 py-2 font-medium">
+                      {job.customer?.id && job.customer.name ? (
+                        <CustomerLink customerId={job.customer.id}>{job.customer.name}</CustomerLink>
+                      ) : (
+                        <span className="text-text-primary-on-dark">{job.customer?.name ?? '—'}</span>
+                      )}
                     </td>
-                    <td className="px-4 py-2 text-text-secondary-on-dark">
-                      {vehicleLabel(job.vehicle)}
+                    <td className="px-4 py-2">
+                      {job.vehicle?.id ? (
+                        <VehicleLink vehicleId={job.vehicle.id} className="text-text-secondary-on-dark hover:text-brand-primary hover:underline underline-offset-2 transition-colors">
+                          {vehicleLabel(job.vehicle)}
+                        </VehicleLink>
+                      ) : (
+                        <span className="text-text-secondary-on-dark">{vehicleLabel(job.vehicle)}</span>
+                      )}
                     </td>
                     <td className="px-4 py-2 text-text-secondary-on-dark">
                       {SERVICE_LABEL[job.serviceType]}
