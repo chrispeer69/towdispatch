@@ -36,7 +36,7 @@ export const tierOfferRecipientSchema = z.object({
   accountId: z.string().uuid().nullable(),
   recipientName: z.string(),
   recipientRole: z.string().nullable(),
-  recipientEmail: z.string().email(),
+  recipientEmail: z.string(),
   recipientPhone: z.string().nullable(),
   magicLinkToken: z.string(),
   magicLinkExpiresAt: z.string().datetime(),
