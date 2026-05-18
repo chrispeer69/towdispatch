@@ -16,6 +16,7 @@
  * the build step is simpler without an MDX pipeline.
  */
 import type { JSX } from 'react';
+import { CallIntakeArticle } from './daily-operations';
 import {
   ConnectQuickbooksArticle,
   ConnectStripeArticle,
@@ -35,6 +36,7 @@ const ARTICLE_REGISTRY: Record<string, () => JSX.Element> = {
   'getting-started/inviting-users': InvitingUsersArticle,
   'getting-started/connect-stripe': ConnectStripeArticle,
   'getting-started/connect-quickbooks': ConnectQuickbooksArticle,
+  'daily-operations/call-intake': CallIntakeArticle,
 };
 
 export function findArticle(key: ArticleKey): (() => JSX.Element) | null {

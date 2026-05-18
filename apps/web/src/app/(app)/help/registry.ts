@@ -141,8 +141,9 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
         title: 'The Call Intake Workflow: From Phone Call to Dispatch',
         summary: 'Capture customer + vehicle + service in under 60 seconds with the live quote box.',
         audience: ['dispatcher'],
-        status: 'planned',
+        status: 'live',
         estimatedMinutes: 7,
+        lastUpdatedAt: '2026-05-17',
       },
       {
         slug: 'live-dispatch-board',
@@ -229,7 +230,7 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
   },
   {
     slug: 'advanced-features',
-    title: 'Advanced Features & Moats',
+    title: 'Advanced Features Powered by AI & Moats',
     blurb: 'Differentiating capabilities: Dynamic Pricing, motor-club tier offers, account rate cards, and more.',
     icon: Zap,
     tone: 'violet',
