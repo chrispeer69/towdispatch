@@ -285,4 +285,8 @@ export class ConfigService {
       sustainedLimit: this.config.RATE_LIMIT_SUSTAINED_LIMIT,
     };
   }
+
+  get mapboxAccessToken(): string {
+    return this.config.MAPBOX_ACCESS_TOKEN;
+  }
 }

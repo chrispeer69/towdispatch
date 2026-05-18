@@ -1,5 +1,6 @@
 'use client';
 
+import { AddressAutocompleteInput } from '@/components/ui/address-autocomplete-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -890,14 +891,17 @@ export function IntakeClient({
           </Field>
 
           <Field label="Pickup">
-            <Input
-              tabIndex={0}
-              data-testid="intake-pickup-address"
-              placeholder="Address or landmark"
+            <AddressAutocompleteInput
+              mapboxToken={mapboxToken}
               value={form.pickupAddress}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                update('pickupAddress', e.target.value)
-              }
+              onChange={(next) => update('pickupAddress', next)}
+              onPick={(s) => {
+                update('pickupAddress', s.fullAddress);
+                update('pickupLat', String(s.lat));
+                update('pickupLng', String(s.lng));
+              }}
+              placeholder="Address or landmark"
+              ariaLabel="Pickup address"
             />
             <DistanceHint
               data-testid="intake-pickup-distance"
@@ -930,14 +934,17 @@ export function IntakeClient({
           form.serviceType === 'impound' ||
           form.serviceType === 'recovery' ? (
             <Field label="Dropoff">
-              <Input
-                tabIndex={0}
-                data-testid="intake-dropoff-address"
-                placeholder="Where the vehicle is going"
+              <AddressAutocompleteInput
+                mapboxToken={mapboxToken}
                 value={form.dropoffAddress}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  update('dropoffAddress', e.target.value)
-                }
+                onChange={(next) => update('dropoffAddress', next)}
+                onPick={(s) => {
+                  update('dropoffAddress', s.fullAddress);
+                  update('dropoffLat', String(s.lat));
+                  update('dropoffLng', String(s.lng));
+                }}
+                placeholder="Where the vehicle is going"
+                ariaLabel="Dropoff address"
               />
               <DistanceHint
                 data-testid="intake-dropoff-distance"

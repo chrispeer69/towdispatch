@@ -20,6 +20,7 @@ import { CustomersModule } from './modules/customers/customers.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { DynamicPricingModule } from './modules/dynamic-pricing/dynamic-pricing.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
+import { DirectionsModule } from './modules/directions/directions.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
 import { EmailModule } from './modules/email/email.module.js';
 import { FleetModule } from './modules/fleet/fleet.module.js';
@@ -62,6 +63,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     DispatchEventsModule,
     JobsModule,
     DispatchModule,
+    DirectionsModule,
     ChatModule,
     StorageModule,
     FleetModule,
