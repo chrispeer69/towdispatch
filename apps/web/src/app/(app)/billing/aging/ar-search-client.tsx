@@ -14,6 +14,7 @@
  * email, mark sent) — the workspace itself is read-mostly.
  */
 import { Button } from '@/components/ui/button';
+import { CustomerLink, InvoiceLink, JobLink } from '@/components/ui/entity-link';
 import { Input } from '@/components/ui/input';
 import {
   type ArSearchResponse,
@@ -22,6 +23,7 @@ import {
   arStatusFilterValues,
 } from '@ustowdispatch/shared';
 import { AlertTriangle, FileSpreadsheet, Printer, Send } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type JSX, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -548,9 +550,9 @@ function Row({
         <input type="checkbox" checked={selected} onChange={onToggle} />
       </td>
       <td className="px-3 py-2 font-mono">
-        <a href={`/billing/invoices/${row.id}`} className="text-orange hover:underline">
+        <InvoiceLink invoiceId={row.id} className="text-orange hover:underline">
           {row.invoiceNumber}
-        </a>
+        </InvoiceLink>
       </td>
       <td className="px-3 py-2">{row.issuedAt ? row.issuedAt.slice(0, 10) : '—'}</td>
       <td className="px-3 py-2">{row.dueAt ? row.dueAt.slice(0, 10) : '—'}</td>
@@ -559,7 +561,17 @@ function Row({
         {formatMoney(row.balanceCents)}
       </td>
       <td className="px-3 py-2">
-        <span className="block text-sm">{row.accountName ?? row.customerName ?? 'Cash'}</span>
+        <span className="block text-sm">
+          {row.accountId && row.accountName ? (
+            <Link href={`/accounts/${row.accountId}`} className="hover:text-brand-primary hover:underline underline-offset-2 transition-colors">
+              {row.accountName}
+            </Link>
+          ) : row.customerId && row.customerName ? (
+            <CustomerLink customerId={row.customerId}>{row.customerName}</CustomerLink>
+          ) : (
+            <span>{row.customerName ?? 'Cash'}</span>
+          )}
+        </span>
         <span className="text-[10px] uppercase tracking-wider text-text-secondary-on-dark">
           {row.customerType.replace('_', ' ')}
         </span>
@@ -572,10 +584,10 @@ function Row({
       </td>
       <td className="px-3 py-2 text-xs">
         {row.driverNames.join(', ') || '—'}
-        {row.jobNumber ? (
-          <a href={`/jobs/${row.jobId}`} className="ml-1 text-orange hover:underline">
+        {row.jobId && row.jobNumber ? (
+          <JobLink jobId={row.jobId} className="ml-1 text-orange hover:underline">
             #{row.jobNumber}
-          </a>
+          </JobLink>
         ) : null}
       </td>
     </tr>

@@ -41,6 +41,7 @@ interface CallerContext {
 export interface DashboardRecentActivityItem {
   id: string;
   jobNumber: string;
+  customerId: string | null;
   customerName: string | null;
   serviceType: JobServiceType;
   status: JobStatus;
@@ -132,6 +133,7 @@ export class DashboardService {
           serviceType: jobs.serviceType,
           status: jobs.status,
           createdAt: jobs.createdAt,
+          customerId: jobs.customerId,
           customerName: customers.name,
         })
         .from(jobs)
@@ -143,6 +145,7 @@ export class DashboardService {
       const recentActivity: DashboardRecentActivityItem[] = recentRows.map((r) => ({
         id: r.id,
         jobNumber: r.jobNumber,
+        customerId: r.customerId ?? null,
         customerName: r.customerName,
         serviceType: r.serviceType,
         status: r.status,

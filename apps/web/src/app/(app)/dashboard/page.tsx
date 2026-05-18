@@ -1,4 +1,5 @@
 import { buttonVariants } from '@/components/ui/button';
+import { CustomerLink, JobLink } from '@/components/ui/entity-link';
 import { apiServer, tryFetch } from '@/lib/api/client';
 import { getOptionalUser } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ interface KpiCardProps {
 interface DashboardRecentActivityItem {
   id: string;
   jobNumber: string;
+  customerId: string | null;
   customerName: string | null;
   serviceType: JobServiceType;
   status: JobStatus;
@@ -206,8 +208,16 @@ export default async function DashboardPage(): Promise<JSX.Element> {
                   <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
                     {formatTime(item.createdAt)}
                   </span>
-                  <span className="flex-1 truncate font-medium text-text-primary-on-dark">
-                    {item.customerName ?? 'Unknown customer'}
+                  <span className="flex-1 truncate font-medium">
+                    <JobLink jobId={item.id}>#{item.jobNumber}</JobLink>
+                    <span className="mx-1.5 text-text-secondary-on-dark">—</span>
+                    {item.customerId ? (
+                      <CustomerLink customerId={item.customerId}>
+                        {item.customerName ?? 'Unknown customer'}
+                      </CustomerLink>
+                    ) : (
+                      <span className="text-text-primary-on-dark">{item.customerName ?? 'Unknown customer'}</span>
+                    )}
                   </span>
                   <span className="text-xs text-text-secondary-on-dark">
                     {SERVICE_LABEL[item.serviceType]}
