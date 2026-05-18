@@ -1,38 +1,50 @@
 'use client';
-
 /**
  * /driver/login — PIN-based driver sign-in.
  *
- * Three-step flow:
- *   1. Tenant slug entry (cached after first successful lookup)
- *   2. Driver picker (active drivers for that tenant, large tap targets)
- *   3. 4-digit PIN keypad (no real keyboard — large buttons)
+ * Frictionless three-step flow:
+ *   1. 6-digit Company Code (cached after first successful lookup —
+ *      returning drivers skip this step).
+ *   2. Driver picker (active drivers for that tenant, large tap targets).
+ *   3. 4-digit PIN keypad (no real keyboard — large buttons).
  *
- * Calls /driver-auth/list-drivers then /driver-auth/login. Stores the
+ * Calls /driver-auth/lookup-by-code then /driver-auth/login. Stores the
  * returned JWT + slim profile in localStorage. Locked accounts redirect
  * to /driver/locked. First-time set-pin flows are handled on
- * /driver/set-pin.
+ * /driver/set-pin. The /driver/d/[code] vanity URL pre-binds the code
+ * and lands here at the picker step automatically.
+ *
+ * The dispatcher's URL slug is intentionally NOT exposed on this surface
+ * — drivers don't know slugs. The 6-digit code is the only identifier
+ * the dispatcher needs to share. Each tenant gets a unique code via the
+ * fn_tenants_assign_company_code trigger from migration 0034.
  */
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { DriverApiError, driverApi } from '@/lib/driver/api-client';
-import { persistDriverSession, readTenantSlugHint } from '@/lib/driver/auth';
+import {
+  persistDriverSession,
+  persistTenantCode,
+  readTenantCodeHint,
+} from '@/lib/driver/auth';
 import type { DriverLoginResponse, DriverPickerResponse } from '@/lib/driver/types';
-import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-type Step = 'tenant' | 'picker' | 'pin';
+type Step = 'code' | 'picker' | 'pin';
 
 export default function DriverLoginPage(): JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams?.get('next') ?? '/driver/workspace';
+  // The /driver/d/[code] vanity-URL page redirects here with ?code=NNNNNN
+  // and ?step=picker after a successful lookup; honor both.
+  const initialStep = (searchParams?.get('step') as Step | null) ?? 'code';
+  const codeFromUrl = searchParams?.get('code') ?? null;
 
-  const [step, setStep] = useState<Step>('tenant');
-  const [tenantSlug, setTenantSlug] = useState('');
+  const [step, setStep] = useState<Step>(initialStep);
+  const [code, setCode] = useState<string>(codeFromUrl ?? '');
   const [tenant, setTenant] = useState<DriverPickerResponse['tenant'] | null>(null);
   const [drivers, setDrivers] = useState<DriverPickerResponse['drivers']>([]);
   const [selectedDriver, setSelectedDriver] = useState<
@@ -42,36 +54,50 @@ export default function DriverLoginPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Prefill the tenant slug if the driver has signed in on this device
-  // before.
+  // First mount: if the device has remembered a code from a prior login,
+  // pre-fill it. Don't auto-submit so the driver can clearly see the
+  // workshop they're about to log into.
   useEffect(() => {
-    const hint = readTenantSlugHint();
-    if (hint) setTenantSlug(hint);
+    if (codeFromUrl) {
+      void lookupCode(codeFromUrl);
+      return;
+    }
+    const hint = readTenantCodeHint();
+    if (hint) setCode(hint);
+    // We deliberately don't auto-submit on hint — the driver may be on a
+    // shared truck device where the previous tenant is wrong.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function lookupTenant(): Promise<void> {
+  async function lookupCode(submittedCode: string): Promise<void> {
+    if (!/^\d{6}$/.test(submittedCode)) {
+      setError('Company code must be 6 digits');
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       const res = await driverApi<DriverPickerResponse>(
         'POST',
-        '/driver-auth/list-drivers',
-        { tenantSlug: tenantSlug.trim().toLowerCase() },
+        '/driver-auth/lookup-by-code',
+        { companyCode: submittedCode },
         { anonymous: true },
       );
       setTenant(res.tenant);
       setDrivers(res.drivers);
+      persistTenantCode(submittedCode);
       setStep('picker');
     } catch (err) {
       if (err instanceof DriverApiError) {
         setError(
           err.status === 404
-            ? "We couldn't find that workshop. Check the slug and try again."
+            ? "We couldn't find a company with that code. Check with dispatch."
             : err.message,
         );
       } else {
         setError('Network error — check your connection.');
       }
+      setCode('');
     } finally {
       setBusy(false);
     }
@@ -141,38 +167,23 @@ export default function DriverLoginPage(): JSX.Element {
 
         <Card className="flex-1">
           <CardContent className="space-y-4 p-5">
-            {step === 'tenant' ? (
+            {step === 'code' ? (
               <>
-                <Label htmlFor="tenantSlug">Workshop slug</Label>
-                <Input
-                  id="tenantSlug"
-                  inputMode="text"
-                  autoComplete="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  placeholder="e.g. springfield-towing"
-                  value={tenantSlug}
-                  onChange={(e) => setTenantSlug(e.target.value)}
-                  className="h-14"
-                />
+                <p className="text-sm font-semibold">Enter your company code</p>
+                <p className="text-xs text-text-secondary-on-dark">
+                  Your dispatcher gave you a 6-digit code. You only need to enter it once on this
+                  device.
+                </p>
+                <CodePad value={code} onChange={setCode} onComplete={lookupCode} />
                 {error ? <p className="text-sm text-danger">{error}</p> : null}
                 <Button
                   size="touch"
                   className="w-full"
-                  disabled={busy || tenantSlug.trim().length === 0}
-                  onClick={lookupTenant}
+                  disabled={busy || code.length !== 6}
+                  onClick={() => lookupCode(code)}
                 >
-                  {busy ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <>
-                      Next <ArrowRight className="h-5 w-5" />
-                    </>
-                  )}
+                  {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Continue'}
                 </Button>
-                <p className="text-xs text-text-secondary-on-dark">
-                  Your dispatcher gave you this slug — it's the short name of your towing company.
-                </p>
               </>
             ) : null}
 
@@ -185,7 +196,13 @@ export default function DriverLoginPage(): JSX.Element {
                   </p>
                   <button
                     type="button"
-                    onClick={() => setStep('tenant')}
+                    onClick={() => {
+                      setStep('code');
+                      setCode('');
+                      setTenant(null);
+                      setDrivers([]);
+                      setError(null);
+                    }}
                     className="text-xs text-brand-primary underline"
                   >
                     Change
@@ -245,7 +262,7 @@ export default function DriverLoginPage(): JSX.Element {
                     <ArrowLeft className="h-3 w-3" /> Not me
                   </button>
                 </div>
-                <PinPad value={pin} onChange={setPin} />
+                <PinPad value={pin} onChange={setPin} length={4} />
                 {error ? <p className="text-sm text-danger">{error}</p> : null}
                 <Button
                   size="touch"
@@ -265,15 +282,87 @@ export default function DriverLoginPage(): JSX.Element {
 }
 
 /**
- * PIN keypad — large tap targets, no native keyboard. Renders 1-9, 0,
- * and a backspace. Numbers display as filled dots once typed.
+ * 6-digit Company Code pad. Auto-submits when 6 digits are entered. The
+ * digits are visible (not dotted) — the code is not a secret, the
+ * dispatcher has shared it openly with the driver.
+ */
+function CodePad({
+  value,
+  onChange,
+  onComplete,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onComplete: (v: string) => void;
+}): JSX.Element {
+  function append(d: string): void {
+    if (value.length >= 6) return;
+    const nextVal = value + d;
+    onChange(nextVal);
+    if (nextVal.length === 6) {
+      // Defer to the next tick so the visible digit lands before the
+      // network request fires.
+      setTimeout(() => onComplete(nextVal), 0);
+    }
+  }
+  function backspace(): void {
+    onChange(value.slice(0, -1));
+  }
+  return (
+    <div>
+      <div className="flex justify-center gap-1.5 py-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <span
+            key={i}
+            className={`flex h-12 w-9 items-center justify-center rounded-[8px] border font-mono text-xl font-bold ${i < value.length ? 'border-brand-primary bg-brand-primary/10' : 'border-divider'}`}
+          >
+            {value[i] ?? ''}
+          </span>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
+          <Button
+            key={d}
+            size="touch"
+            variant="secondary"
+            className="text-2xl font-bold"
+            onClick={() => append(d)}
+            type="button"
+          >
+            {d}
+          </Button>
+        ))}
+        <span />
+        <Button
+          size="touch"
+          variant="secondary"
+          className="text-2xl font-bold"
+          onClick={() => append('0')}
+          type="button"
+        >
+          0
+        </Button>
+        <Button size="touch" variant="ghost" onClick={backspace} type="button" aria-label="Backspace">
+          ←
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 4-digit PIN keypad — large tap targets, no native keyboard. Renders 1-9,
+ * 0, and a backspace. Numbers display as filled dots once typed (the PIN
+ * IS a secret).
  */
 function PinPad({
   value,
   onChange,
-}: { value: string; onChange: (v: string) => void }): JSX.Element {
+  length,
+}: { value: string; onChange: (v: string) => void; length: number }): JSX.Element {
   function append(d: string): void {
-    if (value.length >= 4) return;
+    if (value.length >= length) return;
     onChange(value + d);
   }
   function backspace(): void {
@@ -282,7 +371,7 @@ function PinPad({
   return (
     <div>
       <div className="flex justify-center gap-3 py-3">
-        {[0, 1, 2, 3].map((i) => (
+        {Array.from({ length }, (_, i) => i).map((i) => (
           <span
             key={i}
             className={`h-3 w-3 rounded-full border ${i < value.length ? 'border-brand-primary bg-brand-primary' : 'border-divider'}`}
@@ -312,13 +401,7 @@ function PinPad({
         >
           0
         </Button>
-        <Button
-          size="touch"
-          variant="ghost"
-          onClick={backspace}
-          type="button"
-          aria-label="Backspace"
-        >
+        <Button size="touch" variant="ghost" onClick={backspace} type="button" aria-label="Backspace">
           ←
         </Button>
       </div>

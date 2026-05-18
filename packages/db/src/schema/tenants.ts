@@ -32,6 +32,15 @@ export const tenants = pgTable(
   {
     id: uuid('id').primaryKey(),
     slug: text('slug').notNull(),
+    /**
+     * 6-digit numeric company code used by drivers on /driver/login
+     * (frictionless tenant-bind without exposing the URL slug). Auto-
+     * assigned on insert by the fn_tenants_assign_company_code trigger.
+     * Backfilled for existing tenants by migration 0034.
+     */
+    companyCode: text('company_code')
+      .notNull()
+      .$defaultFn(() => ''),
     name: text('name').notNull(),
     status: text('status', { enum: tenantStatus }).notNull().default('active'),
     settings: jsonb('settings').notNull().default(sql`'{}'::jsonb`),
@@ -55,6 +64,7 @@ export const tenants = pgTable(
   },
   (t) => ({
     slugIdx: uniqueIndex('tenants_slug_unique').on(t.slug),
+    companyCodeIdx: uniqueIndex('tenants_company_code_idx').on(t.companyCode),
   }),
 );
 

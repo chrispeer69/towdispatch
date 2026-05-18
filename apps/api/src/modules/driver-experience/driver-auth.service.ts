@@ -84,25 +84,80 @@ export class DriverAuthService {
   /**
    * Public driver picker. Returns active drivers for a tenant identified
    * by slug. Runs without a tenant context (RLS is bypassed via
-   * runAsAnonymous on TenantAwareDb; we issue an explicit tenant_id filter
+   * runAsAdmin on TransactionRunner; we issue an explicit tenant_id filter
    * to keep it from spraying across tenants). Rate-limited at the
    * controller layer to 10/min per IP.
+   *
+   * Kept for backward compatibility with internal tests that key on slug.
+   * The driver-app UI uses listDriversByCompanyCode instead because
+   * drivers don't know their tenant's URL slug.
    */
   async listDriversForTenant(tenantSlug: string): Promise<{
     tenant: { id: string; slug: string; name: string };
     drivers: DriverPickerDto[];
   }> {
-    return this.admin.runAsAdmin({}, async (db) => {
-      const tenant = await db.query.tenants.findFirst({
+    const tenant = await this.admin.runAsAdmin({}, async (db) => {
+      return db.query.tenants.findFirst({
         where: and(eq(tenants.slug, tenantSlug), isNull(tenants.deletedAt)),
         columns: { id: true, slug: true, name: true, status: true },
       });
-      if (!tenant || tenant.status !== 'active') {
-        throw new NotFoundException({
-          code: ERROR_CODES.NOT_FOUND,
-          message: 'Workshop not found',
-        });
-      }
+    });
+    if (!tenant || tenant.status !== 'active') {
+      throw new NotFoundException({
+        code: ERROR_CODES.NOT_FOUND,
+        message: 'Workshop not found',
+      });
+    }
+    return this.buildDriverPicker({
+      id: tenant.id,
+      slug: tenant.slug,
+      name: tenant.name,
+    });
+  }
+
+  /**
+   * Public driver picker keyed by 6-digit company code. This is the
+   * frictionless flow the in-truck app actually uses — drivers don't
+   * know URL slugs. The dispatcher gives them a 6-digit code that the
+   * device persists in localStorage after first use.
+   */
+  async listDriversByCompanyCode(companyCode: string): Promise<{
+    tenant: { id: string; slug: string; name: string };
+    drivers: DriverPickerDto[];
+  }> {
+    const tenant = await this.admin.runAsAdmin({}, async (db) => {
+      return db.query.tenants.findFirst({
+        where: and(eq(tenants.companyCode, companyCode), isNull(tenants.deletedAt)),
+        columns: { id: true, slug: true, name: true, status: true },
+      });
+    });
+    if (!tenant || tenant.status !== 'active') {
+      throw new NotFoundException({
+        code: ERROR_CODES.NOT_FOUND,
+        message: "We couldn't find a company with that code.",
+      });
+    }
+    return this.buildDriverPicker({
+      id: tenant.id,
+      slug: tenant.slug,
+      name: tenant.name,
+    });
+  }
+
+  /**
+   * Returns the public picker payload for an already-resolved tenant.
+   * Shared by listDriversForTenant (slug) and listDriversByCompanyCode
+   * (6-digit code). Both keys land here.
+   */
+  private async buildDriverPicker(tenant: {
+    id: string;
+    slug: string;
+    name: string;
+  }): Promise<{
+    tenant: { id: string; slug: string; name: string };
+    drivers: DriverPickerDto[];
+  }> {
+    return this.admin.runAsAdmin({}, async (db) => {
       const rows = await db
         .select({
           id: drivers.id,

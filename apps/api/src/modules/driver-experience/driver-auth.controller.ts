@@ -41,6 +41,12 @@ const listDriversSchema = z
   })
   .strict();
 
+const lookupByCodeSchema = z
+  .object({
+    companyCode: z.string().regex(/^\d{6}$/, 'Company code must be 6 digits'),
+  })
+  .strict();
+
 const driverLoginSchema = z
   .object({
     driverId: z.string().uuid(),
@@ -73,6 +79,25 @@ export class DriverAuthController {
     drivers: DriverPickerDto[];
   }> {
     return this.auth.listDriversForTenant(body.tenantSlug);
+  }
+
+  /**
+   * Frictionless driver-app boot: the device passes the 6-digit company
+   * code the dispatcher gave the driver. Returns the same payload as
+   * /list-drivers so the picker UI can render without an extra round
+   * trip. Rate-limited identically to /list-drivers.
+   */
+  @Public()
+  @Throttle({ burst: { limit: 10, ttl: seconds(60) } })
+  @Post('lookup-by-code')
+  @HttpCode(HttpStatus.OK)
+  async lookupByCode(
+    @ZodBody(lookupByCodeSchema) body: z.infer<typeof lookupByCodeSchema>,
+  ): Promise<{
+    tenant: { id: string; slug: string; name: string };
+    drivers: DriverPickerDto[];
+  }> {
+    return this.auth.listDriversByCompanyCode(body.companyCode);
   }
 
   @Public()
