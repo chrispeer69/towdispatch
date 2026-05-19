@@ -27,6 +27,7 @@ import {
   persistDriverSession,
   persistTenantCode,
   readTenantCodeHint,
+  useDriverAuth,
 } from '@/lib/driver/auth';
 import type { DriverLoginResponse, DriverPickerResponse } from '@/lib/driver/types';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -43,6 +44,20 @@ export default function DriverLoginPage(): JSX.Element {
   // and ?step=picker after a successful lookup; honor both.
   const initialStep = (searchParams?.get('step') as Step | null) ?? 'code';
   const codeFromUrl = searchParams?.get('code') ?? null;
+
+  // If the device already holds a valid driver JWT, short-circuit the
+  // entire sign-in flow and forward straight to the requested target.
+  // Without this, the page would still render the cached-code picker
+  // for a frame before <DriverAuthGate> picks up that the driver is
+  // already signed in — producing a visible bounce that the founder
+  // reported as 'PIN login loops back to the driver list'.
+  const { jwt, profile } = useDriverAuth();
+  const alreadySignedIn = Boolean(jwt && profile && profile.expiresAt > Date.now());
+  useEffect(() => {
+    if (alreadySignedIn) {
+      router.replace(next);
+    }
+  }, [alreadySignedIn, next, router]);
 
   const [step, setStep] = useState<Step>(initialStep);
   const [code, setCode] = useState<string>(codeFromUrl ?? '');
@@ -165,6 +180,18 @@ export default function DriverLoginPage(): JSX.Element {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (alreadySignedIn) {
+    // Render a neutral redirecting screen while router.replace(next) is
+    // in flight. Prevents the cached-code picker from flashing for a
+    // tick when a returning driver visits /driver/login while already
+    // signed in.
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg-base text-text-secondary-on-dark">
+        <p className="text-sm">Signing you in…</p>
+      </div>
+    );
   }
 
   return (
