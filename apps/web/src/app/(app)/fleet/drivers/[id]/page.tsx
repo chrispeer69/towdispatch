@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DriverForm } from '../driver-form';
 import { DriverAssignmentsSection } from './driver-assignments-section';
+import { SetDriverPin } from './set-driver-pin';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -37,14 +38,17 @@ export default async function DriverDetailPage({ params }: Props): Promise<JSX.E
           ← All drivers
         </Link>
       </p>
-      <header className="space-y-1">
-        <h2 className="font-condensed text-2xl font-extrabold uppercase tracking-tight">
-          {driver.preferredName ?? driver.firstName} {driver.lastName}
-        </h2>
-        <p className="text-sm text-text-secondary-on-dark">
-          {driver.cdlClass} · {driver.employmentStatus.replace('_', ' ')}
-          {driver.email ? ` · ${driver.email}` : ''}
-        </p>
+      <header className="space-y-3">
+        <div className="space-y-1">
+          <h2 className="font-condensed text-2xl font-extrabold uppercase tracking-tight">
+            {driver.preferredName ?? driver.firstName} {driver.lastName}
+          </h2>
+          <p className="text-sm text-text-secondary-on-dark">
+            {driver.cdlClass} · {driver.employmentStatus.replace('_', ' ')}
+            {driver.email ? ` · ${driver.email}` : ''}
+          </p>
+        </div>
+        <SetDriverPin driverId={driver.id} />
       </header>
 
       <DriverAssignmentsSection driverId={driver.id} initial={assignments} trucks={trucks.data} />
