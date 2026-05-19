@@ -26,18 +26,6 @@ export default function LandingPage(): JSX.Element {
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Link
-            href="/driver"
-            className="text-sm font-semibold text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark"
-          >
-            Driver sign-in
-          </Link>
-          <Link
-            href="/login"
-            className="text-sm font-semibold text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark"
-          >
-            Sign in
-          </Link>
         </div>
       </header>
 
