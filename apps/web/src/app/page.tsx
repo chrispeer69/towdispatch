@@ -26,12 +26,6 @@ export default function LandingPage(): JSX.Element {
         </div>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Link
-            href="/login"
-            className="text-sm font-semibold text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark"
-          >
-            Sign in
-          </Link>
         </div>
       </header>
 
@@ -69,9 +63,19 @@ export default function LandingPage(): JSX.Element {
               'min-w-44 text-text-secondary-on-dark',
             )}
           >
-            Sign in
+            Operator sign-in
+          </Link>
+          <Link
+            href="/driver"
+            className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'min-w-44')}
+          >
+            Driver sign-in
           </Link>
         </div>
+        <p className="mt-3 max-w-md text-xs text-text-secondary-on-dark/70 animate-fade-in-up">
+          Drivers — your dispatcher will give you a 6-digit company code. Tap “Driver sign-in” and
+          enter it once on your in-cab tablet.
+        </p>
 
         <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-text-secondary-on-dark-on-dark/60">
           AI-powered cloud storage on AWS · Open data export
