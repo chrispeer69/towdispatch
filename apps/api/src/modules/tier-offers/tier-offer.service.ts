@@ -740,6 +740,16 @@ export class TierOfferService {
           acceptUrl,
           declineUrl,
           magicLinkExpiresFormatted: fmt(minted.expiresAt),
+          // Custom args for the SendGrid event webhook (Session 4).
+          // The webhook handler reads these to map delivery / open /
+          // bounce events back to the tier_offer_recipients row
+          // without touching the magic-link token.
+          customArgs: {
+            kind: 'tier-offer-invitation',
+            recipientId: r.id,
+            offerId: r.offerId,
+            tenantId: r.tenantId,
+          },
         });
         dispatched++;
       } catch (err) {

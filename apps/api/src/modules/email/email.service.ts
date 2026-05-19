@@ -34,6 +34,12 @@ interface SendArgs {
   subject: string;
   template: string;
   variables: Record<string, unknown>;
+  /**
+   * Forwarded to SendGrid's `customArgs` so the event webhook can
+   * correlate delivery / open / bounce events back to a domain row
+   * (e.g. tier_offer_recipients.id). Ignored on the SMTP fallback path.
+   */
+  customArgs?: Record<string, string>;
 }
 
 export interface SendDiagnostic {
@@ -246,11 +252,20 @@ export class EmailService {
     acceptUrl: string;
     declineUrl: string;
     magicLinkExpiresFormatted: string;
+    /**
+     * Optional custom-args forwarded to SendGrid so the event webhook
+     * can correlate delivery / open / bounce events back to the
+     * tier_offer_recipients row. Caller passes
+     * `{ recipientId, offerId, tenantId }` so the webhook can resolve
+     * the row without touching the magic-link token. Session 4.
+     */
+    customArgs?: Record<string, string> | undefined;
   }): Promise<void> {
     await this.send({
       to: opts.to,
       subject: opts.subjectLine,
       template: 'tier-offer-invitation',
+      ...(opts.customArgs ? { customArgs: opts.customArgs } : {}),
       variables: {
         ...this.brand(),
         operatorName: opts.operatorName,
@@ -352,6 +367,7 @@ export class EmailService {
       html,
       text,
       template: args.template,
+      customArgs: args.customArgs,
     });
     if (!result.ok) {
       // We log here and re-throw. Auth-flow callers wrap this in
@@ -371,6 +387,7 @@ export class EmailService {
     html: string;
     text: string;
     template: string;
+    customArgs?: Record<string, string> | undefined;
   }): Promise<SendDiagnostic> {
     const provider: 'sendgrid' | 'smtp' = this.config.email.sendgridConfigured
       ? 'sendgrid'
@@ -401,6 +418,7 @@ export class EmailService {
             subject: args.subject,
             html: args.html,
             text: args.text,
+            ...(args.customArgs ? { customArgs: args.customArgs } : {}),
           };
           const [response] = await sgMail.send(msg);
           const messageId =
