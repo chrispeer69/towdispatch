@@ -19,6 +19,8 @@ import type { JSX } from 'react';
 import { TierOfferComposerArticle } from './advanced-features-composer';
 import { DynamicPricingArticle } from './advanced-features-dynamic-pricing';
 import { ImpoundYardArticle } from './advanced-features-impound';
+import { PricingDecisionGuideArticle } from './advanced-features-pricing-decision-guide';
+import { PricingQuickstartArticle } from './advanced-features-pricing-quickstart';
 import { AccountRateCardsArticle } from './advanced-features-rates';
 import { UnderstandingMoatsArticle } from './advanced-features-understanding-moats';
 import { ArAgingArticle } from './billing-finance-ar';
@@ -69,6 +71,8 @@ const ARTICLE_REGISTRY: Record<string, () => JSX.Element> = {
   'advanced-features/dynamic-pricing': DynamicPricingArticle,
   'advanced-features/tier-offer-composer': TierOfferComposerArticle,
   'advanced-features/account-rate-cards': AccountRateCardsArticle,
+  'advanced-features/pricing-decision-guide': PricingDecisionGuideArticle,
+  'advanced-features/pricing-quickstart': PricingQuickstartArticle,
   'advanced-features/impound-yard-operations': ImpoundYardArticle,
   'company-policies/refund-policy-template': RefundPolicyArticle,
   'company-policies/damage-claim-procedure': DamageClaimArticle,

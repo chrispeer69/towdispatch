@@ -25,9 +25,7 @@ function H2({ children }: { children: ReactNode }): JSX.Element {
 }
 
 function H3({ children }: { children: ReactNode }): JSX.Element {
-  return (
-    <h3 className="mt-6 text-base font-semibold text-text-primary-on-dark">{children}</h3>
-  );
+  return <h3 className="mt-6 text-base font-semibold text-text-primary-on-dark">{children}</h3>;
 }
 
 function P({ children }: { children: ReactNode }): JSX.Element {
@@ -105,10 +103,10 @@ export function SystemRequirementsArticle(): JSX.Element {
       <H2>1. Purpose</H2>
       <P>
         US Tow DISPATCH is a modern, cloud-based application. Unlike legacy software that requires
-        installation or dedicated hardware, you can run your entire towing operation from any
-        device with an internet connection. This guide outlines the recommended hardware and
-        browser settings to ensure the platform runs smoothly, especially for location-dependent
-        features like the live dispatch board.
+        installation or dedicated hardware, you can run your entire towing operation from any device
+        with an internet connection. This guide outlines the recommended hardware and browser
+        settings to ensure the platform runs smoothly, especially for location-dependent features
+        like the live dispatch board.
       </P>
 
       <H2>2. Prerequisites</H2>
@@ -121,14 +119,14 @@ export function SystemRequirementsArticle(): JSX.Element {
 
       <H3>Recommended Hardware</H3>
       <P>
-        The platform is designed to be lightweight, but dispatchers handling high call volumes
-        will benefit from adequate screen real estate.
+        The platform is designed to be lightweight, but dispatchers handling high call volumes will
+        benefit from adequate screen real estate.
       </P>
       <UnorderedList>
         <li>
-          <Em>Dispatchers and office staff:</Em> any desktop or laptop manufactured in the last
-          five years. A dual-monitor setup is highly recommended (Monitor 1: Live Dispatch Board;
-          Monitor 2: Call Intake or Billing).
+          <Em>Dispatchers and office staff:</Em> any desktop or laptop manufactured in the last five
+          years. A dual-monitor setup is highly recommended (Monitor 1: Live Dispatch Board; Monitor
+          2: Call Intake or Billing).
         </li>
         <li>
           <Em>Drivers:</Em> any smartphone or tablet running iOS or Android, manufactured in the
@@ -138,8 +136,8 @@ export function SystemRequirementsArticle(): JSX.Element {
 
       <H3>Supported Browsers</H3>
       <P>
-        For the best experience, we strongly recommend the latest version of{' '}
-        <Em>Google Chrome</Em> or <Em>Apple Safari</Em>.
+        For the best experience, we strongly recommend the latest version of <Em>Google Chrome</Em>{' '}
+        or <Em>Apple Safari</Em>.
       </P>
       <UnorderedList>
         <li>
@@ -151,8 +149,8 @@ export function SystemRequirementsArticle(): JSX.Element {
           seamlessly on Apple devices.
         </li>
         <li>
-          <Em>Microsoft Edge / Mozilla Firefox</Em> — supported, but you may experience minor
-          visual differences.
+          <Em>Microsoft Edge / Mozilla Firefox</Em> — supported, but you may experience minor visual
+          differences.
         </li>
       </UnorderedList>
       <Callout tone="warning" title="Not supported">
@@ -191,8 +189,7 @@ export function SystemRequirementsArticle(): JSX.Element {
           Tap <Em>App permissions</Em> (or <Em>App access to location</Em>).
         </li>
         <li>
-          Find <Em>Chrome</Em> in the list and select{' '}
-          <Em>Allow only while using the app</Em>.
+          Find <Em>Chrome</Em> in the list and select <Em>Allow only while using the app</Em>.
         </li>
       </OrderedList>
       <P>
@@ -204,16 +201,15 @@ export function SystemRequirementsArticle(): JSX.Element {
       <H2>4. Common Mistakes &amp; Troubleshooting</H2>
       <H3>Driver location shows as "Unknown" on the dispatch board</H3>
       <P>
-        The driver likely tapped <Em>Deny</Em> when the browser asked for location permission.
-        Have the driver clear their browser settings for the site (or sign out and back in) to
-        re-trigger the prompt, then tap <Em>Allow</Em>.
+        The driver likely tapped <Em>Deny</Em> when the browser asked for location permission. Have
+        the driver clear their browser settings for the site (or sign out and back in) to re-trigger
+        the prompt, then tap <Em>Allow</Em>.
       </P>
       <H3>The site feels sluggish or unresponsive</H3>
       <P>
         Ensure the user is not running an ad-blocker or strict privacy extension that might be
-        blocking the connection to our real-time map provider. Try the site in an{' '}
-        <Em>Incognito</Em> or <Em>Private</Em> window to confirm whether an extension is the
-        cause.
+        blocking the connection to our real-time map provider. Try the site in an <Em>Incognito</Em>{' '}
+        or <Em>Private</Em> window to confirm whether an extension is the cause.
       </P>
 
       <H2>5. Related Documents</H2>
@@ -253,7 +249,9 @@ export function CompanyProfileArticle(): JSX.Element {
 
       <H2>2. Prerequisites</H2>
       <UnorderedList>
-        <li>You must be signed in as the tenant <Em>Owner</Em> or <Em>Admin</Em>.</li>
+        <li>
+          You must be signed in as the tenant <Em>Owner</Em> or <Em>Admin</Em>.
+        </li>
         <li>
           Have your business legal name, DBA (if applicable), tax ID, and primary address ready.
         </li>
@@ -269,20 +267,20 @@ export function CompanyProfileArticle(): JSX.Element {
           state/local registration numbers if your jurisdiction requires them on invoices.
         </li>
         <li>
-          Fill in the <Em>Contact</Em> section: primary phone, dispatch phone, accounting email,
-          and the customer-facing email customers will see on receipts.
+          Fill in the <Em>Contact</Em> section: primary phone, dispatch phone, accounting email, and
+          the customer-facing email customers will see on receipts.
         </li>
         <li>
-          Fill in the <Em>Address</Em> section: your primary business address and your dispatch
-          yard address (used by the rate engine to estimate enroute miles).
+          Fill in the <Em>Address</Em> section: your primary business address and your dispatch yard
+          address (used by the rate engine to estimate enroute miles).
         </li>
         <li>
           Upload your <Em>Logo</Em> image. PNG with a transparent background works best. The logo
           appears on PDF invoices, statements, and the customer tracking page header.
         </li>
         <li>
-          Set <Em>Brand Color</Em> hex codes (primary and accent). These drive the customer
-          tracking page accents.
+          Set <Em>Brand Color</Em> hex codes (primary and accent). These drive the customer tracking
+          page accents.
         </li>
         <li>
           Click <Em>Save Profile</Em>. A confirmation toast appears at the bottom of the screen.
@@ -290,10 +288,10 @@ export function CompanyProfileArticle(): JSX.Element {
       </OrderedList>
 
       <Callout tone="tip" title="Why every field matters">
-        Each field maps to a specific surface elsewhere in the platform. The legal name appears
-        on invoices; the dispatch phone is what customers call after they receive a tracking-link
-        SMS; the brand color is what colors the tracking page they see while their tow is in
-        progress. Skipping fields leads to placeholder text appearing in front of customers.
+        Each field maps to a specific surface elsewhere in the platform. The legal name appears on
+        invoices; the dispatch phone is what customers call after they receive a tracking-link SMS;
+        the brand color is what colors the tracking page they see while their tow is in progress.
+        Skipping fields leads to placeholder text appearing in front of customers.
       </Callout>
 
       <H2>4. Common Mistakes &amp; Troubleshooting</H2>
@@ -305,9 +303,9 @@ export function CompanyProfileArticle(): JSX.Element {
       </P>
       <H3>The dispatch yard address is wrong on rate quotes</H3>
       <P>
-        The rate engine uses the dispatch yard address to compute deadhead miles. If a job's
-        enroute miles seem off, check that the dispatch yard address on the Company Profile
-        matches the address you actually dispatch trucks from.
+        The rate engine uses the dispatch yard address to compute deadhead miles. If a job's enroute
+        miles seem off, check that the dispatch yard address on the Company Profile matches the
+        address you actually dispatch trucks from.
       </P>
 
       <H2>5. Related Documents</H2>
@@ -340,16 +338,16 @@ export function InvitingUsersArticle(): JSX.Element {
       <P>
         US Tow DISPATCH supports a flexible role-based permission model. The owner invites every
         teammate, assigns them a role, and the platform decides what each person can see and do
-        based on that role. This guide walks through inviting your first teammates and choosing
-        the right role for each.
+        based on that role. This guide walks through inviting your first teammates and choosing the
+        right role for each.
       </P>
 
       <H2>2. Prerequisites</H2>
       <UnorderedList>
-        <li>You must be signed in as the tenant <Em>Owner</Em> or <Em>Admin</Em>.</li>
         <li>
-          You should have each teammate's email address and full name ready before you start.
+          You must be signed in as the tenant <Em>Owner</Em> or <Em>Admin</Em>.
         </li>
+        <li>You should have each teammate's email address and full name ready before you start.</li>
       </UnorderedList>
 
       <H2>3. Step-by-Step Guide</H2>
@@ -384,24 +382,23 @@ export function InvitingUsersArticle(): JSX.Element {
           manage users, configure rate sheets, manage integrations.
         </li>
         <li>
-          <Em>Manager</Em> — supervises dispatchers and drivers. Can override rates, approve
-          tier activations, and run reports.
+          <Em>Manager</Em> — supervises dispatchers and drivers. Can override rates, approve tier
+          activations, and run reports.
         </li>
         <li>
-          <Em>Dispatcher</Em> — daily dispatch board operator. Can take calls, assign drivers,
-          edit job details. Cannot edit rate sheets or invite users.
+          <Em>Dispatcher</Em> — daily dispatch board operator. Can take calls, assign drivers, edit
+          job details. Cannot edit rate sheets or invite users.
         </li>
         <li>
           <Em>Accounting</Em> — handles invoicing, A/R, and statement delivery. Cannot dispatch
           jobs.
         </li>
         <li>
-          <Em>Driver</Em> — field operator. Sees only their assigned jobs and can capture
-          evidence.
+          <Em>Driver</Em> — field operator. Sees only their assigned jobs and can capture evidence.
         </li>
         <li>
-          <Em>Auditor</Em> — read-only role for external accountants and reviewers. No edit
-          access anywhere.
+          <Em>Auditor</Em> — read-only role for external accountants and reviewers. No edit access
+          anywhere.
         </li>
       </UnorderedList>
 
@@ -422,14 +419,13 @@ export function InvitingUsersArticle(): JSX.Element {
       <H2>4. Common Mistakes &amp; Troubleshooting</H2>
       <H3>The invitation email never arrived</H3>
       <P>
-        Ask the teammate to check spam. The email comes from{' '}
-        <Code>no-reply@towcommand.cloud</Code>. If it is still missing, you can resend the invite
-        from the user's row in the Users table.
+        Ask the teammate to check spam. The email comes from <Code>no-reply@towcommand.cloud</Code>.
+        If it is still missing, you can resend the invite from the user's row in the Users table.
       </P>
       <H3>I gave someone the wrong role</H3>
       <P>
-        Role changes are instant. Change the role from the dropdown and the teammate's
-        permissions update on their next page load.
+        Role changes are instant. Change the role from the dropdown and the teammate's permissions
+        update on their next page load.
       </P>
 
       <H2>5. Related Documents</H2>
@@ -462,13 +458,15 @@ export function ConnectStripeArticle(): JSX.Element {
       <P>
         US Tow DISPATCH uses Stripe to process credit card payments on your behalf — both at the
         scene (Stripe Terminal) and back-office hosted-checkout links sent with invoices. By
-        connecting your own Stripe account, payments flow directly to your bank, not through us.
-        We never hold your money.
+        connecting your own Stripe account, payments flow directly to your bank, not through us. We
+        never hold your money.
       </P>
 
       <H2>2. Prerequisites</H2>
       <UnorderedList>
-        <li>You must be signed in as the tenant <Em>Owner</Em>.</li>
+        <li>
+          You must be signed in as the tenant <Em>Owner</Em>.
+        </li>
         <li>
           A Stripe account is required. If you do not have one, you can create one free at{' '}
           <a className="text-brand-primary hover:underline" href="https://stripe.com">
@@ -495,8 +493,8 @@ export function ConnectStripeArticle(): JSX.Element {
           create one. Complete Stripe's business-verification questions if prompted.
         </li>
         <li>
-          When verification is complete, click <Em>Authorize</Em>. Stripe redirects you back to
-          US Tow DISPATCH.
+          When verification is complete, click <Em>Authorize</Em>. Stripe redirects you back to US
+          Tow DISPATCH.
         </li>
         <li>
           The Payment Processing card now shows a green <Em>Connected</Em> badge. You're done.
@@ -560,7 +558,9 @@ export function ConnectQuickbooksArticle(): JSX.Element {
 
       <H2>2. Prerequisites</H2>
       <UnorderedList>
-        <li>You must be signed in as the tenant <Em>Owner</Em> or <Em>Admin</Em>.</li>
+        <li>
+          You must be signed in as the tenant <Em>Owner</Em> or <Em>Admin</Em>.
+        </li>
         <li>
           You must have an active QuickBooks Online subscription. QuickBooks Desktop is not
           supported by this integration.
@@ -576,9 +576,7 @@ export function ConnectQuickbooksArticle(): JSX.Element {
         <li>
           In the <Em>Accounting</Em> card, click <Em>Connect QuickBooks Online</Em>.
         </li>
-        <li>
-          You are redirected to Intuit's secure sign-in. Enter your QBO credentials.
-        </li>
+        <li>You are redirected to Intuit's secure sign-in. Enter your QBO credentials.</li>
         <li>
           Review the permissions Intuit asks you to grant. Click <Em>Connect</Em>.
         </li>
@@ -587,41 +585,40 @@ export function ConnectQuickbooksArticle(): JSX.Element {
           <Em>Connected</Em> badge with the name of the QBO company file you connected.
         </li>
         <li>
-          Configure your <Em>Customer Sync</Em> mapping: pick whether each US Tow DISPATCH
-          customer creates a new QBO customer (default), or maps to an existing QBO customer by
-          email or name match.
+          Configure your <Em>Customer Sync</Em> mapping: pick whether each US Tow DISPATCH customer
+          creates a new QBO customer (default), or maps to an existing QBO customer by email or name
+          match.
         </li>
         <li>
-          Configure <Em>Invoice Push</Em>: choose whether closed invoices push to QBO
-          automatically (default) or only when an admin clicks <Em>Push to QBO</Em> on the
-          invoice review screen.
+          Configure <Em>Invoice Push</Em>: choose whether closed invoices push to QBO automatically
+          (default) or only when an admin clicks <Em>Push to QBO</Em> on the invoice review screen.
         </li>
       </OrderedList>
 
       <Callout tone="tip" title="Best practice for first-time setup">
-        Before connecting, ask your bookkeeper which QBO income account towing revenue should
-        post to (commonly a "Service Revenue" or "Towing Income" account). The integration will
-        prompt you to pick one during setup.
+        Before connecting, ask your bookkeeper which QBO income account towing revenue should post
+        to (commonly a "Service Revenue" or "Towing Income" account). The integration will prompt
+        you to pick one during setup.
       </Callout>
 
       <H2>4. Common Mistakes &amp; Troubleshooting</H2>
       <H3>Invoices are pushing to the wrong income account</H3>
       <P>
-        Re-open <Em>Settings → Integrations → Accounting</Em>, click <Em>Configure</Em>, and
-        change the income-account mapping. New invoices use the new mapping; previously posted
-        invoices need to be edited in QBO directly.
+        Re-open <Em>Settings → Integrations → Accounting</Em>, click <Em>Configure</Em>, and change
+        the income-account mapping. New invoices use the new mapping; previously posted invoices
+        need to be edited in QBO directly.
       </P>
       <H3>Customer sync created duplicate customers in QBO</H3>
       <P>
-        This usually happens when the same customer signs up under different email addresses
-        across systems. Use QBO's <Em>Merge Customers</Em> tool to consolidate them. Then update
-        your customer-sync mapping in our integration settings to match by email so the
-        duplication does not recur.
+        This usually happens when the same customer signs up under different email addresses across
+        systems. Use QBO's <Em>Merge Customers</Em> tool to consolidate them. Then update your
+        customer-sync mapping in our integration settings to match by email so the duplication does
+        not recur.
       </P>
       <H3>The connection went stale ("Reconnect QuickBooks" notice appears)</H3>
       <P>
-        QBO refresh tokens expire periodically. Click <Em>Reconnect QuickBooks</Em> and complete
-        the OAuth handshake again. Your prior settings (mappings, sync rules) are preserved.
+        QBO refresh tokens expire periodically. Click <Em>Reconnect QuickBooks</Em> and complete the
+        OAuth handshake again. Your prior settings (mappings, sync rules) are preserved.
       </P>
 
       <H2>5. Related Documents</H2>

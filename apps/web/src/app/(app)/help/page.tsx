@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { JSX } from 'react';
 /**
  * /help — Help Center landing.
  *
@@ -11,8 +13,6 @@
  * append to the appropriate category's `documents` array there.
  */
 import { HELP_CENTER_CATEGORIES, getHelpCenterStats } from './registry';
-import Link from 'next/link';
-import type { JSX } from 'react';
 
 export const metadata = { title: 'Help Center — US Tow DISPATCH' };
 
@@ -35,8 +35,8 @@ export default function HelpCenterPage(): JSX.Element {
         </h1>
         <p className="max-w-prose text-sm text-text-secondary-on-dark">
           Step-by-step training documents for everyone who uses US Tow DISPATCH. Choose a category
-          below to see the guides available for your role. Documents marked "Coming soon" are on
-          the roadmap and will be filled in over the coming weeks.
+          below to see the guides available for your role. Documents marked "Coming soon" are on the
+          roadmap and will be filled in over the coming weeks.
         </p>
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary-on-dark/60">
           {stats.liveDocuments} live · {stats.plannedDocuments} coming soon · {stats.totalDocuments}{' '}
