@@ -208,6 +208,21 @@ export const configSchema = z.object({
     .transform((v) => v === 'true'),
   NOAA_USER_AGENT: z.string().optional().default('ustowdispatch-api (ops@ustowdispatch.cloud)'),
   OPENWEATHERMAP_API_KEY: z.string().optional().default(''),
+
+  // Moat #3 — Tier Offer Composer (Session 4).
+  // TIER_OFFER_CRON_ENABLED gates the lifecycle cron (5-minute tick that
+  // expires non-responding recipients and walks offer status sent
+  // → event_active → event_concluded). Default false so dev/CI don't
+  // spam.
+  // SENDGRID_WEBHOOK_PUBLIC_KEY is the base64-encoded ECDSA P-256 public
+  // key SendGrid signs each event-webhook delivery with. Optional; when
+  // unset the webhook logs a warning and accepts requests (development
+  // friendliness). Production MUST set it.
+  TIER_OFFER_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  SENDGRID_WEBHOOK_PUBLIC_KEY: z.string().optional().default(''),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

@@ -1,3 +1,7 @@
+import { ArrowLeft, Clock, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import type { JSX } from 'react';
 /**
  * /help/[category] — Per-category training-documents listing.
  *
@@ -5,11 +9,7 @@
  * clickable and route to /help/[category]/[slug]. "Coming soon" documents
  * render as locked placeholders.
  */
-import { findCategory, HELP_CENTER_CATEGORIES, type TrainingDocument } from '../registry';
-import { ArrowLeft, Clock, Lock } from 'lucide-react';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import type { JSX } from 'react';
+import { HELP_CENTER_CATEGORIES, type TrainingDocument, findCategory } from '../registry';
 
 export function generateStaticParams(): { category: string }[] {
   return HELP_CENTER_CATEGORIES.map((c) => ({ category: c.slug }));

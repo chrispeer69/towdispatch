@@ -204,6 +204,22 @@ The exit gate: [`apps/PHASE_0_EXIT_REPORT.md`](apps/PHASE_0_EXIT_REPORT.md).
 
 ---
 
+## Tier Offer Composer environment variables (Moat #3)
+
+The Tier Offer Composer is the collective-bargaining mechanism that lets operators propose pricing offers to motor-club account managers and run dispatches against the resulting acceptance ledger. It reads the following env vars; most are shared with other features, two are new in Session 4.
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `JWT_SECRET` | yes | — | Already used elsewhere. Magic-link tokens for the public `/offers/[token]` landing page are HS256-signed with this secret (audience `tier-offer-magic-link` provides domain separation from access / refresh / mfa / driver tokens). |
+| `SENDGRID_API_KEY` | recommended | empty | When non-empty the invitation email is delivered via the SendGrid HTTP API; otherwise the SMTP fallback handles it (mailhog locally). |
+| `SENDGRID_WEBHOOK_PUBLIC_KEY` | **yes in production** | empty | **New (Session 4).** Base64-encoded ECDSA P-256 SPKI public key SendGrid surfaces in its event-webhook UI. The webhook handler at `POST /webhooks/sendgrid/tier-offers` verifies the signature on each delivery using this key. When unset, the webhook accepts requests with a logged warning (development friendliness); production deploys MUST set the key. |
+| `TIER_OFFER_CRON_ENABLED` | no | `false` | **New (Session 4).** Gates the lifecycle cron — a 5-minute tick that walks offer status `sent` → `event_active` → `event_concluded` and expires non-responding recipients past their `acceptance_deadline_at`. Set to `true` only on the production API to avoid dev / CI churn. |
+| `WEB_PUBLIC_URL` / `NEXT_PUBLIC_WEB_URL` | yes | localhost | Already used by other features; the magic-link absolute URLs land at `${WEB_PUBLIC_URL}/offers/[token]`. Must point at the real public domain on the production API server so motor clubs see the right URL in their inbox. |
+
+The SendGrid event webhook URL to register on the SendGrid side (Settings → Mail Settings → Event Webhook) is `https://<api-domain>/webhooks/sendgrid/tier-offers`. Enable the `delivered`, `open`, `bounce`, `dropped`, and `deferred` events; the others are intentionally ignored.
+
+---
+
 ## License
 
 Proprietary — © US Tow DISPATCH, Inc.

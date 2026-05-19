@@ -1,3 +1,7 @@
+import { ArrowLeft, Clock } from 'lucide-react';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import type { JSX } from 'react';
 /**
  * /help/[category]/[slug] — Single training document article.
  *
@@ -8,11 +12,7 @@
  * grows).
  */
 import { findArticle } from '../../articles';
-import { findDocument, HELP_CENTER_CATEGORIES } from '../../registry';
-import { ArrowLeft, Clock } from 'lucide-react';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import type { JSX } from 'react';
+import { HELP_CENTER_CATEGORIES, findDocument } from '../../registry';
 
 export function generateStaticParams(): { category: string; slug: string }[] {
   return HELP_CENTER_CATEGORIES.flatMap((c) =>
@@ -28,9 +28,7 @@ export async function generateMetadata({
   const { category, slug } = await params;
   const found = findDocument(category, slug);
   return {
-    title: found
-      ? `${found.document.title} — Help Center — US Tow DISPATCH`
-      : 'Help Center',
+    title: found ? `${found.document.title} — Help Center — US Tow DISPATCH` : 'Help Center',
   };
 }
 
@@ -84,9 +82,8 @@ export default async function HelpDocumentPage({
           return (
             <div className="max-w-none rounded-[14px] border border-divider bg-bg-surface p-6">
               <p className="text-sm text-text-secondary-on-dark">
-                This document is marked live but its article body component has not been
-                registered. Add an entry to{' '}
-                <code>apps/web/src/app/(app)/help/articles/index.tsx</code> mapping{' '}
+                This document is marked live but its article body component has not been registered.
+                Add an entry to <code>apps/web/src/app/(app)/help/articles/index.tsx</code> mapping{' '}
                 <code>{`${category.slug}/${document.slug}`}</code> to the article component.
               </p>
             </div>

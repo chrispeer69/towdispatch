@@ -304,6 +304,26 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
         lastUpdatedAt: '2026-05-17',
       },
       {
+        slug: 'pricing-decision-guide',
+        title: 'Dynamic Pricing vs. Tier Offers — Which One Do I Use When?',
+        summary:
+          'Side-by-side comparison and four common scenarios that pin down exactly when to reach for which tool. Read this first if the two pricing modules feel similar.',
+        audience: ['owner', 'admin', 'manager'],
+        status: 'live',
+        estimatedMinutes: 12,
+        lastUpdatedAt: '2026-05-19',
+      },
+      {
+        slug: 'pricing-quickstart',
+        title: 'Your First 30 Minutes Setting Up Pricing',
+        summary:
+          'Time-boxed walkthrough: configure five core Dynamic Pricing tiers, test one against a fake intake, draft your first Tier Offer template, and end with a written record of what is set up.',
+        audience: ['owner', 'admin'],
+        status: 'live',
+        estimatedMinutes: 8,
+        lastUpdatedAt: '2026-05-19',
+      },
+      {
         slug: 'impound-yard-operations',
         title: 'Impound & Storage Yard Operations',
         summary:

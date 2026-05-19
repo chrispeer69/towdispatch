@@ -211,6 +211,23 @@ export class ConfigService {
     };
   }
 
+  /**
+   * Moat #3 — Tier Offer Composer (Session 4).
+   *
+   * `cronEnabled` gates the @Cron decorator's body in TierOfferLifecycleCron
+   * so dev/CI don't tick every 5 minutes. `webhookPublicKey` is the ECDSA
+   * verification key SendGrid signs each event-webhook delivery with.
+   * When unset, the webhook accepts requests with a logged warning
+   * (development friendliness). Production deploys MUST set the key.
+   */
+  get tierOffer(): { cronEnabled: boolean; webhookPublicKey: string | null } {
+    const key = this.config.SENDGRID_WEBHOOK_PUBLIC_KEY?.trim() ?? '';
+    return {
+      cronEnabled: this.config.TIER_OFFER_CRON_ENABLED,
+      webhookPublicKey: key.length > 0 ? key : null,
+    };
+  }
+
   get quickbooks(): {
     clientId: string;
     clientSecret: string;
