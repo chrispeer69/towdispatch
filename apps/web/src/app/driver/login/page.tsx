@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DriverApiError, driverApi } from '@/lib/driver/api-client';
 import {
+  clearTenantCode,
   persistDriverSession,
   persistTenantCode,
   readTenantCodeHint,
@@ -54,18 +55,29 @@ export default function DriverLoginPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // First mount: if the device has remembered a code from a prior login,
-  // pre-fill it. Don't auto-submit so the driver can clearly see the
-  // workshop they're about to log into.
+  // First mount: if the device has remembered a 6-digit company code
+  // from a prior login, auto-advance to the driver picker without
+  // re-prompting. The code is a device-binding step — it identifies
+  // which workshop's drivers to load — and forcing drivers to retype
+  // it every shift is the friction the founder called out.
+  //
+  // If the cached code is rejected by the API (e.g. tenant got
+  // renamed / the device is being repurposed for a different shop),
+  // lookupCode falls back to showing the code-entry screen with the
+  // remembered value still pre-filled and an explanatory error.
+  //
+  // The picker screen exposes a “Change workshop” button so a driver
+  // moving between shops can clear the binding and re-enter the code.
   useEffect(() => {
     if (codeFromUrl) {
       void lookupCode(codeFromUrl);
       return;
     }
     const hint = readTenantCodeHint();
-    if (hint) setCode(hint);
-    // We deliberately don't auto-submit on hint — the driver may be on a
-    // shared truck device where the previous tenant is wrong.
+    if (hint) {
+      setCode(hint);
+      void lookupCode(hint);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -197,6 +209,7 @@ export default function DriverLoginPage(): JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
+                      clearTenantCode();
                       setStep('code');
                       setCode('');
                       setTenant(null);
@@ -205,7 +218,7 @@ export default function DriverLoginPage(): JSX.Element {
                     }}
                     className="text-xs text-brand-primary underline"
                   >
-                    Change
+                    Change workshop
                   </button>
                 </div>
                 <p className="text-sm text-text-secondary-on-dark">Tap your name to continue.</p>
@@ -343,7 +356,13 @@ function CodePad({
         >
           0
         </Button>
-        <Button size="touch" variant="ghost" onClick={backspace} type="button" aria-label="Backspace">
+        <Button
+          size="touch"
+          variant="ghost"
+          onClick={backspace}
+          type="button"
+          aria-label="Backspace"
+        >
           ←
         </Button>
       </div>
@@ -401,7 +420,13 @@ function PinPad({
         >
           0
         </Button>
-        <Button size="touch" variant="ghost" onClick={backspace} type="button" aria-label="Backspace">
+        <Button
+          size="touch"
+          variant="ghost"
+          onClick={backspace}
+          type="button"
+          aria-label="Backspace"
+        >
           ←
         </Button>
       </div>
