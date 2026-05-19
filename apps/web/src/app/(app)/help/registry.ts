@@ -264,6 +264,16 @@ export const HELP_CENTER_CATEGORIES: TrainingCategory[] = [
     tone: 'violet',
     documents: [
       {
+        slug: 'understanding-moats',
+        title: 'Understanding Our Moats: What They Are and Why They Matter',
+        summary:
+          'The six structural advantages that make US Tow Alliance harder to displace than any competitor in the industry, and how to use them in your day-to-day operation.',
+        audience: ['owner', 'admin', 'manager', 'accounting'],
+        status: 'live',
+        estimatedMinutes: 14,
+        lastUpdatedAt: '2026-05-19',
+      },
+      {
         slug: 'dynamic-pricing',
         title: 'Dynamic Pricing: How to Configure and Activate Tiers',
         summary:

@@ -20,6 +20,7 @@ import { TierOfferComposerArticle } from './advanced-features-composer';
 import { DynamicPricingArticle } from './advanced-features-dynamic-pricing';
 import { ImpoundYardArticle } from './advanced-features-impound';
 import { AccountRateCardsArticle } from './advanced-features-rates';
+import { UnderstandingMoatsArticle } from './advanced-features-understanding-moats';
 import { ArAgingArticle } from './billing-finance-ar';
 import { GeneratingInvoicesArticle } from './billing-finance-invoices';
 import { CardPaymentsArticle } from './billing-finance-payments';
@@ -64,6 +65,7 @@ const ARTICLE_REGISTRY: Record<string, () => JSX.Element> = {
   'billing-finance/ar-aging-workspace': ArAgingArticle,
   'billing-finance/statement-generation': StatementGenerationArticle,
   'billing-finance/red-alert-workflow': RedAlertArticle,
+  'advanced-features/understanding-moats': UnderstandingMoatsArticle,
   'advanced-features/dynamic-pricing': DynamicPricingArticle,
   'advanced-features/tier-offer-composer': TierOfferComposerArticle,
   'advanced-features/account-rate-cards': AccountRateCardsArticle,
