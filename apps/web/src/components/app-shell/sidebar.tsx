@@ -123,6 +123,19 @@ const SECTIONS: NavSection[] = [
         icon: Zap,
         match: (p) => p.startsWith('/dynamic-pricing'),
       },
+      {
+        // Moat #3 — Tier Offer Composer. The collective-bargaining tool:
+        // operators compose pricing offers and send them to motor-club
+        // account managers who accept or decline independently. Visible
+        // to OWNER, ADMIN, MANAGER, ACCOUNTING, AUDITOR per the API
+        // RBAC; we don't gate the link on role here because the page
+        // itself surfaces a friendly access-denied state for roles that
+        // can't view it (DISPATCHER + DRIVER).
+        label: 'Tier Offers',
+        href: '/tier-offers',
+        icon: Mail,
+        match: (p) => p.startsWith('/tier-offers'),
+      },
     ],
   },
   {

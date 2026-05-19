@@ -327,7 +327,55 @@ export function JobCard({ job, compact = false, draggable = true }: JobCardProps
       {!compact ? (
         <p className="mt-1 truncate text-text-primary-on-dark/90">{job.pickupAddress}</p>
       ) : null}
+      <TierOfferBadge status={job.tierOfferEnforcementStatus} />
     </button>
+  );
+}
+
+/**
+ * TierOfferBadge — surfaced on every dispatch-board job card. Green
+ * when the motor club accepted the offer, amber when they declined,
+ * neutral-amber when they haven't responded yet, and absent for jobs
+ * with no active offer governance.
+ *
+ * Wording is deliberately operator-friendly: the badge does not
+ * unilaterally describe the action to take; the operator still confirms
+ * via the existing decline-dispatch dialog with a structured reason.
+ */
+function TierOfferBadge({
+  status,
+}: {
+  status: JobDto['tierOfferEnforcementStatus'];
+}): JSX.Element | null {
+  if (!status || status === 'none') return null;
+  if (status === 'accepted') {
+    return (
+      <span
+        title="Motor club accepted the tier offer for this window. The elevated rate is auto-applied."
+        className="mt-1 inline-block rounded bg-status-success-on-dark/15 text-status-success-on-dark border border-status-success-on-dark/30 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+      >
+        Tier accepted
+      </span>
+    );
+  }
+  if (status === 'declined') {
+    return (
+      <span
+        title="Motor club declined the tier offer. The operator may still accept this dispatch at the standard rate, or decline with a structured reason."
+        className="mt-1 inline-block rounded bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+      >
+        Offer declined — operator decision
+      </span>
+    );
+  }
+  // pending
+  return (
+    <span
+      title="Motor club has not responded to the tier offer yet. The operator may accept at the standard rate or decline with a structured reason."
+      className="mt-1 inline-block rounded bg-accent-orange/10 text-accent-orange border border-accent-orange/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+    >
+      Offer pending — operator decision
+    </span>
   );
 }
 

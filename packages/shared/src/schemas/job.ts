@@ -304,6 +304,17 @@ export const jobSchema = z.object({
     })
     .nullable()
     .optional(),
+  /**
+   * Tier Offer Composer linkage (Moat #3, Session 2). Populated by
+   * TierOfferEnforcementService at job creation when the job's account is a
+   * recipient on an active offer.
+   */
+  tierOfferId: z.string().uuid().nullable().default(null).optional(),
+  tierOfferRecipientId: z.string().uuid().nullable().default(null).optional(),
+  tierOfferEnforcementStatus: z
+    .enum(['accepted', 'declined', 'pending', 'none'])
+    .default('none')
+    .optional(),
 });
 export type JobDto = z.infer<typeof jobSchema>;
 
@@ -372,6 +383,14 @@ export const jobListItemSchema = z.object({
       lastName: z.string(),
     })
     .nullable(),
+  /**
+   * Tier Offer Composer enforcement status (Moat #3). Drives the
+   * dispatch-board badge and the flagged-jobs filter.
+   */
+  tierOfferEnforcementStatus: z
+    .enum(['accepted', 'declined', 'pending', 'none'])
+    .default('none')
+    .optional(),
 });
 export type JobListItemDto = z.infer<typeof jobListItemSchema>;
 
