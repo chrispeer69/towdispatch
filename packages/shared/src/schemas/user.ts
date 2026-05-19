@@ -50,11 +50,8 @@ export const createUserSchema = z.object({
 
 export type CreateUserPayload = z.infer<typeof createUserSchema>;
 
-export const updateUserSchema = createUserSchema
-  .partial()
-  .omit({ password: true })
-  .extend({
-    isActive: z.boolean().optional(),
-    receivesRedAlert: z.boolean().optional(),
-  });
+export const updateUserSchema = createUserSchema.partial().omit({ password: true }).extend({
+  isActive: z.boolean().optional(),
+  receivesRedAlert: z.boolean().optional(),
+});
 export type UpdateUserPayload = z.infer<typeof updateUserSchema>;

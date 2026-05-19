@@ -30,6 +30,16 @@ export const ERROR_CODES = {
   DRIVER_ALREADY_ON_SHIFT: 'driver_already_on_shift',
   TRUCK_NOT_IN_SERVICE: 'truck_not_in_service',
   TRUCK_ALREADY_ASSIGNED: 'truck_already_assigned',
+  /**
+   * Driver attempted PIN login but no PIN has been enrolled for them
+   * yet. Surface as a distinct 401 so the in-truck app can route the
+   * driver to the self-serve PIN-pick screen instead of an opaque
+   * "Invalid PIN" message. Not an information leak: the
+   * /driver-auth/lookup-by-code endpoint already returns the full driver
+   * roster, so an unauthenticated probe with the company code already
+   * has the driver list — PIN-set status adds nothing new.
+   */
+  PIN_NOT_SET: 'pin_not_set',
 
   // 5xx
   INTERNAL_ERROR: 'internal_error',
