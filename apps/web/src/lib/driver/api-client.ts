@@ -54,7 +54,25 @@ export function driverApiBase(): string {
     string,
     string | undefined
   >;
-  return env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+  // Order of resolution:
+  //   1. NEXT_PUBLIC_API_URL when baked into the bundle (preferred).
+  //   2. Smart fallback: when running on the production hostname, point
+  //      to the production API explicitly. Survives misconfigured
+  //      build envs where the var didn't bake in (Railway has a known
+  //      quirk with NEXT_PUBLIC_* vars in Dockerfile builds).
+  //   3. Local-dev fallback when window is undefined or hostname is
+  //      localhost.
+  if (env.NEXT_PUBLIC_API_URL) return env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'app.towcommand.cloud') return 'https://api.towcommand.cloud';
+    if (host.endsWith('.towcommand.cloud')) {
+      // Future-proofs preview / staging subdomains by mirroring the API
+      // subdomain (app.foo → api.foo).
+      return `https://api.${host.split('.').slice(1).join('.')}`;
+    }
+  }
+  return 'http://localhost:3001';
 }
 
 export function readDriverJwt(): string | null {
