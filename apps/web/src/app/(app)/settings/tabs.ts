@@ -55,6 +55,12 @@ export const SETTINGS_TABS = [
     description: 'Per-tenant and per-user preferences for transactional email and in-app alerts.',
   },
   {
+    slug: 'driver-app',
+    label: 'Driver App',
+    description:
+      'Daily briefing message + video shown to every driver once per day before their first job.',
+  },
+  {
     slug: 'billing',
     label: 'Billing & Subscription',
     description: 'Stripe Connect onboarding, platform margin, and SaaS subscription billing.',
