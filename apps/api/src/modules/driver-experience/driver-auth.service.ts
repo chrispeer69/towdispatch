@@ -215,14 +215,27 @@ export class DriverAuthService {
       return { tenant, driver, pinRow: pinRow ?? null };
     });
 
-    // Run a constant-time bcrypt comparison even when no pinRow exists so
-    // a missing PIN can't be probed via response timing. We compare
-    // against a fixed dummy hash and ignore the result.
-    if (!lookup || !lookup.pinRow) {
+    // Run a constant-time bcrypt comparison so timing can't differentiate
+    // "wrong PIN" from "no PIN set" — we keep the bcrypt work in both
+    // branches.
+    if (!lookup) {
+      // Unknown driver / tenant slug. Surface as generic invalid creds
+      // since the company-code lookup is the legitimate enumeration path.
       await bcrypt.compare(input.pin, DUMMY_HASH);
       throw new UnauthorizedException({
         code: ERROR_CODES.INVALID_CREDENTIALS,
         message: 'Invalid driver or PIN',
+      });
+    }
+    if (!lookup.pinRow) {
+      // Driver exists but has no PIN enrolled yet. Surface a distinct
+      // code so the in-truck app can route the driver to the self-serve
+      // PIN-pick screen. Not an information leak — the lookup-by-code
+      // endpoint already enumerates the driver roster.
+      await bcrypt.compare(input.pin, DUMMY_HASH);
+      throw new UnauthorizedException({
+        code: ERROR_CODES.PIN_NOT_SET,
+        message: 'No PIN has been set for this driver yet. Tap “Set up my PIN” to pick one.',
       });
     }
 

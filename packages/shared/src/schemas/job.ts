@@ -292,6 +292,8 @@ export const jobSchema = z.object({
     .object({
       id: z.string().uuid(),
       name: z.string(),
+      phone: z.string().nullable().optional(),
+      email: z.string().nullable().optional(),
     })
     .nullable()
     .optional(),
@@ -301,6 +303,11 @@ export const jobSchema = z.object({
       year: z.number().int().nullable(),
       make: z.string().nullable(),
       model: z.string().nullable(),
+      color: z.string().nullable().optional(),
+      vin: z.string().nullable().optional(),
+      plate: z.string().nullable().optional(),
+      plateState: z.string().nullable().optional(),
+      drivetrain: z.string().nullable().optional(),
     })
     .nullable()
     .optional(),

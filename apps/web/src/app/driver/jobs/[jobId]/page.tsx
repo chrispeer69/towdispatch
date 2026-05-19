@@ -340,34 +340,98 @@ export default function DriverJobPage(): JSX.Element {
 }
 
 function CustomerCard({ job }: { job: JobDto }): JSX.Element {
-  const customerName = job.customer?.name ?? 'Customer';
+  const customer = job.customer;
+  const customerName = customer?.name ?? 'Customer pending';
+  const phone = customer?.phone ?? null;
+  const email = customer?.email ?? null;
+  // Strip everything but digits + leading + for the tel: href so the
+  // dialer doesn't choke on punctuation like "(614) 555-1212".
+  const telHref = phone ? `tel:${phone.replace(/[^+\d]/g, '')}` : null;
+  const smsHref = phone ? `sms:${phone.replace(/[^+\d]/g, '')}` : null;
   return (
     <Card className="mb-3">
       <CardContent className="space-y-2 p-5">
-        <p className="font-semibold">{customerName}</p>
-        <div className="flex flex-wrap gap-2">
-          <a
-            href={'tel:'}
-            className="flex h-11 items-center gap-2 rounded-full border border-divider bg-bg-surface-elevated px-3 text-sm"
-          >
-            <Phone className="h-4 w-4" />
-            Call
-          </a>
+        <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Customer</p>
+        <p className="text-lg font-semibold">{customerName}</p>
+        {phone ? (
+          <p className="font-mono text-sm text-text-primary-on-dark">{phone}</p>
+        ) : (
+          <p className="text-xs text-text-secondary-on-dark">No phone on file</p>
+        )}
+        {email ? <p className="break-all text-xs text-text-secondary-on-dark">{email}</p> : null}
+        <div className="flex flex-wrap gap-2 pt-2">
+          {telHref ? (
+            <a
+              href={telHref}
+              className="flex h-11 items-center gap-2 rounded-full border border-divider bg-bg-surface-elevated px-4 text-sm font-semibold"
+            >
+              <Phone className="h-4 w-4" />
+              Call
+            </a>
+          ) : null}
+          {smsHref ? (
+            <a
+              href={smsHref}
+              className="flex h-11 items-center gap-2 rounded-full border border-divider bg-bg-surface-elevated px-4 text-sm font-semibold"
+            >
+              <Phone className="h-4 w-4" />
+              Text
+            </a>
+          ) : null}
         </div>
       </CardContent>
     </Card>
   );
 }
-
 function VehicleCard({ job }: { job: JobDto }): JSX.Element {
   const v = job.vehicle;
+  if (!v) {
+    return (
+      <Card className="mb-3">
+        <CardContent className="space-y-1 p-5">
+          <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Vehicle</p>
+          <p className="font-semibold">Vehicle pending</p>
+          <p className="text-xs text-text-secondary-on-dark">
+            Service: <span className="uppercase">{job.serviceType}</span>
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ').trim();
+  const plate = v.plate ? `${v.plate}${v.plateState ? ` (${v.plateState})` : ''}` : null;
   return (
     <Card className="mb-3">
-      <CardContent className="space-y-1 p-5">
-        <p className="font-semibold">
-          {v ? `${v.year ?? ''} ${v.make ?? ''} ${v.model ?? ''}`.trim() : 'Vehicle pending'}
-        </p>
-        <p className="text-xs text-text-secondary-on-dark">
+      <CardContent className="space-y-2 p-5">
+        <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Vehicle</p>
+        <p className="text-lg font-semibold">{ymm || 'Vehicle details pending'}</p>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+          {v.color ? (
+            <>
+              <span className="text-text-secondary-on-dark">Color</span>
+              <span className="font-mono">{v.color}</span>
+            </>
+          ) : null}
+          {plate ? (
+            <>
+              <span className="text-text-secondary-on-dark">Plate</span>
+              <span className="font-mono">{plate}</span>
+            </>
+          ) : null}
+          {v.vin ? (
+            <>
+              <span className="text-text-secondary-on-dark">VIN</span>
+              <span className="break-all font-mono text-xs">{v.vin}</span>
+            </>
+          ) : null}
+          {v.drivetrain ? (
+            <>
+              <span className="text-text-secondary-on-dark">Drivetrain</span>
+              <span className="font-mono">{v.drivetrain}</span>
+            </>
+          ) : null}
+        </div>
+        <p className="pt-2 text-xs text-text-secondary-on-dark">
           Service: <span className="uppercase">{job.serviceType}</span>
         </p>
       </CardContent>
