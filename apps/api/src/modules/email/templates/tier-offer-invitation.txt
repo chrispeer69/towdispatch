@@ -1,0 +1,26 @@
+Capacity offer from {{operatorName}}
+
+{{title}}
+
+{{recipientName}}{{#if recipientRole}}, {{recipientRole}}{{/if}} —
+
+{{narrative}}
+
+WHAT WE'RE COMMITTING:
+  {{committedTruckCount}} trucks available for dispatch from
+  {{eventWindowStartFormatted}} through {{eventWindowEndFormatted}},
+  charged at the {{tierName}} tier.
+
+WHAT WE'RE ASKING:
+  Reply by {{acceptanceDeadlineFormatted}} to lock in capacity at this rate.
+  Clubs that decline (or don't respond by the deadline) follow our default
+  for non-responders: {{defaultForNonRespondersHuman}}.
+
+  Accept terms:  {{acceptUrl}}
+  Decline:       {{declineUrl}}
+
+Your responder IP and timestamp will be logged when you click Accept or
+Decline. The acceptance ledger is the contractual record for this
+engagement. Magic links expire on {{magicLinkExpiresFormatted}}.
+
+— {{productName}} · {{operatorName}}

@@ -27,6 +27,7 @@
  * reconstruct exactly how that number was calculated even after the rate
  * sheet has been edited.
  */
+import { sql } from 'drizzle-orm';
 import {
   bigint,
   index,
@@ -132,6 +133,32 @@ export const jobs = pgTable(
     /** Yard the truck dispatches from — origin for the enroute leg. */
     dispatchYardId: uuid('dispatch_yard_id'),
 
+    /**
+     * Tier Offer Composer linkage (Session 2). Set at job-creation time
+     * by TierOfferEnforcementService when the job's account belongs to a
+     * motor club that's a recipient on an active offer. Both ids null
+     * when no active offer covers the dispatch.
+     */
+    tierOfferId: uuid('tier_offer_id'),
+    tierOfferRecipientId: uuid('tier_offer_recipient_id'),
+    /**
+     * Materialized enforcement decision so the dispatch board can render
+     * the right badge without re-running enforcement on every paint.
+     *
+     *   'accepted'  — motor club explicitly accepted the offer; existing
+     *                 tier-resolution flow auto-applies the elevated tier.
+     *   'declined'  — motor club explicitly declined; dispatch board
+     *                 flags the job for operator review.
+     *   'pending'   — motor club has not responded yet; dispatch board
+     *                 flags the job for operator review.
+     *   'none'      — no active offer for this account/window combo.
+     */
+    tierOfferEnforcementStatus: text('tier_offer_enforcement_status', {
+      enum: ['accepted', 'declined', 'pending', 'none'] as const,
+    })
+      .notNull()
+      .default('none'),
+
     notes: text('notes'),
 
     cancelledReason: text('cancelled_reason'),
@@ -164,6 +191,12 @@ export const jobs = pgTable(
     tenantVehicleIdx: index('jobs_tenant_vehicle_idx').on(t.tenantId, t.vehicleId),
     tenantAccountIdx: index('jobs_tenant_account_idx').on(t.tenantId, t.accountId),
     tenantDriverIdx: index('jobs_tenant_assigned_driver_idx').on(t.tenantId, t.assignedDriverId),
+    // Partial index used by the dispatch-board flagged-jobs filter
+    // (Tier Offer Composer Session 2). The vast majority of jobs sit at
+    // 'none' so we avoid index bloat by filtering them out.
+    tenantTierOfferEnforcementIdx: index('jobs_tenant_tier_offer_enforcement_idx')
+      .on(t.tenantId, t.tierOfferEnforcementStatus)
+      .where(sql`tier_offer_enforcement_status <> 'none'`),
   }),
 );
 
