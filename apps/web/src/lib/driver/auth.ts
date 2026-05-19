@@ -84,6 +84,17 @@ export function persistTenantCode(code: string): void {
   window.localStorage.setItem(DRIVER_TENANT_CODE_KEY, code);
 }
 
+/**
+ * Wipe the cached 6-digit company code from this device. Used when the
+ * driver taps “Change” on the picker, which signals that the tablet is
+ * being repurposed for a different workshop — we don’t want the
+ * auto-advance logic to immediately re-fetch the prior workshop.
+ */
+export function clearTenantCode(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(DRIVER_TENANT_CODE_KEY);
+}
+
 export function useDriverAuth(): DriverAuthState & {
   logout: (next?: string) => void;
   refresh: () => void;
