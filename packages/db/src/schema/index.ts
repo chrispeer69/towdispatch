@@ -53,3 +53,7 @@ export * from './driver-telemetry-events';
 export * from './job-evidence';
 export * from './job-field-payments';
 export * from './driver-offline-actions';
+// Tier Offer Composer (Session 1) — Moat #3 schema foundation. Tables in
+// packages/db/sql/0034_tier_offer_composer.sql.
+export * from './tier-offers';
+export * from './tier-offer-recipients';
