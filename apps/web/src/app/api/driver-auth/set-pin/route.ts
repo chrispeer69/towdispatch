@@ -16,7 +16,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const data = await apiServerBff<unknown>('/driver-auth/set-pin', {
       method: 'POST',
-      body: JSON.stringify(body),
+      body,
     });
     return NextResponse.json(data);
   } catch (err) {
