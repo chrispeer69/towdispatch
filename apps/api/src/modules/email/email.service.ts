@@ -223,6 +223,54 @@ export class EmailService {
     });
   }
 
+  /**
+   * Tier Offer Composer (Session 2). Sends a per-recipient invitation
+   * with already-rendered accept / decline magic-link URLs. Caller signs
+   * the JWTs and builds absolute URLs (so the same code path works in
+   * dev/CI without NEXT_PUBLIC_WEB_URL set on the API).
+   */
+  async sendTierOfferInvitationEmail(opts: {
+    to: string;
+    subjectLine: string;
+    operatorName: string;
+    title: string;
+    narrative: string;
+    recipientName: string;
+    recipientRole: string | null | undefined;
+    tierName: string;
+    committedTruckCount: number;
+    eventWindowStartFormatted: string;
+    eventWindowEndFormatted: string;
+    acceptanceDeadlineFormatted: string;
+    defaultForNonRespondersHuman: string;
+    acceptUrl: string;
+    declineUrl: string;
+    magicLinkExpiresFormatted: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: opts.subjectLine,
+      template: 'tier-offer-invitation',
+      variables: {
+        ...this.brand(),
+        operatorName: opts.operatorName,
+        title: opts.title,
+        narrative: opts.narrative,
+        recipientName: opts.recipientName,
+        recipientRole: opts.recipientRole ?? null,
+        tierName: opts.tierName,
+        committedTruckCount: opts.committedTruckCount,
+        eventWindowStartFormatted: opts.eventWindowStartFormatted,
+        eventWindowEndFormatted: opts.eventWindowEndFormatted,
+        acceptanceDeadlineFormatted: opts.acceptanceDeadlineFormatted,
+        defaultForNonRespondersHuman: opts.defaultForNonRespondersHuman,
+        acceptUrl: opts.acceptUrl,
+        declineUrl: opts.declineUrl,
+        magicLinkExpiresFormatted: opts.magicLinkExpiresFormatted,
+      },
+    });
+  }
+
   async sendCreditMemoIssuedEmail(opts: {
     to: string;
     recipientName: string;

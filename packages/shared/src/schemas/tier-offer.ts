@@ -101,3 +101,15 @@ export const updateTierOfferSchema = z
   })
   .strict();
 export type UpdateTierOfferPayload = z.infer<typeof updateTierOfferSchema>;
+
+/**
+ * Operator cancels a sent offer (Session 2). Reason is optional but
+ * recommended; recipients still in flight will be revoked as a side
+ * effect.
+ */
+export const cancelTierOfferSchema = z
+  .object({
+    reason: z.string().max(2000).optional(),
+  })
+  .strict();
+export type CancelTierOfferPayload = z.infer<typeof cancelTierOfferSchema>;

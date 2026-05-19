@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{{subjectLine}}</title>
+  </head>
+  <body style="margin:0;padding:0;background:{{steel}};font-family:'Helvetica Neue',Arial,sans-serif;color:#F0EDE8;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:{{steel}};padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="background:#252A38;border:1px solid #3A4158;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="padding:24px 28px;border-bottom:1px solid #3A4158;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="background:{{orange}};width:36px;height:36px;border-radius:8px;text-align:center;font-weight:800;font-size:18px;color:#FFFFFF;line-height:36px;">T</td>
+                    <td style="padding-left:12px;font-size:16px;font-weight:800;letter-spacing:0.04em;color:#F0EDE8;">
+                      Tow<span style="color:{{orange}};">Command</span> Pro
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 28px 16px;font-size:15px;line-height:1.6;color:#F0EDE8;">
+                <p style="margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#9CA3B5;">
+                  Capacity offer · {{operatorName}}
+                </p>
+                <p style="margin:0 0 18px;font-size:22px;font-weight:700;line-height:1.25;">
+                  {{title}}
+                </p>
+                <p style="margin:0 0 18px;color:#D1D5E0;">
+                  {{recipientName}}{{#if recipientRole}}, {{recipientRole}}{{/if}} —
+                </p>
+                <div style="margin:0 0 22px;color:#F0EDE8;white-space:pre-line;">{{narrative}}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 28px 16px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#1A1E2A;border:1px solid #3A4158;border-radius:10px;">
+                  <tr>
+                    <td style="padding:16px 18px;font-size:13px;color:#9CA3B5;letter-spacing:0.04em;text-transform:uppercase;">
+                      What we&rsquo;re committing
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 18px 14px;font-size:15px;color:#F0EDE8;line-height:1.6;">
+                      <strong>{{committedTruckCount}} trucks</strong> available for dispatch from
+                      <strong>{{eventWindowStartFormatted}}</strong> through
+                      <strong>{{eventWindowEndFormatted}}</strong>, charged at the
+                      <strong>{{tierName}}</strong> tier.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 18px 14px;font-size:13px;color:#9CA3B5;letter-spacing:0.04em;text-transform:uppercase;">
+                      What we&rsquo;re asking
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 18px 18px;font-size:15px;color:#F0EDE8;line-height:1.6;">
+                      Reply by <strong>{{acceptanceDeadlineFormatted}}</strong> to lock in capacity
+                      at this rate. Clubs that decline (or don&rsquo;t respond by the deadline)
+                      follow our default for non-responders: <strong>{{defaultForNonRespondersHuman}}</strong>.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 28px 8px;text-align:center;">
+                <a href="{{acceptUrl}}" style="display:inline-block;background:{{orange}};color:#FFFFFF;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:10px;letter-spacing:0.02em;margin:0 6px 8px;">
+                  Accept terms
+                </a>
+                <a href="{{declineUrl}}" style="display:inline-block;background:transparent;color:#F0EDE8;text-decoration:none;font-weight:600;padding:13px 26px;border-radius:10px;border:1px solid #3A4158;letter-spacing:0.02em;margin:0 6px 8px;">
+                  Decline
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 28px 18px;font-size:12px;color:#9CA3B5;line-height:1.6;">
+                Or copy either link directly into your browser:<br />
+                <span style="font-family:'Menlo',monospace;font-size:11px;word-break:break-all;color:#9CA3B5;">
+                  Accept: {{acceptUrl}}<br />
+                  Decline: {{declineUrl}}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 28px;border-top:1px solid #3A4158;font-size:11px;color:#9CA3B5;letter-spacing:0.04em;line-height:1.5;">
+                Your responder IP and timestamp will be logged when you click Accept or Decline.
+                The acceptance ledger is the contractual record for this engagement.
+                Magic links expire on {{magicLinkExpiresFormatted}}.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:14px 28px;border-top:1px solid #3A4158;font-size:11px;color:#626882;letter-spacing:0.06em;text-transform:uppercase;">
+                {{productName}} · {{operatorName}}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -59,6 +59,7 @@ import { CustomersService } from '../customers/customers.service.js';
 import { DirectionsService } from '../directions/directions.service.js';
 import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 import { RateEngineService } from '../rates/rate-engine.service.js';
+import { TierOfferEnforcementService } from '../tier-offers/tier-offer-enforcement.service.js';
 import {
   InvalidJobTransitionError,
   TERMINAL_STATUSES,
@@ -81,6 +82,7 @@ export class JobsService {
     private readonly rateEngine: RateEngineService,
     private readonly events: DispatchEventsService,
     private readonly directions: DirectionsService,
+    private readonly tierOfferEnforcement: TierOfferEnforcementService,
   ) {}
 
   /**
@@ -88,7 +90,10 @@ export class JobsService {
    * before the impound module's yards table lands). Operators set this once
    * via Settings → Company; intake uses it as the origin for enroute miles.
    */
-  private async readDispatchYardCoord(tx: Tx, tenantId: string): Promise<{ lat: number; lng: number } | null> {
+  private async readDispatchYardCoord(
+    tx: Tx,
+    tenantId: string,
+  ): Promise<{ lat: number; lng: number } | null> {
     const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, tenantId) });
     const settings = (t?.settings as Record<string, unknown> | null) ?? null;
     const yard = settings?.dispatchYardCoord as { lat?: number; lng?: number } | undefined;
@@ -307,7 +312,9 @@ export class JobsService {
           ? { lat: input.pickup.lat, lng: input.pickup.lng }
           : null;
       const dropoffCoord =
-        input.dropoff && typeof input.dropoff.lat === 'number' && typeof input.dropoff.lng === 'number'
+        input.dropoff &&
+        typeof input.dropoff.lat === 'number' &&
+        typeof input.dropoff.lng === 'number'
           ? { lat: input.dropoff.lat, lng: input.dropoff.lng }
           : null;
       const miles = await this.directions.computeJobMiles({
@@ -315,6 +322,17 @@ export class JobsService {
         pickupCoord,
         dropoffCoord,
         useGoogle,
+      });
+
+      // Tier Offer Composer enforcement (Moat #3 Session 2). When the
+      // job's account belongs to a motor club that's a recipient on an
+      // active offer, the resolution tells us whether to apply the elevated
+      // tier (accepted), flag the dispatch board (declined / pending), or
+      // do nothing (no_active_offer).
+      const tierOfferResolution = await this.tierOfferEnforcement.resolveForJob(tx, {
+        tenantId: ctx.tenantId,
+        accountId: input.accountId ?? null,
+        jobStartedAt: new Date(),
       });
 
       // Insert the job.
@@ -342,6 +360,12 @@ export class JobsService {
           rateBreakdown: quote,
           enrouteMiles: miles.enrouteMiles !== null ? String(miles.enrouteMiles) : null,
           intowMiles: miles.intowMiles !== null ? String(miles.intowMiles) : null,
+          tierOfferId:
+            tierOfferResolution.kind !== 'no_active_offer' ? tierOfferResolution.offerId : null,
+          tierOfferRecipientId:
+            tierOfferResolution.kind !== 'no_active_offer' ? tierOfferResolution.recipientId : null,
+          tierOfferEnforcementStatus:
+            tierOfferResolution.kind === 'no_active_offer' ? 'none' : tierOfferResolution.kind,
           notes: composeIntakeNotes(input.notes, !!input.skipCustomerSms),
           createdByUserId: ctx.userId,
         })
@@ -426,6 +450,12 @@ export class JobsService {
         useGoogle,
       });
 
+      const tierOfferResolutionDirect = await this.tierOfferEnforcement.resolveForJob(tx, {
+        tenantId: ctx.tenantId,
+        accountId: input.accountId ?? null,
+        jobStartedAt: new Date(),
+      });
+
       const id = uuidv7();
       const [row] = await tx
         .insert(jobs)
@@ -450,6 +480,18 @@ export class JobsService {
           rateBreakdown: null,
           enrouteMiles: miles.enrouteMiles !== null ? String(miles.enrouteMiles) : null,
           intowMiles: miles.intowMiles !== null ? String(miles.intowMiles) : null,
+          tierOfferId:
+            tierOfferResolutionDirect.kind !== 'no_active_offer'
+              ? tierOfferResolutionDirect.offerId
+              : null,
+          tierOfferRecipientId:
+            tierOfferResolutionDirect.kind !== 'no_active_offer'
+              ? tierOfferResolutionDirect.recipientId
+              : null,
+          tierOfferEnforcementStatus:
+            tierOfferResolutionDirect.kind === 'no_active_offer'
+              ? 'none'
+              : tierOfferResolutionDirect.kind,
           notes: input.notes ?? null,
           createdByUserId: ctx.userId,
         })

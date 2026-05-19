@@ -94,3 +94,23 @@ export const updateTierOfferRecipientSchema = z
   })
   .strict();
 export type UpdateTierOfferRecipientPayload = z.infer<typeof updateTierOfferRecipientSchema>;
+
+/**
+ * Public accept (Session 2). The token IS the auth; no other fields
+ * are required from the recipient. Empty body = pure accept click.
+ * The endpoint captures IP + UA from the request.
+ */
+export const publicAcceptTierOfferSchema = z.object({}).strict();
+export type PublicAcceptTierOfferPayload = z.infer<typeof publicAcceptTierOfferSchema>;
+
+/**
+ * Public decline (Session 2). Optional reason — many motor-club managers
+ * hit Decline without elaborating, which is fine. When provided we log
+ * it on the recipient row for the operator's reconciliation report.
+ */
+export const publicDeclineTierOfferSchema = z
+  .object({
+    reason: z.string().max(2000).optional(),
+  })
+  .strict();
+export type PublicDeclineTierOfferPayload = z.infer<typeof publicDeclineTierOfferSchema>;
