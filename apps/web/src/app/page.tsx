@@ -52,22 +52,19 @@ export default function LandingPage(): JSX.Element {
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:gap-4 animate-fade-in-up">
           <Link
             href="/signup"
-            className={cn(buttonVariants({ variant: 'default', size: 'lg' }), 'min-w-44')}
+            className={cn(buttonVariants({ variant: 'default', size: 'lg' }), 'min-w-48')}
           >
             Get started
           </Link>
           <Link
             href="/login"
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'lg' }),
-              'min-w-44 text-text-secondary-on-dark',
-            )}
+            className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'min-w-48')}
           >
             Operator sign-in
           </Link>
           <Link
             href="/driver"
-            className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'min-w-44')}
+            className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'min-w-48')}
           >
             Driver sign-in
           </Link>
