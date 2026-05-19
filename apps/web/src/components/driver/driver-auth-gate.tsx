@@ -29,7 +29,27 @@ interface Props {
 export function DriverAuthGate({ children }: Props): JSX.Element | null {
   const router = useRouter();
   const pathname = usePathname() ?? '/driver/login';
-  const { jwt, loading } = useDriverAuth();
+  const { jwt, loading, refresh } = useDriverAuth();
+
+  // Browser bfcache (back/forward) restores the rendered DOM without
+  // re-mounting React components. Without this listener, a driver who
+  // signs out and then taps the back button would see the previously-
+  // authenticated workspace because the page came from the cache. We
+  // listen for `pageshow` with `persisted=true` (the bfcache flag),
+  // re-read localStorage, and force a hard reload so the gate runs
+  // against the current auth state.
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent): void => {
+      if (e.persisted) {
+        refresh();
+        // After refresh setState fires, the gate effect below evaluates
+        // and redirects if the JWT is gone. We don't reload here — the
+        // gate handles it.
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, [refresh]);
 
   useEffect(() => {
     if (loading) return;

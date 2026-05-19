@@ -38,6 +38,17 @@ export interface DriverAuthState {
   loading: boolean;
 }
 
+/**
+ * Synchronously read the current driver session from localStorage.
+ * Returns `loading: false` whenever we're in a browser context — the
+ * caller can use the absence of a JWT as the signal to redirect.
+ *
+ * Returning `loading: true` only on the SSR pass keeps the auth gate
+ * from racing: the first client render is already authoritative, so
+ * the gate never sees an empty session for a frame and triggers a
+ * spurious redirect to /driver/login when in fact the driver has just
+ * persisted a fresh JWT.
+ */
 function readState(): DriverAuthState {
   if (typeof window === 'undefined') return { jwt: null, profile: null, loading: true };
   try {
@@ -99,13 +110,21 @@ export function useDriverAuth(): DriverAuthState & {
   logout: (next?: string) => void;
   refresh: () => void;
 } {
-  const [state, setState] = useState<DriverAuthState>({ jwt: null, profile: null, loading: true });
+  // CRITICAL: initialize from localStorage on the first client render
+  // (lazy initializer) so the auth gate's first paint is authoritative.
+  // Returning `{ jwt: null, loading: true }` here used to leave a one-
+  // tick window where the workspace would mount, the gate would see no
+  // JWT, and router.replace('/driver/login') would fire — even though
+  // the JWT had already been persisted by the login page.
+  const [state, setState] = useState<DriverAuthState>(() => readState());
 
   const refresh = useCallback(() => {
     setState(readState());
   }, []);
 
   useEffect(() => {
+    // Re-read once on mount in case a different tab updated storage
+    // between server render and client mount.
     refresh();
     // Cross-tab sync: another tab logged in/out, mirror the change.
     const onStorage = (e: StorageEvent): void => {
