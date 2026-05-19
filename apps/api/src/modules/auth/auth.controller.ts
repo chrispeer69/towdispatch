@@ -49,7 +49,18 @@ import type { FastifyRequest } from 'fastify';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { ZodBody } from '../../common/decorators/zod.decorator.js';
+import { z } from 'zod';
 import { type AuthRequestMeta, AuthService } from './auth.service.js';
+
+const checkSlugSchema = z
+  .object({
+    tenantSlug: z
+      .string()
+      .min(2)
+      .max(40)
+      .regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/),
+  })
+  .strict();
 
 interface AuthedUser {
   id: string;
@@ -69,6 +80,21 @@ export class AuthController {
     @Req() req: FastifyRequest,
   ): Promise<AuthenticatedResponse> {
     return this.auth.signup(body, this.meta(req));
+  }
+
+  /**
+   * Returns whether a given slug is currently free + a suggested
+   * collision-free alternative. The signup form polls this as the
+   * operator types so they almost never see a 409 collision.
+   */
+  @Public()
+  @Throttle({ burst: { limit: 30, ttl: seconds(60) } })
+  @Post('check-slug')
+  @HttpCode(HttpStatus.OK)
+  async checkSlug(
+    @ZodBody(checkSlugSchema) body: { tenantSlug: string },
+  ): Promise<{ available: boolean; suggested: string }> {
+    return this.auth.checkSlugAvailability(body.tenantSlug);
   }
 
   @Public()

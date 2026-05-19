@@ -194,6 +194,41 @@ export class AuthService {
     };
   }
 
+  /**
+   * Cheap public probe: is `tenantSlug` available, and if not, what's
+   * the lowest-numbered free suffix? Returns both pieces so the signup
+   * form can show a green check or auto-uniquify in the same render.
+   */
+  async checkSlugAvailability(
+    tenantSlug: string,
+  ): Promise<{ available: boolean; suggested: string }> {
+    return this.admin.runAsAdmin({}, async (db) => {
+      const direct = await db.query.tenants.findFirst({
+        where: eq(tenants.slug, tenantSlug),
+        columns: { id: true },
+      });
+      if (!direct) {
+        return { available: true, suggested: tenantSlug };
+      }
+      // Walk -2, -3, ... until we find a free slot. Capped so we don't
+      // run away in the (impossible) worst case.
+      for (let i = 2; i <= 50; i++) {
+        const candidate = `${tenantSlug}-${i}`.slice(0, 40);
+        const taken = await db.query.tenants.findFirst({
+          where: eq(tenants.slug, candidate),
+          columns: { id: true },
+        });
+        if (!taken) {
+          return { available: false, suggested: candidate };
+        }
+      }
+      return {
+        available: false,
+        suggested: `${tenantSlug}-${Date.now()}`.slice(0, 40),
+      };
+    });
+  }
+
   // ===========================================================================
   // LOGIN
   // ===========================================================================

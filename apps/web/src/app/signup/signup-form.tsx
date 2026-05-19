@@ -46,6 +46,13 @@ export function SignupForm(): JSX.Element {
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [slugDirty, setSlugDirty] = useState(false);
+  /**
+   * 'idle' | 'checking' | 'available' | 'taken' | 'too-short'.
+   * Drives the inline slug status indicator under the slug input.
+   */
+  const [slugStatus, setSlugStatus] = useState<
+    'idle' | 'checking' | 'available' | 'taken' | 'too-short'
+  >('idle');
 
   const {
     register,
@@ -68,6 +75,7 @@ export function SignupForm(): JSX.Element {
   });
 
   const tenantName = watch('tenantName');
+  const tenantSlug = watch('tenantSlug') ?? '';
   const password = watch('password') ?? '';
 
   useEffect(() => {
@@ -75,6 +83,56 @@ export function SignupForm(): JSX.Element {
       setValue('tenantSlug', slugify(tenantName ?? ''), { shouldValidate: false });
     }
   }, [tenantName, slugDirty, setValue]);
+
+  // Debounced slug-availability check. As the user types, we ask the
+  // API whether the slug is free; if it isn\u2019t, we fetch the next
+  // free suggestion and (when the user hasn\u2019t manually edited the
+  // slug field) silently substitute it. Either way, the user sees a
+  // green check or a yellow "already registered" hint right under the
+  // slug input.
+  useEffect(() => {
+    const candidate = (tenantSlug ?? '').trim();
+    if (candidate.length < 2) {
+      setSlugStatus(candidate.length === 0 ? 'idle' : 'too-short');
+      return;
+    }
+    let cancelled = false;
+    setSlugStatus('checking');
+    const handle = window.setTimeout(async () => {
+      try {
+        const res = await fetch('/api/auth/check-slug', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenantSlug: candidate }),
+        });
+        if (cancelled) return;
+        if (!res.ok) {
+          // Fall back to idle if the probe itself errors out \u2014 the
+          // 409 path on submit will still catch it.
+          setSlugStatus('idle');
+          return;
+        }
+        const data = (await res.json()) as { available: boolean; suggested: string };
+        if (cancelled) return;
+        if (data.available) {
+          setSlugStatus('available');
+        } else {
+          setSlugStatus('taken');
+          if (!slugDirty && data.suggested && data.suggested !== candidate) {
+            // Auto-uniquify only when the user hasn\u2019t manually
+            // touched the slug field. Respect their explicit choice.
+            setValue('tenantSlug', data.suggested, { shouldValidate: false });
+          }
+        }
+      } catch {
+        if (!cancelled) setSlugStatus('idle');
+      }
+    }, 350);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [tenantSlug, slugDirty, setValue]);
 
   async function onSubmit(values: FormValues): Promise<void> {
     setSubmitError(null);
@@ -90,8 +148,21 @@ export function SignupForm(): JSX.Element {
       }),
     });
     if (!res.ok) {
-      const data = (await res.json().catch(() => null)) as { message?: string } | null;
-      setSubmitError(data?.message ?? 'Signup failed. Please try again.');
+      const data = (await res.json().catch(() => null)) as {
+        message?: string;
+        code?: string;
+      } | null;
+      const isConflict =
+        res.status === 409 ||
+        data?.code === 'conflict' ||
+        (data?.message ?? '').toLowerCase().includes('already taken');
+      if (isConflict) {
+        setSubmitError(
+          'This company name is already registered. Try a different name or sign in to your existing account.',
+        );
+      } else {
+        setSubmitError(data?.message ?? 'Signup failed. Please try again.');
+      }
       return;
     }
     router.push('/verify-email-pending');
@@ -121,6 +192,24 @@ export function SignupForm(): JSX.Element {
             })}
           />
         </div>
+        {slugStatus === 'available' && (
+          <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+            ✓ This URL is available.
+          </p>
+        )}
+        {slugStatus === 'taken' && (
+          <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+            That URL is already registered. We picked the next available one for you.
+          </p>
+        )}
+        {slugStatus === 'too-short' && (
+          <p className="mt-1 text-xs text-text-secondary-on-dark/60">
+            URL must be at least 2 characters.
+          </p>
+        )}
+        {slugStatus === 'checking' && (
+          <p className="mt-1 text-xs text-text-secondary-on-dark/60">Checking availability…</p>
+        )}
       </Field>
 
       <Field label="Your name" error={errors.ownerName?.message}>
