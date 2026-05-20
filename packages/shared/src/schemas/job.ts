@@ -379,6 +379,8 @@ export const jobListItemSchema = z.object({
       year: z.number().int().nullable(),
       make: z.string().nullable(),
       model: z.string().nullable(),
+      color: z.string().nullable().optional(),
+      vin: z.string().nullable().optional(),
       plate: z.string().nullable(),
       plateState: z.string().nullable(),
     })

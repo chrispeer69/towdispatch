@@ -222,49 +222,67 @@ export default function DriverWorkspacePage(): JSX.Element {
         </div>
       ) : null}
 
-      {/* Shift control */}
-      <Card className="mb-3">
-        <CardContent className="space-y-3 p-5">
-          {shiftLoading ? (
-            <p className="text-sm text-text-secondary-on-dark">Loading shift…</p>
-          ) : shift ? (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="font-semibold">Shift active</p>
-                <Badge tone="ok">
-                  <CircleDot className="h-3 w-3" />{' '}
-                  {STATUS_LABEL[shift.status as 'in_progress'] ?? shift.status}
-                </Badge>
-              </div>
-              <p className="text-sm text-text-secondary-on-dark">
-                Started {new Date(shift.startedAt).toLocaleTimeString()} · GPS ping{' '}
-                {lastPingAt ? `${formatRelative(lastPingAt)} ago` : 'pending…'}
-              </p>
-              <Button
-                size="touch"
-                variant="destructive"
-                className="w-full"
-                onClick={() => setEndShiftOpen(true)}
+      {/* Status strip — compact one-row summary of shift + pre-trip with
+         inline End shift / Redo pills. Sized so a 10-hour day on a phone
+         doesn't leave a giant red 'End shift' button screaming at the
+         driver every time they look down. */}
+      {shiftLoading ? (
+        <div className="mb-3 rounded-[10px] border border-divider bg-bg-surface p-3 text-sm text-text-secondary-on-dark">
+          Loading shift…
+        </div>
+      ) : shift ? (
+        <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[10px] border border-divider bg-bg-surface px-3 py-2 text-sm">
+          <span className="flex items-center gap-1.5 font-semibold">
+            <CircleDot className="h-3.5 w-3.5 text-ok" />
+            Shift active
+          </span>
+          <span className="text-text-secondary-on-dark">
+            Started{' '}
+            {new Date(shift.startedAt).toLocaleTimeString([], {
+              hour: 'numeric',
+              minute: '2-digit',
+            })}
+          </span>
+          <span className="text-text-secondary-on-dark">
+            GPS {lastPingAt ? `${formatRelative(lastPingAt)} ago` : 'pending…'}
+          </span>
+          {pretripForShift ? (
+            <span className="flex items-center gap-1 text-ok">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Pre-trip
+              <Link
+                href="/driver/pretrip"
+                className="ml-1 text-[10px] uppercase tracking-wide text-text-secondary-on-dark underline"
               >
-                End shift
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="font-semibold">No active shift</p>
-              <p className="text-sm text-text-secondary-on-dark">
-                Pick your truck to clock on for the day.
-              </p>
-              <Button size="touch" className="w-full" onClick={openStartShift}>
-                <PlayCircle className="h-5 w-5" />
-                Start shift
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                Redo
+              </Link>
+            </span>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setEndShiftOpen(true)}
+            className="ml-auto rounded-full border border-danger/60 bg-danger/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-danger hover:bg-danger/20"
+          >
+            End shift
+          </button>
+        </div>
+      ) : (
+        <Card className="mb-3">
+          <CardContent className="space-y-2 p-5">
+            <p className="font-semibold">No active shift</p>
+            <p className="text-sm text-text-secondary-on-dark">
+              Pick your truck to clock on for the day.
+            </p>
+            <Button size="touch" className="w-full" onClick={openStartShift}>
+              <PlayCircle className="h-5 w-5" />
+              Start shift
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Pretrip prompt */}
+      {/* Pre-trip prompt (only when REQUIRED — once completed it's already
+         folded into the status strip above so it doesn't take another row). */}
       {needsPretrip ? (
         <Card className="mb-3 border-status-warning/40">
           <CardContent className="space-y-3 p-5">
@@ -280,16 +298,6 @@ export default function DriverWorkspacePage(): JSX.Element {
             </Button>
           </CardContent>
         </Card>
-      ) : pretripForShift ? (
-        <div className="mb-3 flex items-center justify-between rounded-full border border-ok/40 bg-ok/10 px-3 py-2 text-sm">
-          <span className="flex items-center gap-2 text-ok">
-            <ShieldCheck className="h-4 w-4" />
-            Pre-trip captured at {new Date(pretripForShift.submittedAt).toLocaleTimeString()}
-          </span>
-          <Link href="/driver/pretrip" className="text-xs underline">
-            Redo
-          </Link>
-        </div>
       ) : null}
 
       {dvirFail ? (
@@ -311,13 +319,17 @@ export default function DriverWorkspacePage(): JSX.Element {
           <h2 className="font-condensed text-base font-extrabold uppercase tracking-tight">
             Active jobs
           </h2>
+          {/* Prominent Refresh — drivers tap this many times a day to
+             pull a freshly-assigned job onto their phone. Branded fill
+             + larger touch target so it reads as the primary action on
+             this row. */}
           <button
             type="button"
             onClick={() => void refreshAll()}
-            className="flex h-9 items-center gap-1 rounded-full px-2 text-xs text-text-secondary-on-dark hover:bg-bg-surface-elevated"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-brand-primary px-4 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98]"
             aria-label="Refresh jobs"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <RefreshCw className="h-4 w-4" />
             Refresh
           </button>
         </header>
@@ -356,6 +368,7 @@ export default function DriverWorkspacePage(): JSX.Element {
                   <p className="mt-0.5 text-sm text-text-secondary-on-dark">
                     {j.vehicle ? formatVehicle(j.vehicle) : 'Vehicle pending'}
                   </p>
+                  {j.vehicle ? <VehicleIdMeta vehicle={j.vehicle} /> : null}
                   <p className="mt-2 flex items-center gap-1 text-sm">
                     <MapPin className="h-4 w-4" />
                     {(j.pickupAddress ?? '—').split(',')[0]}
@@ -370,11 +383,15 @@ export default function DriverWorkspacePage(): JSX.Element {
         )}
       </section>
 
-      {/* Quick actions */}
-      <section className="mb-6 grid grid-cols-3 gap-2">
+      {/* Diagnostics footer — lives at the bottom of the screen as a
+         single thin row instead of three giant boxes. GPS ping and
+         offline queue are 99% background concerns; the driver only
+         needs them when something is off (bad cell, stuck shift, etc.)
+         and the row surfaces a count badge then. Help link is here
+         too — same visual weight, available when needed. */}
+      <section className="mb-6 mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-text-secondary-on-dark">
         <button
           type="button"
-          className="flex h-20 flex-col items-center justify-center rounded-[10px] border border-divider bg-bg-surface p-2 text-xs"
           onClick={async () => {
             if (!shift) {
               window.alert('Start a shift first.');
@@ -383,27 +400,30 @@ export default function DriverWorkspacePage(): JSX.Element {
             await gpsRef.current?.pingNow();
             setLastPingAt(new Date());
           }}
+          className="inline-flex items-center gap-1 hover:text-text-primary-on-dark"
         >
-          <Truck className="mb-1 h-5 w-5" />
+          <Truck className="h-3.5 w-3.5" />
           Log GPS ping
         </button>
+        <span className="opacity-30">·</span>
         <Link
           href="/driver/offline"
-          className="flex h-20 flex-col items-center justify-center rounded-[10px] border border-divider bg-bg-surface p-2 text-xs"
+          className="inline-flex items-center gap-1 hover:text-text-primary-on-dark"
         >
-          <Inbox className="mb-1 h-5 w-5" />
+          <Inbox className="h-3.5 w-3.5" />
           Offline queue
           {queueCount > 0 ? (
-            <span className="mt-1 rounded-full bg-status-warning/20 px-1.5 text-[10px] text-status-warning">
+            <span className="ml-1 rounded-full bg-status-warning/20 px-1.5 text-[10px] text-status-warning">
               {queueCount}
             </span>
           ) : null}
         </Link>
+        <span className="opacity-30">·</span>
         <Link
           href="/help"
-          className="flex h-20 flex-col items-center justify-center rounded-[10px] border border-divider bg-bg-surface p-2 text-xs"
+          className="inline-flex items-center gap-1 hover:text-text-primary-on-dark"
         >
-          <HelpCircle className="mb-1 h-5 w-5" />
+          <HelpCircle className="h-3.5 w-3.5" />
           Help
         </Link>
       </section>
@@ -479,11 +499,45 @@ function badgeToneForStatus(s: string): 'neutral' | 'info' | 'warn' | 'ok' | 'br
 }
 
 function formatVehicle(v: {
-  year?: number | null;
-  make?: string | null;
-  model?: string | null;
+  year?: number | null | undefined;
+  make?: string | null | undefined;
+  model?: string | null | undefined;
+  color?: string | null | undefined;
 }): string {
-  return [v.year, v.make, v.model].filter(Boolean).join(' ') || 'Vehicle';
+  const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ');
+  if (!ymm) return 'Vehicle';
+  return v.color ? `${ymm} · ${v.color}` : ymm;
+}
+
+/**
+ * Tiny meta-row under the vehicle summary on the workspace job card.
+ * Surfaces VIN + plate (with state) when present so the driver can
+ * cross-check the vehicle they're hooking against the file in one
+ * glance, without opening the job. Renders nothing when both fields
+ * are missing so the card stays clean.
+ */
+function VehicleIdMeta({
+  vehicle,
+}: {
+  vehicle: {
+    vin?: string | null | undefined;
+    plate?: string | null | undefined;
+    plateState?: string | null | undefined;
+  };
+}): JSX.Element | null {
+  const plate = vehicle.plate
+    ? vehicle.plateState
+      ? `${vehicle.plate} (${vehicle.plateState})`
+      : vehicle.plate
+    : null;
+  if (!vehicle.vin && !plate) return null;
+  return (
+    <p className="mt-0.5 font-mono text-[11px] uppercase tracking-wide text-text-secondary-on-dark">
+      {plate ? <span>Plate {plate}</span> : null}
+      {plate && vehicle.vin ? <span className="mx-1.5 opacity-50">·</span> : null}
+      {vehicle.vin ? <span>VIN {vehicle.vin}</span> : null}
+    </p>
+  );
 }
 
 function formatRelative(when: Date): string {
