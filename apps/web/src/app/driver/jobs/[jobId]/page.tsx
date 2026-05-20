@@ -197,53 +197,42 @@ export default function DriverJobPage(): JSX.Element {
     <DriverShell title={job.jobNumber} backHref="/driver/workspace">
       <OfflineBanner />
 
-      <Card className="mb-3">
-        <CardContent className="space-y-2 p-5">
-          {/* Compact one-line job header — job#, authorized-by, and status
-             all on one row so it stays tiny on a phone. None of these
-             are critical to towing the car; they're reference data. */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary-on-dark">
-            <span className="font-mono font-semibold text-text-primary-on-dark">
-              {job.jobNumber}
-            </span>
-            {job.authorizedByName ? (
-              <span className="truncate">Authorized by {job.authorizedByName}</span>
-            ) : null}
-            <span className="ml-auto">
-              <Badge tone={badgeToneForStatus(job.status)}>{STATUS_LABEL[job.status]}</Badge>
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Service-type headline — first thing the driver should see. */}
+      {/* The job# / authorized-by metadata that used to live on its
+         own header card is reference-only — the DriverShell title
+         already shows the job number, so the redundant card is gone.
+         The status pill now lives inside the Service headline. */}
       <ServiceHeadline job={job} />
       <CustomerCard job={job} />
       <VehicleCard job={job} />
       <RouteCard job={job} />
 
+      {/* Move job forward — single-row layout. The label sits left,
+         the action pill (sized to match the Navigate button on the
+         route card) sits right. When multiple transitions are
+         available the additional pills wrap inline. */}
       <Card className="mb-3">
-        <CardContent className="space-y-3 p-5">
-          <p className="font-semibold">Move job forward</p>
+        <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+          <p className="text-sm font-semibold">Move job forward</p>
           {next.length === 0 ? (
-            <p className="text-sm text-text-secondary-on-dark">
-              No further transitions available from {STATUS_LABEL[job.status]}.
+            <p className="ml-auto text-xs text-text-secondary-on-dark">
+              No further transitions from {STATUS_LABEL[job.status]}.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-2">
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
               {next.map((to) => (
-                <Button
+                <button
                   key={to}
-                  size="touch"
+                  type="button"
                   disabled={busyStatus === to}
                   onClick={() => void transition(to)}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
                 >
                   {busyStatus === to ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     (STATUS_CTA[to] ?? `Mark ${STATUS_LABEL[to]}`)
                   )}
-                </Button>
+                </button>
               ))}
             </div>
           )}
@@ -305,28 +294,36 @@ export default function DriverJobPage(): JSX.Element {
         </CardContent>
       </Card>
 
+      {/* Notes — header carries the action buttons inline so the card
+         doesn't grow a third row just to hold a Post-note button.
+         Empty state line is gone (an empty list is its own state). */}
       <Card className="mb-3">
-        <CardContent className="space-y-3 p-5">
-          <p className="flex items-center gap-2 font-semibold">
-            <StickyNote className="h-4 w-4" /> Notes
-          </p>
+        <CardContent className="space-y-2 p-3">
+          <div className="flex items-center gap-2">
+            <p className="flex items-center gap-1.5 text-sm font-semibold">
+              <StickyNote className="h-4 w-4" /> Notes
+            </p>
+            <div className="ml-auto flex items-center gap-2">
+              <VoiceDictateButton
+                onResult={(text) => setNewNote((s) => (s ? `${s} ${text}` : text))}
+              />
+              <button
+                type="button"
+                disabled={!newNote.trim()}
+                onClick={() => void addNote()}
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+              >
+                Post note
+              </button>
+            </div>
+          </div>
           <Textarea
-            placeholder="Add a note for dispatch (e.g., vehicle won't roll, customer changed dropoff)…"
+            placeholder="Add a note for dispatch — or tap the mic to dictate."
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
             maxLength={2000}
           />
-          <Button
-            size="default"
-            variant="secondary"
-            disabled={!newNote.trim()}
-            onClick={() => void addNote()}
-          >
-            Post note
-          </Button>
-          {notes.length === 0 ? (
-            <p className="text-xs text-text-secondary-on-dark">No notes yet.</p>
-          ) : (
+          {notes.length > 0 ? (
             <ul className="space-y-2">
               {notes.map((n) => (
                 <li key={n.id} className="rounded-[10px] border border-divider p-3 text-sm">
@@ -337,7 +334,7 @@ export default function DriverJobPage(): JSX.Element {
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
         </CardContent>
       </Card>
 
@@ -347,21 +344,21 @@ export default function DriverJobPage(): JSX.Element {
 }
 
 /**
- * Service-type headline. Highlighted accent so the first thing the
- * driver sees on the job file is what they're actually being asked
- * to do (tow / winch / jump / unlock / fuel / etc.). Sits above the
- * customer + vehicle blocks because identifying the service is what
- * dictates how the rest of the visit goes.
+ * Service headline. The visual focal point of the job file: a glowing
+ * blue service-type label flanked by the SERVICE caption (left) and
+ * the live status pill (right). Replaces the standalone status card
+ * from the previous design — status + service now share one row.
  */
 function ServiceHeadline({ job }: { job: JobDto }): JSX.Element {
   return (
-    <div className="mb-3 flex items-center justify-between rounded-[12px] border border-brand-primary/40 bg-brand-primary/10 px-4 py-3">
+    <div className="mb-3 flex items-center justify-between gap-3 rounded-[12px] border border-blue-500/40 bg-blue-500/5 px-4 py-3">
       <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark">
         Service
       </span>
-      <span className="text-base font-extrabold uppercase tracking-tight text-brand-primary">
+      <span className="flex-1 text-center text-lg font-extrabold uppercase tracking-tight text-blue-400 [text-shadow:0_0_18px_rgba(59,130,246,0.55)]">
         {(job.serviceType ?? 'tow').replace(/_/g, ' ')}
       </span>
+      <Badge tone={badgeToneForStatus(job.status)}>{STATUS_LABEL[job.status]}</Badge>
     </div>
   );
 }
@@ -408,10 +405,12 @@ function CustomerCard({ job }: { job: JobDto }): JSX.Element {
   );
 }
 /**
- * Vehicle card — compact. Headline row: YMM + color. Second row:
- * Plate + VIN (compact mono). Drivetrain only when present and
- * inline at the right of the YMM row. No "Service: tow" rehash here
- * because ServiceHeadline already owns that signal above.
+ * Vehicle card — compact. The YMM + color is tappable: tapping it
+ * opens a Google Image search for the make/model so the driver can
+ * visually confirm the vehicle in low light or a packed lot. The
+ * drivetrain (4WD / 2WD / AWD / RWD / FWD) is rendered in bright
+ * red because it materially changes the hookup decision and missing
+ * it can damage the vehicle.
  */
 function VehicleCard({ job }: { job: JobDto }): JSX.Element {
   const v = job.vehicle;
@@ -426,12 +425,31 @@ function VehicleCard({ job }: { job: JobDto }): JSX.Element {
   }
   const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ').trim();
   const plate = v.plate ? `${v.plate}${v.plateState ? ` (${v.plateState})` : ''}` : null;
+  // Build a Google Images query when we have at least a make and model.
+  // Falls back to a plain text label if we don't (so we never render a
+  // dead link).
+  const imageQuery = [v.year, v.make, v.model].filter(Boolean).join(' ').trim();
+  const imageUrl = imageQuery
+    ? `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(imageQuery)}`
+    : null;
   return (
     <Card className="mb-3">
       <CardContent className="space-y-1 p-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-2">
           <p className="text-base font-bold leading-tight">
-            {ymm || 'Vehicle details pending'}
+            {imageUrl ? (
+              <a
+                href={imageUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="underline-offset-2 hover:underline"
+                aria-label={`Open Google Images for ${imageQuery}`}
+              >
+                {ymm || 'Vehicle details pending'}
+              </a>
+            ) : (
+              <>{ymm || 'Vehicle details pending'}</>
+            )}
             {v.color ? (
               <span className="ml-1 text-sm font-semibold text-text-secondary-on-dark">
                 · {v.color}
@@ -439,7 +457,7 @@ function VehicleCard({ job }: { job: JobDto }): JSX.Element {
             ) : null}
           </p>
           {v.drivetrain ? (
-            <span className="font-mono text-[10px] uppercase tracking-wide text-text-secondary-on-dark">
+            <span className="rounded-[6px] bg-danger/15 px-2 py-0.5 font-mono text-[11px] font-extrabold uppercase tracking-wide text-danger">
               {v.drivetrain}
             </span>
           ) : null}
