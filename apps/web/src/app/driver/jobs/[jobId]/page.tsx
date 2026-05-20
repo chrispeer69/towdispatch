@@ -205,6 +205,7 @@ export default function DriverJobPage(): JSX.Element {
       <CustomerCard job={job} />
       <VehicleCard job={job} />
       <RouteCard job={job} />
+      <OfficeNotesCard job={job} />
 
       {/* Move job forward — single-row layout. The label sits left,
          the action pill (sized to match the Navigate button on the
@@ -354,7 +355,7 @@ export default function DriverJobPage(): JSX.Element {
 function ServiceHeadline({ job }: { job: JobDto }): JSX.Element {
   return (
     <div className="mb-3 flex items-center justify-between gap-3 rounded-[12px] border border-blue-500/40 bg-blue-500/5 px-4 py-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-primary-on-dark">
         Service
       </span>
       <span className="flex-1 text-center text-lg font-extrabold uppercase tracking-tight text-blue-400 [text-shadow:0_0_18px_rgba(59,130,246,0.55)]">
@@ -525,6 +526,28 @@ function RouteRow({
         </a>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * Office notes card. Renders the dispatch-typed instructions on the
+ * job (the `notes` field on JobDto) only when the office actually
+ * filled it in. Read-only — the driver can't edit these. Drivers add
+ * their own notes through the Notes card lower on the page.
+ */
+function OfficeNotesCard({ job }: { job: JobDto }): JSX.Element | null {
+  const notes = job.notes?.trim();
+  if (!notes) return null;
+  return (
+    <Card className="mb-3 border-amber-500/40 bg-amber-500/5">
+      <CardContent className="space-y-1 p-3">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+          <StickyNote className="h-3.5 w-3.5" />
+          Office notes
+        </p>
+        <p className="whitespace-pre-wrap text-sm leading-snug">{notes}</p>
+      </CardContent>
+    </Card>
   );
 }
 
