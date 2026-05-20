@@ -83,6 +83,9 @@ export default function DriverLoginPage(): JSX.Element {
   //
   // The picker screen exposes a “Change workshop” button so a driver
   // moving between shops can clear the binding and re-enter the code.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: lookupCode
+  // is intentionally read fresh on each invocation; including it would
+  // re-run this effect every render and break the one-shot bootstrap.
   useEffect(() => {
     if (codeFromUrl) {
       void lookupCode(codeFromUrl);
@@ -161,6 +164,26 @@ export default function DriverLoginPage(): JSX.Element {
         tenantName: res.tenant.name,
         expiresAt,
       });
+      // Daily-briefing gate. Before routing to the requested `next`
+      // destination (workspace by default), check whether there is an
+      // active briefing the driver has not yet acknowledged today. If
+      // so, route to /driver/briefing first; the briefing page sends
+      // the driver to `next` after acknowledgment.
+      try {
+        const briefingCheck = await driverApi<{ needs: boolean }>(
+          'GET',
+          '/driver-briefings/needs-acknowledgment',
+        );
+        if (briefingCheck.needs) {
+          router.replace(`/driver/briefing?next=${encodeURIComponent(next)}`);
+          return;
+        }
+      } catch {
+        // If the briefing check fails (network, 404 = no briefing
+        // configured, etc.), don't block the driver from working.
+        // A failed-open briefing is the safer default than locking
+        // out a driver because the briefing endpoint hiccupped.
+      }
       router.replace(next);
     } catch (err) {
       if (err instanceof DriverApiError) {
