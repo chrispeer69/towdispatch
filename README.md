@@ -223,3 +223,6 @@ The SendGrid event webhook URL to register on the SendGrid side (Settings → Ma
 ## License
 
 Proprietary — © US Tow DISPATCH, Inc.
+
+<!-- trigger deploy May 20, 2026 -->
+
