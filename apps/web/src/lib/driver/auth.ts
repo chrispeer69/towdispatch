@@ -61,17 +61,34 @@ function readState(): DriverAuthState {
   }
 }
 
+/**
+ * Custom event name dispatched on the current window whenever the driver
+ * session is created or destroyed.  The native StorageEvent only fires
+ * in *other* tabs, so without this same-tab broadcast the DriverAuthGate
+ * hook instance never learns that the login page just persisted a JWT —
+ * producing the redirect-loop / "Redirecting…" flash the founder
+ * reported.
+ */
+const DRIVER_AUTH_CHANGE_EVENT = 'driver-auth-change';
+
+/** Notify every useDriverAuth instance in this tab to re-read storage. */
+function broadcastAuthChange(): void {
+  window.dispatchEvent(new Event(DRIVER_AUTH_CHANGE_EVENT));
+}
+
 export function persistDriverSession(jwt: string, profile: DriverProfile): void {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(DRIVER_JWT_KEY, jwt);
   window.localStorage.setItem(DRIVER_PROFILE_KEY, JSON.stringify(profile));
   window.localStorage.setItem(DRIVER_TENANT_SLUG_KEY, profile.tenantSlug);
+  broadcastAuthChange();
 }
 
 export function clearDriverSessionStorage(): void {
   if (typeof window === 'undefined') return;
   window.localStorage.removeItem(DRIVER_JWT_KEY);
   window.localStorage.removeItem(DRIVER_PROFILE_KEY);
+  broadcastAuthChange();
 }
 
 export function readTenantSlugHint(): string | null {
@@ -130,8 +147,19 @@ export function useDriverAuth(): DriverAuthState & {
     const onStorage = (e: StorageEvent): void => {
       if (e.key === DRIVER_JWT_KEY || e.key === DRIVER_PROFILE_KEY) refresh();
     };
+    // Same-tab sync: persistDriverSession / clearDriverSessionStorage
+    // dispatch this event so every hook instance (including the
+    // DriverAuthGate that lives in the parent layout) immediately
+    // picks up the new JWT without waiting for a re-mount.
+    const onLocalChange = (): void => {
+      refresh();
+    };
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener(DRIVER_AUTH_CHANGE_EVENT, onLocalChange);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(DRIVER_AUTH_CHANGE_EVENT, onLocalChange);
+    };
   }, [refresh]);
 
   const logout = useCallback((next = '/driver/login') => {

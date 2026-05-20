@@ -19,6 +19,7 @@ import { useDriverAuth } from '@/lib/driver/auth';
  * unit-tested without rendering the component.
  */
 import { decideAuthGate } from '@/lib/driver/auth-gate-logic';
+import { DRIVER_JWT_KEY } from '@/lib/driver/storage-keys';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -72,7 +73,17 @@ export function DriverAuthGate({ children }: Props): JSX.Element | null {
       </div>
     );
   }
-  const decision = decideAuthGate({ pathname, hasJwt: Boolean(jwt) });
+
+  // Synchronous storage fallback: if React state hasn't caught up with
+  // a just-persisted JWT (the custom event setState is still queued),
+  // read localStorage directly so we never flash "Redirecting…" or
+  // fire a spurious redirect back to /driver/login.  This closes the
+  // last possible timing window across all browsers and devices.
+  const effectiveHasJwt =
+    Boolean(jwt) ||
+    (typeof window !== 'undefined' && Boolean(window.localStorage.getItem(DRIVER_JWT_KEY)));
+
+  const decision = decideAuthGate({ pathname, hasJwt: effectiveHasJwt });
   if (decision.action !== 'render') {
     // Redirect is in flight — render a spinner-friendly blank.
     return (

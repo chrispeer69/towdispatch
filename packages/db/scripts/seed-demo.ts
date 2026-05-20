@@ -43,7 +43,7 @@ import * as schema from '../src/schema/index';
 const TENANT_SLUG = 'roadside';
 const TENANT_NAME = 'Roadside Towing and Recovery, Inc.';
 const DEMO_PASSWORD = 'TempPass#001';
-const INVOICE_PREFIX = 'ROAD';
+const INVOICE_PREFIX = 'INV';
 const INVOICE_YEAR = '2026';
 
 /**
