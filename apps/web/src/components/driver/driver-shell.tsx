@@ -8,7 +8,7 @@
  */
 import { Button } from '@/components/ui/button';
 import { useDriverAuth } from '@/lib/driver/auth';
-import { ChevronLeft, LogOut } from 'lucide-react';
+import { ChevronLeft, HelpCircle, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -29,7 +29,12 @@ export function DriverShell({ title, backHref, children }: Props): JSX.Element {
   return (
     <div className="min-h-screen bg-bg-base text-text-primary-on-dark">
       <header className="sticky top-0 z-30 border-b border-divider bg-bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-3">
+        {/* Three-column header: driver identity (left) · HELP (centered)
+           · Sign out (right). HELP gets a permanent, prominent slot so
+           the driver can always find training material, towing tips,
+           and how-to articles — the in-app Help Center is becoming
+           the home for all that content. */}
+        <div className="mx-auto grid h-16 max-w-3xl grid-cols-[1fr_auto_1fr] items-center px-3">
           <div className="flex min-w-0 items-center gap-2">
             {backHref ? (
               <Link
@@ -47,16 +52,26 @@ export function DriverShell({ title, backHref, children }: Props): JSX.Element {
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => logout()}
-            aria-label="Sign out"
-            className="gap-1"
+          <Link
+            href="/help"
+            aria-label="Help Center"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-brand-primary/40 bg-brand-primary/10 px-3 text-sm font-extrabold uppercase tracking-wide text-brand-primary hover:bg-brand-primary/20 active:scale-[0.98]"
           >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign out</span>
-          </Button>
+            <HelpCircle className="h-4 w-4" />
+            Help
+          </Link>
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => logout()}
+              aria-label="Sign out"
+              className="gap-1"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign out</span>
+            </Button>
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl px-3 pb-32 pt-4">{children}</main>
