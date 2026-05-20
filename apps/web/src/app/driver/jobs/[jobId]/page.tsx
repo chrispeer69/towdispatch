@@ -271,26 +271,28 @@ export default function DriverJobPage(): JSX.Element {
         </CardContent>
       </Card>
 
+      {/* Field payment — single-row layout. Label left, Capture-payment
+         pill right at Navigate-button size. The blurb explaining when
+         the button is gated lives in the disabled tooltip / aria-label
+         instead of consuming a second row of card height. */}
       <Card className="mb-3">
-        <CardContent className="space-y-3 p-5">
-          <p className="font-semibold">Field payment</p>
-          <p className="text-sm text-text-secondary-on-dark">
-            Capture payment at the scene with the Stripe Terminal reader.
-          </p>
-          <Button
-            size="touch"
-            className="w-full"
+        <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+          <p className="text-sm font-semibold">Field payment</p>
+          <button
+            type="button"
             disabled={!canCapturePayment}
             onClick={() => setPaymentOpen(true)}
+            title={
+              canCapturePayment
+                ? 'Capture payment at the scene with the Stripe Terminal reader'
+                : 'Available once the job is in progress and a shift is active'
+            }
+            aria-label="Capture payment"
+            className="ml-auto inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
           >
-            <CreditCard className="h-5 w-5" />
+            <CreditCard className="h-4 w-4" />
             Capture payment
-          </Button>
-          {!canCapturePayment ? (
-            <p className="text-xs text-text-secondary-on-dark">
-              Available once the job is in progress and a shift is active.
-            </p>
-          ) : null}
+          </button>
         </CardContent>
       </Card>
 
