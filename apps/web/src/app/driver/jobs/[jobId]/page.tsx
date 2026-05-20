@@ -206,28 +206,33 @@ export default function DriverJobPage(): JSX.Element {
       <VehicleCard job={job} />
       <RouteCard job={job} />
 
+      {/* Move job forward — single-row layout. The label sits left,
+         the action pill (sized to match the Navigate button on the
+         route card) sits right. When multiple transitions are
+         available the additional pills wrap inline. */}
       <Card className="mb-3">
-        <CardContent className="space-y-3 p-5">
-          <p className="font-semibold">Move job forward</p>
+        <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+          <p className="text-sm font-semibold">Move job forward</p>
           {next.length === 0 ? (
-            <p className="text-sm text-text-secondary-on-dark">
-              No further transitions available from {STATUS_LABEL[job.status]}.
+            <p className="ml-auto text-xs text-text-secondary-on-dark">
+              No further transitions from {STATUS_LABEL[job.status]}.
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-2">
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
               {next.map((to) => (
-                <Button
+                <button
                   key={to}
-                  size="touch"
+                  type="button"
                   disabled={busyStatus === to}
                   onClick={() => void transition(to)}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
                 >
                   {busyStatus === to ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     (STATUS_CTA[to] ?? `Mark ${STATUS_LABEL[to]}`)
                   )}
-                </Button>
+                </button>
               ))}
             </div>
           )}
@@ -289,28 +294,36 @@ export default function DriverJobPage(): JSX.Element {
         </CardContent>
       </Card>
 
+      {/* Notes — header carries the action buttons inline so the card
+         doesn't grow a third row just to hold a Post-note button.
+         Empty state line is gone (an empty list is its own state). */}
       <Card className="mb-3">
-        <CardContent className="space-y-3 p-5">
-          <p className="flex items-center gap-2 font-semibold">
-            <StickyNote className="h-4 w-4" /> Notes
-          </p>
+        <CardContent className="space-y-2 p-3">
+          <div className="flex items-center gap-2">
+            <p className="flex items-center gap-1.5 text-sm font-semibold">
+              <StickyNote className="h-4 w-4" /> Notes
+            </p>
+            <div className="ml-auto flex items-center gap-2">
+              <VoiceDictateButton
+                onResult={(text) => setNewNote((s) => (s ? `${s} ${text}` : text))}
+              />
+              <button
+                type="button"
+                disabled={!newNote.trim()}
+                onClick={() => void addNote()}
+                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+              >
+                Post note
+              </button>
+            </div>
+          </div>
           <Textarea
-            placeholder="Add a note for dispatch (e.g., vehicle won't roll, customer changed dropoff)…"
+            placeholder="Add a note for dispatch — or tap the mic to dictate."
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
             maxLength={2000}
           />
-          <Button
-            size="default"
-            variant="secondary"
-            disabled={!newNote.trim()}
-            onClick={() => void addNote()}
-          >
-            Post note
-          </Button>
-          {notes.length === 0 ? (
-            <p className="text-xs text-text-secondary-on-dark">No notes yet.</p>
-          ) : (
+          {notes.length > 0 ? (
             <ul className="space-y-2">
               {notes.map((n) => (
                 <li key={n.id} className="rounded-[10px] border border-divider p-3 text-sm">
@@ -321,7 +334,7 @@ export default function DriverJobPage(): JSX.Element {
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
         </CardContent>
       </Card>
 
