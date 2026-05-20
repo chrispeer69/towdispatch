@@ -48,6 +48,7 @@ import {
   CreditCard,
   Loader2,
   MapPin,
+  Mic,
   Navigation,
   Phone,
   StickyNote,
@@ -198,19 +199,25 @@ export default function DriverJobPage(): JSX.Element {
 
       <Card className="mb-3">
         <CardContent className="space-y-2 p-5">
-          <div className="flex items-center justify-between">
-            <p className="font-mono text-xs text-text-secondary-on-dark">Job</p>
-            <Badge tone={badgeToneForStatus(job.status)}>{STATUS_LABEL[job.status]}</Badge>
+          {/* Compact one-line job header — job#, authorized-by, and status
+             all on one row so it stays tiny on a phone. None of these
+             are critical to towing the car; they're reference data. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary-on-dark">
+            <span className="font-mono font-semibold text-text-primary-on-dark">
+              {job.jobNumber}
+            </span>
+            {job.authorizedByName ? (
+              <span className="truncate">Authorized by {job.authorizedByName}</span>
+            ) : null}
+            <span className="ml-auto">
+              <Badge tone={badgeToneForStatus(job.status)}>{STATUS_LABEL[job.status]}</Badge>
+            </span>
           </div>
-          <h1 className="text-lg font-bold">{job.jobNumber}</h1>
-          {job.authorizedByName ? (
-            <p className="text-xs text-text-secondary-on-dark">
-              Authorized by {job.authorizedByName}
-            </p>
-          ) : null}
         </CardContent>
       </Card>
 
+      {/* Service-type headline — first thing the driver should see. */}
+      <ServiceHeadline job={job} />
       <CustomerCard job={job} />
       <VehicleCard job={job} />
       <RouteCard job={job} />
@@ -339,61 +346,80 @@ export default function DriverJobPage(): JSX.Element {
   );
 }
 
+/**
+ * Service-type headline. Highlighted accent so the first thing the
+ * driver sees on the job file is what they're actually being asked
+ * to do (tow / winch / jump / unlock / fuel / etc.). Sits above the
+ * customer + vehicle blocks because identifying the service is what
+ * dictates how the rest of the visit goes.
+ */
+function ServiceHeadline({ job }: { job: JobDto }): JSX.Element {
+  return (
+    <div className="mb-3 flex items-center justify-between rounded-[12px] border border-brand-primary/40 bg-brand-primary/10 px-4 py-3">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-secondary-on-dark">
+        Service
+      </span>
+      <span className="text-base font-extrabold uppercase tracking-tight text-brand-primary">
+        {(job.serviceType ?? 'tow').replace(/_/g, ' ')}
+      </span>
+    </div>
+  );
+}
+
 function CustomerCard({ job }: { job: JobDto }): JSX.Element {
   const customer = job.customer;
   const customerName = customer?.name ?? 'Customer pending';
   const phone = customer?.phone ?? null;
-  const email = customer?.email ?? null;
-  // Strip everything but digits + leading + for the tel: href so the
-  // dialer doesn't choke on punctuation like "(614) 555-1212".
+  // Strip everything but digits + leading + for the tel:/sms: hrefs.
   const telHref = phone ? `tel:${phone.replace(/[^+\d]/g, '')}` : null;
   const smsHref = phone ? `sms:${phone.replace(/[^+\d]/g, '')}` : null;
   return (
     <Card className="mb-3">
-      <CardContent className="space-y-2 p-5">
-        <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Customer</p>
-        <p className="text-lg font-semibold">{customerName}</p>
-        {phone ? (
-          <p className="font-mono text-sm text-text-primary-on-dark">{phone}</p>
-        ) : (
-          <p className="text-xs text-text-secondary-on-dark">No phone on file</p>
-        )}
-        {email ? <p className="break-all text-xs text-text-secondary-on-dark">{email}</p> : null}
-        <div className="flex flex-wrap gap-2 pt-2">
-          {telHref ? (
-            <a
-              href={telHref}
-              className="flex h-11 items-center gap-2 rounded-full border border-divider bg-bg-surface-elevated px-4 text-sm font-semibold"
-            >
-              <Phone className="h-4 w-4" />
-              Call
-            </a>
-          ) : null}
-          {smsHref ? (
-            <a
-              href={smsHref}
-              className="flex h-11 items-center gap-2 rounded-full border border-divider bg-bg-surface-elevated px-4 text-sm font-semibold"
-            >
-              <Phone className="h-4 w-4" />
-              Text
-            </a>
-          ) : null}
+      <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-bold leading-tight">{customerName}</p>
+          {phone ? (
+            <p className="font-mono text-xs text-text-secondary-on-dark">{phone}</p>
+          ) : (
+            <p className="text-xs text-text-secondary-on-dark">No phone on file</p>
+          )}
         </div>
+        {telHref ? (
+          <a
+            href={telHref}
+            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground"
+            aria-label={`Call ${customerName}`}
+          >
+            <Phone className="h-4 w-4" />
+            Call
+          </a>
+        ) : null}
+        {smsHref ? (
+          <a
+            href={smsHref}
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-divider px-3 text-sm font-semibold"
+            aria-label={`Text ${customerName}`}
+          >
+            Text
+          </a>
+        ) : null}
       </CardContent>
     </Card>
   );
 }
+/**
+ * Vehicle card — compact. Headline row: YMM + color. Second row:
+ * Plate + VIN (compact mono). Drivetrain only when present and
+ * inline at the right of the YMM row. No "Service: tow" rehash here
+ * because ServiceHeadline already owns that signal above.
+ */
 function VehicleCard({ job }: { job: JobDto }): JSX.Element {
   const v = job.vehicle;
   if (!v) {
     return (
       <Card className="mb-3">
-        <CardContent className="space-y-1 p-5">
-          <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Vehicle</p>
-          <p className="font-semibold">Vehicle pending</p>
-          <p className="text-xs text-text-secondary-on-dark">
-            Service: <span className="uppercase">{job.serviceType}</span>
-          </p>
+        <CardContent className="p-3">
+          <p className="text-sm font-semibold text-text-secondary-on-dark">Vehicle pending</p>
         </CardContent>
       </Card>
     );
@@ -402,87 +428,90 @@ function VehicleCard({ job }: { job: JobDto }): JSX.Element {
   const plate = v.plate ? `${v.plate}${v.plateState ? ` (${v.plateState})` : ''}` : null;
   return (
     <Card className="mb-3">
-      <CardContent className="space-y-2 p-5">
-        <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Vehicle</p>
-        <p className="text-lg font-semibold">{ymm || 'Vehicle details pending'}</p>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-          {v.color ? (
-            <>
-              <span className="text-text-secondary-on-dark">Color</span>
-              <span className="font-mono">{v.color}</span>
-            </>
-          ) : null}
-          {plate ? (
-            <>
-              <span className="text-text-secondary-on-dark">Plate</span>
-              <span className="font-mono">{plate}</span>
-            </>
-          ) : null}
-          {v.vin ? (
-            <>
-              <span className="text-text-secondary-on-dark">VIN</span>
-              <span className="break-all font-mono text-xs">{v.vin}</span>
-            </>
-          ) : null}
+      <CardContent className="space-y-1 p-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+          <p className="text-base font-bold leading-tight">
+            {ymm || 'Vehicle details pending'}
+            {v.color ? (
+              <span className="ml-1 text-sm font-semibold text-text-secondary-on-dark">
+                · {v.color}
+              </span>
+            ) : null}
+          </p>
           {v.drivetrain ? (
-            <>
-              <span className="text-text-secondary-on-dark">Drivetrain</span>
-              <span className="font-mono">{v.drivetrain}</span>
-            </>
+            <span className="font-mono text-[10px] uppercase tracking-wide text-text-secondary-on-dark">
+              {v.drivetrain}
+            </span>
           ) : null}
         </div>
-        <p className="pt-2 text-xs text-text-secondary-on-dark">
-          Service: <span className="uppercase">{job.serviceType}</span>
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function RouteCard({ job }: { job: JobDto }): JSX.Element {
-  const pickup = job.pickupAddress;
-  const dropoff = job.dropoffAddress;
-  return (
-    <Card className="mb-3">
-      <CardContent className="space-y-3 p-5">
-        <div className="flex items-start gap-2">
-          <MapPin className="mt-0.5 h-4 w-4 text-brand-primary" />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-text-secondary-on-dark">Pickup</p>
-            <p className="break-words text-sm">{pickup}</p>
-            <a
-              href={mapsUrl(pickup)}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="mt-1 inline-flex h-9 items-center gap-1 text-xs text-brand-primary underline"
-            >
-              <Navigation className="h-3 w-3" />
-              Open in Maps
-            </a>
-          </div>
-        </div>
-        {dropoff ? (
-          <div className="flex items-start gap-2">
-            <MapPin className="mt-0.5 h-4 w-4 text-ok" />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs text-text-secondary-on-dark">Dropoff</p>
-              <p className="break-words text-sm">{dropoff}</p>
-              <a
-                href={mapsUrl(dropoff)}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mt-1 inline-flex h-9 items-center gap-1 text-xs text-brand-primary underline"
-              >
-                <Navigation className="h-3 w-3" />
-                Open in Maps
-              </a>
-            </div>
-          </div>
+        {plate || v.vin ? (
+          <p className="font-mono text-[11px] uppercase tracking-wide text-text-secondary-on-dark">
+            {plate ? <>Plate {plate}</> : null}
+            {plate && v.vin ? <span className="mx-1.5 opacity-50">·</span> : null}
+            {v.vin ? <>VIN {v.vin}</> : null}
+          </p>
         ) : null}
       </CardContent>
     </Card>
   );
 }
+
+/**
+ * Route card — two compact rows. Tapping the Navigate button now
+ * launches turn-by-turn navigation directly via the Google Maps
+ * `dir_action=navigate` URL scheme instead of just opening the
+ * destination pin. One tap from here to driving.
+ */
+function RouteCard({ job }: { job: JobDto }): JSX.Element {
+  const pickup = job.pickupAddress;
+  const dropoff = job.dropoffAddress;
+  return (
+    <Card className="mb-3">
+      <CardContent className="space-y-1.5 p-3">
+        <RouteRow tone="brand" label="Pickup" address={pickup} />
+        {dropoff ? <RouteRow tone="ok" label="Dropoff" address={dropoff} /> : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RouteRow({
+  tone,
+  label,
+  address,
+}: {
+  tone: 'brand' | 'ok';
+  label: string;
+  address: string | null;
+}): JSX.Element {
+  const pinClass = tone === 'brand' ? 'text-brand-primary' : 'text-ok';
+  return (
+    <div className="flex items-center gap-2">
+      <MapPin className={`h-4 w-4 shrink-0 ${pinClass}`} aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold">{address ?? '—'}</p>
+        <p className="text-[10px] uppercase tracking-wide text-text-secondary-on-dark">{label}</p>
+      </div>
+      {address ? (
+        <a
+          href={mapsUrl(address)}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand-primary px-3 text-sm font-semibold text-brand-primary-foreground"
+          aria-label={`Navigate to ${label}`}
+        >
+          <Navigation className="h-4 w-4" />
+          Navigate
+        </a>
+      ) : null}
+    </div>
+  );
+}
+
+/** Per-claim photo cap. 15 is the business rule from the founder. */
+const PHOTO_CAP = 15;
+/** Per-video duration cap, in seconds. */
+const VIDEO_DURATION_CAP_SECONDS = 120;
 
 function PhotoTab({
   evidence,
@@ -492,20 +521,42 @@ function PhotoTab({
   onCapture: (file: File) => void | Promise<void>;
 }): JSX.Element {
   const photos = evidence.filter((e) => e.kind.startsWith('photo'));
+  const atCap = photos.length >= PHOTO_CAP;
   return (
     <div className="space-y-3">
-      <label className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-divider bg-bg-surface-elevated text-sm font-semibold">
+      <div className="flex items-center justify-between">
+        <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">Photos</p>
+        <p
+          className={`text-xs font-mono ${
+            atCap ? 'text-status-warning' : 'text-text-secondary-on-dark'
+          }`}
+        >
+          {photos.length} / {PHOTO_CAP}
+        </p>
+      </div>
+      <label
+        className={`flex h-14 items-center justify-center gap-2 rounded-[10px] border border-divider bg-bg-surface-elevated text-sm font-semibold ${
+          atCap ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+        }`}
+      >
         <Camera className="h-5 w-5" />
-        Take a photo
+        {atCap ? `Limit — ${PHOTO_CAP} max per file` : 'Take a photo'}
         <input
           type="file"
           accept="image/*"
           capture="environment"
           multiple
+          disabled={atCap}
           className="hidden"
           onChange={(e) => {
             const files = e.target.files ? Array.from(e.target.files) : [];
-            for (const file of files) void onCapture(file);
+            const room = Math.max(0, PHOTO_CAP - photos.length);
+            for (const file of files.slice(0, room)) void onCapture(file);
+            if (files.length > room) {
+              window.alert(
+                `Only ${room} of ${files.length} photos uploaded — ${PHOTO_CAP} per claim is the limit.`,
+              );
+            }
             e.target.value = '';
           }}
         />
@@ -537,8 +588,32 @@ function VideoTab({
   onCapture: (file: File) => void | Promise<void>;
 }): JSX.Element {
   const videos = evidence.filter((e) => e.kind.startsWith('video'));
+
+  // Read the duration of the selected file (browser-side, before upload)
+  // and reject anything over the cap so dispatch never receives a 5-minute
+  // damage walkaround that would blow the storage budget.
+  async function getDurationSeconds(file: File): Promise<number> {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file);
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      v.src = url;
+      v.onloadedmetadata = () => {
+        URL.revokeObjectURL(url);
+        resolve(Number.isFinite(v.duration) ? v.duration : 0);
+      };
+      v.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(0);
+      };
+    });
+  }
+
   return (
     <div className="space-y-3">
+      <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">
+        Walkaround video · max {VIDEO_DURATION_CAP_SECONDS}s per clip
+      </p>
       <label className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-divider bg-bg-surface-elevated text-sm font-semibold">
         <Video className="h-5 w-5" />
         Capture walkaround video
@@ -547,10 +622,18 @@ function VideoTab({
           accept="video/*"
           capture="environment"
           className="hidden"
-          onChange={(e) => {
+          onChange={async (e) => {
             const file = e.target.files?.[0];
-            if (file) void onCapture(file);
             e.target.value = '';
+            if (!file) return;
+            const duration = await getDurationSeconds(file);
+            if (duration > VIDEO_DURATION_CAP_SECONDS + 1) {
+              window.alert(
+                `That clip is ${Math.round(duration)}s. ${VIDEO_DURATION_CAP_SECONDS}s is the max per video. Trim it and try again.`,
+              );
+              return;
+            }
+            void onCapture(file);
           }}
         />
       </label>
@@ -575,6 +658,14 @@ function VideoTab({
 function SignatureTab({ job, onSaved }: { job: JobDto; onSaved: () => void }): JSX.Element {
   const padRef = useRef<SignaturePadHandle | null>(null);
   const [busy, setBusy] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+
+  const phone = job.customer?.phone ?? null;
+  const customerName = job.customer?.name ?? 'the customer';
+  const releaseMessage = `Hi ${customerName}, your signed liability release for tow #${job.jobNumber} is on file with the operator. Reply to this number if you need a copy. — US Tow Alliance`;
+  const smsHref = phone
+    ? `sms:${phone.replace(/[^+\d]/g, '')}?&body=${encodeURIComponent(releaseMessage)}`
+    : null;
 
   async function save(): Promise<void> {
     if (!padRef.current || padRef.current.isEmpty()) {
@@ -592,6 +683,7 @@ function SignatureTab({ job, onSaved }: { job: JobDto; onSaved: () => void }): J
         file,
       });
       padRef.current.clear();
+      setSavedAt(new Date());
       onSaved();
     } catch (err) {
       window.alert(`Save failed: ${(err as Error).message}`);
@@ -602,6 +694,10 @@ function SignatureTab({ job, onSaved }: { job: JobDto; onSaved: () => void }): J
 
   return (
     <div className="space-y-3">
+      <p className="text-xs text-text-secondary-on-dark">
+        Customer signs to release the operator from liability for pre-existing damage documented in
+        the photos above.
+      </p>
       <SignaturePad ref={padRef} />
       <div className="flex gap-2">
         <Button variant="ghost" onClick={() => padRef.current?.clear()}>
@@ -612,6 +708,25 @@ function SignatureTab({ job, onSaved }: { job: JobDto; onSaved: () => void }): J
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save signature'}
         </Button>
       </div>
+      {/* After a signature lands, surface a one-tap "text a copy to the
+         customer" button. We launch the driver's native messaging app
+         with the customer's number + a prefilled body — same UX as a
+         CRM-managed SMS for the customer's inbox, with zero new
+         outbound SMS infra cost on our side. */}
+      {savedAt && smsHref ? (
+        <a
+          href={smsHref}
+          className="flex h-11 items-center justify-center gap-2 rounded-full border border-divider bg-bg-surface-elevated text-sm font-semibold"
+        >
+          <Phone className="h-4 w-4" />
+          Text release confirmation to customer
+        </a>
+      ) : null}
+      {savedAt && !smsHref ? (
+        <p className="text-xs text-text-secondary-on-dark">
+          Signature saved. Customer phone not on file — no text sent.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -758,6 +873,78 @@ function PaymentDialog({
   );
 }
 
+/**
+ * Voice-dictation button for the driver notes composer. Wraps the Web
+ * Speech API (SpeechRecognition / webkitSpeechRecognition) so the
+ * driver can dictate by voice instead of thumb-typing while in the
+ * truck. Falls back to a disabled state on browsers that don't support
+ * it (mostly Firefox — Chrome + Safari + Edge all do).
+ */
+function VoiceDictateButton({
+  onResult,
+}: {
+  onResult: (text: string) => void;
+}): JSX.Element {
+  const [listening, setListening] = useState(false);
+  const recRef = useRef<unknown>(null);
+  const supported =
+    typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  function start(): void {
+    if (!supported) {
+      window.alert('Voice dictation is not supported in this browser. Try Chrome or Safari.');
+      return;
+    }
+    // biome-ignore lint/suspicious/noExplicitAny: Web Speech API typings vary by browser
+    const Ctor: any =
+      // biome-ignore lint/suspicious/noExplicitAny: same
+      (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+    // biome-ignore lint/suspicious/noExplicitAny: same
+    const rec: any = new Ctor();
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.continuous = false;
+    rec.onresult = (event: { results: ArrayLike<{ 0: { transcript: string } }> }) => {
+      const text = Array.from(event.results)
+        .map((r) => r[0].transcript)
+        .join(' ')
+        .trim();
+      if (text) onResult(text);
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    recRef.current = rec;
+    setListening(true);
+    rec.start();
+  }
+
+  function stop(): void {
+    // biome-ignore lint/suspicious/noExplicitAny: same as above
+    const rec = recRef.current as any;
+    rec?.stop?.();
+    setListening(false);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => (listening ? stop() : start())}
+      disabled={!supported}
+      className={`flex h-10 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-semibold ${
+        listening
+          ? 'bg-danger text-danger-foreground'
+          : 'border border-divider bg-bg-surface-elevated text-text-primary-on-dark'
+      } ${supported ? '' : 'opacity-50'}`}
+      aria-label={listening ? 'Stop dictation' : 'Start voice dictation'}
+    >
+      <Mic className="h-4 w-4" />
+      {listening ? 'Listening…' : 'Dictate'}
+    </button>
+  );
+}
+
 function badgeToneForStatus(s: JobStatus): 'neutral' | 'info' | 'warn' | 'ok' | 'brand' {
   if (s === 'dispatched') return 'info';
   if (s === 'enroute' || s === 'on_scene') return 'warn';
@@ -766,7 +953,18 @@ function badgeToneForStatus(s: JobStatus): 'neutral' | 'info' | 'warn' | 'ok' | 
   return 'neutral';
 }
 
+/**
+ * Build a Google Maps URL that launches turn-by-turn navigation
+ * directly when tapped on mobile, rather than just showing the
+ * destination pin on a map. On iOS this hands off to Google Maps if
+ * installed (then Apple Maps as the fallback handler for the
+ * universal link); on Android it opens Google Maps and starts
+ * directions from the user's current location.
+ *
+ * Reference: https://developers.google.com/maps/documentation/urls/get-started#directions-action
+ */
 function mapsUrl(address: string | null): string {
   if (!address) return '#';
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  const encoded = encodeURIComponent(address);
+  return `https://www.google.com/maps/dir/?api=1&destination=${encoded}&travelmode=driving&dir_action=navigate`;
 }
