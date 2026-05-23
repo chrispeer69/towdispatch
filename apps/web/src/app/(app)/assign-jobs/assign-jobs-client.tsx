@@ -33,7 +33,8 @@ export function AssignJobsClient({ initialSnapshot }: Props): JSX.Element {
             Assign Jobs
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
-            Drag a job onto a driver to assign. Drag back to the queue to unassign.
+            Click the job number to open its details. Grab anywhere else on the card to drag it onto
+            a driver — drag back to the queue to unassign.
           </p>
         </div>
         <ConnectionPill connected={connected} />
