@@ -49,7 +49,11 @@ public actor AuthService: TokenProvider {
     }
 
     public func signOut() async {
-        if let refresh = session?.refreshToken {
+        // Operator sessions hit /auth/logout to invalidate the refresh
+        // token; driver-PIN sessions have no refresh token, so we just
+        // clear local state. Calling /auth/logout with a driver bearer
+        // token returns 403 on the server and dirties the telemetry.
+        if let current = session, current.kind == .operator, let refresh = current.refreshToken {
             _ = try? await api.logout(LogoutRequest(refreshToken: refresh))
         }
         store.clear()
@@ -100,9 +104,17 @@ public actor AuthService: TokenProvider {
         pin: String,
         tenantSlug: String
     ) async throws -> AuthSession {
-        let resp = try await api.driverPinLogin(
-            DriverPinLoginRequest(driverId: driverId, pin: pin, tenantSlug: tenantSlug)
-        )
+        let resp: DriverLoginResponse
+        do {
+            resp = try await api.driverPinLogin(
+                DriverPinLoginRequest(driverId: driverId, pin: pin, tenantSlug: tenantSlug)
+            )
+        } catch let apiError as APIError {
+            if let code = DriverAuthService.errorCode(from: apiError) {
+                throw DriverAuthError(code: code, underlying: apiError)
+            }
+            throw apiError
+        }
         // Driver picker payload lacks email — fabricate a stable, non-routable
         // placeholder so the AuthUser shape stays uniform. The role string
         // identifies this as a driver session for any consumers that branch
@@ -135,5 +147,45 @@ public actor AuthService: TokenProvider {
         try store.save(new)
         session = new
         return new
+    }
+}
+
+/// Driver-auth error surfaced to the UI so it can route:
+///   PIN_NOT_SET        → set-pin screen with driverId+tenant
+///   ACCOUNT_LOCKED     → locked screen (countdown if `unlockAt` provided)
+///   INVALID_CREDENTIALS → re-prompt with "Wrong PIN"
+public struct DriverAuthError: Error, Equatable {
+    public let code: DriverAuthErrorCode
+    public let underlying: APIError?
+    public init(code: DriverAuthErrorCode, underlying: APIError? = nil) {
+        self.code = code
+        self.underlying = underlying
+    }
+}
+
+/// Pure helpers for mapping backend error payloads → `DriverAuthErrorCode`.
+public enum DriverAuthService {
+    /// Inspect an APIError and pull the `code` field out of its JSON body
+    /// if the body is shaped `{ code, message }`. The backend's driver-auth
+    /// service throws ConflictException / UnauthorizedException with these
+    /// codes — see `apps/api/src/modules/driver-experience/driver-auth.service.ts`.
+    public static func errorCode(from error: APIError) -> DriverAuthErrorCode? {
+        switch error {
+        case .http(let status, let message):
+            if let raw = message,
+               let data = raw.data(using: .utf8),
+               let body = try? JSONDecoder().decode(DriverAuthErrorBody.self, from: data),
+               let codeStr = body.code {
+                return DriverAuthErrorCode(rawValue: codeStr.uppercased()) ?? .unknown
+            }
+            switch status {
+            case 401: return .invalidCredentials
+            case 423: return .accountLocked
+            case 404: return .notFound
+            default: return nil
+            }
+        default:
+            return nil
+        }
     }
 }

@@ -59,7 +59,14 @@ private extension OutboxAction {
              .endShift(_, let d),
              .updateShiftStatus(_, _, let d),
              .updateShiftLocation(_, _, _, let d),
-             .sendChatMessage(_, let d):
+             .sendChatMessage(_, let d),
+             .submitPretrip(_, let d),
+             .acknowledgeBriefing(_, _, let d),
+             .fieldPaymentCapture(_, let d),
+             .fieldPaymentCancel(_, let d),
+             .telemetryBatch(_, let d),
+             .driverShiftCheckIn(_, _, let d),
+             .driverShiftCheckOut(let d):
             return d
         }
     }

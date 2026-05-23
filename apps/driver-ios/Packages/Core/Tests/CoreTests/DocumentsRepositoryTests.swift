@@ -66,4 +66,30 @@ private actor NoopAPIForDocs: USTowDispatchAPI {
     func updateShiftLocation(shiftId: String, lat: Double, lng: Double) async throws -> DriverShift { fatalError() }
     func sendChatMessage(_ body: SendChatMessageRequest) async throws -> ChatMessage { fatalError() }
     func listChatMessages(jobId: String) async throws -> [ChatMessage] { [] }
+
+    func driverListByTenant(_ body: DriverListByTenantRequest) async throws -> DriverPickerResponse { fatalError() }
+    func driverLookupByCode(_ body: DriverLookupByCodeRequest) async throws -> DriverPickerResponse { fatalError() }
+    func driverPinLogin(_ body: DriverPinLoginRequest) async throws -> DriverLoginResponse { fatalError() }
+    func driverSetPin(_ body: SetPinRequest) async throws {}
+    func driverClearFailedAttempts(_ body: ClearFailedAttemptsRequest) async throws {}
+    func activeBriefing() async throws -> DriverDailyBriefing? { nil }
+    func briefingNeedsAcknowledgment() async throws -> BriefingNeedsResponse { BriefingNeedsResponse(needs: false, briefing: nil) }
+    func acknowledgeBriefing(id: String, body: AcknowledgeBriefingRequest) async throws -> DriverBriefingAcknowledgment { fatalError() }
+    func submitPretrip(_ body: CreatePretripInspectionPayload) async throws -> DriverPretripInspection { fatalError() }
+    func myRecentPretrips() async throws -> [DriverPretripInspection] { [] }
+    func presignEvidence(_ body: JobEvidencePresignRequest) async throws -> JobEvidencePresignResponse { fatalError() }
+    func finalizeEvidence(id: String, body: JobEvidenceFinalizeRequest) async throws -> JobEvidence { fatalError() }
+    func failEvidence(id: String, body: JobEvidenceFailRequest) async throws -> JobEvidence { fatalError() }
+    func listJobEvidence(jobId: String) async throws -> [JobEvidence] { [] }
+    func replayOfflineActions(_ body: DriverOfflineBatchRequest) async throws -> DriverOfflineBatchResponse { fatalError() }
+    func pingTelemetry(_ body: DriverTelemetryEvent) async throws -> DriverTelemetryEventDto { fatalError() }
+    func batchTelemetry(_ body: DriverTelemetryBatchRequest) async throws -> DriverTelemetryBatchResponse { DriverTelemetryBatchResponse(inserted: 0) }
+    func createFieldPaymentIntent(_ body: CreateFieldPaymentPayload) async throws -> JobFieldPayment { fatalError() }
+    func captureFieldPayment(id: String) async throws -> JobFieldPayment { fatalError() }
+    func cancelFieldPayment(id: String) async throws -> JobFieldPayment { fatalError() }
+    func driverCheckIn(truckId: String, dvirId: String?) async throws -> DriverShift { fatalError() }
+    func driverCheckOut() async throws -> DriverShift { fatalError() }
+    func driverActiveShift() async throws -> DriverShift? { nil }
+    func driverMyJobs() async throws -> [MyJob] { [] }
+    func driverJob(id: String) async throws -> Job { fatalError() }
 }

@@ -18,3 +18,52 @@
 "settings.data_saver" = "Ahorro de datos (foto solo por Wi-Fi)";
 "settings.quiet_hours" = "Horas de silencio";
 "profile.signout" = "Cerrar sesión";
+
+/* Session 7 — Autenticación con PIN */
+"pin.enter_title" = "Introduce tu PIN";
+"pin.change_driver" = "Elegir otro conductor";
+"pin.error.wrong" = "PIN incorrecto. Inténtalo de nuevo.";
+"pin.error.not_found" = "Conductor no encontrado. Elige otro conductor.";
+"pin.error.generic" = "No se pudo iniciar sesión. Inténtalo de nuevo.";
+"setpin.title" = "PIN aún no configurado";
+"setpin.body_title" = "Pide a despacho que registre tu PIN";
+"setpin.body_text" = "Por seguridad, un administrador configura tu primer PIN en la consola de despacho. Una vez registrado podrás iniciar sesión aquí con el código de 4 dígitos.";
+"setpin.back_to_signin" = "Volver al inicio de sesión";
+"locked.title" = "Demasiados PINs incorrectos";
+"locked.subtitle" = "Por tu seguridad la cuenta del conductor está bloqueada temporalmente.";
+"locked.call_dispatch" = "Llamar a despacho";
+"locked.back" = "Volver al inicio de sesión";
+"locked.try_again" = "Intentar de nuevo";
+"code.title" = "Código del taller";
+"code.subtitle" = "Introduce el código de 6 dígitos que te dio tu despachador.";
+"code.continue" = "Continuar";
+"code.operator_login" = "Soy operador (correo + contraseña)";
+"code.error.format" = "Introduce exactamente 6 dígitos.";
+"code.error.not_found" = "No encontramos ese taller. Verifica el código con tu despachador.";
+"picker.title" = "¿Quién conduce?";
+"picker.change_code" = "¿Taller incorrecto? Volver a introducir el código.";
+
+/* Session 7 — Resumen diario */
+"briefing.daily" = "Resumen de hoy";
+"briefing.mandatory" = "Requerido";
+"briefing.watch_video" = "Ver el video del resumen";
+"briefing.read_confirm" = "He leído y visto el resumen de hoy.";
+"briefing.acknowledge" = "Confirmar resumen";
+"briefing.none" = "Sin resumen activo.";
+
+/* Session 7 — Inspección previa */
+"pretrip.title" = "Inspección previa al viaje";
+"pretrip.subtitle" = "Camina alrededor del camión y califica cada elemento. Los fallos requieren una nota + foto.";
+"pretrip.odometer" = "Odómetro (millas)";
+"pretrip.notes" = "Notas generales";
+"pretrip.fail_note" = "Describe el problema (requerido)";
+"pretrip.submit" = "Enviar inspección";
+
+/* Session 7 — Sin conexión */
+"offline.empty" = "Todo está sincronizado.";
+"offline.count" = "%d en cola";
+"offline.retry_all" = "Reintentar todo";
+"offline.purge" = "Vaciar cola";
+"offline.status_online" = "En línea";
+"offline.status_offline" = "Sin conexión";
+"offline.attempts" = "%d intento(s)";
