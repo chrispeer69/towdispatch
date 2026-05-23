@@ -48,6 +48,19 @@ object NetworkModule {
             .build()
     }
 
+    /**
+     * Dedicated client for S3 PUTs. No Authorization header (presigned URLs
+     * already carry auth) and no logging (multi-MB photo/video bodies waste
+     * battery + storage to log).
+     */
+    @Provides @Singleton
+    @S3Upload
+    fun provideS3UploadClient(): OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(300, TimeUnit.SECONDS)
+        .build()
+
     @Provides @Singleton
     fun provideRetrofit(client: OkHttpClient, json: Json): Retrofit {
         val factory = json.asConverterFactory("application/json".toMediaType())
