@@ -177,6 +177,44 @@ exact pattern `PaymentsService.publicView` uses.
 
 ---
 
+## 10. Verification + ship handled by a second agent instance
+
+This worktree was authored by one Claude instance and verified/shipped by a
+second instance running the same task assignment concurrently (the user
+runs several Claude Code windows across worktrees). The second instance
+found the build already complete and quiescent (no writes for 8+ min, no
+commit, no PR), confirmed it was coherent — not a stub — by reading the
+repository, composer, token, public controller, and recipient services
+cold, then ran the full gate rather than rewriting anything. Overwriting an
+in-flight parallel build would have been destructive, so the verifying
+instance did not.
+
+**Verification results (this environment, no `DATABASE_URL`):**
+- `tsc --noEmit` (typecheck): **green**
+- API tests: **232 passed / 376 skipped / 0 failed** (baseline was 180
+  passed with 32 test *files* failing — every one of those failures was the
+  missing tier-offers module files, now resolved). Unit specs for state,
+  token, cron, composer, and recipient services all run green. The RLS
+  integration spec (`tier-offer-composer-rls.spec.ts`) skips without a DB.
+- `@ustowdispatch/api build`: **green**
+
+**🟡 `pnpm lint` (repo-wide) is red — but not on this session's surface.**
+All 13 tier-offers files AND the three allowed-touch files (`app.module.ts`,
+`config.schema.ts`, `config.service.ts`) lint **clean**. The 70 errors are
+pre-existing baseline debt in untouched files (`user-invites.service.ts`,
+`tracking.service.ts`, et al.). Fixing them would violate the "do not touch
+files outside the module + AppModule + config" constraint, so they are left
+as-is and flagged here.
+
+**🟡 Coverage % not measured.** No coverage script is configured in the repo
+(`vitest run` has no `--coverage` wiring and no provider installed). Unit
+specs exist for every logic-bearing unit (state machine, token service,
+expiry cron, composer service, recipient service) plus an RLS integration
+spec; a hard 90% number could not be emitted in this environment without
+adding coverage tooling (out of scope).
+
+---
+
 ## What was NOT touched
 
 - No schema changes (Session 1's job).

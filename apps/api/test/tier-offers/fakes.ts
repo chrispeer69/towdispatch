@@ -98,9 +98,13 @@ export class FakeTierOfferRepository {
     return o && o.deletedAt === null ? o : undefined;
   }
 
-  async insertOffer(_tx: unknown, values: TierOffer): Promise<TierOffer> {
-    this.offers.set(values.id, values);
-    return values;
+  async insertOffer(_tx: unknown, values: Partial<TierOffer>): Promise<TierOffer> {
+    // Emulate the DB defaulting created_at / updated_at (and other
+    // NOT NULL DEFAULT columns) that the service does not supply on insert,
+    // then returns via .returning().
+    const row = makeOffer(values);
+    this.offers.set(row.id, row);
+    return row;
   }
 
   async updateOffer(
@@ -131,9 +135,13 @@ export class FakeTierOfferRepository {
     return r && r.deletedAt === null ? r : undefined;
   }
 
-  async insertRecipient(_tx: unknown, values: TierOfferRecipient): Promise<TierOfferRecipient> {
-    this.recipients.set(values.id, values);
-    return values;
+  async insertRecipient(
+    _tx: unknown,
+    values: Partial<TierOfferRecipient>,
+  ): Promise<TierOfferRecipient> {
+    const row = makeRecipient(values);
+    this.recipients.set(row.id, row);
+    return row;
   }
 
   async updateRecipient(
