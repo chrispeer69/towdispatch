@@ -26,6 +26,7 @@ interface KpiCardProps {
   icon: LucideIcon;
   tone?: 'orange' | 'blue' | 'green' | 'violet';
   href?: string;
+  valueAccent?: boolean;
 }
 
 interface DashboardRecentActivityItem {
@@ -72,12 +73,19 @@ function KpiCard({
   icon: Icon,
   tone = 'orange',
   href,
+  valueAccent = false,
 }: KpiCardProps): JSX.Element {
   const accentClass: Record<NonNullable<KpiCardProps['tone']>, string> = {
     orange: 'text-brand-primary bg-brand-primary/15',
     blue: 'text-info bg-info/15',
     green: 'text-ok bg-ok/15',
     violet: 'text-violet bg-violet/15',
+  };
+  const valueAccentClass: Record<NonNullable<KpiCardProps['tone']>, string> = {
+    orange: 'text-brand-primary',
+    blue: 'text-info',
+    green: 'text-ok',
+    violet: 'text-violet',
   };
   const inner = (
     <>
@@ -89,7 +97,14 @@ function KpiCard({
         </div>
         {href ? <ChevronRight className="h-4 w-4 text-text-secondary-on-dark/40" /> : null}
       </div>
-      <p className="mt-4 font-condensed text-3xl font-extrabold leading-none">{value}</p>
+      <p
+        className={cn(
+          'mt-4 font-condensed text-3xl font-extrabold leading-none',
+          valueAccent && valueAccentClass[tone],
+        )}
+      >
+        {value}
+      </p>
       <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
         {label}
       </p>
@@ -230,6 +245,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           caption="By driver below"
           icon={Wallet}
           tone="green"
+          valueAccent
         />
         <KpiCard
           label="Avg ETA"
@@ -440,7 +456,7 @@ function RevenueByDriverCard({
         <h3 className="font-condensed text-lg font-extrabold uppercase tracking-wide">
           Today's Revenue
         </h3>
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ok">
           {currencyFormatter.format(totalCents / 100)} total
         </span>
       </div>
@@ -470,7 +486,7 @@ function RevenueByDriverCard({
                   {r.driverName}
                 </span>
               )}
-              <span className="font-mono text-sm font-semibold tabular-nums">
+              <span className="font-mono text-sm font-semibold tabular-nums text-ok">
                 {currencyFormatterCents.format(r.revenueCents / 100)}
               </span>
             </li>
