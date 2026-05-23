@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">US Tow DISPATCH Conductor</string>
+
+    <!-- Auth -->
+    <!-- TODO(i18n): native-Spanish review on PIN copy. -->
+    <string name="auth_workshop_code_label">Código del taller (6 dígitos)</string>
+    <string name="auth_pin_label">PIN (4 dígitos)</string>
+    <string name="auth_sign_in_cta">Iniciar sesión</string>
+    <string name="auth_continue_cta">Continuar</string>
+    <string name="auth_change_workshop_cta">Cambiar de taller</string>
+    <string name="auth_locked_title">Cuenta bloqueada</string>
+    <string name="auth_locked_body">Demasiados intentos fallidos. Espere a que se desbloquee o pídale al despachador que lo libere manualmente.</string>
+    <string name="auth_set_pin_title">PIN no configurado</string>
+    <string name="auth_back_to_sign_in">Volver al inicio de sesión</string>
+
+    <!-- Briefing -->
+    <string name="briefing_title">Briefing diario</string>
+    <string name="briefing_acknowledge_cta">Confirmar y continuar</string>
+    <string name="briefing_none_title">No hay briefing hoy</string>
+
+    <!-- Pretrip -->
+    <string name="pretrip_title">Inspección previa al viaje</string>
+    <string name="pretrip_truck_label">ID del camión</string>
+    <string name="pretrip_odometer_label">Odómetro (millas)</string>
+    <string name="pretrip_submit_cta">Enviar inspección</string>
+
+    <!-- Offline -->
+    <string name="offline_title">Sin conexión</string>
+    <string name="offline_body">No hay red. Sus cambios se guardarán localmente y se sincronizarán al reconectarse.</string>
+    <string name="offline_retry_cta">Reintentar ahora</string>
+    <string name="offline_back_cta">Volver al espacio de trabajo</string>
+    <string name="offline_pending_actions">Acciones pendientes: %d</string>
+    <string name="offline_pending_uploads">Cargas pendientes: %d</string>
+
+    <!-- Generic -->
+    <string name="generic_retry">Reintentar</string>
+    <string name="generic_continue">Continuar</string>
+</resources>
