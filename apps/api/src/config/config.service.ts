@@ -211,6 +211,19 @@ export class ConfigService {
     };
   }
 
+  /** Moat #3 — Tier Offer Composer (Session 2). */
+  get tierOffers(): {
+    cronEnabled: boolean;
+    magicLinkSecret: string;
+    magicLinkTtlDays: number;
+  } {
+    return {
+      cronEnabled: this.config.TIER_OFFER_CRON_ENABLED,
+      magicLinkSecret: this.config.TIER_OFFER_MAGIC_LINK_SECRET,
+      magicLinkTtlDays: this.config.TIER_OFFER_MAGIC_LINK_TTL_DAYS,
+    };
+  }
+
   get quickbooks(): {
     clientId: string;
     clientSecret: string;

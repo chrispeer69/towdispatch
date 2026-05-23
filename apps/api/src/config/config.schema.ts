@@ -208,6 +208,23 @@ export const configSchema = z.object({
     .transform((v) => v === 'true'),
   NOAA_USER_AGENT: z.string().optional().default('ustowdispatch-api (ops@ustowdispatch.cloud)'),
   OPENWEATHERMAP_API_KEY: z.string().optional().default(''),
+
+  // Moat #3 — Tier Offer Composer (Session 2). The nightly expiry sweep
+  // is gated by an env flag so it never fires in dev/CI by default; flip
+  // to "true" in Railway once motor-club offers go live. The magic-link
+  // secret signs the per-recipient accept/decline tokens (HMAC-SHA-256);
+  // any change invalidates every in-flight token. TTL_DAYS controls how
+  // long after `acceptance_deadline_at` a recipient can still click their
+  // link and land on a friendly "expired" page instead of a 404.
+  TIER_OFFER_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  TIER_OFFER_MAGIC_LINK_SECRET: z
+    .string()
+    .min(32, 'TIER_OFFER_MAGIC_LINK_SECRET must be 32+ chars')
+    .default('change-me-tier-offer-magic-link-secret-please-rotate-in-prod'),
+  TIER_OFFER_MAGIC_LINK_TTL_DAYS: z.coerce.number().int().min(1).max(60).default(14),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

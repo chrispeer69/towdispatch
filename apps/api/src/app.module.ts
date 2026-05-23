@@ -35,6 +35,7 @@ import { ServiceCatalogModule } from './modules/service-catalog/service-catalog.
 import { ServiceRatesModule } from './modules/service-rates/service-rates.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
 import { TenantsModule } from './modules/tenants/tenants.module.js';
+import { TierOffersModule } from './modules/tier-offers/tier-offers.module.js';
 import { TrackingModule } from './modules/tracking/tracking.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
@@ -59,6 +60,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     VehiclesModule,
     RatesModule,
     DynamicPricingModule,
+    TierOffersModule,
     ServiceCatalogModule,
     ServiceRatesModule,
     DispatchEventsModule,
