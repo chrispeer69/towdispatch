@@ -78,7 +78,18 @@ jobs:
         run: pnpm --filter @ustowdispatch/web build
 
       - name: Install Playwright browsers
-        run: pnpm --filter @ustowdispatch/e2e exec playwright install --with-deps chromium
+        # Install exactly the browsers the project matrix will run. On the
+        # master-branch push E2E_FULL_BROWSER_MATRIX=1 activates the firefox
+        # + webkit projects (see apps/e2e/playwright.config.ts); installing
+        # chromium alone there left those projects with no binary and every
+        # firefox/webkit test failed instantly with "Executable doesn't
+        # exist". PR runs keep the flag at 0 and install chromium only.
+        run: |
+          if [ "$E2E_FULL_BROWSER_MATRIX" = "1" ]; then
+            pnpm --filter @ustowdispatch/e2e exec playwright install --with-deps chromium firefox webkit
+          else
+            pnpm --filter @ustowdispatch/e2e exec playwright install --with-deps chromium
+          fi
 
       - name: Start API
         env:
