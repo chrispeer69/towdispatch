@@ -47,6 +47,13 @@ android {
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
@@ -98,10 +105,23 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
 
+    implementation(libs.play.services.location)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging.ktx)
 
     implementation(libs.accompanist.permissions)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.androidx.room.testing)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.okhttp.mockwebserver)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
 
 kapt { correctErrorTypes = true }
