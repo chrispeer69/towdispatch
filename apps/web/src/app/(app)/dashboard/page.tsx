@@ -26,6 +26,7 @@ interface KpiCardProps {
   icon: LucideIcon;
   tone?: 'orange' | 'blue' | 'green' | 'violet';
   href?: string;
+  valueAccent?: boolean;
 }
 
 interface DashboardRecentActivityItem {
@@ -72,12 +73,19 @@ function KpiCard({
   icon: Icon,
   tone = 'orange',
   href,
+  valueAccent = false,
 }: KpiCardProps): JSX.Element {
   const accentClass: Record<NonNullable<KpiCardProps['tone']>, string> = {
     orange: 'text-brand-primary bg-brand-primary/15',
     blue: 'text-info bg-info/15',
     green: 'text-ok bg-ok/15',
     violet: 'text-violet bg-violet/15',
+  };
+  const valueAccentClass: Record<NonNullable<KpiCardProps['tone']>, string> = {
+    orange: 'text-brand-primary',
+    blue: 'text-info',
+    green: 'text-ok',
+    violet: 'text-violet',
   };
   const inner = (
     <>
@@ -89,7 +97,14 @@ function KpiCard({
         </div>
         {href ? <ChevronRight className="h-4 w-4 text-text-secondary-on-dark/40" /> : null}
       </div>
-      <p className="mt-4 font-condensed text-3xl font-extrabold leading-none">{value}</p>
+      <p
+        className={cn(
+          'mt-4 font-condensed text-3xl font-extrabold leading-none',
+          valueAccent && valueAccentClass[tone],
+        )}
+      >
+        {value}
+      </p>
       <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
         {label}
       </p>
@@ -190,7 +205,6 @@ export default async function DashboardPage(): Promise<JSX.Element> {
   };
 
   const activeCallsValue = String(overview.activeCalls);
-  const driversValue = String(overview.driversOnDuty);
   const revenueValue = currencyFormatter.format(overview.todaysRevenueCents / 100);
   const etaValue = overview.avgEtaMinutes === null ? '— min' : `${overview.avgEtaMinutes} min`;
 
@@ -216,7 +230,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
         ) : null}
       </header>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <KpiCard
           label="Active Calls"
           value={activeCallsValue}
@@ -226,18 +240,12 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           href="/active-calls"
         />
         <KpiCard
-          label="Drivers On Duty"
-          value={driversValue}
-          caption="Roster below"
-          icon={Users}
-          tone="blue"
-        />
-        <KpiCard
           label="Today's Revenue"
           value={revenueValue}
           caption="By driver below"
           icon={Wallet}
           tone="green"
+          valueAccent
         />
         <KpiCard
           label="Avg ETA"
@@ -386,41 +394,38 @@ function DriversOnDutyCard({
           <p className="text-sm text-text-secondary-on-dark">No drivers are clocked in yet.</p>
         </div>
       ) : (
-        <ul className="mt-4 divide-y divide-divider rounded-[10px] border border-divider bg-bg-surface-elevated/10">
-          {list.map((d) => {
-            // When the shift has a current job, the job status is the
-            // dispatcher-relevant signal (en route → on scene → in progress).
-            // Between calls, fall back to the shift's own status.
-            const statusLabel = d.currentJobStatus
-              ? STATUS_LABEL[d.currentJobStatus]
-              : (SHIFT_STATUS_LABEL[d.shiftStatus] ?? d.shiftStatus);
-            const onCall = Boolean(d.currentJobId);
-            return (
-              <li
-                key={d.driverId}
-                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-              >
-                <Link
-                  href={`/fleet/drivers/${d.driverId}`}
-                  className="font-medium hover:text-brand-primary hover:underline underline-offset-2"
+        <div className="mt-4 overflow-hidden rounded-[10px] border border-divider bg-bg-surface-elevated/10">
+          <div className="grid grid-cols-[1.4fr_1fr_auto] gap-3 border-b border-divider bg-bg-surface-elevated/20 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark/70">
+            <span>Name</span>
+            <span>Truck</span>
+            <span className="justify-self-end">Status</span>
+          </div>
+          <ul className="divide-y divide-divider">
+            {list.map((d) => {
+              // When the shift has a current job, the job status is the
+              // dispatcher-relevant signal (en route → on scene → in progress).
+              // Between calls, fall back to the shift's own status.
+              const statusLabel = d.currentJobStatus
+                ? STATUS_LABEL[d.currentJobStatus]
+                : (SHIFT_STATUS_LABEL[d.shiftStatus] ?? d.shiftStatus);
+              const onCall = Boolean(d.currentJobId);
+              return (
+                <li
+                  key={d.driverId}
+                  className="grid grid-cols-[1.4fr_1fr_auto] items-center gap-3 px-4 py-3 text-sm"
                 >
-                  {d.firstName} {d.lastName}
-                </Link>
-                <span className="font-mono text-[11px] text-text-secondary-on-dark">
-                  {d.truckUnitNumber ? `Truck ${d.truckUnitNumber}` : '— no truck'}
-                </span>
-                <span className="flex items-center gap-2">
-                  {onCall && d.currentJobNumber && d.currentJobId ? (
-                    <JobLink
-                      jobId={d.currentJobId}
-                      className="font-mono text-[11px] text-text-secondary-on-dark hover:text-brand-primary hover:underline"
-                    >
-                      #{d.currentJobNumber}
-                    </JobLink>
-                  ) : null}
+                  <Link
+                    href={`/fleet/drivers/${d.driverId}`}
+                    className="truncate font-medium hover:text-brand-primary hover:underline underline-offset-2"
+                  >
+                    {d.firstName} {d.lastName}
+                  </Link>
+                  <span className="font-mono text-[11px] text-text-secondary-on-dark">
+                    {d.truckUnitNumber ? `Truck ${d.truckUnitNumber}` : '— no truck'}
+                  </span>
                   <span
                     className={cn(
-                      'rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.14em]',
+                      'justify-self-end rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.14em]',
                       onCall
                         ? 'border-brand-primary/40 bg-brand-primary/10 text-brand-primary'
                         : 'border-divider bg-bg-surface text-text-secondary-on-dark',
@@ -428,11 +433,11 @@ function DriversOnDutyCard({
                   >
                     {statusLabel}
                   </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );
@@ -451,7 +456,7 @@ function RevenueByDriverCard({
         <h3 className="font-condensed text-lg font-extrabold uppercase tracking-wide">
           Today's Revenue
         </h3>
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ok">
           {currencyFormatter.format(totalCents / 100)} total
         </span>
       </div>
@@ -481,7 +486,7 @@ function RevenueByDriverCard({
                   {r.driverName}
                 </span>
               )}
-              <span className="font-mono text-sm font-semibold tabular-nums">
+              <span className="font-mono text-sm font-semibold tabular-nums text-ok">
                 {currencyFormatterCents.format(r.revenueCents / 100)}
               </span>
             </li>
