@@ -190,7 +190,6 @@ export default async function DashboardPage(): Promise<JSX.Element> {
   };
 
   const activeCallsValue = String(overview.activeCalls);
-  const driversValue = String(overview.driversOnDuty);
   const revenueValue = currencyFormatter.format(overview.todaysRevenueCents / 100);
   const etaValue = overview.avgEtaMinutes === null ? '— min' : `${overview.avgEtaMinutes} min`;
 
@@ -216,7 +215,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
         ) : null}
       </header>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <KpiCard
           label="Active Calls"
           value={activeCallsValue}
@@ -224,13 +223,6 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           icon={Truck}
           tone="orange"
           href="/active-calls"
-        />
-        <KpiCard
-          label="Drivers On Duty"
-          value={driversValue}
-          caption="Roster below"
-          icon={Users}
-          tone="blue"
         />
         <KpiCard
           label="Today's Revenue"
@@ -386,41 +378,38 @@ function DriversOnDutyCard({
           <p className="text-sm text-text-secondary-on-dark">No drivers are clocked in yet.</p>
         </div>
       ) : (
-        <ul className="mt-4 divide-y divide-divider rounded-[10px] border border-divider bg-bg-surface-elevated/10">
-          {list.map((d) => {
-            // When the shift has a current job, the job status is the
-            // dispatcher-relevant signal (en route → on scene → in progress).
-            // Between calls, fall back to the shift's own status.
-            const statusLabel = d.currentJobStatus
-              ? STATUS_LABEL[d.currentJobStatus]
-              : (SHIFT_STATUS_LABEL[d.shiftStatus] ?? d.shiftStatus);
-            const onCall = Boolean(d.currentJobId);
-            return (
-              <li
-                key={d.driverId}
-                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
-              >
-                <Link
-                  href={`/fleet/drivers/${d.driverId}`}
-                  className="font-medium hover:text-brand-primary hover:underline underline-offset-2"
+        <div className="mt-4 overflow-hidden rounded-[10px] border border-divider bg-bg-surface-elevated/10">
+          <div className="grid grid-cols-[1.4fr_1fr_auto] gap-3 border-b border-divider bg-bg-surface-elevated/20 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark/70">
+            <span>Name</span>
+            <span>Truck</span>
+            <span className="justify-self-end">Status</span>
+          </div>
+          <ul className="divide-y divide-divider">
+            {list.map((d) => {
+              // When the shift has a current job, the job status is the
+              // dispatcher-relevant signal (en route → on scene → in progress).
+              // Between calls, fall back to the shift's own status.
+              const statusLabel = d.currentJobStatus
+                ? STATUS_LABEL[d.currentJobStatus]
+                : (SHIFT_STATUS_LABEL[d.shiftStatus] ?? d.shiftStatus);
+              const onCall = Boolean(d.currentJobId);
+              return (
+                <li
+                  key={d.driverId}
+                  className="grid grid-cols-[1.4fr_1fr_auto] items-center gap-3 px-4 py-3 text-sm"
                 >
-                  {d.firstName} {d.lastName}
-                </Link>
-                <span className="font-mono text-[11px] text-text-secondary-on-dark">
-                  {d.truckUnitNumber ? `Truck ${d.truckUnitNumber}` : '— no truck'}
-                </span>
-                <span className="flex items-center gap-2">
-                  {onCall && d.currentJobNumber && d.currentJobId ? (
-                    <JobLink
-                      jobId={d.currentJobId}
-                      className="font-mono text-[11px] text-text-secondary-on-dark hover:text-brand-primary hover:underline"
-                    >
-                      #{d.currentJobNumber}
-                    </JobLink>
-                  ) : null}
+                  <Link
+                    href={`/fleet/drivers/${d.driverId}`}
+                    className="truncate font-medium hover:text-brand-primary hover:underline underline-offset-2"
+                  >
+                    {d.firstName} {d.lastName}
+                  </Link>
+                  <span className="font-mono text-[11px] text-text-secondary-on-dark">
+                    {d.truckUnitNumber ? `Truck ${d.truckUnitNumber}` : '— no truck'}
+                  </span>
                   <span
                     className={cn(
-                      'rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.14em]',
+                      'justify-self-end rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.14em]',
                       onCall
                         ? 'border-brand-primary/40 bg-brand-primary/10 text-brand-primary'
                         : 'border-divider bg-bg-surface text-text-secondary-on-dark',
@@ -428,11 +417,11 @@ function DriversOnDutyCard({
                   >
                     {statusLabel}
                   </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </div>
   );
