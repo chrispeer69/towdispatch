@@ -39,7 +39,9 @@ public actor AuthService: TokenProvider {
         let new = AuthSession(
             user: user, tenant: tenant,
             accessToken: access, refreshToken: refresh,
-            accessTokenExpiresAt: expiresAt
+            accessTokenExpiresAt: expiresAt,
+            kind: .operator,
+            driverId: nil
         )
         try store.save(new)
         session = new
@@ -63,21 +65,75 @@ public actor AuthService: TokenProvider {
         if let existing = refreshTask {
             return try await existing.value
         }
-        guard let refreshToken = session?.refreshToken else {
+        // Driver PIN sessions have no refresh token — the backend mints a
+        // 12h access token only. When expired the driver re-enters their
+        // PIN. Surfaced here as noActiveSession so the APIClient turns
+        // the upstream 401 into `.unauthorized` and the root view shows
+        // the PIN screen.
+        guard let current = session else { throw APIError.noActiveSession }
+        if current.kind == .driver { throw APIError.noActiveSession }
+        guard let refreshToken = current.refreshToken else {
             throw APIError.noActiveSession
         }
         let task = Task<String, Error> {
             defer { self.refreshTask = nil }
             let resp = try await api.refresh(RefreshRequest(refreshToken: refreshToken))
-            guard var current = session else { throw APIError.noActiveSession }
-            current.accessToken = resp.accessToken
-            current.refreshToken = resp.refreshToken
-            current.accessTokenExpiresAt = Date().addingTimeInterval(TimeInterval(resp.expiresIn))
-            try store.save(current)
-            session = current
+            guard var updated = session else { throw APIError.noActiveSession }
+            updated.accessToken = resp.accessToken
+            updated.refreshToken = resp.refreshToken
+            updated.accessTokenExpiresAt = Date().addingTimeInterval(TimeInterval(resp.expiresIn))
+            try store.save(updated)
+            session = updated
             return resp.accessToken
         }
         refreshTask = task
         return try await task.value
+    }
+
+    // ---------- Session 7: PIN auth ----------
+
+    /// PIN-based driver sign-in. On success persists an `AuthSession` with
+    /// `kind == .driver`, `driverId` set, and `refreshToken == nil`. Sign-out
+    /// is identical to the operator path.
+    public func signInWithPin(
+        driverId: String,
+        pin: String,
+        tenantSlug: String
+    ) async throws -> AuthSession {
+        let resp = try await api.driverPinLogin(
+            DriverPinLoginRequest(driverId: driverId, pin: pin, tenantSlug: tenantSlug)
+        )
+        // Driver picker payload lacks email — fabricate a stable, non-routable
+        // placeholder so the AuthUser shape stays uniform. The role string
+        // identifies this as a driver session for any consumers that branch
+        // on `user.role`.
+        let user = AuthUser(
+            id: resp.driver.id,
+            email: "\(resp.driver.id)@driver.local",
+            firstName: resp.driver.firstName,
+            lastName: resp.driver.lastName,
+            role: "driver",
+            emailVerifiedAt: nil,
+            mfaEnabled: false
+        )
+        let tenant = AuthTenant(
+            id: resp.tenant.id,
+            slug: resp.tenant.slug,
+            name: resp.tenant.name,
+            status: "active"
+        )
+        let expiresAt = Date().addingTimeInterval(TimeInterval(resp.expiresIn))
+        let new = AuthSession(
+            user: user,
+            tenant: tenant,
+            accessToken: resp.accessToken,
+            refreshToken: nil,
+            accessTokenExpiresAt: expiresAt,
+            kind: .driver,
+            driverId: resp.driver.id
+        )
+        try store.save(new)
+        session = new
+        return new
     }
 }
