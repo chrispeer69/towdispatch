@@ -27,6 +27,7 @@ import {
   type JobStatusChangedEvent,
 } from '@ustowdispatch/shared';
 import { Inbox, MapPin, Truck, Users } from 'lucide-react';
+import Link from 'next/link';
 import {
   type Dispatch,
   type ReactNode,
@@ -293,6 +294,11 @@ export interface JobCardProps {
 }
 
 export function JobCard({ job, compact = false, draggable = true }: JobCardProps): JSX.Element {
+  // The card body is the drag origin (hand cursor) so dispatchers can pick
+  // up a job anywhere and drop it onto a driver. The job # is a Link with a
+  // pointer cursor that stops pointerdown from reaching dnd-kit — clicking
+  // the number opens /jobs/[id] for detail review before assignment without
+  // accidentally starting a drag.
   const drag = useDraggable({ id: job.id });
   const { attributes, listeners, setNodeRef, transform, isDragging } = drag;
   const style: React.CSSProperties = draggable
@@ -303,23 +309,31 @@ export function JobCard({ job, compact = false, draggable = true }: JobCardProps
     : {};
   const colorCls = SERVICE_TYPE_COLOR[job.serviceType] ?? SERVICE_TYPE_COLOR.other;
   return (
-    <button
+    <div
       ref={draggable ? setNodeRef : undefined}
       style={style}
       data-testid={`job-card-${job.id}`}
       data-status={job.status}
       data-service={job.serviceType}
-      type="button"
       {...(draggable ? attributes : {})}
       {...(draggable ? listeners : {})}
-      className={`block w-full rounded-md border bg-bg-base/80 p-2.5 text-left text-xs transition ${
+      className={`relative w-full rounded-md border bg-bg-base/80 p-2.5 text-left text-xs transition ${
         draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
       } ${draggable && isDragging ? 'opacity-50 ring-2 ring-brand-primary/60' : ''} ${colorCls}`}
     >
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] tracking-tight text-text-primary-on-dark">
+      <div className="flex items-center justify-between gap-2">
+        <Link
+          href={`/jobs/${job.id}`}
+          data-testid={`job-card-open-${job.id}`}
+          // stopPropagation keeps the click from reaching the card's dnd-kit
+          // pointer listener — without this, dragging would steal the click
+          // and the link would never fire.
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          className="font-mono text-[11px] tracking-tight text-text-primary-on-dark cursor-pointer hover:text-brand-primary hover:underline underline-offset-2"
+        >
           #{job.jobNumber}
-        </span>
+        </Link>
         <span className="font-condensed text-[10px] font-extrabold uppercase tracking-widest">
           {job.serviceType.replace('_', ' ')}
         </span>
@@ -328,7 +342,7 @@ export function JobCard({ job, compact = false, draggable = true }: JobCardProps
         <p className="mt-1 truncate text-text-primary-on-dark/90">{job.pickupAddress}</p>
       ) : null}
       <TierOfferBadge status={job.tierOfferEnforcementStatus} />
-    </button>
+    </div>
   );
 }
 

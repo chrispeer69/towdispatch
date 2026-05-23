@@ -4,18 +4,28 @@ import { apiServer, tryFetch } from '@/lib/api/client';
 import { getOptionalUser } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
 import type { JobServiceType, JobStatus } from '@ustowdispatch/shared';
-import { ArrowUpRight, Clock, type LucideIcon, Plus, Truck, Users, Wallet } from 'lucide-react';
+import {
+  ArrowUpRight,
+  ChevronRight,
+  Clock,
+  type LucideIcon,
+  Plus,
+  Truck,
+  Users,
+  Wallet,
+} from 'lucide-react';
 import Link from 'next/link';
 
-export const metadata = { title: 'Dashboard â€” US Tow DISPATCH' };
+export const metadata = { title: 'Dashboard — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
 interface KpiCardProps {
   label: string;
   value: string;
-  delta?: string;
+  caption?: string;
   icon: LucideIcon;
   tone?: 'orange' | 'blue' | 'green' | 'violet';
+  href?: string;
 }
 
 interface DashboardRecentActivityItem {
@@ -28,47 +38,89 @@ interface DashboardRecentActivityItem {
   createdAt: string;
 }
 
+interface DashboardDriverOnDuty {
+  driverId: string;
+  firstName: string;
+  lastName: string;
+  truckUnitNumber: string | null;
+  shiftStatus: string;
+  currentJobId: string | null;
+  currentJobNumber: string | null;
+  currentJobStatus: JobStatus | null;
+}
+
+interface DashboardRevenueByDriverItem {
+  driverId: string | null;
+  driverName: string;
+  revenueCents: number;
+}
+
 interface DashboardOverviewDto {
   activeCalls: number;
   driversOnDuty: number;
   todaysRevenueCents: number;
   avgEtaMinutes: number | null;
   recentActivity: DashboardRecentActivityItem[];
+  driversOnDutyList: DashboardDriverOnDuty[];
+  revenueByDriver: DashboardRevenueByDriverItem[];
 }
 
-function KpiCard({ label, value, delta, icon: Icon, tone = 'orange' }: KpiCardProps): JSX.Element {
+function KpiCard({
+  label,
+  value,
+  caption,
+  icon: Icon,
+  tone = 'orange',
+  href,
+}: KpiCardProps): JSX.Element {
   const accentClass: Record<NonNullable<KpiCardProps['tone']>, string> = {
     orange: 'text-brand-primary bg-brand-primary/15',
     blue: 'text-info bg-info/15',
     green: 'text-ok bg-ok/15',
     violet: 'text-violet bg-violet/15',
   };
-  return (
-    <div className="rounded-[14px] border border-divider bg-bg-surface p-5">
+  const inner = (
+    <>
       <div className="flex items-start justify-between">
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-[10px] ${accentClass[tone]}`}
         >
           <Icon className="h-5 w-5" />
         </div>
-        {delta ? (
-          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
-            {delta}
-          </span>
-        ) : null}
+        {href ? <ChevronRight className="h-4 w-4 text-text-secondary-on-dark/40" /> : null}
       </div>
       <p className="mt-4 font-condensed text-3xl font-extrabold leading-none">{value}</p>
       <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
         {label}
       </p>
-    </div>
+      {caption ? (
+        <p className="mt-2 text-[11px] text-text-secondary-on-dark/70">{caption}</p>
+      ) : null}
+    </>
   );
+  const baseCls = 'block rounded-[14px] border border-divider bg-bg-surface p-5 transition-colors';
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(baseCls, 'hover:border-brand-primary/40 hover:bg-bg-surface-elevated/20')}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={baseCls}>{inner}</div>;
 }
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   maximumFractionDigits: 0,
+});
+const currencyFormatterCents = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 2,
 });
 
 const STATUS_LABEL: Record<JobStatus, string> = {
@@ -80,6 +132,15 @@ const STATUS_LABEL: Record<JobStatus, string> = {
   completed: 'Completed',
   cancelled: 'Cancelled',
   goa: 'GOA',
+};
+
+const SHIFT_STATUS_LABEL: Record<string, string> = {
+  available: 'Available',
+  en_route: 'En route',
+  on_scene: 'On scene',
+  in_progress: 'In progress',
+  returning: 'Returning',
+  break: 'On break',
 };
 
 const SERVICE_LABEL: Record<JobServiceType, string> = {
@@ -103,7 +164,7 @@ function formatTime(iso: string): string {
 
 export default async function DashboardPage(): Promise<JSX.Element> {
   // Auth gating is enforced by (app)/layout.tsx. getOptionalUser is the
-  // non-throwing variant â€” a transient /auth/me flake here cannot redirect us
+  // non-throwing variant — a transient /auth/me flake here cannot redirect us
   // out from under a layout that already streamed an authenticated shell.
   const session = await getOptionalUser();
   const today = new Date().toLocaleDateString(undefined, {
@@ -124,12 +185,14 @@ export default async function DashboardPage(): Promise<JSX.Element> {
     todaysRevenueCents: 0,
     avgEtaMinutes: null,
     recentActivity: [],
+    driversOnDutyList: [],
+    revenueByDriver: [],
   };
 
   const activeCallsValue = String(overview.activeCalls);
   const driversValue = String(overview.driversOnDuty);
   const revenueValue = currencyFormatter.format(overview.todaysRevenueCents / 100);
-  const etaValue = overview.avgEtaMinutes === null ? 'â€” min' : `${overview.avgEtaMinutes} min`;
+  const etaValue = overview.avgEtaMinutes === null ? '— min' : `${overview.avgEtaMinutes} min`;
 
   return (
     <div className="space-y-6">
@@ -140,7 +203,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
             {today}
-            {session ? ` Â· ${session.tenant.name}` : ''}
+            {session ? ` · ${session.tenant.name}` : ''}
           </p>
         </div>
         {session && !session.user.emailVerifiedAt ? (
@@ -148,7 +211,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
             href="/verify-email-pending"
             className="rounded-[10px] border border-brand-primary/30 bg-brand-primary/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-primary hover:bg-brand-primary/20"
           >
-            Confirm your email â†’
+            Confirm your email →
           </a>
         ) : null}
       </header>
@@ -157,25 +220,41 @@ export default async function DashboardPage(): Promise<JSX.Element> {
         <KpiCard
           label="Active Calls"
           value={activeCallsValue}
-          delta="â€”"
+          caption="By client →"
           icon={Truck}
           tone="orange"
+          href="/active-calls"
         />
         <KpiCard
           label="Drivers On Duty"
           value={driversValue}
-          delta="â€”"
+          caption="Roster below"
           icon={Users}
           tone="blue"
         />
         <KpiCard
           label="Today's Revenue"
           value={revenueValue}
-          delta="â€”"
+          caption="By driver below"
           icon={Wallet}
           tone="green"
         />
-        <KpiCard label="Avg ETA" value={etaValue} delta="â€”" icon={Clock} tone="violet" />
+        <KpiCard
+          label="Avg ETA"
+          value={etaValue}
+          caption="Tap to triage breaches →"
+          icon={Clock}
+          tone="violet"
+          href="/active-etas"
+        />
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <DriversOnDutyCard list={overview.driversOnDutyList} totalCount={overview.driversOnDuty} />
+        <RevenueByDriverCard
+          list={overview.revenueByDriver}
+          totalCents={overview.todaysRevenueCents}
+        />
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
@@ -194,7 +273,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
                 Your first job will show here.
               </p>
               <p className="mt-1 max-w-md text-sm text-text-secondary-on-dark">
-                Welcome aboard â€” once dispatch starts assigning calls, this feed lights up in real
+                Welcome aboard — once dispatch starts assigning calls, this feed lights up in real
                 time.
               </p>
             </div>
@@ -216,7 +295,9 @@ export default async function DashboardPage(): Promise<JSX.Element> {
                         {item.customerName ?? 'Unknown customer'}
                       </CustomerLink>
                     ) : (
-                      <span className="text-text-primary-on-dark">{item.customerName ?? 'Unknown customer'}</span>
+                      <span className="text-text-primary-on-dark">
+                        {item.customerName ?? 'Unknown customer'}
+                      </span>
                     )}
                   </span>
                   <span className="text-xs text-text-secondary-on-dark">
@@ -279,6 +360,134 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           </p>
         </div>
       </section>
+    </div>
+  );
+}
+
+function DriversOnDutyCard({
+  list,
+  totalCount,
+}: {
+  list: DashboardDriverOnDuty[];
+  totalCount: number;
+}): JSX.Element {
+  return (
+    <div className="rounded-[14px] border border-divider bg-bg-surface p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="font-condensed text-lg font-extrabold uppercase tracking-wide">
+          Drivers On Duty
+        </h3>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+          {list.length} of {totalCount}
+        </span>
+      </div>
+      {list.length === 0 ? (
+        <div className="mt-6 flex h-32 flex-col items-center justify-center rounded-[10px] border border-dashed border-divider bg-bg-surface-elevated/20 text-center">
+          <p className="text-sm text-text-secondary-on-dark">No drivers are clocked in yet.</p>
+        </div>
+      ) : (
+        <ul className="mt-4 divide-y divide-divider rounded-[10px] border border-divider bg-bg-surface-elevated/10">
+          {list.map((d) => {
+            // When the shift has a current job, the job status is the
+            // dispatcher-relevant signal (en route → on scene → in progress).
+            // Between calls, fall back to the shift's own status.
+            const statusLabel = d.currentJobStatus
+              ? STATUS_LABEL[d.currentJobStatus]
+              : (SHIFT_STATUS_LABEL[d.shiftStatus] ?? d.shiftStatus);
+            const onCall = Boolean(d.currentJobId);
+            return (
+              <li
+                key={d.driverId}
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+              >
+                <Link
+                  href={`/fleet/drivers/${d.driverId}`}
+                  className="font-medium hover:text-brand-primary hover:underline underline-offset-2"
+                >
+                  {d.firstName} {d.lastName}
+                </Link>
+                <span className="font-mono text-[11px] text-text-secondary-on-dark">
+                  {d.truckUnitNumber ? `Truck ${d.truckUnitNumber}` : '— no truck'}
+                </span>
+                <span className="flex items-center gap-2">
+                  {onCall && d.currentJobNumber && d.currentJobId ? (
+                    <JobLink
+                      jobId={d.currentJobId}
+                      className="font-mono text-[11px] text-text-secondary-on-dark hover:text-brand-primary hover:underline"
+                    >
+                      #{d.currentJobNumber}
+                    </JobLink>
+                  ) : null}
+                  <span
+                    className={cn(
+                      'rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-[0.14em]',
+                      onCall
+                        ? 'border-brand-primary/40 bg-brand-primary/10 text-brand-primary'
+                        : 'border-divider bg-bg-surface text-text-secondary-on-dark',
+                    )}
+                  >
+                    {statusLabel}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function RevenueByDriverCard({
+  list,
+  totalCents,
+}: {
+  list: DashboardRevenueByDriverItem[];
+  totalCents: number;
+}): JSX.Element {
+  return (
+    <div className="rounded-[14px] border border-divider bg-bg-surface p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="font-condensed text-lg font-extrabold uppercase tracking-wide">
+          Today's Revenue
+        </h3>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+          {currencyFormatter.format(totalCents / 100)} total
+        </span>
+      </div>
+      <p className="mt-1 text-[11px] text-text-secondary-on-dark/70">
+        Updated on page load. Tap a driver to see their day.
+      </p>
+      {list.length === 0 ? (
+        <div className="mt-6 flex h-32 flex-col items-center justify-center rounded-[10px] border border-dashed border-divider bg-bg-surface-elevated/20 text-center">
+          <p className="text-sm text-text-secondary-on-dark">No paid invoices yet today.</p>
+        </div>
+      ) : (
+        <ul className="mt-4 divide-y divide-divider rounded-[10px] border border-divider bg-bg-surface-elevated/10">
+          {list.map((r) => (
+            <li
+              key={r.driverId ?? 'unassigned'}
+              className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+            >
+              {r.driverId ? (
+                <Link
+                  href={`/fleet/drivers/${r.driverId}/today`}
+                  className="font-medium hover:text-brand-primary hover:underline underline-offset-2"
+                >
+                  {r.driverName}
+                </Link>
+              ) : (
+                <span className="font-medium italic text-text-secondary-on-dark">
+                  {r.driverName}
+                </span>
+              )}
+              <span className="font-mono text-sm font-semibold tabular-nums">
+                {currencyFormatterCents.format(r.revenueCents / 100)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
