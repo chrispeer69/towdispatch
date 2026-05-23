@@ -152,13 +152,18 @@ export const configSchema = z.object({
     .default('Your tow truck is on the way. Track live: {{tracking_url}} — {{tenant_name}}'),
   TRACKING_LINK_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(24),
 
-  // Session 11 — Stripe Connect. When STRIPE_SECRET_KEY is missing, the
-  // payments module falls back to the in-memory stub provider so the API
-  // boots cleanly in dev without real keys. The stub is also the test
-  // default. Tests can override secrets via env in the test setup.
+  // Session 11 — Stripe Connect. The payments module selects its provider from
+  // PAYMENTS_PROVIDER (below): `stub` uses the in-memory provider, `live` uses
+  // the real Stripe SDK and refuses to boot unless the keys + webhook secret
+  // are real. The stub is the default so the API boots cleanly in dev/CI and
+  // tests without real keys.
   STRIPE_SECRET_KEY: z.string().optional().default(''),
   STRIPE_PUBLIC_KEY: z.string().optional().default(''),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default('whsec_test_session11_default_dev_secret'),
+  // Cutover switch. `live` is the single flag flipped to route real cards
+  // through Stripe; when set, PaymentsModule hard-fails the boot if any Stripe
+  // secret is missing or still a dev placeholder (no silent stub fallback).
+  PAYMENTS_PROVIDER: z.enum(['stub', 'live']).default('stub'),
 
   // Session 12 — QuickBooks Online. When QBO_CLIENT_ID is missing the stub
   // provider drives the entire accounting flow so dev can exercise the full

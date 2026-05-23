@@ -7,15 +7,22 @@
  *   - PaymentsPublicController (the /pay/[token] customer page backend)
  *   - PaymentsWebhookController (POST /webhooks/stripe)
  *
- * Provider selection:
- *   The PAYMENT_PROVIDER token is bound by a factory that reads
- *   ConfigService.stripe.configured. When STRIPE_SECRET_KEY is present we
- *   instantiate the real Stripe SDK; otherwise we use the in-memory stub.
+ * Provider selection (cutover):
+ *   The PAYMENT_PROVIDER token is bound by a factory that reads the explicit
+ *   PAYMENTS_PROVIDER flag — the single switch operators flip for go-live.
+ *     - `stub` (default): in-memory provider; Stripe keys are ignored. Safe
+ *       for dev, CI, and tests.
+ *     - `live`: the real Stripe SDK. The factory REFUSES TO BOOT if any key is
+ *       missing/invalid or the webhook secret is still a dev placeholder. There
+ *       is no silent fallback to the stub in live mode — a fallback would mean
+ *       real customer cards are never charged with no signal, so we fail loud.
  *   Tests can override the binding by importing PaymentsModule and
  *   `.overrideProvider(PAYMENT_PROVIDER).useValue(...)`.
  *
  * Imports BillingModule so InvoicesService is available for re-totaling
  * invoices after Stripe events.
+ *
+ * See STRIPE_LIVE_CUTOVER.md for the operator runbook.
  */
 import { Module } from '@nestjs/common';
 import { ConfigService } from '../../config/config.service.js';
@@ -29,30 +36,64 @@ import type { PaymentProvider } from './provider.js';
 import { StripePaymentProvider } from './stripe.provider.js';
 import { StubPaymentProvider } from './stub.provider.js';
 
+/**
+ * Substrings that mark a webhook secret as a non-production placeholder. The
+ * Session 11 dev default (`whsec_test_session11_default_dev_secret`) contains
+ * `session11`/`default`; real Stripe `whsec_` values won't. Kept as explicit
+ * markers rather than a blanket `includes('test')` so a legitimately random
+ * live secret that happens to contain "test" is not falsely rejected.
+ */
+const PLACEHOLDER_WEBHOOK_MARKERS = ['session11', 'default', 'placeholder', 'changeme', 'example'];
+
+export function isPlaceholderWebhookSecret(secret: string): boolean {
+  if (!secret.startsWith('whsec_')) return true;
+  const lower = secret.toLowerCase();
+  return PLACEHOLDER_WEBHOOK_MARKERS.some((marker) => lower.includes(marker));
+}
+
+/**
+ * Resolve the PaymentProvider from config. Exported so the boot-time guard can
+ * be unit-tested without standing up the Nest container or a database.
+ *
+ * @throws Error when PAYMENTS_PROVIDER=live but Stripe is not fully configured.
+ */
+export function selectPaymentProvider(config: ConfigService): PaymentProvider {
+  if (config.payments.provider === 'live') {
+    const s = config.stripe;
+    if (!s.configured) {
+      throw new Error(
+        'PAYMENTS_PROVIDER=live but Stripe keys are missing or invalid. Set real ' +
+          'STRIPE_SECRET_KEY and STRIPE_PUBLIC_KEY before cutover. Refusing to boot ' +
+          'rather than silently fall back to the stub and drop real charges.',
+      );
+    }
+    if (isPlaceholderWebhookSecret(s.webhookSecret)) {
+      throw new Error(
+        'PAYMENTS_PROVIDER=live but STRIPE_WEBHOOK_SECRET is missing or still a dev ' +
+          'placeholder. Set the whsec_ value from the Stripe dashboard webhook ' +
+          'endpoint. Refusing to boot.',
+      );
+    }
+    // Constructor validates the secret key and configures the SDK (no network
+    // call); a placeholder key throws here and propagates — boot fails loud.
+    const live = new StripePaymentProvider(s.secretKey);
+    config.logger.info(
+      { provider: 'live', livemode: s.secretKey.startsWith('sk_live_') },
+      'PaymentsModule: using StripePaymentProvider (LIVE)',
+    );
+    return live;
+  }
+  config.logger.info({ provider: 'stub' }, 'PaymentsModule: using StubPaymentProvider');
+  return new StubPaymentProvider();
+}
+
 @Module({
   imports: [BillingModule],
   controllers: [PaymentsController, PaymentsPublicController, PaymentsWebhookController],
   providers: [
     {
       provide: PAYMENT_PROVIDER,
-      useFactory: (config: ConfigService): PaymentProvider => {
-        const s = config.stripe;
-        if (s.configured) {
-          try {
-            return new StripePaymentProvider(s.secretKey);
-          } catch (err) {
-            config.logger.warn(
-              { err: String(err) },
-              'StripePaymentProvider failed to initialize — falling back to stub',
-            );
-          }
-        }
-        config.logger.info(
-          { stripeConfigured: s.configured },
-          'PaymentsModule: using StubPaymentProvider',
-        );
-        return new StubPaymentProvider();
-      },
+      useFactory: (config: ConfigService): PaymentProvider => selectPaymentProvider(config),
       inject: [ConfigService],
     },
     PaymentsService,

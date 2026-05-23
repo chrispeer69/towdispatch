@@ -199,6 +199,15 @@ export class ConfigService {
     };
   }
 
+  /**
+   * Payments cutover switch. `provider` is the single env flag
+   * (PAYMENTS_PROVIDER) that selects the real Stripe SDK (`live`) vs the
+   * in-memory stub (`stub`, the default). See STRIPE_LIVE_CUTOVER.md.
+   */
+  get payments(): { provider: 'stub' | 'live' } {
+    return { provider: this.config.PAYMENTS_PROVIDER };
+  }
+
   get dynamicPricing(): {
     cronEnabled: boolean;
     noaaUserAgent: string;
