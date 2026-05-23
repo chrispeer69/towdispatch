@@ -89,6 +89,22 @@ export class SentryService implements OnModuleInit {
     });
   }
 
+  /**
+   * Deliberate smoke-test error from GET /_debug/boom. Tags the event
+   * smoke_test=true and a caller-supplied marker so the production-smoke
+   * spec can poll the Sentry API for exactly its event, and so alert rules
+   * can exclude `smoke_test:true` and never page a human on a synthetic
+   * crash. No-op when Sentry is disabled (no SENTRY_DSN).
+   */
+  captureSmokeError(marker: string, err: Error): void {
+    if (!this.enabled) return;
+    Sentry.withScope((scope) => {
+      scope.setTag('smoke_test', 'true');
+      scope.setTag('smoke_marker', marker);
+      Sentry.captureException(err);
+    });
+  }
+
   /** Security events (token reuse, lockouts) get their own log line + Sentry breadcrumb. */
   recordSecurityEvent(name: string, ctx: Record<string, string | number | null>): void {
     this.logger.warn({ ...ctx, securityEvent: name }, `security event: ${name}`);

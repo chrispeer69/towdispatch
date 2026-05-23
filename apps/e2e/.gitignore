@@ -2,3 +2,6 @@ test-results/
 playwright-report/
 node_modules/
 *.log
+
+# Production smoke secrets — only the .example is committed.
+.env.smoke

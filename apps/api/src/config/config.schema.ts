@@ -117,6 +117,18 @@ export const configSchema = z.object({
   // Release tag stamped on every Sentry event. Set by CI from the git SHA.
   RELEASE_TAG: z.string().optional().default('dev'),
 
+  // Production smoke harness — guarded deliberate-error endpoint
+  // (GET /_debug/boom). Used by apps/e2e/production-smoke to verify Sentry
+  // capture against a live deploy. Inert by default: the route 404s unless
+  // SMOKE_DEBUG_ERROR_ENABLED=true AND the request carries a bearer token
+  // matching SMOKE_DEBUG_TOKEN. The captured event is tagged smoke_test=true
+  // so alert rules can exclude synthetic crashes and never page on-call.
+  SMOKE_DEBUG_ERROR_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  SMOKE_DEBUG_TOKEN: z.string().optional().default(''),
+
   // Web frontend security/observability. Compression threshold in bytes.
   COMPRESSION_MIN_BYTES: z.coerce.number().int().min(0).default(1024),
 

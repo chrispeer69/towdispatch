@@ -255,6 +255,18 @@ export class ConfigService {
   get sentryDsn(): string {
     return this.config.SENTRY_DSN;
   }
+  /**
+   * Guarded deliberate-error endpoint (GET /_debug/boom) used by the
+   * production smoke harness. `enabled` gates the route's existence; `token`
+   * is the bearer secret it requires. Both must be set for the route to do
+   * anything other than 404.
+   */
+  get smokeDebug(): { enabled: boolean; token: string } {
+    return {
+      enabled: this.config.SMOKE_DEBUG_ERROR_ENABLED,
+      token: this.config.SMOKE_DEBUG_TOKEN,
+    };
+  }
   get releaseTag(): string {
     return this.config.RELEASE_TAG;
   }
