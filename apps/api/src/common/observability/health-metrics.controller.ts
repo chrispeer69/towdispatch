@@ -8,8 +8,9 @@
  * balancers default to.
  */
 import { Controller, Get, Header, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ERROR_CODES } from '@ustowdispatch/shared';
+import { ERROR_CODES, type RegionHealth } from '@ustowdispatch/shared';
 import type { Redis } from 'ioredis';
+import { RegionContextService } from '../../common/region/region-context.service.js';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { REDIS_CLIENT } from '../../modules/redis/redis.tokens.js';
 import { Public } from '../decorators/public.decorator.js';
@@ -21,6 +22,7 @@ export class HealthMetricsController {
     private readonly db: TenantAwareDb,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly metrics: MetricsService,
+    private readonly region: RegionContextService,
   ) {}
 
   @Public()
@@ -34,6 +36,9 @@ export class HealthMetricsController {
   async readiness(): Promise<{
     status: 'ok';
     checks: { db: 'ok'; redis: 'ok' };
+    // Session 44 — additive. Existing fields above are unchanged so probes
+    // and the deploy pipeline keep working; failover tooling reads `region`.
+    region: RegionHealth;
   }> {
     const checks: { db?: 'ok'; redis?: 'ok' } = {};
     try {
@@ -55,7 +60,11 @@ export class HealthMetricsController {
         message: 'Redis not reachable',
       });
     }
-    return { status: 'ok', checks: checks as { db: 'ok'; redis: 'ok' } };
+    return {
+      status: 'ok',
+      checks: checks as { db: 'ok'; redis: 'ok' },
+      region: await this.region.health(),
+    };
   }
 
   @Public()

@@ -16,7 +16,15 @@ export class ConfigService {
     this.config = loadConfig();
     this.logger = pino({
       level: this.config.LOG_LEVEL,
-      base: { service: 'ustowdispatch-api', env: this.config.NODE_ENV },
+      // region_id / region_role on the root logger `base` tags EVERY log line
+      // (root, child loggers, Sentry context) — not just the per-request
+      // access log — so cross-region log aggregation can filter by origin.
+      base: {
+        service: 'ustowdispatch-api',
+        env: this.config.NODE_ENV,
+        region_id: this.config.REGION_ID,
+        region_role: this.config.REGION_ROLE,
+      },
       ...(this.config.NODE_ENV === 'development'
         ? {
             transport: {
@@ -65,27 +73,79 @@ export class ConfigService {
       .map((s) => s.trim())
       .filter(Boolean);
   }
-  get databaseUrl(): string {
-    // If APP_USER_PASSWORD is set, derive an app_user URL from DATABASE_URL
-    // by swapping credentials. This is the path used in managed-Postgres
-    // deployments (Railway/Render/Fly) where the addon hands us a single
-    // superuser URL; migrations use it as-is, runtime swaps in app_user so
-    // RLS is enforced.
+  /**
+   * Derive an app_user connection URL from a raw (possibly superuser) URL by
+   * swapping credentials when APP_USER_PASSWORD is set. Managed-Postgres
+   * deployments hand us one superuser URL; migrations use it as-is, runtime
+   * swaps in app_user so RLS is enforced. No-op when already app_user.
+   */
+  private toAppUserUrl(raw: string): string {
     const pw = this.config.APP_USER_PASSWORD;
-    if (pw && !this.config.DATABASE_URL.includes('app_user:')) {
+    if (pw && !raw.includes('app_user:')) {
       try {
-        const url = new URL(this.config.DATABASE_URL);
+        const url = new URL(raw);
         url.username = 'app_user';
         url.password = pw;
         return url.toString();
       } catch {
-        return this.config.DATABASE_URL;
+        return raw;
       }
     }
-    return this.config.DATABASE_URL;
+    return raw;
+  }
+  get databaseUrl(): string {
+    return this.toAppUserUrl(this.config.DATABASE_URL);
+  }
+  /**
+   * Read-replica URL (app_user-swapped). Falls back to the primary URL when
+   * DATABASE_READ_URL is unset — single-region deploys read from primary,
+   * unchanged. See `readReplicaConfigured` for whether a DISTINCT replica
+   * exists (the only case that warrants a separate pool / replica-lag query).
+   */
+  get databaseReadUrl(): string {
+    if (!this.config.DATABASE_READ_URL) return this.databaseUrl;
+    return this.toAppUserUrl(this.config.DATABASE_READ_URL);
+  }
+  /** True only when a distinct read replica is configured. */
+  get readReplicaConfigured(): boolean {
+    return !!this.config.DATABASE_READ_URL && this.databaseReadUrl !== this.databaseUrl;
   }
   get databaseAdminUrl(): string {
     return this.config.DATABASE_ADMIN_URL ?? this.config.DATABASE_URL;
+  }
+
+  /**
+   * Multi-Region (Session 44). `isPrimary` is the single predicate the write
+   * guard, the read-replica router, and the health endpoints branch on. All
+   * fields default to a primary US-East single-region deploy.
+   */
+  get region(): {
+    id: AppConfig['REGION_ID'];
+    role: AppConfig['REGION_ROLE'];
+    isPrimary: boolean;
+    /** Origin (scheme+host) of the peer region's API, or '' when unknown. */
+    peerOrigin: string;
+    /** Full peer URL as configured (used to probe /ready), or '' when unset. */
+    peerHealthcheckUrl: string;
+    replicationLagAlertSeconds: number;
+  } {
+    const raw = (this.config.PRIMARY_REGION_HEALTHCHECK_URL ?? '').trim();
+    let peerOrigin = '';
+    if (raw) {
+      try {
+        peerOrigin = new URL(raw).origin;
+      } catch {
+        peerOrigin = '';
+      }
+    }
+    return {
+      id: this.config.REGION_ID,
+      role: this.config.REGION_ROLE,
+      isPrimary: this.config.REGION_ROLE === 'primary',
+      peerOrigin,
+      peerHealthcheckUrl: raw,
+      replicationLagAlertSeconds: this.config.REPLICATION_LAG_ALERT_SECONDS,
+    };
   }
   get redisUrl(): string {
     return this.config.REDIS_URL;

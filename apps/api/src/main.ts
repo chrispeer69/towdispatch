@@ -21,6 +21,8 @@ import { registerRawBodyJsonParser } from './common/middleware/raw-body.middlewa
 import { registerRequestContext } from './common/middleware/request-context.middleware.js';
 import { SentryService } from './common/observability/sentry.service.js';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
+import { RegionContextService } from './common/region/region-context.service.js';
+import { registerRegionGuards } from './common/region/region.middleware.js';
 import { ConfigService } from './config/config.service.js';
 import { DispatchGateway } from './modules/dispatch/dispatch.gateway.js';
 import { TrackingGateway } from './modules/tracking/tracking.gateway.js';
@@ -43,6 +45,16 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
 
   registerRequestContext(app.getHttpAdapter().getInstance());
+
+  // Region write-guard + last-write marker (Session 44). On a secondary region
+  // this refuses tenant writes with 503 + Location → primary. No-op on the
+  // primary (the default). Registered right after request-context so the
+  // request id is already attached for the warn log.
+  registerRegionGuards(app.getHttpAdapter().getInstance(), {
+    config,
+    regionContext: app.get(RegionContextService),
+    logger: config.logger,
+  });
 
   const csp = config.csp;
   await app.register(helmet, {
