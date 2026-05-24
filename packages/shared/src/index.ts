@@ -6,6 +6,9 @@ export * from './lien-processing/index';
 // Repo Compliance (Session 51) — statutory self-help repossession workflow
 // contracts (UCC Article 9 + per-state right-to-cure), all 50 states + DC.
 export * from './repo-compliance/index';
+// Yard Management (Session 54) — operator yard floor: facilities, stall map,
+// storage rate cards, auto-billing, release workflow, gate search.
+export * from './yard/index';
 // Multi-Region (Session 44) — region identity, health, and status contracts.
 export * from './region/index';
 // EV-Specific Recovery Workflows (Session 48).

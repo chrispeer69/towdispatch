@@ -47,6 +47,12 @@ const nextConfig = {
 // (PR / e2e / local) skips upload and is otherwise unaffected. The runtime SDK
 // is DSN-gated in the instrumentation files, so the wrapper is a no-op at
 // runtime when the DSN is empty.
+// Compose next-intl (S47) + Sentry (R-06). Source-map upload runs ONLY when
+// SENTRY_AUTH_TOKEN is set (CI/deploy); a local/tokenless build skips upload
+// and is otherwise unaffected. The runtime SDK is DSN-gated in the
+// instrumentation files, so the Sentry wrapper is a no-op at runtime when no
+// DSN is set. (A prior bad merge left three competing `export default`
+// statements here — reunified; see SESSION_54_DECISIONS.md.)
 /** @type {import('@sentry/nextjs').SentryBuildOptions} */
 const sentryBuildOptions = {
   silent: !process.env.CI,

@@ -23,6 +23,9 @@ export const disputeOutcomeSchema = z.object({
 export type DisputeOutcomeDto = z.infer<typeof disputeOutcomeSchema>;
 
 export const recordFraudOutcomeSchema = z
+// Renamed from recordOutcomeSchema / RecordOutcomePayload to avoid a barrel
+// name-collision with ai-dispatch's identically-named feedback contract
+// (both land on the @ustowdispatch/shared root). See SESSION_54_DECISIONS.md.
 export const recordDisputeOutcomeSchema = z
   .object({
     wasFraud: z.boolean(),

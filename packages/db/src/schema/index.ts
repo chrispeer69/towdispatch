@@ -64,6 +64,17 @@ export * from './impound-records';
 export * from './impound-holds';
 export * from './impound-fees';
 export * from './impound-releases';
+// Yard Management (Session 54) — operator yard floor layered over S22 impound:
+// facilities, stall map + photos, storage rate cards, auto-billing runs +
+// per-day charge ledger, and the gated release workflow. Tables in
+// packages/db/sql/0051_yard_management.sql.
+export * from './yard-facilities';
+export * from './yard-stalls';
+export * from './yard-stall-photos';
+export * from './storage-rate-cards';
+export * from './storage-billing-runs';
+export * from './storage-charges';
+export * from './release-workflows';
 export * from './commission-rules';
 export * from './reporting';
 // Lien Processing (Session 23) — statutory lien-sale workflow for unclaimed

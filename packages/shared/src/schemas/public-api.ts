@@ -184,6 +184,10 @@ export const webhookDeliverySchema = z.object({
   updatedAt: z.string().datetime(),
 });
 export type PublicApiWebhookDeliveryDto = z.infer<typeof webhookDeliverySchema>;
+// Renamed from WebhookDeliveryDto to avoid a barrel name-collision with the
+// notifications-module DTO of the same name (both reach the shared root). The
+// notifications DTO keeps the bare name. See SESSION_54_DECISIONS.md.
+export type PublicWebhookDeliveryDto = z.infer<typeof webhookDeliverySchema>;
 
 // ----------------------------------------------------------------------
 // /v1 public resource DTOs — deliberately trimmed + stable. Internal fields
