@@ -146,3 +146,9 @@ export * from './scim-tokens';
 export * from './sso-login-audit';
 export * from './scim-groups';
 export * from './scim-group-members';
+// Repo Compliance (Session 50) — state-by-state repossession compliance:
+// per-state rules (global ref), required notices, timeline. Tables in
+// packages/db/sql/0051_repo_compliance.sql.
+export * from './repo-state-rules';
+export * from './repo-required-notices';
+export * from './repo-timeline-events';

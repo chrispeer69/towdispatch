@@ -33,3 +33,7 @@ export * from './marketplace-api/index';
 // Enterprise SSO (Session 38) — SAML 2.0 / OIDC connection + SCIM 2.0
 // provisioning + login-audit contracts.
 export * from './sso/index';
+// Repo Compliance (Session 50) — state-by-state repossession compliance:
+// breach-of-peace validation, pre/post repo notices, redemption windows,
+// personal-property holds. Top 10 states; remaining 40 + DC → Session 51.
+export * from './repo/compliance/index';

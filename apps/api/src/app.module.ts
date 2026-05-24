@@ -42,13 +42,14 @@ import { ImpoundModule } from './modules/impound/impound.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
 import { MarketplaceApiModule } from './modules/marketplace-api/marketplace-api.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { OpsModule } from './modules/ops/ops.module.js';
-import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { PublicApiModule } from './modules/public-api/public-api.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
+import { RepoComplianceModule } from './modules/repo/repo-compliance.module.js';
 import { ReportingModule } from './modules/reporting/reporting.module.js';
 import { ServiceCatalogModule } from './modules/service-catalog/service-catalog.module.js';
 import { ServiceRatesModule } from './modules/service-rates/service-rates.module.js';
@@ -106,6 +107,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     ImpoundModule,
     HeavyDutyModule,
     LienProcessingModule,
+    RepoComplianceModule,
     EvRecoveryModule,
     VoiceDriverModule,
     PublicApiModule,
