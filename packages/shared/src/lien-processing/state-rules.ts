@@ -1,18 +1,22 @@
 /**
- * Lien Processing (Session 23) — per-state statutory rule contract.
+ * Lien Processing — per-state statutory rule contract.
  *
  * `LienStateRules` is the jsonb shape stored in lien_state_rules.rules and
  * the typed config the rule engine reads (state-rules.config.ts in the API
- * is the runtime source of truth). The 10 states shipped this session are
- * CA, TX, FL, NY, GA, NC, OH, IL, PA, MI; the remaining 40 are deferred.
+ * is the runtime source of truth). Session 23 shipped the top 10 states (CA,
+ * TX, FL, NY, GA, NC, OH, IL, PA, MI); Session 35 added the remaining 40 + DC
+ * for full 50-state + DC coverage.
  *
- * Day-counts are best-effort against each state's lien-sale statute and
- * require legal review before production use — see SESSION_23_DECISIONS.md.
+ * Day-counts are best-effort against each jurisdiction's lien-sale statute and
+ * require legal review before production use — see SESSION_23_DECISIONS.md
+ * (top 10) and SESSION_35_DECISIONS.md (remaining 40 + DC).
  */
 import { z } from 'zod';
 
-// The 10 states implemented this session.
+// All 50 states + DC. The first 10 were shipped in Session 23; the remaining
+// 40 + DC were added in Session 35. Sorted alphabetically within each group.
 export const lienStateValues = [
+  // Session 23 — top 10.
   'CA',
   'TX',
   'FL',
@@ -23,6 +27,48 @@ export const lienStateValues = [
   'IL',
   'PA',
   'MI',
+  // Session 35 — remaining 40 + DC (alphabetical).
+  'AK',
+  'AL',
+  'AR',
+  'AZ',
+  'CO',
+  'CT',
+  'DC',
+  'DE',
+  'HI',
+  'IA',
+  'ID',
+  'IN',
+  'KS',
+  'KY',
+  'LA',
+  'MA',
+  'MD',
+  'ME',
+  'MN',
+  'MO',
+  'MS',
+  'MT',
+  'ND',
+  'NE',
+  'NH',
+  'NJ',
+  'NM',
+  'NV',
+  'OK',
+  'OR',
+  'RI',
+  'SC',
+  'SD',
+  'TN',
+  'UT',
+  'VA',
+  'VT',
+  'WA',
+  'WI',
+  'WV',
+  'WY',
 ] as const;
 export type LienState = (typeof lienStateValues)[number];
 
