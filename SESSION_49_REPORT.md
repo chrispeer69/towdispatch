@@ -93,10 +93,24 @@ Lien processing (S23/S35), motor-club gateway, the JobsService state machine
   separate cleanup.
 - iOS/Android changes are unverified (no native toolchain in session env).
 
+## Verification (this session)
+
+| Gate | Result |
+|------|--------|
+| `pnpm typecheck` | ✅ green — all 6 packages, 0 errors |
+| `pnpm test` | ✅ green — apps/api 104 passed / 82 skipped (DB-gated RLS+integration self-skip without DATABASE_URL), apps/web 20 passed, scripts 10 passed |
+| `pnpm build` | ✅ green — web + api build clean (web prod build requires `NEXT_PUBLIC_API_URL`, the R-14 guard) |
+| `pnpm biome check` | 🟡 **pre-existing** 44 errors + 38 warnings, ALL in unrelated files (auction.service, import/*, notifications/channels, synth script — `noNonNullAssertion` + 2 `organizeImports`). **Zero in any Session 49 file.** Master was already biome-red; a repo-wide lint cleanup (removing 42 `!` assertions in unrelated modules) is out of scope and behavior-risky. |
+
+Repo unit tests run locally and pass (21). RLS + integration specs are DB-gated
+(green in CI / docker, where `DATABASE_URL` + `REDIS_URL` are set).
+
 ## Commands
 
 ```
-pnpm typecheck && pnpm biome check && pnpm test && pnpm build
+pnpm typecheck && pnpm test && pnpm build      # green this session
+pnpm biome check                                # pre-existing failures, none in S49 files
+NEXT_PUBLIC_API_URL=… pnpm build                # web prod build needs this (R-14 guard)
+REPO_MODULE_ENABLED=true                         # enable the module at runtime (ships dark)
 # DB-gated specs (RLS + integration) need DATABASE_URL + REDIS_URL (CI / docker).
-# Enable the module at runtime: REPO_MODULE_ENABLED=true
 ```
