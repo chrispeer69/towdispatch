@@ -79,4 +79,50 @@ api iterated to green (see report for the final clean run).
 
 ## Feature decisions
 
-(Recorded as the feature is built — see below.)
+- **Job type vs. separate workflow** — chose to add `'repo'` to the existing
+  `service_type` enum (the spec's "job_type" = the real `jobs.service_type`)
+  rather than a parallel job entity. State-machine reuse > duplication: a repo
+  dispatch job rides `JobsService.transition` unchanged. There is NO DB CHECK on
+  `service_type`, so adding the value is a TS/Zod-enum change in BOTH the db
+  schema and the shared schema (they are separate enums that must stay in sync —
+  the compiler enforced it via the exhaustive `Record<JobServiceType>` maps).
+- **Lienholder as tenant-scoped reference (not global like jurisdictions)** —
+  operators keep their own lienholder books (a bank is a different relationship
+  per operator), so `lienholders` is tenant-scoped + FORCE RLS, not global ref.
+- **Condition-photo slots — 8** — exterior front/rear/left/right, interior,
+  odometer, damage, vin_plate (+ 'other'). Matches industry repo body-damage
+  condition-report sheets. The slot is advisory (a case can carry several of one).
+- **Storage-rate reuse from S22** — repo storage billing reuses the impound
+  daily-rate compute (daysStored × dailyRateCents) and the existing
+  `storage_daily` invoice line type; the distinguishing field is the
+  line's COST CENTER (a repo invoice vs an impound release), not the math.
+  Repo-specific fees got two NEW line types (`skip_trace`, `repo_attempt`);
+  recovery reuses `recovery`. All flow through the existing invoices
+  computeTotals path — billing is never forked (block 8).
+- **Status machine** — open → located → recovered|surrendered → closed; open|
+  located → cancelled. `recordRecovery` sets recovered/surrendered (by
+  recovery_type) and derives `redemption_ends_at` from recovered_at +
+  redemption_window_days. `releaseToLienholder`/`cancelCase` are thin aliases
+  over `closeCase(disposition)`; one `/close` endpoint serves both.
+- **Redemption math in UTC** — `computeRedemptionEnd` advances whole calendar
+  days with setUTCDate (DST-immune, leap-day/month/year-correct). DB stores UTC;
+  presentation localizes.
+- **Idempotency** — partial unique on (tenant, lienholder, case_number) WHERE
+  status <> 'cancelled', so a cancelled assignment frees the number for re-issue.
+- **gps coords as double precision** — exposed as `number | null` in the DTO,
+  no numeric-string coercion tax (adequate precision for field pins).
+- **Env gate REPO_MODULE_ENABLED (default false)** — ships dark; controllers
+  return 503 `repo_module_disabled` when off (mirrors VoiceDriver/MarketplaceApi).
+  The `'repo'` service_type + `repo_case_id` column are inert without it.
+- **No event emission this session** — unlike impound (`impound.opened`), repo
+  does not emit DISPATCH_EVENTS, to avoid expanding the public-API webhook
+  catalog out of scope. Deferred (🟡).
+- **Driver "create repo job from case" prefill** — the DB linkage (`repo_case_id`
+  FK, `'repo'` service_type) and the no-signature/no-SMS driver behavior are in
+  place, but the dispatcher one-click "create job from case" action (prefilling
+  debtor→customer, lienholder→payer via JobsService.create) is deferred (🟡):
+  it needs a JobsService.create integration that is larger than the core slice.
+- **Native driver apps (iOS/Android)** — additive: the signature-capture
+  shortcut is hidden for `serviceType == 'repo'` (peaceful repo needs no debtor
+  signature). NOT Xcode/Gradle-verified in this session env (🟡); the fuller
+  8-slot condition-photo checklist screen is spec'd for a follow-up.

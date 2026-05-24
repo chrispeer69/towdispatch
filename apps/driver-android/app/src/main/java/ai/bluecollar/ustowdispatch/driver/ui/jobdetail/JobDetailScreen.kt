@@ -160,7 +160,12 @@ fun JobDetailScreen(
                 }
             }
 
-            // Photos + signature shortcuts
+            // Photos + signature shortcuts. Repossession (Session 49): a
+            // peaceful repo requires NO debtor signature, so the signature
+            // shortcut is hidden for repo jobs — the condition-photo checklist
+            // captured via Photos is persisted to repo_condition_photos by the
+            // API on completion.
+            val isRepo = j.serviceType == "repo"
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 FilledTonalButton(
                     onClick = onCapturePhotos,
@@ -170,13 +175,15 @@ fun JobDetailScreen(
                     Spacer(Modifier.width(8.dp))
                     Text("Photos")
                 }
-                FilledTonalButton(
-                    onClick = onCaptureSignature,
-                    modifier = Modifier.weight(1f).height(56.dp),
-                ) {
-                    Icon(Icons.Filled.Edit, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Signature")
+                if (!isRepo) {
+                    FilledTonalButton(
+                        onClick = onCaptureSignature,
+                        modifier = Modifier.weight(1f).height(56.dp),
+                    ) {
+                        Icon(Icons.Filled.Edit, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Signature")
+                    }
                 }
             }
 
