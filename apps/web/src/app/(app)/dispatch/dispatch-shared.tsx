@@ -1,5 +1,7 @@
 'use client';
 
+import { formatEtaMinutes } from '@/lib/ai-dispatch/ui-helpers';
+import { clientGetEta } from '@/lib/api/ai-dispatch-client';
 /**
  * Shared dispatch board primitives used by both /dispatch (Live Dispatch:
  * Active jobs + Map) and /assign-jobs (New queue + Driver roster + DnD).
@@ -342,7 +344,57 @@ export function JobCard({ job, compact = false, draggable = true }: JobCardProps
         <p className="mt-1 truncate text-text-primary-on-dark/90">{job.pickupAddress}</p>
       ) : null}
       <TierOfferBadge status={job.tierOfferEnforcementStatus} />
+      <JobEtaPill jobId={job.id} status={job.status} />
     </div>
+  );
+}
+
+/**
+ * Predictive-ETA pill (AI Smart Dispatch, Session 41). Surfaces the engine's
+ * drive-to-scene projection for an in-flight job. Self-fetches once on mount,
+ * and only for jobs that have an assigned driver with a position to route from
+ * (dispatched / enroute) — an unassigned job has no origin, so we render
+ * nothing rather than a meaningless "—". Display-only; never assigns.
+ */
+const ETA_PILL_STATUSES = new Set<JobDto['status']>(['dispatched', 'enroute']);
+
+function JobEtaPill({
+  jobId,
+  status,
+}: {
+  jobId: string;
+  status: JobDto['status'];
+}): JSX.Element | null {
+  const [minutes, setMinutes] = useState<number | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!ETA_PILL_STATUSES.has(status)) return;
+    let alive = true;
+    clientGetEta(jobId)
+      .then((r) => {
+        if (alive) {
+          setMinutes(r.predictedMinutes);
+          setLoaded(true);
+        }
+      })
+      .catch(() => {
+        if (alive) setLoaded(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [jobId, status]);
+
+  if (!ETA_PILL_STATUSES.has(status) || !loaded || minutes === null) return null;
+  return (
+    <span
+      className="mt-1 inline-flex items-center gap-1 rounded-full border border-brand-primary/40 bg-brand-primary/10 px-2 py-0.5 font-mono text-[10px] font-bold text-brand-primary"
+      title="Predicted drive-to-scene ETA (AI Smart Dispatch)"
+      data-testid={`job-eta-${jobId}`}
+    >
+      ETA {formatEtaMinutes(minutes)}
+    </span>
   );
 }
 

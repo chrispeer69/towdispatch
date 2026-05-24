@@ -411,6 +411,29 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  // AI Smart Dispatch + Predictive ETAs (Session 41) — advisory v1.
+  // AI_DISPATCH_RECOMPUTE_CRON_ENABLED gates the 60-second recompute tick that
+  // refreshes recommendations for unassigned jobs. ADVISORY ONLY — it never
+  // assigns a job. Default false so dev/CI don't churn against seed data.
+  AI_DISPATCH_RECOMPUTE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  // ETA provider. `heuristic` (default) is the offline distance/traffic model;
+  // `mapbox` is a future server-side-routing stub (selected only when a token
+  // is also set; the service falls back to heuristic if it throws).
+  ETA_PROVIDER: z.enum(['heuristic', 'mapbox']).default('heuristic'),
+  // Scoring-factor weights as integer "points" (normalised by their sum at
+  // runtime, so they need not total 100). Operator-tunable defaults; per-tenant
+  // overrides are a documented deferral. Rationale in SESSION_41_DECISIONS.md.
+  AI_DISPATCH_WEIGHT_DISTANCE: z.coerce.number().int().min(0).default(30),
+  AI_DISPATCH_WEIGHT_CAPABILITY: z.coerce.number().int().min(0).default(25),
+  AI_DISPATCH_WEIGHT_CERT_MATCH: z.coerce.number().int().min(0).default(15),
+  AI_DISPATCH_WEIGHT_FATIGUE: z.coerce.number().int().min(0).default(10),
+  AI_DISPATCH_WEIGHT_HISTORICAL: z.coerce.number().int().min(0).default(10),
+  AI_DISPATCH_WEIGHT_UTILIZATION: z.coerce.number().int().min(0).default(10),
+  // Default number of candidates surfaced per job (top N).
+  AI_DISPATCH_RECOMMENDATION_LIMIT: z.coerce.number().int().min(1).max(20).default(3),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

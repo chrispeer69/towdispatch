@@ -101,6 +101,15 @@ const SECTIONS: NavSection[] = [
         match: (p) => p.startsWith('/dispatch'),
       },
       {
+        // Session 41 — AI Smart Dispatch. Advisory candidate scoring +
+        // predictive-ETA accuracy reports. The page gates by role; the link
+        // is shown to all and the page surfaces a friendly denied state.
+        label: 'AI Dispatch',
+        href: '/ai-dispatch',
+        icon: Sparkles,
+        match: (p) => p.startsWith('/ai-dispatch'),
+      },
+      {
         label: 'Assign Jobs',
         href: '/assign-jobs',
         icon: Truck,
