@@ -156,3 +156,10 @@ export * from './repo-location-attempts';
 export * from './repo-recovery-events';
 export * from './repo-personal-property';
 export * from './repo-condition-photos';
+// Customer Self-Serve Portal (Session 55) — account-less per-impound sessions,
+// self-attested ID, release intents, Stripe payment mirror. Tables in
+// packages/db/sql/0051_self_serve_portal.sql.
+export * from './customer-portal-sessions';
+export * from './customer-portal-id-verifications';
+export * from './customer-portal-release-intents';
+export * from './customer-portal-payments';

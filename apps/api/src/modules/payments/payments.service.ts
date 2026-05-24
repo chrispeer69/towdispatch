@@ -31,7 +31,15 @@ import {
   NotFoundException,
   Optional,
 } from '@nestjs/common';
-import { customers, invoices, payments, tenants, uuidv7 } from '@ustowdispatch/db';
+import {
+  customerPortalPayments,
+  customerPortalReleaseIntents,
+  customers,
+  invoices,
+  payments,
+  tenants,
+  uuidv7,
+} from '@ustowdispatch/db';
 import {
   type CardOnFileDto,
   ERROR_CODES,
@@ -710,6 +718,13 @@ export class PaymentsService {
       metadata?: Record<string, string>;
     };
     const piId = obj.id;
+    // Session 55: self-serve portal PaymentIntents carry no invoiceId; route
+    // them to the portal release-intent handoff. The stripe_events idempotency
+    // INSERT already ran in handleWebhookEvent, so this branch is dedupe-safe.
+    if (obj.metadata?.kind === 'self_serve_portal') {
+      await this.onSelfServePortalSucceeded(obj.metadata.tenantId, piId, obj.amount);
+      return;
+    }
     const tenantId = obj.metadata?.tenantId;
     const invoiceId = obj.metadata?.invoiceId;
     if (!tenantId || !invoiceId) {
@@ -793,6 +808,10 @@ export class PaymentsService {
       id: string;
       metadata?: Record<string, string>;
     };
+    if (obj.metadata?.kind === 'self_serve_portal') {
+      await this.onSelfServePortalFailed(obj.metadata.tenantId, obj.id);
+      return;
+    }
     const tenantId = obj.metadata?.tenantId;
     if (!tenantId) return;
     await this.db.runInTenantContext(
@@ -806,6 +825,82 @@ export class PaymentsService {
               eq(payments.tenantId, tenantId),
               eq(payments.stripePaymentIntentId, obj.id),
               isNull(payments.deletedAt),
+            ),
+          );
+      },
+    );
+  }
+
+  /**
+   * Session 55 — self-serve portal payment succeeded. Flip the matching release
+   * intent paid -> ready_for_gate (the yard-gate handoff signal) and mark the
+   * portal payment row succeeded. Idempotent: a re-delivered webhook is a no-op
+   * once the intent is already ready_for_gate.
+   */
+  private async onSelfServePortalSucceeded(
+    tenantId: string | undefined,
+    piId: string,
+    amountCents: number,
+  ): Promise<void> {
+    if (!tenantId) {
+      this.logger.warn({ piId }, 'self-serve portal payment succeeded without tenantId');
+      return;
+    }
+    await this.db.runInTenantContext(
+      { tenantId, userId: '00000000-0000-0000-0000-000000000000' },
+      async (tx) => {
+        const intent = await tx.query.customerPortalReleaseIntents.findFirst({
+          where: and(
+            eq(customerPortalReleaseIntents.tenantId, tenantId),
+            eq(customerPortalReleaseIntents.stripePaymentIntentId, piId),
+            isNull(customerPortalReleaseIntents.deletedAt),
+          ),
+        });
+        if (
+          intent &&
+          (intent.status === 'initiated' ||
+            intent.status === 'id_provided' ||
+            intent.status === 'paid')
+        ) {
+          await tx
+            .update(customerPortalReleaseIntents)
+            .set({
+              status: 'ready_for_gate',
+              paidCents: Number(intent.totalDueCents),
+              readyForGateAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(customerPortalReleaseIntents.id, intent.id));
+        }
+        await tx
+          .update(customerPortalPayments)
+          .set({ status: 'succeeded', paidAt: new Date(), amountCents, updatedAt: new Date() })
+          .where(
+            and(
+              eq(customerPortalPayments.tenantId, tenantId),
+              eq(customerPortalPayments.stripePaymentIntentId, piId),
+              isNull(customerPortalPayments.deletedAt),
+            ),
+          );
+      },
+    );
+    this.logger.info({ tenantId, piId }, 'self-serve portal payment succeeded → ready_for_gate');
+  }
+
+  /** Session 55 — self-serve portal payment failed; the release intent stays open for retry. */
+  private async onSelfServePortalFailed(tenantId: string | undefined, piId: string): Promise<void> {
+    if (!tenantId) return;
+    await this.db.runInTenantContext(
+      { tenantId, userId: '00000000-0000-0000-0000-000000000000' },
+      async (tx) => {
+        await tx
+          .update(customerPortalPayments)
+          .set({ status: 'failed', updatedAt: new Date() })
+          .where(
+            and(
+              eq(customerPortalPayments.tenantId, tenantId),
+              eq(customerPortalPayments.stripePaymentIntentId, piId),
+              isNull(customerPortalPayments.deletedAt),
             ),
           );
       },

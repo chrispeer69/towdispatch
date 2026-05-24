@@ -11,6 +11,7 @@ import type {
   JobRiskDetailDto,
   ListDisputesFilter,
   ListHighRiskFilter,
+  RecordDisputeOutcomePayload,
   RecordDisputePayload,
   RecordFraudOutcomePayload,
   ResolveDisputePayload,
@@ -72,6 +73,7 @@ export const clientResolveDispute = (id: string, body: ResolveDisputePayload) =>
   });
 
 export const clientRecordOutcome = (id: string, body: RecordFraudOutcomePayload) =>
+export const clientRecordOutcome = (id: string, body: RecordDisputeOutcomePayload) =>
   req<DisputeOutcomeDto>(`${BASE}/disputes/${id}/outcome`, {
     method: 'POST',
     body: JSON.stringify(body),

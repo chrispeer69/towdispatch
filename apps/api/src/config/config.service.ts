@@ -204,6 +204,31 @@ export class ConfigService {
   }
 
   /**
+   * Customer Self-Serve Portal (Session 55). `enabled` master-gates the
+   * surface; `paymentEnabled` separately gates pay endpoints so the portal can
+   * launch read-only first. `sessionSecret` signs the (non-JWT) session cookie,
+   * domain-separated from JWT_SECRET; `idEncryptionKey` encrypts ID-last4 at
+   * rest (distinct from the QBO/SSO keys — key separation).
+   */
+  get selfServePortal(): {
+    enabled: boolean;
+    paymentEnabled: boolean;
+    sessionTtlMinutes: number;
+    sessionSecret: string;
+    idEncryptionKey: string;
+  } {
+    return {
+      enabled: this.config.CUSTOMER_PORTAL_ENABLED,
+      paymentEnabled: this.config.CUSTOMER_PORTAL_PAYMENT_ENABLED,
+      sessionTtlMinutes: this.config.CUSTOMER_PORTAL_SESSION_TTL_MIN,
+      sessionSecret:
+        this.config.CUSTOMER_PORTAL_SESSION_SECRET ||
+        `${this.config.JWT_SECRET}::self-serve-portal`,
+      idEncryptionKey: this.config.CUSTOMER_PORTAL_ID_ENCRYPTION_KEY,
+    };
+  }
+
+  /**
    * Auction & Remarketing Marketplace (Session 33). `cronEnabled` gates the
    * lifecycle cron body so dev/CI don't mutate seed listings every tick.
    */

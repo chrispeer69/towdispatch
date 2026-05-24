@@ -51,6 +51,7 @@ import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
 import { RepoModule } from './modules/repo/repo.module.js';
 import { ReportingModule } from './modules/reporting/reporting.module.js';
+import { SelfServePortalModule } from './modules/self-serve-portal/self-serve-portal.module.js';
 import { ServiceCatalogModule } from './modules/service-catalog/service-catalog.module.js';
 import { ServiceRatesModule } from './modules/service-rates/service-rates.module.js';
 import { SsoModule } from './modules/sso/sso.module.js';
@@ -119,6 +120,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     AiDispatchModule,
     MarketplaceApiModule,
     SsoModule,
+    SelfServePortalModule,
     DashboardModule,
     ReportingModule,
     AdminModule,
