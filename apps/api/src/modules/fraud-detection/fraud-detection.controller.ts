@@ -16,13 +16,13 @@ import {
   type ListHighRiskFilter,
   ROLES,
   type RecordDisputePayload,
-  type RecordOutcomePayload,
+  type RecordDisputeOutcomePayload,
   type ResolveDisputePayload,
   type ReviewFraudScorePayload,
   listDisputesFilterSchema,
   listHighRiskFilterSchema,
   recordDisputeSchema,
-  recordOutcomeSchema,
+  recordDisputeOutcomeSchema,
   resolveDisputeSchema,
   reviewFraudScoreSchema,
 } from '@ustowdispatch/shared';
@@ -113,7 +113,7 @@ export class FraudDetectionController {
   async recordOutcome(
     @Req() req: FastifyRequest,
     @ZodParam(disputeParam) p: { id: string },
-    @ZodBody(recordOutcomeSchema) body: RecordOutcomePayload,
+    @ZodBody(recordDisputeOutcomeSchema) body: RecordDisputeOutcomePayload,
   ) {
     return this.service.recordOutcome(this.ctx(req), p.id, body);
   }

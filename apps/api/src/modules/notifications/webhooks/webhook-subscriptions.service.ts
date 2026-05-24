@@ -9,12 +9,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   uuidv7,
-  webhookDeliveries,
+  notificationWebhookDeliveries,
   webhookSubscriptions,
 } from '@ustowdispatch/db';
 import type {
   UpsertWebhookSubscriptionPayload,
-  WebhookDeliveryDto,
+  NotificationWebhookDeliveryDto,
   WebhookSubscriptionDto,
 } from '@ustowdispatch/shared';
 import { and, desc, eq } from 'drizzle-orm';
@@ -165,20 +165,20 @@ export class WebhookSubscriptionsService {
     ctx: CallerContext,
     subscriptionId: string,
     limit = 50,
-  ): Promise<WebhookDeliveryDto[]> {
+  ): Promise<NotificationWebhookDeliveryDto[]> {
     return this.db.runInTenantContext(
       { tenantId: ctx.tenantId, userId: ctx.userId, requestId: ctx.requestId },
       async (tx) => {
         const rows = await tx
           .select()
-          .from(webhookDeliveries)
+          .from(notificationWebhookDeliveries)
           .where(
             and(
-              eq(webhookDeliveries.tenantId, ctx.tenantId),
-              eq(webhookDeliveries.subscriptionId, subscriptionId),
+              eq(notificationWebhookDeliveries.tenantId, ctx.tenantId),
+              eq(notificationWebhookDeliveries.subscriptionId, subscriptionId),
             ),
           )
-          .orderBy(desc(webhookDeliveries.createdAt))
+          .orderBy(desc(notificationWebhookDeliveries.createdAt))
           .limit(limit);
         return rows.map((r) => ({
           id: r.id,

@@ -47,7 +47,7 @@ import type {
   ListDisputesFilter,
   ListHighRiskFilter,
   RecordDisputePayload,
-  RecordOutcomePayload,
+  RecordDisputeOutcomePayload,
   ResolveDisputePayload,
   ReviewFraudScorePayload,
 } from '@ustowdispatch/shared';
@@ -249,7 +249,7 @@ export class FraudDetectionService {
   async recordOutcome(
     ctx: CallerCtx,
     disputeId: string,
-    input: RecordOutcomePayload,
+    input: RecordDisputeOutcomePayload,
   ): Promise<DisputeOutcomeDto> {
     return this.db.runInTenantContext(ctx, async (tx) => {
       await this.requireDispute(tx, disputeId);

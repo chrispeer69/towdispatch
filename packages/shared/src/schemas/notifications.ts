@@ -383,7 +383,7 @@ export const webhookDeliveryDtoSchema = z.object({
   deliveredAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
 });
-export type WebhookDeliveryDto = z.infer<typeof webhookDeliveryDtoSchema>;
+export type NotificationWebhookDeliveryDto = z.infer<typeof webhookDeliveryDtoSchema>;
 
 /* ============================================================
  * Dead letters

@@ -37,7 +37,7 @@ import {
   type UpsertTemplatePayload,
   type UpsertWebhookSubscriptionPayload,
   type UserPreferencesDto,
-  type WebhookDeliveryDto,
+  type NotificationWebhookDeliveryDto,
   type WebhookSubscriptionDto,
   dispatchNotificationSchema,
   notificationListQuerySchema,
@@ -279,7 +279,7 @@ export class NotificationsController {
   async listWebhookDeliveries(
     @ZodParam(subIdSchema) params: { subscriptionId: string },
     @Req() req: FastifyRequest,
-  ): Promise<WebhookDeliveryDto[]> {
+  ): Promise<NotificationWebhookDeliveryDto[]> {
     return this.webhooks.listDeliveries(this.callerCtx(req), params.subscriptionId);
   }
 

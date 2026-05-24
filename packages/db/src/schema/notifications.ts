@@ -460,7 +460,7 @@ export type NotificationDeviceTokenRow = typeof notificationDeviceTokens.$inferS
  * Lighter than notification_deliveries because webhooks don't need the
  * read-state / rendered-body columns.
  */
-export const webhookDeliveries = pgTable(
+export const notificationWebhookDeliveries = pgTable(
   'webhook_deliveries',
   {
     id: uuid('id').primaryKey(),
@@ -503,4 +503,4 @@ export const webhookDeliveries = pgTable(
   }),
 );
 
-export type WebhookDeliveryRow = typeof webhookDeliveries.$inferSelect;
+export type NotificationWebhookDeliveryRow = typeof notificationWebhookDeliveries.$inferSelect;
