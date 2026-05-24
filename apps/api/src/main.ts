@@ -103,7 +103,7 @@ async function bootstrap(): Promise<void> {
 
   const sentry = app.get(SentryService);
   app.useGlobalPipes(new ZodValidationPipe());
-  app.useGlobalFilters(new GlobalExceptionFilter(config.logger, sentry));
+  app.useGlobalFilters(new GlobalExceptionFilter(config, sentry));
   app.useGlobalInterceptors(new LoggingInterceptor(config.logger));
 
   app.enableShutdownHooks();

@@ -61,7 +61,7 @@ export async function bootApp(): Promise<NestFastifyApplication> {
   const config = app.get(ConfigService);
   registerRequestContext(app.getHttpAdapter().getInstance());
   app.useGlobalPipes(new ZodValidationPipe());
-  app.useGlobalFilters(new GlobalExceptionFilter(config.logger));
+  app.useGlobalFilters(new GlobalExceptionFilter(config));
   await app.init();
   // Replace Nest's default application/json parser with one that captures
   // the raw body for Stripe webhook signature verification. Must run after

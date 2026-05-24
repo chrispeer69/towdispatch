@@ -74,6 +74,14 @@ export class ConfigService {
       .filter(Boolean);
   }
   /**
+   * Base URI for RFC 9457 problem-type identifiers. Trailing slash stripped so
+   * the GlobalExceptionFilter can safely build `${base}/<error-code>` without a
+   * doubled slash when an operator sets `…cloud/`.
+   */
+  get problemTypeBase(): string {
+    return this.config.PROBLEM_TYPE_BASE.replace(/\/+$/, '');
+  }
+  /**
    * Derive an app_user connection URL from a raw (possibly superuser) URL by
    * swapping credentials when APP_USER_PASSWORD is set. Managed-Postgres
    * deployments hand us one superuser URL; migrations use it as-is, runtime
@@ -362,6 +370,9 @@ export class ConfigService {
     clientSecret: string;
     redirectUri: string;
     sandbox: boolean;
+    appcenterBase: string;
+    oauthBase: string;
+    apiBase: string;
     tokenEncryptionKey: string;
     webhookVerifierToken: string;
     configured: boolean;
@@ -375,6 +386,9 @@ export class ConfigService {
       clientSecret,
       redirectUri,
       sandbox: this.config.QBO_SANDBOX,
+      appcenterBase: this.config.QBO_APPCENTER_BASE,
+      oauthBase: this.config.QBO_OAUTH_BASE,
+      apiBase: this.config.QBO_API_BASE,
       tokenEncryptionKey: this.config.QBO_TOKEN_ENCRYPTION_KEY,
       webhookVerifierToken: this.config.QBO_WEBHOOK_VERIFIER_TOKEN,
       configured: !!clientId && !!clientSecret,

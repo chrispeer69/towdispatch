@@ -65,7 +65,7 @@ async function bootAppWithStub(stub: QboStubProvider): Promise<NestFastifyApplic
   const config = app.get(ConfigService);
   registerRequestContext(app.getHttpAdapter().getInstance());
   app.useGlobalPipes(new ZodValidationPipe());
-  app.useGlobalFilters(new GlobalExceptionFilter(config.logger));
+  app.useGlobalFilters(new GlobalExceptionFilter(config));
   await app.init();
   registerRawBodyJsonParser(app.getHttpAdapter().getInstance());
   await app.getHttpAdapter().getInstance().ready();

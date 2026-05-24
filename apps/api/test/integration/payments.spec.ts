@@ -71,7 +71,7 @@ async function bootAppWithStub(stub: StubPaymentProvider): Promise<NestFastifyAp
   const config = app.get(ConfigService);
   registerRequestContext(app.getHttpAdapter().getInstance());
   app.useGlobalPipes(new ZodValidationPipe());
-  app.useGlobalFilters(new GlobalExceptionFilter(config.logger));
+  app.useGlobalFilters(new GlobalExceptionFilter(config));
   await app.init();
   // Override Nest's default application/json parser AFTER init so the raw
   // body is captured for Stripe webhook signature verification.

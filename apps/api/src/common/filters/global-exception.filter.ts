@@ -17,14 +17,22 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from 'pino';
 import { ZodError } from 'zod';
 import { redactPii } from '../observability/redact-pii.js';
+import type { ConfigService } from '../../config/config.service.js';
 import type { SentryService } from '../observability/sentry.service.js';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger: Logger;
+  /** Base URI for RFC 9457 problem-type identifiers; no trailing slash. */
+  private readonly problemTypeBase: string;
+
   constructor(
-    private readonly logger: Logger,
+    config: ConfigService,
     private readonly sentry?: SentryService,
-  ) {}
+  ) {
+    this.logger = config.logger;
+    this.problemTypeBase = config.problemTypeBase;
+  }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -34,7 +42,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let problem: ProblemDetails = {
-      type: `https://errors.ustowdispatch.com/${ERROR_CODES.INTERNAL_ERROR}`,
+      type: `${this.problemTypeBase}/${ERROR_CODES.INTERNAL_ERROR}`,
       title: 'Internal Server Error',
       status,
       code: ERROR_CODES.INTERNAL_ERROR,
@@ -44,7 +52,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof ZodError) {
       status = HttpStatus.BAD_REQUEST;
       problem = {
-        type: `https://errors.ustowdispatch.com/${ERROR_CODES.VALIDATION_FAILED}`,
+        type: `${this.problemTypeBase}/${ERROR_CODES.VALIDATION_FAILED}`,
         title: 'Validation Failed',
         status,
         code: ERROR_CODES.VALIDATION_FAILED,
@@ -63,7 +71,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           : (r as { code?: string; message?: string; errors?: ProblemDetails['errors'] });
       const code = payload.code ?? statusToCode(status);
       problem = {
-        type: `https://errors.ustowdispatch.com/${code}`,
+        type: `${this.problemTypeBase}/${code}`,
         title: payload.message ?? exception.message ?? 'Request failed',
         status,
         code,
