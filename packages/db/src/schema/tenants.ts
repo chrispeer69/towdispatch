@@ -58,6 +58,15 @@ export const tenants = pgTable(
      */
     platformMarginBps: integer('platform_margin_bps').notNull().default(30),
 
+    /**
+     * Multi-Region (Session 44). Tenant's preferred serving region
+     * (e.g. 'us-east' | 'us-west'). Nullable; no DB CHECK by design
+     * (forward-compat for >2 regions) — values validated app-side. Routing on
+     * it is deferred to edge/DNS (owner-side); the API only validates/echoes
+     * the X-Preferred-Region header. See migration 0039.
+     */
+    preferredRegion: text('preferred_region'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
