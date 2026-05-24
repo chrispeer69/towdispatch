@@ -9,8 +9,11 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { ROLES, type Role } from '@ustowdispatch/shared';
 import {
+  type AuditAnomaliesQuery,
+  type AuditAnomaliesReport,
   type AuditLogQuery,
   type PaginatedAuditLog,
+  auditAnomaliesQuerySchema,
   auditLogQuerySchema,
 } from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
@@ -40,6 +43,21 @@ export class AdminController {
     @Req() req: FastifyRequest,
   ): Promise<PaginatedAuditLog> {
     return this.admin.queryAuditLog(this.callerCtx(req), query);
+  }
+
+  /**
+   * Advisory anomaly surface over the audit trail (SOC 2 Type II). Surfaces
+   * admin deletes, off-hours admin activity, and failed-login spikes for the
+   * caller's tenant. Same roles + RLS scoping as the reader. Read-only; flags
+   * but never blocks.
+   */
+  @Get('audit-log/anomalies')
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.AUDITOR)
+  async auditLogAnomalies(
+    @ZodQuery(auditAnomaliesQuerySchema) query: AuditAnomaliesQuery,
+    @Req() req: FastifyRequest,
+  ): Promise<AuditAnomaliesReport> {
+    return this.admin.queryAnomalies(this.callerCtx(req), query);
   }
 
   private callerCtx(req: FastifyRequest): CallerContext {

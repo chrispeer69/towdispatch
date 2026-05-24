@@ -69,3 +69,77 @@ export interface PaginatedAuditLog {
   perPage: number;
   total: number;
 }
+
+/**
+ * Audit-log anomaly surface (Session 40 — SOC 2 Type II monitoring effectiveness).
+ *
+ * Backs GET /admin/audit-log/anomalies — an advisory read over the same tenant-
+ * scoped audit_log (plus the users table for failed-login counters) that
+ * surfaces three operating-effectiveness signals an auditor / operator watches:
+ * admin deletes, off-hours admin activity, and failed-login spikes. It flags; it
+ * does not block. Every query runs in the caller's tenant transaction, so RLS
+ * confines results to the caller's own tenant (same posture as the reader).
+ *
+ * Off-hours band is expressed as UTC hours [start, end); when start > end (e.g.
+ * 22→6) the band wraps midnight. Defaults: 22:00–06:00 UTC.
+ */
+export const auditAnomaliesQuerySchema = z
+  .object({
+    windowDays: z.coerce.number().int().min(1).max(90).default(7),
+    offHoursStartUtc: z.coerce.number().int().min(0).max(23).default(22),
+    offHoursEndUtc: z.coerce.number().int().min(0).max(23).default(6),
+    failedLoginThreshold: z.coerce.number().int().min(1).max(100).default(5),
+    /** Max rows scanned per signal; protects the DB. One extra is read to detect truncation. */
+    limit: z.coerce.number().int().min(1).max(1000).default(200),
+  })
+  .strict();
+export type AuditAnomaliesQuery = z.infer<typeof auditAnomaliesQuerySchema>;
+
+export interface AdminDeleteAnomaly {
+  id: string;
+  actorId: string | null;
+  actorEmail: string | null;
+  actorRole: string | null;
+  resourceType: string;
+  resourceId: string | null;
+  createdAt: string;
+}
+
+export interface OffHoursAdminAnomaly {
+  id: string;
+  actorId: string | null;
+  actorEmail: string | null;
+  actorRole: string | null;
+  action: AuditActionValue;
+  resourceType: string;
+  createdAt: string;
+  hourUtc: number;
+}
+
+export interface FailedLoginAnomaly {
+  userId: string;
+  email: string;
+  role: string;
+  failedLoginCount: number;
+  lockedUntil: string | null;
+}
+
+export interface AuditAnomaliesReport {
+  window: {
+    days: number;
+    since: string;
+    offHoursStartUtc: number;
+    offHoursEndUtc: number;
+    failedLoginThreshold: number;
+  };
+  adminDeletes: AdminDeleteAnomaly[];
+  offHoursAdminActivity: OffHoursAdminAnomaly[];
+  failedLoginSpikes: FailedLoginAnomaly[];
+  summary: {
+    adminDeletes: number;
+    offHoursAdminActivity: number;
+    failedLoginSpikes: number;
+    /** True if any signal hit the row cap and results may be incomplete. */
+    truncated: boolean;
+  };
+}

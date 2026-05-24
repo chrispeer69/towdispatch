@@ -45,11 +45,9 @@ const today = new Date().toISOString().slice(0, 10);
 function structuralChecks(): CollectorResult[] {
   const results: CollectorResult[] = [];
   const pass = (message: string): CollectorResult => ({ status: 'ok', message });
-  const fail = (message: string, details?: string[]): CollectorResult => ({
-    status: 'fail',
-    message,
-    details,
-  });
+  // exactOptionalPropertyTypes: only attach `details` when present (never undefined).
+  const fail = (message: string, details?: string[]): CollectorResult =>
+    details ? { status: 'fail', message, details } : { status: 'fail', message };
 
   // Required top-level artifacts.
   for (const rel of ['matrix.md', 'vendors.md', 'evidence/README.md']) {

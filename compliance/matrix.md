@@ -38,3 +38,44 @@ and **in place** as of the report date; Type II (Session 40) will attest they
 `pnpm compliance:check` is the automated smoke test: it fails if any control
 file here lacks an entry, any policy is missing, or any collector reports a
 hard failure. See [evidence/README.md](evidence/README.md).
+
+---
+
+## SOC 2 Type II + PCI DSS (Session 40)
+
+Type II attests the controls above **operated effectively** over a **12-month**
+observation window. Same control set, now evidenced continuously. PCI DSS
+(SAQ A-EP) is assessed in [pci/](pci/). See
+[SESSION_40_DECISIONS.md](../SESSION_40_DECISIONS.md).
+
+### Operating-effectiveness collectors (continuous evidence)
+
+| Control | TSC / PCI | Operating-effectiveness evidence | Collector | Cadence |
+|---|---|---|---|---|
+| Change management | CC8.1; PCI 6 | % PRs reviewed, mean time-to-merge, rollback rate | `change-management.ts` | daily |
+| Incident response | CC7.3, CC7.4 | incident count, MTTR, post-mortem completion rate | `incident-metrics.ts` | daily |
+| Monitoring | CC4.1, CC7.2; PCI 10 | health-endpoint uptime/latency samples; anomaly surface | `monitoring-sample.ts`, `/admin/audit-log/anomalies` | daily |
+| Vulnerability mgmt | CC7.1; PCI 6, 11 | `pnpm audit` severity vs SLA; CodeQL; Dependabot | `dependency-scan.ts`, `security-scan.yml` | daily + weekly |
+| Access review | CC6.1–6.3; PCI 7, 8 | quarterly signed review (stale/never-logged-in/privileged-no-MFA) | `quarterly-access-review.ts` | quarterly |
+| Availability / DR | A1.2, A1.3 | quarterly region-failover drill (RPO 60s/RTO 15min) | `dr-drill.ts` | quarterly |
+| Backup | A1.2 | last-backup age < RPO | `verify-backup.ts` | daily |
+| PCI — no PAN | PCI 3, 10 | no PAN literal / card-field logging (CI hard-fail) | `verify-no-pan-logs.ts` | daily + CI |
+| PCI — Stripe-only | PCI 3 | no raw card column/field (CI hard-fail) | `verify-stripe-only.ts` | daily + CI |
+
+### Delta from Type I
+
+- **New continuous pipeline:** `pnpm compliance:collect` writes a dated, retained
+  evidence set (manifest + per-control JSON) to `compliance/evidence/automated/`
+  daily; git history = ≥ 18-month retention.
+- **New smoke gate:** `pnpm compliance:type2-check` verifies the coverage matrix
+  + corpus + runs all collectors.
+- **New monitoring surface:** `GET /admin/audit-log/anomalies` (admin deletes,
+  off-hours admin activity, failed-login spikes) — see
+  [policies/monitoring.md](policies/monitoring.md).
+- **New policies:** [penetration-testing.md](policies/penetration-testing.md),
+  [disaster-recovery.md](policies/disaster-recovery.md),
+  [monitoring.md](policies/monitoring.md),
+  [vulnerability-management.md](policies/vulnerability-management.md).
+- **PCI DSS now in scope (SAQ A-EP):** [pci/scope.md](pci/scope.md),
+  [pci/controls.md](pci/controls.md), [pci/network-diagram.md](pci/network-diagram.md),
+  [pci/asar.md](pci/asar.md). (Type I matrix listed PCI as deferred-to-S40.)

@@ -13,10 +13,17 @@
  * service — see audit-redaction.ts.
  */
 import { Injectable } from '@nestjs/common';
-import { auditLog } from '@ustowdispatch/db';
-import type { AuditLogQuery, PaginatedAuditLog } from '@ustowdispatch/shared';
-import { type SQL, and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { auditLog, users } from '@ustowdispatch/db';
+import type {
+  AuditAnomaliesQuery,
+  AuditAnomaliesReport,
+  AuditLogQuery,
+  FailedLoginAnomaly,
+  PaginatedAuditLog,
+} from '@ustowdispatch/shared';
+import { type SQL, and, desc, eq, gt, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { classifyAuditAnomalies } from './audit-anomalies.js';
 import { redactState } from './audit-redaction.js';
 
 interface CallerContext {
@@ -87,6 +94,101 @@ export class AdminService {
         page: filters.page,
         perPage: filters.perPage,
         total,
+      };
+    });
+  }
+
+  /**
+   * Advisory anomaly surface over audit_log + users (SOC 2 Type II monitoring
+   * effectiveness). Tenant-scoped via RLS exactly like queryAuditLog — there is
+   * no cross-tenant path. Flags only; never blocks. Each signal reads one row
+   * past `limit` so the report can honestly report truncation.
+   */
+  async queryAnomalies(ctx: CallerContext, q: AuditAnomaliesQuery): Promise<AuditAnomaliesReport> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const since = new Date(Date.now() - q.windowDays * 86_400_000);
+
+      // Admin/owner audit activity in the window, joined to the actor for
+      // identity + current role. One extra row read to detect truncation.
+      const auditRows = await tx
+        .select({
+          id: auditLog.id,
+          actorId: auditLog.actorId,
+          action: auditLog.action,
+          resourceType: auditLog.resourceType,
+          resourceId: auditLog.resourceId,
+          createdAt: auditLog.createdAt,
+          actorEmail: users.email,
+          actorRole: users.role,
+        })
+        .from(auditLog)
+        .innerJoin(users, eq(auditLog.actorId, users.id))
+        .where(and(gte(auditLog.createdAt, since), inArray(users.role, ['owner', 'admin'])))
+        .orderBy(desc(auditLog.createdAt))
+        .limit(q.limit + 1);
+
+      const auditTruncated = auditRows.length > q.limit;
+      const { adminDeletes, offHoursAdminActivity } = classifyAuditAnomalies(
+        auditRows.slice(0, q.limit).map((r) => ({
+          id: r.id,
+          actorId: r.actorId ?? null,
+          actorEmail: r.actorEmail ?? null,
+          actorRole: r.actorRole ?? null,
+          action: r.action,
+          resourceType: r.resourceType,
+          resourceId: r.resourceId ?? null,
+          createdAt: r.createdAt,
+        })),
+        { startUtc: q.offHoursStartUtc, endUtc: q.offHoursEndUtc },
+      );
+
+      // Failed-login spikes: a counter on the user row (active accounts only),
+      // not an audit event — see SESSION_40_DECISIONS.md D6.
+      const now = new Date();
+      const spikeRows = await tx
+        .select({
+          userId: users.id,
+          email: users.email,
+          role: users.role,
+          failedLoginCount: users.failedLoginCount,
+          lockedUntil: users.lockedUntil,
+        })
+        .from(users)
+        .where(
+          and(
+            isNull(users.deletedAt),
+            or(gte(users.failedLoginCount, q.failedLoginThreshold), gt(users.lockedUntil, now)),
+          ),
+        )
+        .orderBy(desc(users.failedLoginCount))
+        .limit(q.limit + 1);
+
+      const spikeTruncated = spikeRows.length > q.limit;
+      const failedLoginSpikes: FailedLoginAnomaly[] = spikeRows.slice(0, q.limit).map((r) => ({
+        userId: r.userId,
+        email: r.email,
+        role: r.role,
+        failedLoginCount: r.failedLoginCount,
+        lockedUntil: r.lockedUntil ? r.lockedUntil.toISOString() : null,
+      }));
+
+      return {
+        window: {
+          days: q.windowDays,
+          since: since.toISOString(),
+          offHoursStartUtc: q.offHoursStartUtc,
+          offHoursEndUtc: q.offHoursEndUtc,
+          failedLoginThreshold: q.failedLoginThreshold,
+        },
+        adminDeletes,
+        offHoursAdminActivity,
+        failedLoginSpikes,
+        summary: {
+          adminDeletes: adminDeletes.length,
+          offHoursAdminActivity: offHoursAdminActivity.length,
+          failedLoginSpikes: failedLoginSpikes.length,
+          truncated: auditTruncated || spikeTruncated,
+        },
       };
     });
   }
