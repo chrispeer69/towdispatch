@@ -155,14 +155,16 @@ export class ConfigService {
     refreshSecret: string;
     mfaSecret: string;
     driverSecret: string;
+    portalSecret: string;
     accessTtl: string;
     refreshTtl: string;
     driverTtl: string;
+    portalTtl: string;
     issuer: string;
     audience: string;
   } {
-    // Domain-separate the access/refresh/mfa/driver secrets from a single
-    // JWT_SECRET so an attacker who somehow obtained a refresh-token
+    // Domain-separate the access/refresh/mfa/driver/portal secrets from a
+    // single JWT_SECRET so an attacker who somehow obtained a refresh-token
     // forgery oracle can't trivially mint access tokens. Explicit
     // overrides win when set.
     const base = this.config.JWT_SECRET;
@@ -171,12 +173,18 @@ export class ConfigService {
       refreshSecret: this.config.JWT_REFRESH_SECRET || `${base}::refresh`,
       mfaSecret: this.config.JWT_MFA_SECRET || `${base}::mfa`,
       driverSecret: this.config.JWT_DRIVER_SECRET || `${base}::driver`,
+      portalSecret: this.config.JWT_PORTAL_SECRET || `${base}::portal`,
       accessTtl: this.config.JWT_ACCESS_TTL,
       refreshTtl: this.config.JWT_REFRESH_TTL,
       driverTtl: this.config.JWT_DRIVER_TTL,
+      portalTtl: this.config.JWT_PORTAL_TTL,
       issuer: this.config.JWT_ISSUER,
       audience: this.config.JWT_AUDIENCE,
     };
+  }
+  /** White-Label Customer Portal (Session 32). */
+  get portal(): { baseDomain: string } {
+    return { baseDomain: this.config.PORTAL_BASE_DOMAIN };
   }
   get totpEncryptionKey(): string {
     return this.config.TOTP_ENCRYPTION_KEY;

@@ -44,6 +44,13 @@ export const configSchema = z.object({
    * token oracle can't mint driver tokens or vice-versa.
    */
   JWT_DRIVER_SECRET: z.string().optional(),
+  /**
+   * Optional override for the customer-portal JWT signing secret (Session
+   * 32). When unset, derived from JWT_SECRET via ::portal suffix (same
+   * pattern as accessSecret/driverSecret). Domain-separated so a leaked
+   * portal-customer token can never ride the operator or driver surfaces.
+   */
+  JWT_PORTAL_SECRET: z.string().optional(),
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('30d'),
   /**
@@ -52,6 +59,13 @@ export const configSchema = z.object({
    * device sitting in the truck overnight could be used by a stranger.
    */
   JWT_DRIVER_TTL: z.string().default('12h'),
+  /**
+   * Customer-portal session length (Session 32). Default 24h: customers
+   * check job status sporadically, and the portal token is stateless (no
+   * refresh rotation in v1 — see SESSION_32_DECISIONS.md), so a day balances
+   * convenience against a stolen-token window.
+   */
+  JWT_PORTAL_TTL: z.string().default('24h'),
   JWT_ISSUER: z.string().default('ustowdispatch'),
   JWT_AUDIENCE: z.string().default('ustowdispatch-api'),
 
@@ -348,6 +362,12 @@ export const configSchema = z.object({
   // Per-key overrides live on the api_keys row; a per-tenant override UI is
   // deferred (Session 29 scope note).
   PUBLIC_API_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).max(100_000).default(60),
+  // White-Label Customer Portal (Session 32). PORTAL_BASE_DOMAIN is the apex
+  // under which every tenant gets a free fallback portal subdomain:
+  // <slug>.portal.<PORTAL_BASE_DOMAIN>. Tenants may additionally point a
+  // vanity domain (tenant_branding.custom_domain) at the portal; that is
+  // resolved by exact Host match. See CUSTOM_DOMAIN_RUNBOOK.md.
+  PORTAL_BASE_DOMAIN: z.string().min(1).default('portal.towcommand.cloud'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

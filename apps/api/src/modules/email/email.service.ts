@@ -100,6 +100,52 @@ export class EmailService {
     });
   }
 
+  /**
+   * Customer-portal email verification (Session 32). Reuses the
+   * 'email-verification' template but the link points at the tenant's portal
+   * host (custom domain or <slug>.portal.<base>), not the staff app, so the
+   * caller passes a fully-formed verifyUrl. Full white-label email theming
+   * (tenant logo/colors in the email body) is deferred — see
+   * SESSION_32_DECISIONS.md.
+   */
+  async sendPortalVerificationEmail(opts: {
+    to: string;
+    name: string;
+    tenantName: string;
+    verifyUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Confirm your email for the ${opts.tenantName} customer portal`,
+      template: 'email-verification',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.name,
+        tenantName: opts.tenantName,
+        verifyUrl: opts.verifyUrl,
+      },
+    });
+  }
+
+  /** Customer-portal password reset (Session 32). See note above. */
+  async sendPortalPasswordResetEmail(opts: {
+    to: string;
+    name: string;
+    tenantName: string;
+    resetUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Reset your ${opts.tenantName} customer portal password`,
+      template: 'password-reset',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.name,
+        resetUrl: opts.resetUrl,
+      },
+    });
+  }
+
   async sendPasswordChangedNotification(opts: { to: string; name: string }): Promise<void> {
     await this.send({
       to: opts.to,
