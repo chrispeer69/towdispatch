@@ -179,6 +179,77 @@ export class DriverMobileService {
   }
 
   /**
+   * Session 15 — FCM-fallback poll. Returns jobs assigned to this driver
+   * that have NOT been accepted yet (status='dispatched'). The driver app's
+   * foreground service hits this every 15 seconds when no FCM message has
+   * arrived in 30 seconds. This is the moat against silent notifications.
+   *
+   * Distinct from /dispatch/my-jobs: that endpoint returns the full active
+   * job set (enroute, on_scene, in_progress). This one is the much smaller
+   * "did I miss a dispatch?" projection.
+   */
+  async myPendingJobs(ctx: CallerContext): Promise<{
+    jobs: Array<{
+      jobId: string;
+      jobNumber: string;
+      status: string;
+      serviceType: string;
+      pickup: { address: string; lat: number | null; lng: number | null };
+      customerName: string | null;
+      assignedAt: string;
+      priorityLabel: string;
+    }>;
+    serverTime: string;
+  }> {
+    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const driver = await tx.query.drivers.findFirst({
+        where: and(eq(driversTable.userId, ctx.userId), isNull(driversTable.deletedAt)),
+      });
+      const empty = { jobs: [] as never[], serverTime: new Date().toISOString() };
+      if (!driver) return empty;
+
+      const jobRows = await tx.query.jobs.findMany({
+        where: and(
+          eq(jobs.assignedDriverId, driver.id),
+          inArray(jobs.status, ['dispatched'] as JobStatus[]),
+          isNull(jobs.deletedAt),
+        ),
+        orderBy: (t, { asc }) => [asc(t.assignedAt), asc(t.createdAt)],
+        limit: 20,
+      });
+      if (jobRows.length === 0) return empty;
+
+      const customerIds = Array.from(
+        new Set(jobRows.map((j) => j.customerId).filter((v): v is string => !!v)),
+      );
+      const customerRows = customerIds.length
+        ? await tx.query.customers.findMany({
+            where: and(inArray(customers.id, customerIds), isNull(customers.deletedAt)),
+          })
+        : [];
+      const customerById = new Map(customerRows.map((c) => [c.id, c]));
+
+      return {
+        jobs: jobRows.map((j) => ({
+          jobId: j.id,
+          jobNumber: j.jobNumber,
+          status: j.status as string,
+          serviceType: j.serviceType as string,
+          pickup: {
+            address: j.pickupAddress ?? '',
+            lat: j.pickupLat != null ? Number(j.pickupLat) : null,
+            lng: j.pickupLng != null ? Number(j.pickupLng) : null,
+          },
+          customerName: j.customerId ? (customerById.get(j.customerId)?.name ?? null) : null,
+          assignedAt: (j.assignedAt ?? j.createdAt).toISOString(),
+          priorityLabel: 'normal',
+        })),
+        serverTime: new Date().toISOString(),
+      };
+    });
+  }
+
+  /**
    * Upload a job photo as a document attached to the job. Verifies the
    * caller's driver record is currently assigned to the job — drivers may
    * only attach photos to their own jobs.

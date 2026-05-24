@@ -110,4 +110,16 @@ export class SentryService implements OnModuleInit {
     this.logger.warn({ ...ctx, securityEvent: name }, `security event: ${name}`);
     this.captureMessage(`security:${name}`, ctx);
   }
+
+  /**
+   * Leave an info breadcrumb on the current Sentry scope so a subsequent error
+   * carries the lead-up in its trail (e.g. a cron-run summary). No-op when
+   * Sentry is disabled (no SENTRY_DSN) — never makes a network call.
+   */
+  addBreadcrumb(category: string, message: string, data?: Record<string, unknown>): void {
+    if (!this.enabled) return;
+    const crumb: Sentry.Breadcrumb = { category, message, level: 'info' };
+    if (data) crumb.data = data;
+    Sentry.addBreadcrumb(crumb);
+  }
 }
