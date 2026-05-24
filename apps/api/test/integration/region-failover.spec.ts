@@ -12,6 +12,7 @@
  */
 import { ERROR_CODES } from '@ustowdispatch/shared';
 import Fastify, { type FastifyInstance } from 'fastify';
+import type { Logger } from 'pino';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { registerRegionGuards } from '../../src/common/region/region.middleware.js';
 
@@ -36,9 +37,7 @@ async function buildApp(
   markWrite: ReturnType<typeof vi.fn>;
 }> {
   const app = Fastify();
-  const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() } as unknown as import(
-    'pino',
-  ).Logger;
+  const logger = { warn: vi.fn(), info: vi.fn(), error: vi.fn() } as unknown as Logger;
   registerRegionGuards(app, {
     config: { region: makeRegion(role) } as never,
     regionContext: { markWrite } as never,
