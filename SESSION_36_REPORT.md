@@ -99,6 +99,10 @@ cron; reports as HD-module endpoints (not the central registry); web under
 - Migration `0039` sits one ahead of master's `0037` because
   `0038_lien_processing` is on an as-yet-unmerged branch; the gap is harmless
   (see decisions doc).
+- Only the targeted web helper spec was run (`hd-ui-helpers.spec`), not the full
+  `pnpm -F web test`. The pre-existing `offline-queue.spec` failure
+  (driver-app `window.location`/env gap, not in CI) is unrelated to this session
+  and is the only known failure in the full web suite.
 
 ## Commands
 
