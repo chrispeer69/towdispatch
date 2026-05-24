@@ -8,8 +8,8 @@ import type {
   CreateApiKeyResult,
   CreateWebhookEndpointPayload,
   CreateWebhookEndpointResult,
+  PublicApiWebhookDeliveryDto,
   UpdateWebhookEndpointPayload,
-  WebhookDeliveryDto,
   WebhookEndpointDto,
 } from '@ustowdispatch/shared';
 
@@ -44,14 +44,14 @@ export const clientDeleteWebhook = (id: string) =>
 
 // Deliveries
 export const clientListDeliveries = (endpointId: string) =>
-  bff<WebhookDeliveryDto[]>(`webhooks/${endpointId}/deliveries`);
+  bff<PublicApiWebhookDeliveryDto[]>(`webhooks/${endpointId}/deliveries`);
 export const clientTestWebhook = (endpointId: string) =>
-  bff<WebhookDeliveryDto>(`webhooks/${endpointId}/test`, {
+  bff<PublicApiWebhookDeliveryDto>(`webhooks/${endpointId}/test`, {
     method: 'POST',
     body: JSON.stringify({}),
   });
 export const clientRetryDelivery = (deliveryId: string) =>
-  bff<WebhookDeliveryDto>(`webhooks/deliveries/${deliveryId}/retry`, {
+  bff<PublicApiWebhookDeliveryDto>(`webhooks/deliveries/${deliveryId}/retry`, {
     method: 'POST',
     body: JSON.stringify({}),
   });

@@ -7,7 +7,7 @@
  * real BullMQ Queue (which would open a Redis connection).
  */
 import { describe, expect, it } from 'vitest';
-import { NOTIFY_RETRY_CONFIG, NOTIFY_QUEUE_NAMES } from './notifications-queue.service.js';
+import { NOTIFY_QUEUE_NAMES, NOTIFY_RETRY_CONFIG } from './notifications-queue.service.js';
 
 const EXPECTED_POLICY = {
   push: { attempts: 3, type: 'exponential', delay: 5_000 },
@@ -32,7 +32,7 @@ describe('NotificationsQueueService retry policy', () => {
     const channels = Object.keys(NOTIFY_QUEUE_NAMES);
     expect(channels.sort()).toEqual(['email', 'in_app', 'push', 'sms', 'webhook']);
     for (const c of channels) {
-      expect(NOTIFY_QUEUE_NAMES[c as keyof typeof NOTIFY_QUEUE_NAMES]).toMatch(/^notify:/);
+      expect(NOTIFY_QUEUE_NAMES[c as keyof typeof NOTIFY_QUEUE_NAMES]).toMatch(/^notify-/);
     }
   });
 });

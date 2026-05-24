@@ -31,7 +31,7 @@ import {
   type ApiScope,
   type CreateApiKeyResult,
   type CreateWebhookEndpointResult,
-  type WebhookDeliveryDto,
+  type PublicApiWebhookDeliveryDto,
   type WebhookEndpointDto,
   type WebhookEventType,
   apiScopeValues,
@@ -631,7 +631,7 @@ function DeliveriesModal({
   onClose: () => void;
 }): JSX.Element {
   const dialogRef = useDialog();
-  const [deliveries, setDeliveries] = useState<WebhookDeliveryDto[] | null>(null);
+  const [deliveries, setDeliveries] = useState<PublicApiWebhookDeliveryDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retryingId, setRetryingId] = useState<string | null>(null);
 
@@ -922,7 +922,9 @@ function StatusPill({
   );
 }
 
-function DeliveryStatusPill({ status }: { status: WebhookDeliveryDto['status'] }): JSX.Element {
+function DeliveryStatusPill({
+  status,
+}: { status: PublicApiWebhookDeliveryDto['status'] }): JSX.Element {
   const tone =
     status === 'delivered' ? 'success' : status === 'failed' ? 'danger' : ('warning' as const);
   return <StatusPill tone={tone as 'success' | 'warning' | 'danger'}>{status}</StatusPill>;

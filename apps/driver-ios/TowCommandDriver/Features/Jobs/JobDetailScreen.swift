@@ -186,20 +186,26 @@ struct JobDetailScreen: View {
                     .clipShape(RoundedRectangle(cornerRadius: TCMetrics.cornerRadius))
                 }
                 .tcTapTarget()
-                NavigationLink {
-                    SignatureScreen(jobId: my.job.id)
-                } label: {
-                    HStack {
-                        Image(systemName: "pencil.and.outline")
-                        Text("Capture Signature")
+                // Repossession (Session 49): a peaceful repo requires NO debtor
+                // signature, so hide the signature capture for repo jobs. The
+                // condition-photo checklist is captured via the photo flow above
+                // and persisted to repo_condition_photos by the API on completion.
+                if my.job.serviceType != "repo" {
+                    NavigationLink {
+                        SignatureScreen(jobId: my.job.id)
+                    } label: {
+                        HStack {
+                            Image(systemName: "pencil.and.outline")
+                            Text("Capture Signature")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .foregroundStyle(.white)
+                        .background(TCColor.surfaceMuted)
+                        .clipShape(RoundedRectangle(cornerRadius: TCMetrics.cornerRadius))
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .foregroundStyle(.white)
-                    .background(TCColor.surfaceMuted)
-                    .clipShape(RoundedRectangle(cornerRadius: TCMetrics.cornerRadius))
+                    .tcTapTarget()
                 }
-                .tcTapTarget()
                 NavigationLink {
                     ChatScreen(jobId: my.job.id)
                 } label: {

@@ -45,6 +45,10 @@ export interface DriverAccessClaims extends JWTPayload {
 export interface PortalAccessClaims extends JWTPayload {
   sub: string;
   cid: string;
+  tid: string;
+}
+
+/**
  * Auction bidder session claims (Session 33). Audience suffix `-bidder`
  * keeps the bidder keyspace fully separate from operator/driver tokens.
  */
@@ -52,6 +56,9 @@ export interface BidderAccessClaims extends JWTPayload {
   sub: 'bidder';
   bidderId: string;
   tid: string;
+}
+
+/**
  * Marketplace developer-portal session claims (Session 46). Audience suffix
  * `-developer` isolates the developer keyspace from operator and driver
  * tokens — a developer JWT can never be accepted by JwtAuthGuard or the
@@ -257,6 +264,8 @@ export class JwtService {
       throw new Error('Invalid portal token');
     }
     return payload as PortalAccessClaims;
+  }
+
   bidderTtlSeconds(): number {
     return parseDuration(this.config.jwt.bidderTtl);
   }
@@ -290,6 +299,8 @@ export class JwtService {
       throw new Error('Invalid bidder token');
     }
     return payload as BidderAccessClaims;
+  }
+
   /**
    * Marketplace developer-portal session token (Session 46). `sub` is the
    * developer_accounts.id; audience `…-developer` keeps it off the operator

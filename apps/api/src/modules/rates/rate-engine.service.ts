@@ -68,6 +68,9 @@ const SERVICE_TYPE_CATALOG_CODE: Record<JobServiceType, string | null> = {
   winch: 'WINCHING',
   recovery: 'LABOR',
   impound: 'DAILY_IMPOUND_RATE',
+  // Repo fees are billed via the repo billing path (recovery/skip-trace/
+  // storage/attempt lines), not the intake rate engine — no catalog code.
+  repo: null,
   other: null,
 };
 
@@ -626,6 +629,7 @@ function labelFor(s: JobServiceType): string {
     winch: 'Winch',
     recovery: 'Recovery',
     impound: 'Impound',
+    repo: 'Repossession',
     other: 'Other service',
   };
   return map[s];

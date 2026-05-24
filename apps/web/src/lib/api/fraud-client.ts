@@ -12,7 +12,7 @@ import type {
   ListDisputesFilter,
   ListHighRiskFilter,
   RecordDisputePayload,
-  RecordOutcomePayload,
+  RecordFraudOutcomePayload,
   ResolveDisputePayload,
   ReviewFraudScorePayload,
 } from '@ustowdispatch/shared';
@@ -71,7 +71,7 @@ export const clientResolveDispute = (id: string, body: ResolveDisputePayload) =>
     body: JSON.stringify(body),
   });
 
-export const clientRecordOutcome = (id: string, body: RecordOutcomePayload) =>
+export const clientRecordOutcome = (id: string, body: RecordFraudOutcomePayload) =>
   req<DisputeOutcomeDto>(`${BASE}/disputes/${id}/outcome`, {
     method: 'POST',
     body: JSON.stringify(body),

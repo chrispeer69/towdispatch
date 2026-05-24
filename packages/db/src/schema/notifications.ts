@@ -16,7 +16,6 @@
  * targeted at tenant B (the "kill-switch" requirement in the prompt).
  */
 import {
-  bigint,
   boolean,
   index,
   integer,
@@ -33,13 +32,7 @@ import { users } from './users';
 export const notificationPriorityValues = ['emergency', 'high', 'normal', 'low'] as const;
 export type NotificationPriority = (typeof notificationPriorityValues)[number];
 
-export const notificationChannelValues = [
-  'push',
-  'sms',
-  'email',
-  'in_app',
-  'webhook',
-] as const;
+export const notificationChannelValues = ['push', 'sms', 'email', 'in_app', 'webhook'] as const;
 export type NotificationChannelValue = (typeof notificationChannelValues)[number];
 
 export const notificationStatusValues = [
@@ -308,7 +301,10 @@ export const notificationTemplates = pgTable(
     bodyPlain: text('body_plain'),
 
     /** Schema definition for variable preview. jsonb<{ key: string; example: unknown }[]>. */
-    variablesSchema: jsonb('variables_schema').notNull().$type<unknown[]>().default([] as unknown[]),
+    variablesSchema: jsonb('variables_schema')
+      .notNull()
+      .$type<unknown[]>()
+      .default([] as unknown[]),
 
     active: boolean('active').notNull().default(true),
 
@@ -344,7 +340,10 @@ export const webhookSubscriptions = pgTable(
     /** AES-256 encrypted shared HMAC secret. Stored ciphertext; rotated via admin UI. */
     secret: text('secret').notNull(),
     /** Array of event_type strings. ['*'] subscribes to everything. */
-    eventTypes: jsonb('event_types').notNull().$type<string[]>().default([] as string[]),
+    eventTypes: jsonb('event_types')
+      .notNull()
+      .$type<string[]>()
+      .default([] as string[]),
 
     active: boolean('active').notNull().default(true),
 
@@ -389,7 +388,9 @@ export const notificationDeadLetters = pgTable(
 
     /** When the admin clicks retry, we move the row + bump the retry counter. */
     retriedAt: timestamp('retried_at', { withTimezone: true }),
-    retriedByUserId: uuid('retried_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+    retriedByUserId: uuid('retried_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -460,7 +461,7 @@ export type NotificationDeviceTokenRow = typeof notificationDeviceTokens.$inferS
  * Lighter than notification_deliveries because webhooks don't need the
  * read-state / rendered-body columns.
  */
-export const webhookDeliveries = pgTable(
+export const notificationWebhookDeliveries = pgTable(
   'webhook_deliveries',
   {
     id: uuid('id').primaryKey(),
@@ -503,4 +504,4 @@ export const webhookDeliveries = pgTable(
   }),
 );
 
-export type WebhookDeliveryRow = typeof webhookDeliveries.$inferSelect;
+export type WebhookDeliveryRow = typeof notificationWebhookDeliveries.$inferSelect;

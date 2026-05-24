@@ -125,7 +125,7 @@ d('Customer portal services (integration)', () => {
       sendPortalPasswordResetEmail: async () => undefined,
     } as unknown as EmailService;
 
-    const tenantDb = new TenantAwareDb(app);
+    const tenantDb = new TenantAwareDb(app, app, portalConfig);
     const runner = new TransactionRunner(admin);
     auth = new PortalAuthService(
       portalConfig,

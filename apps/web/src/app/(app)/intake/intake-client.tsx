@@ -96,6 +96,7 @@ const SERVICE_TYPE_LABELS: Record<JobServiceType, string> = {
   winch: 'Winch',
   recovery: 'Recovery',
   impound: 'Impound',
+  repo: 'Repossession',
   other: 'Other',
 };
 

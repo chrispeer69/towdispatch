@@ -283,6 +283,7 @@ export const SERVICE_TYPE_COLOR: Record<JobServiceType, string> = {
   winch: 'bg-ok/20 text-ok border-ok/40',
   recovery: 'bg-danger/20 text-danger border-danger/40',
   impound: 'bg-violet/20 text-violet border-violet/40',
+  repo: 'bg-violet/20 text-violet border-violet/40',
   other: 'bg-bg-base text-text-secondary-on-dark border-divider',
 };
 

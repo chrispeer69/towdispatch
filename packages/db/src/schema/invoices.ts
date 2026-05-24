@@ -182,6 +182,9 @@ export const invoiceLineItemTypeValues = [
   'equipment_surcharge',
   'environmental',
   'storage_daily',
+  // Repossession Workflow (Session 49) — repo-specific line types.
+  'skip_trace',
+  'repo_attempt',
   'admin',
   'discount',
   'custom',

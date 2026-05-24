@@ -266,7 +266,13 @@ export default function DriverJobPage(): JSX.Element {
       <Card className="mb-3">
         <CardContent className="space-y-3 p-5">
           <div className="flex border-b border-divider">
-            {(['photos', 'video', 'signature'] as EvidenceTab[]).map((t) => (
+            {/* Repossession (Session 49): a peaceful repo requires no debtor
+                signature, so the Signature tab is hidden for repo jobs. */}
+            {(
+              (job.serviceType === 'repo'
+                ? ['photos', 'video']
+                : ['photos', 'video', 'signature']) as EvidenceTab[]
+            ).map((t) => (
               <button
                 key={t}
                 type="button"

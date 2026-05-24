@@ -7,11 +7,7 @@
  * initial creation. Rotate stamps a fresh secret.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  uuidv7,
-  webhookDeliveries,
-  webhookSubscriptions,
-} from '@ustowdispatch/db';
+import { notificationWebhookDeliveries, uuidv7, webhookSubscriptions } from '@ustowdispatch/db';
 import type {
   UpsertWebhookSubscriptionPayload,
   WebhookDeliveryDto,
@@ -98,10 +94,7 @@ export class WebhookSubscriptionsService {
             updatedAt: new Date(),
           })
           .where(
-            and(
-              eq(webhookSubscriptions.id, id),
-              eq(webhookSubscriptions.tenantId, ctx.tenantId),
-            ),
+            and(eq(webhookSubscriptions.id, id), eq(webhookSubscriptions.tenantId, ctx.tenantId)),
           );
         const row = (
           await tx
@@ -126,10 +119,7 @@ export class WebhookSubscriptionsService {
           .update(webhookSubscriptions)
           .set({ secret: encrypted, updatedAt: new Date() })
           .where(
-            and(
-              eq(webhookSubscriptions.id, id),
-              eq(webhookSubscriptions.tenantId, ctx.tenantId),
-            ),
+            and(eq(webhookSubscriptions.id, id), eq(webhookSubscriptions.tenantId, ctx.tenantId)),
           );
         const row = (
           await tx
@@ -151,10 +141,7 @@ export class WebhookSubscriptionsService {
         await tx
           .delete(webhookSubscriptions)
           .where(
-            and(
-              eq(webhookSubscriptions.id, id),
-              eq(webhookSubscriptions.tenantId, ctx.tenantId),
-            ),
+            and(eq(webhookSubscriptions.id, id), eq(webhookSubscriptions.tenantId, ctx.tenantId)),
           );
         return { ok: true };
       },
@@ -171,14 +158,14 @@ export class WebhookSubscriptionsService {
       async (tx) => {
         const rows = await tx
           .select()
-          .from(webhookDeliveries)
+          .from(notificationWebhookDeliveries)
           .where(
             and(
-              eq(webhookDeliveries.tenantId, ctx.tenantId),
-              eq(webhookDeliveries.subscriptionId, subscriptionId),
+              eq(notificationWebhookDeliveries.tenantId, ctx.tenantId),
+              eq(notificationWebhookDeliveries.subscriptionId, subscriptionId),
             ),
           )
-          .orderBy(desc(webhookDeliveries.createdAt))
+          .orderBy(desc(notificationWebhookDeliveries.createdAt))
           .limit(limit);
         return rows.map((r) => ({
           id: r.id,

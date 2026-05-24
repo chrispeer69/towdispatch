@@ -170,6 +170,18 @@ const SECTIONS: NavSection[] = [
         href: '/lien-cases',
         icon: Gavel,
         match: (p) => p.startsWith('/lien-cases'),
+      },
+      {
+        // Repo Workflow (Session 49) — repossession assignments from
+        // lienholders: locate → attempt → recover → close, plus the
+        // lienholder book and recovery-fee invoicing. The page gates access
+        // by role with a friendly 403, so the link is unguarded here.
+        label: 'Repo Cases',
+        href: '/repo/cases',
+        icon: Truck,
+        match: (p) => p.startsWith('/repo'),
+      },
+      {
         // Full DOT Compliance (Session 37) — FMCSA recordkeeping: carrier
         // profile, driver qualifications, hours-of-service, drug & alcohol
         // program, incident register, and audit-packet PDF. The page gates
