@@ -74,6 +74,13 @@ export const configSchema = z.object({
   JWT_BIDDER_SECRET: z.string().optional(),
   /** Bidder session length. Default 24h for online bidding sessions. */
   JWT_BIDDER_TTL: z.string().default('24h'),
+   * Optional override for the marketplace DEVELOPER JWT signing secret. When
+   * unset, derived from JWT_SECRET via ::developer suffix. Domain-separated so
+   * a developer-portal token can never be accepted as an operator/driver token
+   * (different audience `…-developer`). See SESSION_46_DECISIONS.md.
+   */
+  JWT_DEVELOPER_SECRET: z.string().optional(),
+  JWT_DEVELOPER_TTL: z.string().default('1h'),
   JWT_ISSUER: z.string().default('ustowdispatch'),
   JWT_AUDIENCE: z.string().default('ustowdispatch-api'),
 
@@ -478,6 +485,34 @@ export const configSchema = z.object({
   NOTIFY_EMAIL_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(8),
   NOTIFY_WEBHOOK_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(8),
   NOTIFY_IN_APP_CONCURRENCY: z.coerce.number().int().min(1).max(64).default(16),
+
+  // Public Marketplace API (Session 46).
+  // MARKETPLACE_API_ENABLED real-gates the entire marketplace surface (OAuth,
+  // developer portal, directory, installs) — when false every controller
+  // returns 503. Default false: the ecosystem ships dark and ops flips it on
+  // per environment once the public API resource endpoints exist. See
+  // SESSION_46_DECISIONS.md.
+  MARKETPLACE_API_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  // Bearer token gating the platform-admin app-review endpoints
+  // (/marketplace-admin/*). There is no platform-admin RBAC role in v1, so app
+  // approval/rejection/suspension is an internal ops operation authenticated by
+  // this shared secret. Unset => the review endpoints are disabled (403).
+  MARKETPLACE_ADMIN_TOKEN: z.string().min(16).optional(),
+  // TTL for the single-use OAuth authorization code (PKCE). Short by design.
+  MARKETPLACE_OAUTH_CODE_TTL: z.string().default('10m'),
+  // TTL for issued marketplace ACCESS tokens (opaque, hashed at rest). Refresh
+  // tokens do not expire on a clock — they live until uninstall/revoke/rotate.
+  MARKETPLACE_ACCESS_TOKEN_TTL: z.string().default('1h'),
+  // When true, the webhook deliverer performs real outbound HTTP POSTs to an
+  // app's registered URL. Default false: events are still recorded in
+  // marketplace_app_events, but no network call is made (CI/dev safe).
+  MARKETPLACE_WEBHOOK_DELIVERY_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

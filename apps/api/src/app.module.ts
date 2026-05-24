@@ -41,6 +41,7 @@ import { ImportModule } from './modules/import/import.module.js';
 import { ImpoundModule } from './modules/impound/impound.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
+import { MarketplaceApiModule } from './modules/marketplace-api/marketplace-api.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { OpsModule } from './modules/ops/ops.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
@@ -113,6 +114,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     DamageAnalysisModule,
     DotModule,
     AiDispatchModule,
+    MarketplaceApiModule,
     DashboardModule,
     ReportingModule,
     AdminModule,
