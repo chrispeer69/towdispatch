@@ -5,64 +5,86 @@
 	objectVersion = 60;
 	objects = {
 /* Begin PBXBuildFile section */
-		66EA28A8738B9B1C2A52C9AD /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1129D55A3A3454D9FF90C814 /* AppContainer.swift */; };
-		575FC26C3DD75D4591676B78 /* PermissionsWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141ED14F2CFEDDADD2001DEC /* PermissionsWizard.swift */; };
-		81D5B40F3C1B749E8FC29738 /* PushRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449752F52A312EA6708AC2C7 /* PushRegistrar.swift */; };
-		26C3F1136B8E9AC4980366A9 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B244F2EA47E277796400FCEB /* RootView.swift */; };
-		6C2236C22195278847131DEA /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1F1168BEA2E8033CAF82A6 /* SettingsStore.swift */; };
-		B1A8FEEAE365A5A1718D0E16 /* UsTowDispatchDriverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8A453FDCCB376787CDD151B /* UsTowDispatchDriverApp.swift */; };
-		3F1AAF9541F2019F49950E25 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA692B6EDA59F9E3D4334B6 /* LoginView.swift */; };
-		A48D5049B35BB51516DDDB06 /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73A0B4448AAC94D03E211A7A /* ChatScreen.swift */; };
-		215AD1CD7B248858FB30AFA8 /* DVIRScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1968379B47DEAB8E1DE6AA48 /* DVIRScreen.swift */; };
-		BEFF469B671A0C16A1AC85FE /* DocumentVaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CA4598966661F7A1362D5 /* DocumentVaultScreen.swift */; };
-		6D9EF99C5623C1357FB162F9 /* EarningsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95CD3A1EEEC980DD5870AE6E /* EarningsScreen.swift */; };
-		8828497A52B2C131B04CED61 /* JobDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631C24D2B53A95280477CB2E /* JobDetailScreen.swift */; };
-		EE9455B180A64D5F853910BE /* JobListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B342A1BD551DDA296F4E68 /* JobListScreen.swift */; };
-		AA7D0C77209B847B98972C59 /* NavigationHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 776F1EEEACC0745E52B7B6A1 /* NavigationHandoff.swift */; };
-		E67ABF9BD498BAA5999B9CB3 /* PaymentsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547327E67DECF506A855EA01 /* PaymentsService.swift */; };
-		99A3BA0DE74C6F8A79A353ED /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 096F631B2161469BD4014AD4 /* CameraCaptureView.swift */; };
-		87C3D2151625DB41B0FED389 /* PhotoCaptureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ACDE4C42DF503AC4735896F /* PhotoCaptureScreen.swift */; };
-		E58506260C4A742A0968884B /* ProfileScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DD9DEB93A5A8B71AE503E3 /* ProfileScreen.swift */; };
-		8587560692E70FA968684266 /* PanicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C9B868333F090EB8F4131E /* PanicButton.swift */; };
-		AFF7D1720D90F554C30E9796 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDBAEDEEF5D880EF2463FDB /* SettingsScreen.swift */; };
-		F8B2BF124AF3DE994D623275 /* SignatureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C0E40553E523D9D2DD07E8 /* SignatureScreen.swift */; };
-		1AC03EB40003C9071894FD15 /* TimeClockScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01FEA8E5642E5C9AD048794B /* TimeClockScreen.swift */; };
-		DDB9D82928AE8E28D39F94ED /* VINScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C22B5A1BDD548793825BC93 /* VINScanner.swift */; };
-		A27BA6AFA5E1DB43466A8E24 /* AppContainerSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3CC530FC8B77FF7FA103041 /* AppContainerSmokeTests.swift */; };
-		AEDA565E36364FFA546F6661 /* VINValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6AFD6FB44A6C9DEF2933CD /* VINValidatorTests.swift */; };
-		498430CE35373660243443B9 /* StatusFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A31E7EB24EC654685093CC0 /* StatusFlowUITests.swift */; };
+		BF120615E97CA43A0B1544F1 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10275177DD3F3BE4ABC4C75C /* AppContainer.swift */; };
+		50C38BB39F5B2656B218B0AC /* PermissionsWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1A214AC7B74F854395D0FE /* PermissionsWizard.swift */; };
+		E6E96C57228AA274B417B2F6 /* PushRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B2438C5B4CAB52A9C8B75E /* PushRegistrar.swift */; };
+		91886F29A7E46C17A3B4541F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AB0888C680DB7C9EBB38D0 /* RootView.swift */; };
+		F86CD4156E0008DC8DA06CAC /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD0FDD72DFB21AF7D22BCC1E /* SettingsStore.swift */; };
+		A957026EF5DF83CCB4169BD0 /* UsTowDispatchDriverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3E3EE3FDC0584BD92D0FAD /* UsTowDispatchDriverApp.swift */; };
+		FA861207C00082E046BA863D /* LockedScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7956A8E15F2EB38211BCA6A6 /* LockedScreen.swift */; };
+		B22A07F0FB7B77A4FF189479 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38957DEAE76AB5DEC071C481 /* LoginView.swift */; };
+		4AE2F374607AC8B5462B8BB4 /* PINEntryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F124A8E856E0234A3EA2D8A1 /* PINEntryScreen.swift */; };
+		C2F4650201657E817761528E /* SetPINScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 570D41AE54E14C48B823AF17 /* SetPINScreen.swift */; };
+		51258D1BC8ACE0AD9915C4F2 /* BriefingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABC105621E9EA9A6D632D90 /* BriefingScreen.swift */; };
+		4E597111654D3918D403A582 /* BriefingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A53CA984822D85271F6D5F0 /* BriefingViewModel.swift */; };
+		80B307458DDA561DBD31A84E /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880348B9F2FF70C1981C6382 /* ChatScreen.swift */; };
+		BA9CA997C332904380C4670F /* DVIRScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EF40BF74BE5CEE2E7033C3D /* DVIRScreen.swift */; };
+		D11D75F34E42E2C17B6ECA30 /* DocumentVaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F5C42EF5AB3D66661BC24E /* DocumentVaultScreen.swift */; };
+		0A045F4F8A063BE2A8C118C3 /* EarningsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1CA480C74134D74FDC84AB /* EarningsScreen.swift */; };
+		1C83289A622090D33F305CDF /* JobDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366FEDA8B5E023CDD02FB139 /* JobDetailScreen.swift */; };
+		DC9F82D9AA5F80F113912DFE /* JobListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAD1A17DC2812F7ACE3E8140 /* JobListScreen.swift */; };
+		26C84F30C599ED6A9DFA3E40 /* NavigationHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6ED933016C8ACD583EEBD33 /* NavigationHandoff.swift */; };
+		CBAC60AC5511FD7B81ED9E01 /* OfflineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C2F5B20067C7FD5EC46C66 /* OfflineScreen.swift */; };
+		63DFD68CD200372DCA26CC2E /* LiveFieldPaymentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6713C4D24DBD065EBECC1DD /* LiveFieldPaymentService.swift */; };
+		1447AB65D6472909EE1F5B82 /* PaymentsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2F72B7FDAF52277FA55C1E /* PaymentsService.swift */; };
+		BAD399F457813C005D7766F3 /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AA0F2E0F1D7FF1A58280AC /* CameraCaptureView.swift */; };
+		A682249A6E282E336FC7CD4D /* PhotoCaptureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04D8C098A2788651D79413AA /* PhotoCaptureScreen.swift */; };
+		743488E590B910401D685BB0 /* PretripScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2DB338BB67356B0FF80B31 /* PretripScreen.swift */; };
+		86038C06B8C2330AABF47A23 /* PretripViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332730D5CFB8AC9D740090E1 /* PretripViewModel.swift */; };
+		75841AB2E6311B70ACE5CEAC /* ProfileScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 515957BBBF03ADDFE9728BC9 /* ProfileScreen.swift */; };
+		878DC16C89F31160E37E65A0 /* PanicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F10FC48AE61065B3B275D7D /* PanicButton.swift */; };
+		4127F75E5711CF0D6AF2D724 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F13E005CC8FD7FBC19C43D8 /* SettingsScreen.swift */; };
+		4EA27638CF29331F8437E3B6 /* SignatureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265899F8A54FAED872E4EB43 /* SignatureScreen.swift */; };
+		01B18AA478CFCCE6E307B66E /* TimeClockScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA54E725E03D3E4C37EF585 /* TimeClockScreen.swift */; };
+		995CA5F9803A27E6EBE2AB73 /* VINScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 946EEB76567E8FB029DA215D /* VINScanner.swift */; };
+		78D8C2F09A334BF81AFD977A /* AppContainerSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2875386CCE242184FE2D8 /* AppContainerSmokeTests.swift */; };
+		75595ECFF2FC9CE103CABA68 /* VINValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DF88BF04A492607DEE6EF8A /* VINValidatorTests.swift */; };
+		088BF3073796A5506D5CF4DC /* BriefingGateUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319C2A08123FF887A83462D0 /* BriefingGateUITests.swift */; };
+		4355B6F4F47F4849CE60CD13 /* PINFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC5CF3D328A3ED1051DF5EE /* PINFlowUITests.swift */; };
+		D3985DB13BD17D31AAF12BFE /* StatusFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6CB436D9EAD4665884C5CB1 /* StatusFlowUITests.swift */; };
 		2DD9DC7618C3EBAF9F8D987D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8F860F726BCEED75D7D3791E /* Localizable.strings */; };
 		A94482B8CE44EF2FDB82D970 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 0CB4985433B35CF382759002 /* Core */; };
 		B01B085214C6550E36ACDF49 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 506C644C1D1DA0B7DD9DA1F3 /* DesignSystem */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1129D55A3A3454D9FF90C814 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/AppContainer.swift"; sourceTree = "<group>"; };
-		141ED14F2CFEDDADD2001DEC /* PermissionsWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/PermissionsWizard.swift"; sourceTree = "<group>"; };
-		449752F52A312EA6708AC2C7 /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/PushRegistrar.swift"; sourceTree = "<group>"; };
-		B244F2EA47E277796400FCEB /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/RootView.swift"; sourceTree = "<group>"; };
-		9F1F1168BEA2E8033CAF82A6 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/SettingsStore.swift"; sourceTree = "<group>"; };
-		A8A453FDCCB376787CDD151B /* UsTowDispatchDriverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/UsTowDispatchDriverApp.swift"; sourceTree = "<group>"; };
-		DBA692B6EDA59F9E3D4334B6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Auth/LoginView.swift"; sourceTree = "<group>"; };
-		73A0B4448AAC94D03E211A7A /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Chat/ChatScreen.swift"; sourceTree = "<group>"; };
-		1968379B47DEAB8E1DE6AA48 /* DVIRScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/DVIR/DVIRScreen.swift"; sourceTree = "<group>"; };
-		A03CA4598966661F7A1362D5 /* DocumentVaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/DocumentVault/DocumentVaultScreen.swift"; sourceTree = "<group>"; };
-		95CD3A1EEEC980DD5870AE6E /* EarningsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Earnings/EarningsScreen.swift"; sourceTree = "<group>"; };
-		631C24D2B53A95280477CB2E /* JobDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Jobs/JobDetailScreen.swift"; sourceTree = "<group>"; };
-		C0B342A1BD551DDA296F4E68 /* JobListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Jobs/JobListScreen.swift"; sourceTree = "<group>"; };
-		776F1EEEACC0745E52B7B6A1 /* NavigationHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Navigation/NavigationHandoff.swift"; sourceTree = "<group>"; };
-		547327E67DECF506A855EA01 /* PaymentsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Payments/PaymentsService.swift"; sourceTree = "<group>"; };
-		096F631B2161469BD4014AD4 /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Photos/CameraCaptureView.swift"; sourceTree = "<group>"; };
-		2ACDE4C42DF503AC4735896F /* PhotoCaptureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Photos/PhotoCaptureScreen.swift"; sourceTree = "<group>"; };
-		C4DD9DEB93A5A8B71AE503E3 /* ProfileScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Profile/ProfileScreen.swift"; sourceTree = "<group>"; };
-		66C9B868333F090EB8F4131E /* PanicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Safety/PanicButton.swift"; sourceTree = "<group>"; };
-		EDDBAEDEEF5D880EF2463FDB /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Settings/SettingsScreen.swift"; sourceTree = "<group>"; };
-		D2C0E40553E523D9D2DD07E8 /* SignatureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Signature/SignatureScreen.swift"; sourceTree = "<group>"; };
-		01FEA8E5642E5C9AD048794B /* TimeClockScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/TimeClock/TimeClockScreen.swift"; sourceTree = "<group>"; };
-		5C22B5A1BDD548793825BC93 /* VINScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/VIN/VINScanner.swift"; sourceTree = "<group>"; };
-		B3CC530FC8B77FF7FA103041 /* AppContainerSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverTests/AppContainerSmokeTests.swift"; sourceTree = "<group>"; };
-		5E6AFD6FB44A6C9DEF2933CD /* VINValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverTests/VINValidatorTests.swift"; sourceTree = "<group>"; };
-		4A31E7EB24EC654685093CC0 /* StatusFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverUITests/StatusFlowUITests.swift"; sourceTree = "<group>"; };
+		10275177DD3F3BE4ABC4C75C /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/AppContainer.swift"; sourceTree = "<group>"; };
+		BF1A214AC7B74F854395D0FE /* PermissionsWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/PermissionsWizard.swift"; sourceTree = "<group>"; };
+		68B2438C5B4CAB52A9C8B75E /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/PushRegistrar.swift"; sourceTree = "<group>"; };
+		98AB0888C680DB7C9EBB38D0 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/RootView.swift"; sourceTree = "<group>"; };
+		BD0FDD72DFB21AF7D22BCC1E /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/SettingsStore.swift"; sourceTree = "<group>"; };
+		1C3E3EE3FDC0584BD92D0FAD /* UsTowDispatchDriverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/App/UsTowDispatchDriverApp.swift"; sourceTree = "<group>"; };
+		7956A8E15F2EB38211BCA6A6 /* LockedScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Auth/LockedScreen.swift"; sourceTree = "<group>"; };
+		38957DEAE76AB5DEC071C481 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Auth/LoginView.swift"; sourceTree = "<group>"; };
+		F124A8E856E0234A3EA2D8A1 /* PINEntryScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Auth/PINEntryScreen.swift"; sourceTree = "<group>"; };
+		570D41AE54E14C48B823AF17 /* SetPINScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Auth/SetPINScreen.swift"; sourceTree = "<group>"; };
+		AABC105621E9EA9A6D632D90 /* BriefingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Briefing/BriefingScreen.swift"; sourceTree = "<group>"; };
+		9A53CA984822D85271F6D5F0 /* BriefingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Briefing/BriefingViewModel.swift"; sourceTree = "<group>"; };
+		880348B9F2FF70C1981C6382 /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Chat/ChatScreen.swift"; sourceTree = "<group>"; };
+		5EF40BF74BE5CEE2E7033C3D /* DVIRScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/DVIR/DVIRScreen.swift"; sourceTree = "<group>"; };
+		16F5C42EF5AB3D66661BC24E /* DocumentVaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/DocumentVault/DocumentVaultScreen.swift"; sourceTree = "<group>"; };
+		6F1CA480C74134D74FDC84AB /* EarningsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Earnings/EarningsScreen.swift"; sourceTree = "<group>"; };
+		366FEDA8B5E023CDD02FB139 /* JobDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Jobs/JobDetailScreen.swift"; sourceTree = "<group>"; };
+		BAD1A17DC2812F7ACE3E8140 /* JobListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Jobs/JobListScreen.swift"; sourceTree = "<group>"; };
+		E6ED933016C8ACD583EEBD33 /* NavigationHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Navigation/NavigationHandoff.swift"; sourceTree = "<group>"; };
+		43C2F5B20067C7FD5EC46C66 /* OfflineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Offline/OfflineScreen.swift"; sourceTree = "<group>"; };
+		C6713C4D24DBD065EBECC1DD /* LiveFieldPaymentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Payments/LiveFieldPaymentService.swift"; sourceTree = "<group>"; };
+		FA2F72B7FDAF52277FA55C1E /* PaymentsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Payments/PaymentsService.swift"; sourceTree = "<group>"; };
+		58AA0F2E0F1D7FF1A58280AC /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Photos/CameraCaptureView.swift"; sourceTree = "<group>"; };
+		04D8C098A2788651D79413AA /* PhotoCaptureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Photos/PhotoCaptureScreen.swift"; sourceTree = "<group>"; };
+		7D2DB338BB67356B0FF80B31 /* PretripScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Pretrip/PretripScreen.swift"; sourceTree = "<group>"; };
+		332730D5CFB8AC9D740090E1 /* PretripViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Pretrip/PretripViewModel.swift"; sourceTree = "<group>"; };
+		515957BBBF03ADDFE9728BC9 /* ProfileScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Profile/ProfileScreen.swift"; sourceTree = "<group>"; };
+		2F10FC48AE61065B3B275D7D /* PanicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Safety/PanicButton.swift"; sourceTree = "<group>"; };
+		2F13E005CC8FD7FBC19C43D8 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Settings/SettingsScreen.swift"; sourceTree = "<group>"; };
+		265899F8A54FAED872E4EB43 /* SignatureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/Signature/SignatureScreen.swift"; sourceTree = "<group>"; };
+		4EA54E725E03D3E4C37EF585 /* TimeClockScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/TimeClock/TimeClockScreen.swift"; sourceTree = "<group>"; };
+		946EEB76567E8FB029DA215D /* VINScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriver/Features/VIN/VINScanner.swift"; sourceTree = "<group>"; };
+		0EE2875386CCE242184FE2D8 /* AppContainerSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverTests/AppContainerSmokeTests.swift"; sourceTree = "<group>"; };
+		8DF88BF04A492607DEE6EF8A /* VINValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverTests/VINValidatorTests.swift"; sourceTree = "<group>"; };
+		319C2A08123FF887A83462D0 /* BriefingGateUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverUITests/BriefingGateUITests.swift"; sourceTree = "<group>"; };
+		7EC5CF3D328A3ED1051DF5EE /* PINFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverUITests/PINFlowUITests.swift"; sourceTree = "<group>"; };
+		E6CB436D9EAD4665884C5CB1 /* StatusFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowCommandDriverUITests/StatusFlowUITests.swift"; sourceTree = "<group>"; };
 		EF61687EE07F521749F45DFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TowCommandDriver/Resources/Info.plist"; sourceTree = "<group>"; };
 		EEB8D2129CF6E076F7455CB0 /* TowCommandDriver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TowCommandDriver/Resources/TowCommandDriver.entitlements"; sourceTree = "<group>"; };
 		F830B064E833FD426237B0FB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "TowCommandDriver/Resources/Localizable.strings"; sourceTree = "<group>"; };
@@ -99,29 +121,38 @@
 		3C3B0F03DC089F93B8457928 /* TowCommandDriver */ = {
 			isa = PBXGroup;
 			children = (
-				1129D55A3A3454D9FF90C814 /* AppContainer.swift */,
-				141ED14F2CFEDDADD2001DEC /* PermissionsWizard.swift */,
-				449752F52A312EA6708AC2C7 /* PushRegistrar.swift */,
-				B244F2EA47E277796400FCEB /* RootView.swift */,
-				9F1F1168BEA2E8033CAF82A6 /* SettingsStore.swift */,
-				A8A453FDCCB376787CDD151B /* UsTowDispatchDriverApp.swift */,
-				DBA692B6EDA59F9E3D4334B6 /* LoginView.swift */,
-				73A0B4448AAC94D03E211A7A /* ChatScreen.swift */,
-				1968379B47DEAB8E1DE6AA48 /* DVIRScreen.swift */,
-				A03CA4598966661F7A1362D5 /* DocumentVaultScreen.swift */,
-				95CD3A1EEEC980DD5870AE6E /* EarningsScreen.swift */,
-				631C24D2B53A95280477CB2E /* JobDetailScreen.swift */,
-				C0B342A1BD551DDA296F4E68 /* JobListScreen.swift */,
-				776F1EEEACC0745E52B7B6A1 /* NavigationHandoff.swift */,
-				547327E67DECF506A855EA01 /* PaymentsService.swift */,
-				096F631B2161469BD4014AD4 /* CameraCaptureView.swift */,
-				2ACDE4C42DF503AC4735896F /* PhotoCaptureScreen.swift */,
-				C4DD9DEB93A5A8B71AE503E3 /* ProfileScreen.swift */,
-				66C9B868333F090EB8F4131E /* PanicButton.swift */,
-				EDDBAEDEEF5D880EF2463FDB /* SettingsScreen.swift */,
-				D2C0E40553E523D9D2DD07E8 /* SignatureScreen.swift */,
-				01FEA8E5642E5C9AD048794B /* TimeClockScreen.swift */,
-				5C22B5A1BDD548793825BC93 /* VINScanner.swift */,
+				10275177DD3F3BE4ABC4C75C /* AppContainer.swift */,
+				BF1A214AC7B74F854395D0FE /* PermissionsWizard.swift */,
+				68B2438C5B4CAB52A9C8B75E /* PushRegistrar.swift */,
+				98AB0888C680DB7C9EBB38D0 /* RootView.swift */,
+				BD0FDD72DFB21AF7D22BCC1E /* SettingsStore.swift */,
+				1C3E3EE3FDC0584BD92D0FAD /* UsTowDispatchDriverApp.swift */,
+				7956A8E15F2EB38211BCA6A6 /* LockedScreen.swift */,
+				38957DEAE76AB5DEC071C481 /* LoginView.swift */,
+				F124A8E856E0234A3EA2D8A1 /* PINEntryScreen.swift */,
+				570D41AE54E14C48B823AF17 /* SetPINScreen.swift */,
+				AABC105621E9EA9A6D632D90 /* BriefingScreen.swift */,
+				9A53CA984822D85271F6D5F0 /* BriefingViewModel.swift */,
+				880348B9F2FF70C1981C6382 /* ChatScreen.swift */,
+				5EF40BF74BE5CEE2E7033C3D /* DVIRScreen.swift */,
+				16F5C42EF5AB3D66661BC24E /* DocumentVaultScreen.swift */,
+				6F1CA480C74134D74FDC84AB /* EarningsScreen.swift */,
+				366FEDA8B5E023CDD02FB139 /* JobDetailScreen.swift */,
+				BAD1A17DC2812F7ACE3E8140 /* JobListScreen.swift */,
+				E6ED933016C8ACD583EEBD33 /* NavigationHandoff.swift */,
+				43C2F5B20067C7FD5EC46C66 /* OfflineScreen.swift */,
+				C6713C4D24DBD065EBECC1DD /* LiveFieldPaymentService.swift */,
+				FA2F72B7FDAF52277FA55C1E /* PaymentsService.swift */,
+				58AA0F2E0F1D7FF1A58280AC /* CameraCaptureView.swift */,
+				04D8C098A2788651D79413AA /* PhotoCaptureScreen.swift */,
+				7D2DB338BB67356B0FF80B31 /* PretripScreen.swift */,
+				332730D5CFB8AC9D740090E1 /* PretripViewModel.swift */,
+				515957BBBF03ADDFE9728BC9 /* ProfileScreen.swift */,
+				2F10FC48AE61065B3B275D7D /* PanicButton.swift */,
+				2F13E005CC8FD7FBC19C43D8 /* SettingsScreen.swift */,
+				265899F8A54FAED872E4EB43 /* SignatureScreen.swift */,
+				4EA54E725E03D3E4C37EF585 /* TimeClockScreen.swift */,
+				946EEB76567E8FB029DA215D /* VINScanner.swift */,
 				EF61687EE07F521749F45DFA /* Info.plist */,
 				EEB8D2129CF6E076F7455CB0 /* TowCommandDriver.entitlements */,
 				8F860F726BCEED75D7D3791E /* Localizable.strings */,
@@ -132,8 +163,8 @@
 		E717C295FF9827DFF805D88B /* TowCommandDriverTests */ = {
 			isa = PBXGroup;
 			children = (
-				B3CC530FC8B77FF7FA103041 /* AppContainerSmokeTests.swift */,
-				5E6AFD6FB44A6C9DEF2933CD /* VINValidatorTests.swift */,
+				0EE2875386CCE242184FE2D8 /* AppContainerSmokeTests.swift */,
+				8DF88BF04A492607DEE6EF8A /* VINValidatorTests.swift */,
 			);
 			name = TowCommandDriverTests;
 			sourceTree = "<group>";
@@ -141,7 +172,9 @@
 		DD3429FC8319BB3A23E9614F /* TowCommandDriverUITests */ = {
 			isa = PBXGroup;
 			children = (
-				4A31E7EB24EC654685093CC0 /* StatusFlowUITests.swift */,
+				319C2A08123FF887A83462D0 /* BriefingGateUITests.swift */,
+				7EC5CF3D328A3ED1051DF5EE /* PINFlowUITests.swift */,
+				E6CB436D9EAD4665884C5CB1 /* StatusFlowUITests.swift */,
 			);
 			name = TowCommandDriverUITests;
 			sourceTree = "<group>";
@@ -163,29 +196,38 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				66EA28A8738B9B1C2A52C9AD /* AppContainer.swift in Sources */,
-				575FC26C3DD75D4591676B78 /* PermissionsWizard.swift in Sources */,
-				81D5B40F3C1B749E8FC29738 /* PushRegistrar.swift in Sources */,
-				26C3F1136B8E9AC4980366A9 /* RootView.swift in Sources */,
-				6C2236C22195278847131DEA /* SettingsStore.swift in Sources */,
-				B1A8FEEAE365A5A1718D0E16 /* UsTowDispatchDriverApp.swift in Sources */,
-				3F1AAF9541F2019F49950E25 /* LoginView.swift in Sources */,
-				A48D5049B35BB51516DDDB06 /* ChatScreen.swift in Sources */,
-				215AD1CD7B248858FB30AFA8 /* DVIRScreen.swift in Sources */,
-				BEFF469B671A0C16A1AC85FE /* DocumentVaultScreen.swift in Sources */,
-				6D9EF99C5623C1357FB162F9 /* EarningsScreen.swift in Sources */,
-				8828497A52B2C131B04CED61 /* JobDetailScreen.swift in Sources */,
-				EE9455B180A64D5F853910BE /* JobListScreen.swift in Sources */,
-				AA7D0C77209B847B98972C59 /* NavigationHandoff.swift in Sources */,
-				E67ABF9BD498BAA5999B9CB3 /* PaymentsService.swift in Sources */,
-				99A3BA0DE74C6F8A79A353ED /* CameraCaptureView.swift in Sources */,
-				87C3D2151625DB41B0FED389 /* PhotoCaptureScreen.swift in Sources */,
-				E58506260C4A742A0968884B /* ProfileScreen.swift in Sources */,
-				8587560692E70FA968684266 /* PanicButton.swift in Sources */,
-				AFF7D1720D90F554C30E9796 /* SettingsScreen.swift in Sources */,
-				F8B2BF124AF3DE994D623275 /* SignatureScreen.swift in Sources */,
-				1AC03EB40003C9071894FD15 /* TimeClockScreen.swift in Sources */,
-				DDB9D82928AE8E28D39F94ED /* VINScanner.swift in Sources */,
+				BF120615E97CA43A0B1544F1 /* AppContainer.swift in Sources */,
+				50C38BB39F5B2656B218B0AC /* PermissionsWizard.swift in Sources */,
+				E6E96C57228AA274B417B2F6 /* PushRegistrar.swift in Sources */,
+				91886F29A7E46C17A3B4541F /* RootView.swift in Sources */,
+				F86CD4156E0008DC8DA06CAC /* SettingsStore.swift in Sources */,
+				A957026EF5DF83CCB4169BD0 /* UsTowDispatchDriverApp.swift in Sources */,
+				FA861207C00082E046BA863D /* LockedScreen.swift in Sources */,
+				B22A07F0FB7B77A4FF189479 /* LoginView.swift in Sources */,
+				4AE2F374607AC8B5462B8BB4 /* PINEntryScreen.swift in Sources */,
+				C2F4650201657E817761528E /* SetPINScreen.swift in Sources */,
+				51258D1BC8ACE0AD9915C4F2 /* BriefingScreen.swift in Sources */,
+				4E597111654D3918D403A582 /* BriefingViewModel.swift in Sources */,
+				80B307458DDA561DBD31A84E /* ChatScreen.swift in Sources */,
+				BA9CA997C332904380C4670F /* DVIRScreen.swift in Sources */,
+				D11D75F34E42E2C17B6ECA30 /* DocumentVaultScreen.swift in Sources */,
+				0A045F4F8A063BE2A8C118C3 /* EarningsScreen.swift in Sources */,
+				1C83289A622090D33F305CDF /* JobDetailScreen.swift in Sources */,
+				DC9F82D9AA5F80F113912DFE /* JobListScreen.swift in Sources */,
+				26C84F30C599ED6A9DFA3E40 /* NavigationHandoff.swift in Sources */,
+				CBAC60AC5511FD7B81ED9E01 /* OfflineScreen.swift in Sources */,
+				63DFD68CD200372DCA26CC2E /* LiveFieldPaymentService.swift in Sources */,
+				1447AB65D6472909EE1F5B82 /* PaymentsService.swift in Sources */,
+				BAD399F457813C005D7766F3 /* CameraCaptureView.swift in Sources */,
+				A682249A6E282E336FC7CD4D /* PhotoCaptureScreen.swift in Sources */,
+				743488E590B910401D685BB0 /* PretripScreen.swift in Sources */,
+				86038C06B8C2330AABF47A23 /* PretripViewModel.swift in Sources */,
+				75841AB2E6311B70ACE5CEAC /* ProfileScreen.swift in Sources */,
+				878DC16C89F31160E37E65A0 /* PanicButton.swift in Sources */,
+				4127F75E5711CF0D6AF2D724 /* SettingsScreen.swift in Sources */,
+				4EA27638CF29331F8437E3B6 /* SignatureScreen.swift in Sources */,
+				01B18AA478CFCCE6E307B66E /* TimeClockScreen.swift in Sources */,
+				995CA5F9803A27E6EBE2AB73 /* VINScanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,8 +235,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A27BA6AFA5E1DB43466A8E24 /* AppContainerSmokeTests.swift in Sources */,
-				AEDA565E36364FFA546F6661 /* VINValidatorTests.swift in Sources */,
+				78D8C2F09A334BF81AFD977A /* AppContainerSmokeTests.swift in Sources */,
+				75595ECFF2FC9CE103CABA68 /* VINValidatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,7 +244,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				498430CE35373660243443B9 /* StatusFlowUITests.swift in Sources */,
+				088BF3073796A5506D5CF4DC /* BriefingGateUITests.swift in Sources */,
+				4355B6F4F47F4849CE60CD13 /* PINFlowUITests.swift in Sources */,
+				D3985DB13BD17D31AAF12BFE /* StatusFlowUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

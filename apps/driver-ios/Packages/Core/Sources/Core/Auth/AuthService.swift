@@ -39,7 +39,9 @@ public actor AuthService: TokenProvider {
         let new = AuthSession(
             user: user, tenant: tenant,
             accessToken: access, refreshToken: refresh,
-            accessTokenExpiresAt: expiresAt
+            accessTokenExpiresAt: expiresAt,
+            kind: .operator,
+            driverId: nil
         )
         try store.save(new)
         session = new
@@ -47,7 +49,11 @@ public actor AuthService: TokenProvider {
     }
 
     public func signOut() async {
-        if let refresh = session?.refreshToken {
+        // Operator sessions hit /auth/logout to invalidate the refresh
+        // token; driver-PIN sessions have no refresh token, so we just
+        // clear local state. Calling /auth/logout with a driver bearer
+        // token returns 403 on the server and dirties the telemetry.
+        if let current = session, current.kind == .operator, let refresh = current.refreshToken {
             _ = try? await api.logout(LogoutRequest(refreshToken: refresh))
         }
         store.clear()
@@ -63,21 +69,123 @@ public actor AuthService: TokenProvider {
         if let existing = refreshTask {
             return try await existing.value
         }
-        guard let refreshToken = session?.refreshToken else {
+        // Driver PIN sessions have no refresh token — the backend mints a
+        // 12h access token only. When expired the driver re-enters their
+        // PIN. Surfaced here as noActiveSession so the APIClient turns
+        // the upstream 401 into `.unauthorized` and the root view shows
+        // the PIN screen.
+        guard let current = session else { throw APIError.noActiveSession }
+        if current.kind == .driver { throw APIError.noActiveSession }
+        guard let refreshToken = current.refreshToken else {
             throw APIError.noActiveSession
         }
         let task = Task<String, Error> {
             defer { self.refreshTask = nil }
             let resp = try await api.refresh(RefreshRequest(refreshToken: refreshToken))
-            guard var current = session else { throw APIError.noActiveSession }
-            current.accessToken = resp.accessToken
-            current.refreshToken = resp.refreshToken
-            current.accessTokenExpiresAt = Date().addingTimeInterval(TimeInterval(resp.expiresIn))
-            try store.save(current)
-            session = current
+            guard var updated = session else { throw APIError.noActiveSession }
+            updated.accessToken = resp.accessToken
+            updated.refreshToken = resp.refreshToken
+            updated.accessTokenExpiresAt = Date().addingTimeInterval(TimeInterval(resp.expiresIn))
+            try store.save(updated)
+            session = updated
             return resp.accessToken
         }
         refreshTask = task
         return try await task.value
+    }
+
+    // ---------- Session 7: PIN auth ----------
+
+    /// PIN-based driver sign-in. On success persists an `AuthSession` with
+    /// `kind == .driver`, `driverId` set, and `refreshToken == nil`. Sign-out
+    /// is identical to the operator path.
+    public func signInWithPin(
+        driverId: String,
+        pin: String,
+        tenantSlug: String
+    ) async throws -> AuthSession {
+        let resp: DriverLoginResponse
+        do {
+            resp = try await api.driverPinLogin(
+                DriverPinLoginRequest(driverId: driverId, pin: pin, tenantSlug: tenantSlug)
+            )
+        } catch let apiError as APIError {
+            if let code = DriverAuthService.errorCode(from: apiError) {
+                throw DriverAuthError(code: code, underlying: apiError)
+            }
+            throw apiError
+        }
+        // Driver picker payload lacks email — fabricate a stable, non-routable
+        // placeholder so the AuthUser shape stays uniform. The role string
+        // identifies this as a driver session for any consumers that branch
+        // on `user.role`.
+        let user = AuthUser(
+            id: resp.driver.id,
+            email: "\(resp.driver.id)@driver.local",
+            firstName: resp.driver.firstName,
+            lastName: resp.driver.lastName,
+            role: "driver",
+            emailVerifiedAt: nil,
+            mfaEnabled: false
+        )
+        let tenant = AuthTenant(
+            id: resp.tenant.id,
+            slug: resp.tenant.slug,
+            name: resp.tenant.name,
+            status: "active"
+        )
+        let expiresAt = Date().addingTimeInterval(TimeInterval(resp.expiresIn))
+        let new = AuthSession(
+            user: user,
+            tenant: tenant,
+            accessToken: resp.accessToken,
+            refreshToken: nil,
+            accessTokenExpiresAt: expiresAt,
+            kind: .driver,
+            driverId: resp.driver.id
+        )
+        try store.save(new)
+        session = new
+        return new
+    }
+}
+
+/// Driver-auth error surfaced to the UI so it can route:
+///   PIN_NOT_SET        → set-pin screen with driverId+tenant
+///   ACCOUNT_LOCKED     → locked screen (countdown if `unlockAt` provided)
+///   INVALID_CREDENTIALS → re-prompt with "Wrong PIN"
+public struct DriverAuthError: Error, Equatable {
+    public let code: DriverAuthErrorCode
+    public let underlying: APIError?
+    public init(code: DriverAuthErrorCode, underlying: APIError? = nil) {
+        self.code = code
+        self.underlying = underlying
+    }
+}
+
+/// Pure helpers for mapping backend error payloads → `DriverAuthErrorCode`.
+public enum DriverAuthService {
+    /// Inspect an APIError and pull the `code` field out of its JSON body
+    /// if the body is shaped `{ code, message }`. The backend's driver-auth
+    /// service throws ConflictException / UnauthorizedException with these
+    /// codes — see `apps/api/src/modules/driver-experience/driver-auth.service.ts`.
+    public static func errorCode(from error: APIError) -> DriverAuthErrorCode? {
+        switch error {
+        case .http(let status, let message):
+            if let raw = message,
+               let data = raw.data(using: .utf8),
+               let body = try? JSONDecoder().decode(DriverAuthErrorBody.self, from: data),
+               let codeStr = body.code {
+                return DriverAuthErrorCode(rawValue: codeStr.uppercased()) ?? .unknown
+            }
+            switch status {
+            case 401: return .invalidCredentials
+            case 423: return .accountLocked
+            case 404: return .notFound
+            default: return nil
+            }
+        default:
+            return nil
+        }
     }
 }

@@ -18,3 +18,52 @@
 "settings.data_saver" = "Data saver (Wi-Fi photo upload only)";
 "settings.quiet_hours" = "Quiet hours";
 "profile.signout" = "Sign Out";
+
+/* Session 7 — PIN auth */
+"pin.enter_title" = "Enter your PIN";
+"pin.change_driver" = "Choose a different driver";
+"pin.error.wrong" = "Wrong PIN. Try again.";
+"pin.error.not_found" = "Driver not found. Choose a different driver.";
+"pin.error.generic" = "Couldn't sign in. Try again.";
+"setpin.title" = "PIN not set yet";
+"setpin.body_title" = "Ask dispatch to enroll your PIN";
+"setpin.body_text" = "For security, an admin sets your first PIN in the dispatcher console. Once enrolled you can sign in here with the 4-digit code.";
+"setpin.back_to_signin" = "Back to sign in";
+"locked.title" = "Too many wrong PINs";
+"locked.subtitle" = "For your safety the driver account is temporarily locked.";
+"locked.call_dispatch" = "Call dispatch";
+"locked.back" = "Back to sign in";
+"locked.try_again" = "Try again";
+"code.title" = "Workshop code";
+"code.subtitle" = "Enter the 6-digit code shared by your dispatcher.";
+"code.continue" = "Continue";
+"code.operator_login" = "I'm an operator (email + password)";
+"code.error.format" = "Enter exactly 6 digits.";
+"code.error.not_found" = "We couldn't find that workshop. Check the code with your dispatcher.";
+"picker.title" = "Who's driving?";
+"picker.change_code" = "Wrong workshop? Re-enter code.";
+
+/* Session 7 — Briefing */
+"briefing.daily" = "Today's briefing";
+"briefing.mandatory" = "Required";
+"briefing.watch_video" = "Watch the briefing video";
+"briefing.read_confirm" = "I have read and watched today's briefing.";
+"briefing.acknowledge" = "Acknowledge briefing";
+"briefing.none" = "No active briefing.";
+
+/* Session 7 — Pre-trip */
+"pretrip.title" = "Pre-trip inspection";
+"pretrip.subtitle" = "Walk the truck and rate each item. Fails require a note + photo.";
+"pretrip.odometer" = "Odometer (miles)";
+"pretrip.notes" = "General notes";
+"pretrip.fail_note" = "Describe the issue (required)";
+"pretrip.submit" = "Submit pre-trip";
+
+/* Session 7 — Offline */
+"offline.empty" = "Everything is synced.";
+"offline.count" = "%d queued";
+"offline.retry_all" = "Retry all";
+"offline.purge" = "Clear queue";
+"offline.status_online" = "Online";
+"offline.status_offline" = "Offline";
+"offline.attempts" = "%d attempt(s)";
