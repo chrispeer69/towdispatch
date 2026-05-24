@@ -361,6 +361,7 @@ export const configSchema = z.object({
   // Minimum parser confidence (0–1) to act on a recognized intent; below it
   // the command is downgraded to 'clarify' and the driver is asked to repeat.
   VOICE_DRIVER_CONFIDENCE_MIN: z.coerce.number().min(0).max(1).default(0.75),
+<<<<<<< HEAD
   // Phase 0 hardening (Session 17) — daily DB-backup freshness verification.
   // BACKUP_VERIFY_CRON_ENABLED gates the 03:00 cron that asserts the most
   // recent backup is younger than BACKUP_MAX_AGE_HOURS and raises a Sentry
@@ -540,6 +541,28 @@ export const configSchema = z.object({
     .transform((v) => v === 'true'),
   // Rows mutated per statement before the sweep loops — caps lock duration.
   AI_DISPATCH_RETENTION_BATCH_SIZE: z.coerce.number().int().min(1).max(10_000).default(500),
+=======
+
+  // Enterprise SSO (Session 38) — SAML 2.0 / OIDC / SCIM 2.0.
+  // ENTERPRISE_SSO_ENABLED is the master gate: when false (default) every
+  // /sso/* and /scim/* route returns 403 sso_disabled. ENTERPRISE_SSO_TENANTS
+  // is a CSV allowlist of tenant IDs — empty (default) means NO tenant is
+  // allowed (conservative: SSO is opt-in per tenant, not opt-out). Both must
+  // pass for a tenant to use SSO/SCIM. The existing password login path is
+  // never affected by these flags.
+  ENTERPRISE_SSO_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  ENTERPRISE_SSO_TENANTS: z.string().optional().default(''),
+  // 32+ chars; AES-256-GCM key for the sso_connections.oidc_client_secret_encrypted
+  // column. Mirrors QBO_TOKEN_ENCRYPTION_KEY. Kept always-valid so the
+  // column survives an SSO disable/re-enable without re-entry.
+  SSO_TOKEN_ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'SSO_TOKEN_ENCRYPTION_KEY must be 32+ chars')
+    .default('change-me-sso-token-encryption-key-please-rotate-in-prod'),
+>>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

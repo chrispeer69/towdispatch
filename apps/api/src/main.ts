@@ -19,6 +19,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter.
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
 import { registerRawBodyJsonParser } from './common/middleware/raw-body.middleware.js';
 import { registerRequestContext } from './common/middleware/request-context.middleware.js';
+import { registerSsoBodyParsers } from './common/middleware/sso-body-parsers.js';
 import { SentryService } from './common/observability/sentry.service.js';
 import { ZodValidationPipe } from './common/pipes/zod-validation.pipe.js';
 import { RegionContextService } from './common/region/region-context.service.js';
@@ -120,6 +121,8 @@ async function bootstrap(): Promise<void> {
     { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 * 1024 },
     (_req, body, done) => done(null, body),
   );
+  // Enterprise SSO (Session 38): SAML ACS form-urlencoded + SCIM scim+json.
+  registerSsoBodyParsers(fi);
 
   const port = config.apiPort;
   const host = config.apiHost;

@@ -13,8 +13,11 @@ import type {
   PaginatedAuditLog,
   PaginatedCustomers,
   PaginatedVehicles,
+  ScimTokenDto,
   ServiceCatalogEntryDto,
   ServiceRateDto,
+  SsoConnectionDto,
+  SsoLoginAuditDto,
   TenantDto,
   UserDto,
   UserInviteDto,
@@ -110,6 +113,27 @@ export async function fetchUserInvites(
   accessToken?: string | null,
 ): Promise<UserInviteDto[]> {
   return apiServer<UserInviteDto[]>(`/users/invites?status=${status}`, {
+    accessToken: accessToken ?? null,
+  });
+}
+
+// ---- Enterprise SSO (Session 38) ----
+export async function fetchSsoConnections(
+  accessToken?: string | null,
+): Promise<SsoConnectionDto[]> {
+  return apiServer<SsoConnectionDto[]>('/admin/sso/connections', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export async function fetchScimTokens(accessToken?: string | null): Promise<ScimTokenDto[]> {
+  return apiServer<ScimTokenDto[]>('/admin/sso/tokens', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export async function fetchSsoAudit(accessToken?: string | null): Promise<SsoLoginAuditDto[]> {
+  return apiServer<SsoLoginAuditDto[]>('/admin/sso/audit', {
     accessToken: accessToken ?? null,
   });
 }

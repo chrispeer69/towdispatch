@@ -73,6 +73,17 @@ export const users = pgTable(
     lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 
     /**
+     * Enterprise SSO / SCIM provisioning (Session 38). NULL for every
+     * password user — the auth path never reads these. external_id is the
+     * IdP-assigned SCIM externalId; sso_connection_id ties the row to the
+     * connection that provisioned it. FK + partial-unique index live in
+     * 0048_enterprise_sso.sql (no .references() here to avoid a circular
+     * schema import with sso-connections).
+     */
+    externalId: text('external_id'),
+    ssoConnectionId: uuid('sso_connection_id'),
+
+    /**
      * Opt-in flag for the Monday 6:00 AM RED ALERT past-due email
      * (Build 5 — MOAT #7). Owners are auto-set to true at creation and
      * by migration backfill. Admins receive by role regardless. Other
