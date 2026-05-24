@@ -14,11 +14,7 @@ import { index, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle
 import { tenants } from './tenants';
 import { users } from './users';
 
-export const dynamicPricingDemandSurgeStatusValues = [
-  'pending',
-  'approved',
-  'dismissed',
-] as const;
+export const dynamicPricingDemandSurgeStatusValues = ['pending', 'approved', 'dismissed'] as const;
 export type DynamicPricingDemandSurgeStatus =
   (typeof dynamicPricingDemandSurgeStatusValues)[number];
 

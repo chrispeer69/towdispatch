@@ -1,7 +1,7 @@
+import { launch } from 'chrome-launcher';
 // Tiny Lighthouse runner that emits scores as JSON for the addendum.
 // Usage: node apps/e2e/scripts/lighthouse-runner.mjs http://localhost:3000/login
 import lighthouse from 'lighthouse';
-import { launch } from 'chrome-launcher';
 
 const url = process.argv[2] ?? 'http://localhost:3000/login';
 const chrome = await launch({ chromeFlags: ['--headless=new', '--no-sandbox'] });

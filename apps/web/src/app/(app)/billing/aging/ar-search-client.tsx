@@ -563,7 +563,10 @@ function Row({
       <td className="px-3 py-2">
         <span className="block text-sm">
           {row.accountId && row.accountName ? (
-            <Link href={`/accounts/${row.accountId}`} className="hover:text-brand-primary hover:underline underline-offset-2 transition-colors">
+            <Link
+              href={`/accounts/${row.accountId}`}
+              className="hover:text-brand-primary hover:underline underline-offset-2 transition-colors"
+            >
               {row.accountName}
             </Link>
           ) : row.customerId && row.customerName ? (

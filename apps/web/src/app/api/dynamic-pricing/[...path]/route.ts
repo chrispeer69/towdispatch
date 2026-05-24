@@ -13,7 +13,11 @@ interface Ctx {
 }
 
 function expectsBinary(tail: string, search: string): boolean {
-  if (tail.startsWith('reports/') && (search.includes('format=xlsx') || search.includes('format=csv'))) return true;
+  if (
+    tail.startsWith('reports/') &&
+    (search.includes('format=xlsx') || search.includes('format=csv'))
+  )
+    return true;
   return false;
 }
 

@@ -1,5 +1,5 @@
-import { apiServer, tryFetch } from '@/lib/api/client';
 import { CustomerLink, JobLink, VehicleLink } from '@/components/ui/entity-link';
+import { apiServer, tryFetch } from '@/lib/api/client';
 import type {
   JobListItemDto,
   JobServiceType,
@@ -146,18 +146,27 @@ export default async function JobsPage({
                     </td>
                     <td className="px-4 py-2 font-medium">
                       {job.customer?.id && job.customer.name ? (
-                        <CustomerLink customerId={job.customer.id}>{job.customer.name}</CustomerLink>
+                        <CustomerLink customerId={job.customer.id}>
+                          {job.customer.name}
+                        </CustomerLink>
                       ) : (
-                        <span className="text-text-primary-on-dark">{job.customer?.name ?? '—'}</span>
+                        <span className="text-text-primary-on-dark">
+                          {job.customer?.name ?? '—'}
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-2">
                       {job.vehicle?.id ? (
-                        <VehicleLink vehicleId={job.vehicle.id} className="text-text-secondary-on-dark hover:text-brand-primary hover:underline underline-offset-2 transition-colors">
+                        <VehicleLink
+                          vehicleId={job.vehicle.id}
+                          className="text-text-secondary-on-dark hover:text-brand-primary hover:underline underline-offset-2 transition-colors"
+                        >
                           {vehicleLabel(job.vehicle)}
                         </VehicleLink>
                       ) : (
-                        <span className="text-text-secondary-on-dark">{vehicleLabel(job.vehicle)}</span>
+                        <span className="text-text-secondary-on-dark">
+                          {vehicleLabel(job.vehicle)}
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-2 text-text-secondary-on-dark">

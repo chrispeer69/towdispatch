@@ -1,6 +1,6 @@
+import { launch } from 'chrome-launcher';
 // Detailed runner: dumps any non-passing audit for the requested category.
 import lighthouse from 'lighthouse';
-import { launch } from 'chrome-launcher';
 const [, , url = 'http://localhost:3000/login', category = 'accessibility'] = process.argv;
 const chrome = await launch({ chromeFlags: ['--headless=new', '--no-sandbox'] });
 try {

@@ -111,7 +111,7 @@ interface RequestOpts<TBody> {
   accessToken?: string | null;
 }
 
-async function resolveAccessToken(opts: RequestOpts<any>): Promise<string | null> {
+async function resolveAccessToken(opts: RequestOpts<unknown>): Promise<string | null> {
   if (opts.accessToken !== undefined) return opts.accessToken;
   const cached = await getSessionToken();
   if (cached) return cached;

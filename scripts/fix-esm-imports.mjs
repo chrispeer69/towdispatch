@@ -6,7 +6,7 @@
  *
  * Usage: node scripts/fix-esm-imports.mjs <dist-dir>
  */
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const root = process.argv[2];

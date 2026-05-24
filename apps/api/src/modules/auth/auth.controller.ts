@@ -46,10 +46,10 @@ import {
   verifyEmailSchema,
 } from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
+import { z } from 'zod';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { ZodBody } from '../../common/decorators/zod.decorator.js';
-import { z } from 'zod';
 import { type AuthRequestMeta, AuthService } from './auth.service.js';
 
 const checkSlugSchema = z

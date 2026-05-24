@@ -32,7 +32,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   GoneException,
   Inject,
   Injectable,
@@ -483,9 +482,7 @@ export class UserInvitesService {
 }
 
 function isUniqueViolation(err: unknown): boolean {
-  return (
-    typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505'
-  );
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505';
 }
 
 function computeStatus(

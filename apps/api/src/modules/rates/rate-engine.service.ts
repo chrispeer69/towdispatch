@@ -406,7 +406,7 @@ export class RateEngineService {
           lineItems.push({ code: li.code, label: li.label, amountCents: li.amountCents });
         }
 
-                const subtotalCents = lineItems.reduce((acc, li) => acc + li.amountCents, 0);
+        const subtotalCents = lineItems.reduce((acc, li) => acc + li.amountCents, 0);
 
         // Dynamic Pricing (Moat #1) — resolve the active tier stack and
         // apply it to the subtotal. The spec says the quote response
@@ -421,21 +421,19 @@ export class RateEngineService {
         });
 
         let totalCents = subtotalCents;
-        let dynamicPricingBreakdown:
-          | {
-              baseCents: number;
-              finalCents: number;
-              cappedAt: number | null;
-              capMultiplier: number;
-              tiers: Array<{
-                tierId: string;
-                name: string;
-                category: string;
-                multiplier: number;
-                contributionCents: number;
-              }>;
-            }
-          | null = null;
+        let dynamicPricingBreakdown: {
+          baseCents: number;
+          finalCents: number;
+          cappedAt: number | null;
+          capMultiplier: number;
+          tiers: Array<{
+            tierId: string;
+            name: string;
+            category: string;
+            multiplier: number;
+            contributionCents: number;
+          }>;
+        } | null = null;
         if (stack.tiers.length > 0 && stack.finalCents > subtotalCents) {
           const surgeCents = stack.finalCents - subtotalCents;
           lineItems.push({

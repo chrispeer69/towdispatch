@@ -12,8 +12,8 @@
  */
 import { tryFetch } from '@/lib/api/client';
 import { fetchTenantCurrent } from '@/lib/api/resources';
-import { requireUser } from '@/lib/auth/session';
 import { getSessionToken } from '@/lib/auth/cookies';
+import { requireUser } from '@/lib/auth/session';
 import { ROLES, type Role } from '@ustowdispatch/shared';
 import { AlertTriangle } from 'lucide-react';
 import { redirect } from 'next/navigation';
@@ -27,12 +27,7 @@ const TAB = findSettingsTab('company');
 export const metadata = { title: 'Company Profile — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
 
-const VIEW_ROLES: readonly Role[] = [
-  ROLES.OWNER,
-  ROLES.ADMIN,
-  ROLES.MANAGER,
-  ROLES.ACCOUNTING,
-];
+const VIEW_ROLES: readonly Role[] = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTING];
 
 export default async function CompanyProfilePage(): Promise<JSX.Element> {
   const me = await requireUser();

@@ -1,5 +1,5 @@
 import type { MeResponse } from '@ustowdispatch/shared';
-import { cookies, headers } from 'next/headers';
+import { headers } from 'next/headers';
 /**
  * Server-side session loaders.
  *

@@ -26,7 +26,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -121,7 +120,10 @@ export class UserInvitesController {
   }
 
   @Public()
-  @Throttle({ burst: { limit: 10, ttl: seconds(60) }, sustained: { limit: 30, ttl: seconds(3600) } })
+  @Throttle({
+    burst: { limit: 10, ttl: seconds(60) },
+    sustained: { limit: 30, ttl: seconds(3600) },
+  })
   @Post('accept-invite')
   @HttpCode(HttpStatus.OK)
   async accept(
