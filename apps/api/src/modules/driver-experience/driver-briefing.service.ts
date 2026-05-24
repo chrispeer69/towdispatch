@@ -297,6 +297,111 @@ export class DriverBriefingService {
       userAgent: ctx.userAgent ?? undefined,
     };
   }
+
+  /**
+   * Admin: list every briefing for the tenant (active + inactive,
+   * excluding soft-deleted). Sorted newest-first so the Settings UI
+   * shows the freshest authoring at the top.
+   */
+  async listAll(ctx: OperatorContext): Promise<DriverDailyBriefingDto[]> {
+    return this.db.runInTenantContext(this.toOperatorTenantCtx(ctx), async (tx) => {
+      const rows = await tx.query.driverDailyBriefings.findMany({
+        where: isNull(driverDailyBriefings.deletedAt),
+        orderBy: (b, { desc }) => [desc(b.createdAt)],
+      });
+      return rows.map(briefingRowToDto);
+    });
+  }
+
+  /**
+   * Admin: training completion log. Joins acknowledgments with the
+   * briefing title and the driver's first/last name so the UI can
+   * render the formal record without N+1 fetches.
+   *
+   * Filters supported: briefingId (single), driverId (single), date
+   * range. Limit is hard-capped to keep the CSV export bounded.
+   */
+  async listAcknowledgments(
+    ctx: OperatorContext,
+    filters: {
+      briefingId?: string | undefined;
+      driverId?: string | undefined;
+      fromDate?: string | undefined;
+      toDate?: string | undefined;
+      limit?: number | undefined;
+    } = {},
+  ): Promise<
+    Array<{
+      id: string;
+      driverId: string;
+      driverName: string;
+      briefingId: string;
+      briefingTitle: string;
+      acknowledgedDate: string;
+      messageReadAt: string | null;
+      videoCompletedAt: string | null;
+      acknowledgedAt: string;
+      ipAddress: string | null;
+    }>
+  > {
+    const limit = Math.min(Math.max(filters.limit ?? 500, 1), 5000);
+    return this.db.runInTenantContext(this.toOperatorTenantCtx(ctx), async (tx) => {
+      // Drizzle doesn't have a clean .findMany with cross-table joins on
+      // arbitrary columns, so we drop to raw SQL. Tenant scoping is the
+      // first WHERE clause; RLS adds a second guard underneath.
+      // biome-ignore lint/suspicious/noExplicitAny: Drizzle .execute() return type varies by driver
+      const result: any = await tx.execute(sql`
+        SELECT
+          a.id,
+          a.driver_id        AS "driverId",
+          d.first_name       AS "firstName",
+          d.last_name        AS "lastName",
+          a.briefing_id      AS "briefingId",
+          b.title            AS "briefingTitle",
+          to_char(a.acknowledged_date, 'YYYY-MM-DD') AS "acknowledgedDate",
+          a.message_read_at  AS "messageReadAt",
+          a.video_completed_at AS "videoCompletedAt",
+          a.acknowledged_at  AS "acknowledgedAt",
+          a.ip_address       AS "ipAddress"
+        FROM driver_briefing_acknowledgments a
+        JOIN driver_daily_briefings b ON b.id = a.briefing_id
+        JOIN drivers d ON d.id = a.driver_id
+        WHERE a.tenant_id = ${ctx.tenantId}
+        ${filters.briefingId ? sql`AND a.briefing_id = ${filters.briefingId}` : sql``}
+        ${filters.driverId ? sql`AND a.driver_id = ${filters.driverId}` : sql``}
+        ${filters.fromDate ? sql`AND a.acknowledged_date >= ${filters.fromDate}::date` : sql``}
+        ${filters.toDate ? sql`AND a.acknowledged_date <= ${filters.toDate}::date` : sql``}
+        ORDER BY a.acknowledged_at DESC
+        LIMIT ${limit}
+      `);
+      const rows: Array<Record<string, unknown>> = Array.isArray(result?.rows)
+        ? result.rows
+        : Array.isArray(result)
+          ? result
+          : [];
+      return rows.map((r) => ({
+        id: String(r.id),
+        driverId: String(r.driverId),
+        driverName: `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || 'Driver',
+        briefingId: String(r.briefingId),
+        briefingTitle: String(r.briefingTitle),
+        acknowledgedDate: String(r.acknowledgedDate),
+        messageReadAt:
+          r.messageReadAt instanceof Date
+            ? r.messageReadAt.toISOString()
+            : ((r.messageReadAt as string | null) ?? null),
+        videoCompletedAt:
+          r.videoCompletedAt instanceof Date
+            ? r.videoCompletedAt.toISOString()
+            : ((r.videoCompletedAt as string | null) ?? null),
+        acknowledgedAt:
+          r.acknowledgedAt instanceof Date
+            ? r.acknowledgedAt.toISOString()
+            : String(r.acknowledgedAt),
+        ipAddress: (r.ipAddress as string | null) ?? null,
+      }));
+    });
+  }
 }
 
 function briefingRowToDto(r: {

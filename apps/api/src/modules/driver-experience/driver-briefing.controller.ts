@@ -105,6 +105,32 @@ export class DriverBriefingController {
     return this.briefings.patch(this.operatorCtx(req), params.id, body);
   }
 
+  /** Admin: list every briefing for the tenant (active + archived). */
+  @UseGuards(RolesGuard)
+  @Roles(ROLES.OWNER, ROLES.ADMIN)
+  @Get()
+  async listAll(@Req() req: FastifyRequest): Promise<DriverDailyBriefingDto[]> {
+    return this.briefings.listAll(this.operatorCtx(req));
+  }
+
+  /**
+   * Admin: training completion log. Optional query filters: briefingId,
+   * driverId, fromDate (YYYY-MM-DD), toDate (YYYY-MM-DD), limit (max 5000).
+   */
+  @UseGuards(RolesGuard)
+  @Roles(ROLES.OWNER, ROLES.ADMIN)
+  @Get('acknowledgments')
+  async listAcknowledgments(@Req() req: FastifyRequest) {
+    const q = req.query as Record<string, string | undefined>;
+    return this.briefings.listAcknowledgments(this.operatorCtx(req), {
+      briefingId: q.briefingId,
+      driverId: q.driverId,
+      fromDate: q.fromDate,
+      toDate: q.toDate,
+      limit: q.limit ? Number.parseInt(q.limit, 10) : undefined,
+    });
+  }
+
   private driverCtx(
     driver: DriverAuthContext,
     req: FastifyRequest,

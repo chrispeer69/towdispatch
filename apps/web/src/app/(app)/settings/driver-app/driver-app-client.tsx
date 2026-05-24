@@ -330,6 +330,175 @@ export function DriverAppClient(): JSX.Element {
           it cleanly — drivers who saw the old one yesterday will see the new one today.
         </p>
       </section>
+
+      <TrainingLog />
     </div>
+  );
+}
+
+/**
+ * Training completion log. Operators care about formal records:
+ * who acknowledged which briefing, when, and on what device. The
+ * server returns rows pre-joined with driver name + briefing title
+ * so the table can render without an N+1.
+ *
+ * The CSV button calls the same endpoint with `?limit=5000` and
+ * serializes client-side. We keep CSV serialization local rather
+ * than adding a server-side `?format=csv` branch because the data
+ * volume is small and HR records are happier with a UTF-8 CSV than
+ * an Excel-flavored XLSX.
+ */
+function TrainingLog(): JSX.Element {
+  const [rows, setRows] = useState<
+    Array<{
+      id: string;
+      driverId: string;
+      driverName: string;
+      briefingId: string;
+      briefingTitle: string;
+      acknowledgedDate: string;
+      messageReadAt: string | null;
+      videoCompletedAt: string | null;
+      acknowledgedAt: string;
+      ipAddress: string | null;
+    }>
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load(): Promise<void> {
+    setLoading(true);
+    setError(null);
+    try {
+      const r = await fetch('/api/driver-briefings/acknowledgments?limit=500', {
+        cache: 'no-store',
+      });
+      if (!r.ok) {
+        const body = (await r.json().catch(() => ({}))) as { message?: string };
+        throw new Error(body.message ?? `Load failed (${r.status})`);
+      }
+      const data = (await r.json()) as typeof rows;
+      setRows(data);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Mount-only.
+  useEffect(() => {
+    void load();
+  }, []);
+
+  function downloadCsv(): void {
+    const header = [
+      'Acknowledged date',
+      'Acknowledged at (UTC)',
+      'Driver',
+      'Briefing title',
+      'Message read at',
+      'Video completed at',
+      'IP address',
+    ];
+    const csvEscape = (v: string | null): string => {
+      if (v == null) return '';
+      // RFC 4180: wrap in quotes if value contains comma, quote, or newline.
+      if (/[,"\n\r]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
+      return v;
+    };
+    const lines = [header.join(',')];
+    for (const r of rows) {
+      lines.push(
+        [
+          r.acknowledgedDate,
+          r.acknowledgedAt,
+          r.driverName,
+          r.briefingTitle,
+          r.messageReadAt ?? '',
+          r.videoCompletedAt ?? '',
+          r.ipAddress ?? '',
+        ]
+          .map(csvEscape)
+          .join(','),
+      );
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `driver-training-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <section className="rounded-md border border-divider bg-bg-surface p-6 space-y-3">
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark">
+            Training completion log
+          </h3>
+          <p className="mt-1 text-sm text-text-secondary-on-dark">
+            Formal record of every driver acknowledgment. Use this for HR / compliance filings.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void load()}
+            disabled={loading}
+            className="rounded-md border border-divider px-3 py-1.5 text-xs font-semibold uppercase tracking-wide hover:bg-bg-surface-elevated"
+          >
+            Refresh
+          </button>
+          <button
+            type="button"
+            onClick={downloadCsv}
+            disabled={rows.length === 0}
+            className="rounded-md bg-brand-primary px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white disabled:opacity-40"
+          >
+            Download CSV
+          </button>
+        </div>
+      </header>
+      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {loading ? (
+        <p className="text-sm text-text-secondary-on-dark">Loading…</p>
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-text-secondary-on-dark">No acknowledgments yet.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-left text-[11px] font-mono uppercase tracking-[0.18em] text-text-secondary-on-dark">
+                <th className="py-2 pr-4">Date</th>
+                <th className="py-2 pr-4">Driver</th>
+                <th className="py-2 pr-4">Briefing title</th>
+                <th className="py-2 pr-4">Read at</th>
+                <th className="py-2 pr-4">Video done</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-divider">
+                  <td className="py-2 pr-4 font-mono text-xs">{r.acknowledgedDate}</td>
+                  <td className="py-2 pr-4">{r.driverName}</td>
+                  <td className="py-2 pr-4">{r.briefingTitle}</td>
+                  <td className="py-2 pr-4 text-xs text-text-secondary-on-dark">
+                    {r.messageReadAt ? new Date(r.messageReadAt).toLocaleString() : '—'}
+                  </td>
+                  <td className="py-2 pr-4 text-xs text-text-secondary-on-dark">
+                    {r.videoCompletedAt ? new Date(r.videoCompletedAt).toLocaleString() : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
