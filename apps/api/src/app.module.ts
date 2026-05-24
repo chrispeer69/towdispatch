@@ -38,6 +38,7 @@ import { LienProcessingModule } from './modules/lien-processing/lien-processing.
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { OpsModule } from './modules/ops/ops.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
+import { PublicApiModule } from './modules/public-api/public-api.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
 import { ReportingModule } from './modules/reporting/reporting.module.js';
@@ -98,6 +99,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     LienProcessingModule,
     EvRecoveryModule,
     VoiceDriverModule,
+    PublicApiModule,
     DashboardModule,
     ReportingModule,
     AdminModule,

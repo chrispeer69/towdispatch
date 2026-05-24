@@ -328,6 +328,26 @@ export const configSchema = z.object({
     .transform((v) => v === 'true'),
   BACKUP_MAX_AGE_HOURS: z.coerce.number().int().min(1).max(720).default(24),
   RAILWAY_API_TOKEN: z.string().optional().default(''),
+  // Public REST API + Webhooks (Session 29).
+  // WEBHOOK_DELIVERY_ENABLED gates the delivery cron's body (it mounts the
+  // schedule either way, but short-circuits when false) so dev/CI never POST
+  // to real endpoints. Default false.
+  WEBHOOK_DELIVERY_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  // 32+ chars; AES-256-GCM key for webhook_endpoints.secret_encrypted. The
+  // signing secret must be reversible (the worker decrypts it to HMAC-sign
+  // each delivery), so this is encryption-at-rest, not a hash. Defaulted like
+  // the TOTP/QBO keys so the API boots in dev; production MUST override.
+  WEBHOOK_SIGNING_ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'WEBHOOK_SIGNING_ENCRYPTION_KEY must be 32+ chars')
+    .default('change-me-webhook-signing-encryption-key-rotate-in-prod'),
+  // Default per-key request budget (requests/minute) stamped on new API keys.
+  // Per-key overrides live on the api_keys row; a per-tenant override UI is
+  // deferred (Session 29 scope note).
+  PUBLIC_API_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).max(100_000).default(60),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

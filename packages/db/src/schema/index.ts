@@ -88,3 +88,10 @@ export * from './hd-rate-sheets';
 // Voice-Controlled Driver Workflows (Session 45) — CarPlay / Android Auto
 // hands-free job actions. Audit table in packages/db/sql/0046_voice_commands.sql.
 export * from './voice-command-log';
+// Public REST API + Webhooks (Session 29) — API-key auth, webhook endpoints,
+// delivery ledger, idempotency cache. Tables in
+// packages/db/sql/0037_public_api.sql.
+export * from './api-keys';
+export * from './webhook-endpoints';
+export * from './webhook-deliveries';
+export * from './api-idempotency-keys';

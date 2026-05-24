@@ -21,6 +21,11 @@ export const ERROR_CODES = {
   CONFLICT: 'conflict',
   RATE_LIMITED: 'rate_limited',
   IDEMPOTENCY_KEY_REUSED: 'idempotency_key_reused',
+  // Public REST API (Session 29). Distinct codes so consumers branch on the
+  // failure mode without parsing strings.
+  API_KEY_INVALID: 'api_key_invalid',
+  API_KEY_EXPIRED: 'api_key_expired',
+  INSUFFICIENT_SCOPE: 'insufficient_scope',
   TENANT_INACTIVE: 'tenant_inactive',
   TENANT_CONTEXT_MISSING: 'tenant_context_missing',
   TENANT_SELECTION_REQUIRED: 'tenant_selection_required',
