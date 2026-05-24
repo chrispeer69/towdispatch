@@ -80,6 +80,13 @@ export const users = pgTable(
      */
     receivesRedAlert: boolean('receives_red_alert').notNull().default(false),
 
+    /**
+     * Canada Expansion (Session 47): per-user BCP-47 locale override
+     * (e.g. 'fr-CA'). NULL = inherit tenant.default_locale. The only
+     * user-model change this session. See migration 0047.
+     */
+    localePreference: text('locale_preference'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

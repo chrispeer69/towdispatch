@@ -11,6 +11,7 @@
  * controller; new code should use the flat signupSchema.
  */
 import { z } from 'zod';
+import { countrySchema, currencySchema, localeSchema, unitSystemSchema } from '../i18n/locales';
 import { tenantSlugSchema } from './tenant';
 import { emailSchema, passwordSchema } from './user';
 
@@ -141,6 +142,9 @@ export const authUserDtoSchema = z.object({
   role: z.string(),
   emailVerifiedAt: z.string().datetime().nullable(),
   mfaEnabled: z.boolean(),
+  // Canada Expansion (S47): per-user BCP-47 locale override; null = inherit
+  // the tenant default. Sits above tenant.defaultLocale in locale resolution.
+  localePreference: z.string().nullable(),
 });
 export type AuthUserDto = z.infer<typeof authUserDtoSchema>;
 
@@ -149,6 +153,14 @@ export const authTenantDtoSchema = z.object({
   slug: tenantSlugSchema,
   name: z.string(),
   status: z.string(),
+  // Canada Expansion (S47): tenant localization defaults. Optional on the wire
+  // because the rare accept-invite token-issue path omits them; the canonical
+  // /auth/me + login paths always populate them from the tenant row. Clients
+  // fall back to en-US/USD/imperial when absent.
+  country: countrySchema.optional(),
+  defaultLocale: localeSchema.optional(),
+  defaultCurrency: currencySchema.optional(),
+  defaultUnitSystem: unitSystemSchema.optional(),
 });
 export type AuthTenantDto = z.infer<typeof authTenantDtoSchema>;
 

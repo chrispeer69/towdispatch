@@ -2,6 +2,8 @@ import { ConnectivityBanner } from '@/components/connectivity-banner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemedToaster } from '@/components/themed-toaster';
 import type { Metadata, Viewport } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
@@ -59,35 +61,42 @@ const THEME_INIT_SCRIPT = `
 })();
 `.trim();
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element {
+}): Promise<JSX.Element> {
+  // Canada Expansion (S47): resolve the request locale + messages and wrap the
+  // app in the next-intl provider so every surface can translate via
+  // useTranslations / getTranslations.
+  const locale = await getLocale();
+  const messages = await getMessages();
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang={locale} className={inter.variable} suppressHydrationWarning>
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: anti-flash script intentionally inlined */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="bg-background text-foreground antialiased">
-        <ThemeProvider>
-          {/* Skip link — first focusable element on every page so keyboard
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider>
+            {/* Skip link — first focusable element on every page so keyboard
               users can bypass the sidebar/topbar and jump straight to
               content. Off-screen-but-focusable (translate-y) rather than
               sr-only; Lighthouse a11y flags sr-only skip links because the
               unfocused bounding box is 1×1 (looks unfocusable to static
               analysis). */}
-          <a
-            href="#main-content"
-            className="fixed left-4 top-0 z-50 -translate-y-16 rounded bg-brand-primary px-4 py-2 font-semibold text-white transition-transform focus:translate-y-4"
-          >
-            Skip to main content
-          </a>
-          <ConnectivityBanner />
-          {children}
-          <ThemedToaster />
-        </ThemeProvider>
+            <a
+              href="#main-content"
+              className="fixed left-4 top-0 z-50 -translate-y-16 rounded bg-brand-primary px-4 py-2 font-semibold text-white transition-transform focus:translate-y-4"
+            >
+              Skip to main content
+            </a>
+            <ConnectivityBanner />
+            {children}
+            <ThemedToaster />
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

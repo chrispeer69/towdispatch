@@ -1,0 +1,63 @@
+{
+  "common": {
+    "appName": "US Tow DISPATCH",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "loading": "Chargement…",
+    "back": "Retour",
+    "next": "Suivant",
+    "yes": "Oui",
+    "no": "Non",
+    "all": "Tous",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "jobs": "Remorquages",
+    "dispatch": "Répartition en direct",
+    "customers": "Clients",
+    "accounts": "Comptes",
+    "billing": "Facturation",
+    "impound": "Fourrière et entreposage",
+    "lienCases": "Dossiers de privilège",
+    "settings": "Paramètres"
+  },
+  "jobStatus": {
+    "requested": "Demandé",
+    "assigned": "Assigné",
+    "en_route": "En route",
+    "on_scene": "Sur place",
+    "completed": "Terminé",
+    "cancelled": "Annulé"
+  },
+  "invoice": {
+    "invoice": "Facture",
+    "billTo": "Facturer à",
+    "description": "Description",
+    "quantity": "Qté",
+    "unitPrice": "Prix unitaire",
+    "amount": "Montant",
+    "subtotal": "Sous-total",
+    "tax": "Taxe",
+    "total": "Total",
+    "paid": "Payé",
+    "balanceDue": "Solde dû",
+    "dueDate": "Date d'échéance",
+    "invoiceNumber": "Facture nº"
+  },
+  "portal": {
+    "payNow": "Payer maintenant",
+    "payInvoice": "Payer la facture",
+    "amountDue": "Montant dû",
+    "paymentConfirmed": "Paiement confirmé",
+    "trackVehicle": "Suivre votre véhicule",
+    "estimatedArrival": "Arrivée estimée",
+    "driverEnRoute": "Votre chauffeur est en route",
+    "thankYou": "Merci",
+    "receiptEmailed": "Un reçu vous a été envoyé par courriel"
+  }
+}

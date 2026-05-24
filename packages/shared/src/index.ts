@@ -20,3 +20,7 @@ export * from './fraud-detection/index';
 export * from './damage-analysis/index';
 // Full DOT Compliance (Session 37) — FMCSA recordkeeping contracts.
 export * from './dot/index';
+// Canada Expansion (Session 47) — locale/currency/unit/country vocabulary,
+// locale resolution, presentation formatting + unit conversion, postal
+// validation. Shared by API and web.
+export * from './i18n/index';

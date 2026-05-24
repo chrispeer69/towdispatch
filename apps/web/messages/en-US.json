@@ -1,0 +1,63 @@
+{
+  "common": {
+    "appName": "US Tow DISPATCH",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "search": "Search",
+    "loading": "Loading…",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "jobs": "Tow Jobs",
+    "dispatch": "Live Dispatch",
+    "customers": "Customers",
+    "accounts": "Accounts",
+    "billing": "Billing",
+    "impound": "Impound & Storage",
+    "lienCases": "Lien Cases",
+    "settings": "Settings"
+  },
+  "jobStatus": {
+    "requested": "Requested",
+    "assigned": "Assigned",
+    "en_route": "En route",
+    "on_scene": "On scene",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "invoice": {
+    "invoice": "Invoice",
+    "billTo": "Bill to",
+    "description": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "total": "Total",
+    "paid": "Paid",
+    "balanceDue": "Balance due",
+    "dueDate": "Due date",
+    "invoiceNumber": "Invoice #"
+  },
+  "portal": {
+    "payNow": "Pay now",
+    "payInvoice": "Pay invoice",
+    "amountDue": "Amount due",
+    "paymentConfirmed": "Payment confirmed",
+    "trackVehicle": "Track your vehicle",
+    "estimatedArrival": "Estimated arrival",
+    "driverEnRoute": "Your driver is on the way",
+    "thankYou": "Thank you",
+    "receiptEmailed": "A receipt has been emailed to you"
+  }
+}
