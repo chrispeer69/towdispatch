@@ -17,14 +17,18 @@
  * mid/high-value collateral (pursuing a deficiency on low-value collateral is
  * rarely worthwhile — a product heuristic, not a statutory rule).
  */
+import type { RepoState, RepoStateRules, RepoValueTier } from '@ustowdispatch/shared';
+// RepoCaseStatus/RepoCaseStep/RepoActionType collide by name with the Session 49
+// `repo` workflow module (different enum values). The top-level shared barrel
+// resolves the collision in favor of the S49 definitions, so this compliance
+// engine imports its own (Session 51) contracts directly from the module. These
+// are type-only imports — erased at compile time, so the deep specifier never
+// reaches the emitted JS. See SESSION_51_DECISIONS.md.
 import type {
   RepoActionType,
   RepoCaseStatus,
   RepoCaseStep,
-  RepoState,
-  RepoStateRules,
-  RepoValueTier,
-} from '@ustowdispatch/shared';
+} from '@ustowdispatch/shared/repo-compliance/cases';
 
 // All timestamps are UTC (the DB invariant), so day math uses UTC.
 const DAY_MS = 86_400_000;

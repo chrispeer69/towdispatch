@@ -15,14 +15,12 @@ import {
   type ListDisputesFilter,
   type ListHighRiskFilter,
   ROLES,
-  type RecordDisputeOutcomePayload,
   type RecordDisputePayload,
   type RecordFraudOutcomePayload,
   type ResolveDisputePayload,
   type ReviewFraudScorePayload,
   listDisputesFilterSchema,
   listHighRiskFilterSchema,
-  recordDisputeOutcomeSchema,
   recordDisputeSchema,
   recordFraudOutcomeSchema,
   resolveDisputeSchema,
@@ -116,7 +114,6 @@ export class FraudDetectionController {
     @Req() req: FastifyRequest,
     @ZodParam(disputeParam) p: { id: string },
     @ZodBody(recordFraudOutcomeSchema) body: RecordFraudOutcomePayload,
-    @ZodBody(recordDisputeOutcomeSchema) body: RecordDisputeOutcomePayload,
   ) {
     return this.service.recordOutcome(this.ctx(req), p.id, body);
   }

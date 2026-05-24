@@ -578,6 +578,9 @@ export const configSchema = z.object({
   // ops flips it on per environment. The 'repo' job service_type and the
   // repo_case_id column are inert without it. See SESSION_49_DECISIONS.md.
   REPO_MODULE_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   // Yard Management (Session 54). YARD_MANAGEMENT_ENABLED defaults true —
   // the module is purely additive over S22 impound, so it ships on. The
   // storage auto-billing cron is gated SEPARATELY and defaults false so
@@ -588,6 +591,9 @@ export const configSchema = z.object({
     .default('true')
     .transform((v) => v === 'true'),
   STORAGE_AUTOBILLING_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   // Reporting builder + KPI dashboard (Session 53).
   // REPORTING_BUILDER_ENABLED gates the /reporting/builder/* and
   // /reporting/kpi/* surfaces. Default true: it is additive and read-only, so
