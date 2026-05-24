@@ -262,7 +262,16 @@ export class DevelopersService {
     if (body.scopes !== undefined) set('scopes', JSON.stringify(body.scopes), '::jsonb');
     if (body.oauthRedirectUrls !== undefined)
       set('oauth_redirect_urls', JSON.stringify(body.oauthRedirectUrls), '::jsonb');
-    if (body.webhookUrl !== undefined) set('webhook_url', body.webhookUrl);
+    if (body.webhookUrl !== undefined) {
+      set('webhook_url', body.webhookUrl);
+      // Backfill a signing secret the first time a webhook URL is added — the
+      // deliverer no-ops without one. COALESCE keeps an existing secret stable.
+      if (body.webhookUrl !== null) {
+        set('webhook_secret', generateOpaqueToken(TOKEN_PREFIXES.webhookSecret));
+        // Rewrite the just-pushed assignment to COALESCE over the existing value.
+        sets[sets.length - 1] = `webhook_secret = COALESCE(webhook_secret, $${i - 1})`;
+      }
+    }
     if (sets.length === 0) return toAppDto(current);
 
     vals.push(appId, developerId);
