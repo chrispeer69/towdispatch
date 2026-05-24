@@ -1,9 +1,5 @@
 /**
  * Fraud Detection (Session 43) — dispute-outcome (ground-truth) contracts.
- *
- * Once a dispute resolves, the operator records whether it was actually fraud
- * and optionally which signal predicted it. Feeds a future model-training
- * pipeline (deferred). signalId is optional.
  */
 import { z } from 'zod';
 
@@ -22,10 +18,6 @@ export const disputeOutcomeSchema = z.object({
 });
 export type DisputeOutcomeDto = z.infer<typeof disputeOutcomeSchema>;
 
-export const recordFraudOutcomeSchema = z
-// Renamed from recordOutcomeSchema / RecordOutcomePayload to avoid a barrel
-// name-collision with ai-dispatch's identically-named feedback contract
-// (both land on the @ustowdispatch/shared root). See SESSION_54_DECISIONS.md.
 export const recordDisputeOutcomeSchema = z
   .object({
     wasFraud: z.boolean(),
@@ -34,5 +26,7 @@ export const recordDisputeOutcomeSchema = z
     notes: z.string().max(5000).optional(),
   })
   .strict();
+
+export const recordFraudOutcomeSchema = recordDisputeOutcomeSchema;
 export type RecordFraudOutcomePayload = z.infer<typeof recordFraudOutcomeSchema>;
 export type RecordDisputeOutcomePayload = z.infer<typeof recordDisputeOutcomeSchema>;

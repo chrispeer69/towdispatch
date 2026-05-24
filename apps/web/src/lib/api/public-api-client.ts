@@ -8,7 +8,6 @@ import type {
   CreateApiKeyResult,
   CreateWebhookEndpointPayload,
   CreateWebhookEndpointResult,
-  PublicApiWebhookDeliveryDto,
   PublicWebhookDeliveryDto,
   UpdateWebhookEndpointPayload,
   WebhookEndpointDto,
@@ -43,11 +42,7 @@ export const clientUpdateWebhook = (id: string, body: UpdateWebhookEndpointPaylo
 export const clientDeleteWebhook = (id: string) =>
   bff<void>(`webhooks/${id}`, { method: 'DELETE' });
 
-// Deliveries
 export const clientListDeliveries = (endpointId: string) =>
-  bff<PublicApiWebhookDeliveryDto[]>(`webhooks/${endpointId}/deliveries`);
-export const clientTestWebhook = (endpointId: string) =>
-  bff<PublicApiWebhookDeliveryDto>(`webhooks/${endpointId}/test`, {
   bff<PublicWebhookDeliveryDto[]>(`webhooks/${endpointId}/deliveries`);
 export const clientTestWebhook = (endpointId: string) =>
   bff<PublicWebhookDeliveryDto>(`webhooks/${endpointId}/test`, {
@@ -55,7 +50,6 @@ export const clientTestWebhook = (endpointId: string) =>
     body: JSON.stringify({}),
   });
 export const clientRetryDelivery = (deliveryId: string) =>
-  bff<PublicApiWebhookDeliveryDto>(`webhooks/deliveries/${deliveryId}/retry`, {
   bff<PublicWebhookDeliveryDto>(`webhooks/deliveries/${deliveryId}/retry`, {
     method: 'POST',
     body: JSON.stringify({}),

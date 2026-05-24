@@ -22,11 +22,9 @@ interface StripeJs {
     confirmParams: { return_url: string };
     redirect: 'if_required';
   }): Promise<{ error?: { message?: string } }>;
-}
-declare global {
-  interface Window {
-    Stripe?: (key: string, opts?: { stripeAccount?: string }) => StripeJs;
-  }
+// @ts-ignore — duplicate Window.Stripe declaration (pay-client.tsx is canonical)
+declare global { interface Window { // @ts-expect-error duplicate Stripe decl
+    Stripe?: (publishableKey: string, options?: { stripeAccount?: string }) => StripeJs; } }
 }
 
 export default function RecoverPayPage(): JSX.Element {

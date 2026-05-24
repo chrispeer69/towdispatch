@@ -38,8 +38,6 @@ export async function fetchWebhooks(): Promise<WebhookSubscriptionDto[]> {
 }
 export async function fetchWebhookDeliveries(
   subscriptionId: string,
-): Promise<NotificationWebhookDeliveryDto[]> {
-  return apiServer<NotificationWebhookDeliveryDto[]>(
 ): Promise<NotifyWebhookDeliveryDto[]> {
   return apiServer<NotifyWebhookDeliveryDto[]>(
     `/admin/notifications/webhooks/${subscriptionId}/deliveries`,

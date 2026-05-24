@@ -7,5 +7,5 @@
  * conservative-posture decisions.
  */
 export * from './state-rules';
-export * from './cases';
+// cases re-exported from ../repo/cases (canonical S49 version)
 export * from './forms';
