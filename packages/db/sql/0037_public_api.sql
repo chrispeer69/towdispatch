@@ -249,13 +249,17 @@ ALTER TABLE webhook_deliveries ADD CONSTRAINT webhook_deliveries_attempt_nonneg
   CHECK (attempt >= 0 AND attempt <= max_attempts);
 END IF;
 END $$;
-
-CREATE INDEX IF NOT EXISTS webhook_deliveries_tenant_endpoint_idx
-  ON webhook_deliveries (tenant_id, endpoint_id, created_at)
-  WHERE deleted_at IS NULL;
-
--- Worker sweep target: due, undelivered rows.
-CREATE INDEX IF NOT EXISTS webhook_deliveries_due_idx
+-- Indexes only apply if S29 schema columns exist (endpoint_id, deleted_at).
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'webhook_deliveries' AND column_name = 'endpoint_id') THEN
+  CREATE INDEX IF NOT EXISTS webhook_deliveries_tenant_endpoint_idx
+    ON webhook_deliveries (tenant_id, endpoint_id, created_at)
+    WHERE deleted_at IS NULL;
+  CREATE INDEX IF NOT EXISTS webhook_deliveries_due_idx
+    ON webhook_deliveries (next_retry_at)
+    WHERE status = 'pending' AND deleted_at IS NULL;
+END IF;
+END $$;
   ON webhook_deliveries (next_retry_at)
   WHERE status = 'pending' AND deleted_at IS NULL;
 
@@ -268,21 +272,31 @@ CREATE POLICY webhook_deliveries_tenant_isolation ON webhook_deliveries
   USING (tenant_id = fn_current_tenant_id())
   WITH CHECK (tenant_id = fn_current_tenant_id());
 
-DROP TRIGGER IF EXISTS trg_webhook_deliveries_tenant_consistency ON webhook_deliveries;
-CREATE TRIGGER trg_webhook_deliveries_tenant_consistency
-  BEFORE INSERT OR UPDATE ON webhook_deliveries
-  FOR EACH ROW EXECUTE FUNCTION
-    fn_public_api_child_tenant_consistency('webhook_endpoints', 'endpoint_id');
+-- Trigger only applies if S29 schema (endpoint_id FK to webhook_endpoints)
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'webhook_deliveries' AND column_name = 'endpoint_id') THEN
+  DROP TRIGGER IF EXISTS trg_webhook_deliveries_tenant_consistency ON webhook_deliveries;
+  CREATE TRIGGER trg_webhook_deliveries_tenant_consistency
+    BEFORE INSERT OR UPDATE ON webhook_deliveries
+    FOR EACH ROW EXECUTE FUNCTION
+      fn_public_api_child_tenant_consistency('webhook_endpoints', 'endpoint_id');
+END IF;
+END $$;
 
 DROP TRIGGER IF EXISTS trg_audit_webhook_deliveries ON webhook_deliveries;
 CREATE TRIGGER trg_audit_webhook_deliveries
   AFTER INSERT OR UPDATE OR DELETE ON webhook_deliveries
   FOR EACH ROW EXECUTE FUNCTION fn_audit_log();
 
-DROP TRIGGER IF EXISTS trg_webhook_deliveries_set_updated_at ON webhook_deliveries;
-CREATE TRIGGER trg_webhook_deliveries_set_updated_at
-  BEFORE UPDATE ON webhook_deliveries
-  FOR EACH ROW EXECUTE FUNCTION fn_public_api_set_updated_at();
+-- updated_at trigger only if fn_public_api_set_updated_at exists
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'fn_public_api_set_updated_at') THEN
+  DROP TRIGGER IF EXISTS trg_webhook_deliveries_set_updated_at ON webhook_deliveries;
+  CREATE TRIGGER trg_webhook_deliveries_set_updated_at
+    BEFORE UPDATE ON webhook_deliveries
+    FOR EACH ROW EXECUTE FUNCTION fn_public_api_set_updated_at();
+END IF;
+END $$;
 
 
 -- ---------------------------------------------------------------------
