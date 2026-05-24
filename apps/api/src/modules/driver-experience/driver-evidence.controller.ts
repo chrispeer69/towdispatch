@@ -4,13 +4,29 @@
  * playback. Every route accepts both driver and operator JWTs via
  * DriverOrOperatorAuthGuard.
  */
-import { Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
-import { type JobEvidenceDto, jobEvidenceKindValues } from '@ustowdispatch/shared';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  type JobEvidenceDto,
+  type JobEvidenceWithUrlDto,
+  ROLES,
+  jobEvidenceKindValues,
+} from '@ustowdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Public } from '../../common/decorators/public.decorator.js';
+import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodBody, ZodParam } from '../../common/decorators/zod.decorator.js';
-import { DriverEvidenceService, type JobEvidenceWithUrlDto } from './driver-evidence.service.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
+import { DriverEvidenceService } from './driver-evidence.service.js';
 import { DriverOrOperatorAuthGuard } from './driver-or-operator-auth.guard.js';
 
 const presignSchema = z
@@ -102,6 +118,29 @@ export class JobEvidenceListController {
     @Req() req: FastifyRequest,
   ): Promise<JobEvidenceWithUrlDto[]> {
     return this.evidence.listForJob(actorFromRequest(req), params.jobId);
+  }
+}
+
+/**
+ * Operator-only mutations on evidence. Unlike the controllers above this
+ * is NOT @Public(): the global JwtAuthGuard enforces an operator JWT, and
+ * RolesGuard narrows it to the back-office roles. Mounted at the same
+ * `job-evidence` base path — Nest routes by method+path, so DELETE :id
+ * here does not collide with the POST routes above.
+ */
+@UseGuards(RolesGuard)
+@Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.DISPATCHER)
+@Controller('job-evidence')
+export class JobEvidenceAdminController {
+  constructor(private readonly evidence: DriverEvidenceService) {}
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @ZodParam(idSchema) params: { id: string },
+    @Req() req: FastifyRequest,
+  ): Promise<void> {
+    await this.evidence.delete(actorFromRequest(req), params.id);
   }
 }
 

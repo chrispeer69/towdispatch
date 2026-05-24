@@ -23,6 +23,7 @@ import { DriverBriefingController } from './driver-briefing.controller.js';
 import { DriverBriefingService } from './driver-briefing.service.js';
 import {
   DriverEvidenceController,
+  JobEvidenceAdminController,
   JobEvidenceListController,
 } from './driver-evidence.controller.js';
 import { DriverEvidenceService } from './driver-evidence.service.js';
@@ -57,6 +58,7 @@ import { StubStripeTerminalProvider } from './stripe-terminal/stub-stripe-termin
     DriverPretripController,
     DriverEvidenceController,
     JobEvidenceListController,
+    JobEvidenceAdminController,
     DriverFieldPaymentController,
     DriverTelemetryController,
     DriverOfflineSyncController,

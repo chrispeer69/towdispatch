@@ -52,12 +52,59 @@ export interface PresignedGet {
   expiresAt: number;
 }
 
+export interface PresignGetThumbnailInput {
+  tenantId: string;
+  /** The evidence object key (the full-size asset). */
+  key: string;
+  kind: JobEvidenceKind;
+}
+
+export interface GenerateThumbnailInput {
+  tenantId: string;
+  /** The full-size asset key the thumbnail is derived from. */
+  key: string;
+  kind: JobEvidenceKind;
+  /** Source content-type — only `image/*` is processable in-process. */
+  contentType: string;
+  /** Source size in bytes — oversized images are skipped. */
+  sizeBytes: number;
+}
+
+/**
+ * Largest source image we resize in-process. A phone photo is a few MB; this
+ * 25MB ceiling bounds the buffer pulled into API memory. Anything larger is
+ * skipped (the UI falls back to the full-size asset).
+ */
+export const MAX_THUMBNAIL_SOURCE_BYTES = 25 * 1024 * 1024;
+
+/** Square thumbnail edge in px — matches the operator-console grid tile. */
+export const THUMBNAIL_EDGE_PX = 200;
+
 export interface EvidenceStorageProvider {
   readonly id: string;
   /** Mint a server-signed PUT URL valid for ~5 minutes. */
   presignPut(input: PresignPutInput): Promise<PresignedPut>;
   /** Mint a short-lived GET URL the dispatch UI uses to render the asset. */
   presignGet(input: PresignGetInput): Promise<PresignedGet>;
+  /**
+   * Mint a short-lived GET URL for the 200x200 jpg thumbnail derived from
+   * an uploaded asset. Returns null for kinds that have no thumbnail
+   * (documents / other). For image evidence the thumbnail object is written
+   * by `generateThumbnail` on finalize; video posters are produced by the
+   * storage tier (S3 event → ffmpeg Lambda). This only signs the derived
+   * key. Dev/CI stubs may return the source asset URL.
+   */
+  presignGetThumbnail(input: PresignGetThumbnailInput): Promise<PresignedGet | null>;
+  /**
+   * Resize an uploaded **image** asset to a {@link THUMBNAIL_EDGE_PX}px square
+   * jpeg and write it at {@link buildThumbnailKey}. Returns `true` when a
+   * thumbnail object was written, `false` when skipped (non-image kind,
+   * non-`image/*` content-type, oversized source, or a no-byte stub). Callers
+   * MUST treat this as best-effort — a thrown error must never fail finalize.
+   * Video posters are out of scope (Sharp can't decode video; that stays an
+   * ffmpeg/Lambda concern).
+   */
+  generateThumbnail(input: GenerateThumbnailInput): Promise<boolean>;
 }
 
 /**
@@ -77,6 +124,33 @@ export function buildEvidenceKey(input: {
 }): string {
   const ext = extensionForKind(input.kind);
   return `tenants/${input.tenantId}/job-evidence/${input.jobId}/${input.evidenceId}-${input.kind}.${ext}`;
+}
+
+/**
+ * Kinds that get a generated thumbnail: still photos, signatures (raster
+ * canvases), and videos (a poster frame). Documents (pdf) and the catch-all
+ * `other` have no thumbnail — the UI shows a type icon instead.
+ */
+export function isThumbnailableKind(kind: JobEvidenceKind): boolean {
+  return kind.startsWith('photo_') || kind.startsWith('signature_') || kind.startsWith('video_');
+}
+
+/**
+ * Derive the thumbnail object key from a full-size evidence key. The
+ * thumbnail lives under a sibling `thumbnails/` prefix and is ALWAYS a
+ * `.jpg` (a video's `.mp4` source yields a `.jpg` poster). Pure +
+ * deterministic so both providers and the tests agree on the key.
+ *
+ * `tenants/{t}/job-evidence/{job}/{id}-{kind}.{ext}`
+ *   → `tenants/{t}/job-evidence/{job}/thumbnails/{id}-{kind}.jpg`
+ */
+export function buildThumbnailKey(evidenceKey: string): string {
+  const slash = evidenceKey.lastIndexOf('/');
+  const dir = evidenceKey.slice(0, slash);
+  const file = evidenceKey.slice(slash + 1);
+  const dot = file.lastIndexOf('.');
+  const base = dot === -1 ? file : file.slice(0, dot);
+  return `${dir}/thumbnails/${base}.jpg`;
 }
 
 function extensionForKind(kind: JobEvidenceKind): string {
