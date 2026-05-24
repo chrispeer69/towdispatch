@@ -65,6 +65,7 @@ export const ERROR_CODES = {
   MARKETPLACE_INVALID_APP_STATE: 'marketplace_invalid_app_state',
   MARKETPLACE_SCOPE_NOT_GRANTED: 'marketplace_scope_not_granted',
   MARKETPLACE_NOT_INSTALLED: 'marketplace_not_installed',
+
   // Enterprise SSO (Session 38)
   SSO_DISABLED: 'sso_disabled',
   SSO_TENANT_NOT_ALLOWED: 'sso_tenant_not_allowed',

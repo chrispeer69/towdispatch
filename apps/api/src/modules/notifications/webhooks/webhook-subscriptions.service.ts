@@ -8,9 +8,10 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { notificationWebhookDeliveries, uuidv7, webhookSubscriptions } from '@ustowdispatch/db';
+import { uuidv7, webhookDeliveries, webhookSubscriptions } from '@ustowdispatch/db';
 import type {
+  NotificationWebhookDeliveryDto,
   UpsertWebhookSubscriptionPayload,
-  WebhookDeliveryDto,
   WebhookSubscriptionDto,
 } from '@ustowdispatch/shared';
 import { and, desc, eq } from 'drizzle-orm';
@@ -152,7 +153,7 @@ export class WebhookSubscriptionsService {
     ctx: CallerContext,
     subscriptionId: string,
     limit = 50,
-  ): Promise<WebhookDeliveryDto[]> {
+  ): Promise<NotificationWebhookDeliveryDto[]> {
     return this.db.runInTenantContext(
       { tenantId: ctx.tenantId, userId: ctx.userId, requestId: ctx.requestId },
       async (tx) => {

@@ -31,6 +31,21 @@ interface CallerContext {
   userAgent: string | null;
 }
 
+/**
+ * Admin-only operational endpoints (Phase 0 hardening, Session 17).
+ *
+ * GET /admin/sentry-test — throws an unhandled error to verify the
+ * GlobalExceptionFilter → Sentry capture path end-to-end against a live
+ * deploy. Restricted to OWNER/ADMIN (the global JwtAuthGuard authenticates;
+ * RolesGuard authorizes). Unlike the public smoke endpoint /_debug/boom
+ * (bearer-token gated, used by the unauthenticated production-smoke harness),
+ * this one is authenticated and always mounted — an operator hits it from the
+ * admin UI / curl with a valid session to confirm errors are reaching Sentry.
+ *
+ * The thrown error is a plain Error (NOT an HttpException) so the global
+ * filter routes it through its `instanceof Error` branch — log + Sentry
+ * captureException + 500. No PII in the message.
+ */
 @UseGuards(RolesGuard)
 @Controller('admin')
 export class AdminController {

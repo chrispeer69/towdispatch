@@ -8,6 +8,11 @@ import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller.js';
 import { AdminService } from './admin.service.js';
 
+/**
+ * Hosts admin-only operational endpoints (Phase 0 hardening, Session 17).
+ * AdminController injects AdminService (audit-anomaly + redaction helpers),
+ * so the service is declared as a provider here.
+ */
 @Module({
   controllers: [AdminController],
   providers: [AdminService],

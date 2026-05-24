@@ -7,37 +7,34 @@
  */
 import {
   BadRequestException,
-  Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import {
+  type DeadLetterDto,
+  type DeliveryMetrics,
   type DispatchNotificationPayload,
   type DispatchNotificationResult,
-  type DeliveryMetrics,
-  type DeadLetterDto,
   type InAppNotificationDto,
   type NotificationListQuery,
   type NotificationTemplateDto,
+  type NotificationWebhookDeliveryDto,
   type PreviewTemplatePayload,
-  type RegisterDeviceTokenPayload,
   ROLES,
+  type RegisterDeviceTokenPayload,
   type TenantDefaultPreferencesPayload,
   type UpdateUserPreferencesPayload,
   type UpsertTemplatePayload,
   type UpsertWebhookSubscriptionPayload,
   type UserPreferencesDto,
-  type WebhookDeliveryDto,
   type WebhookSubscriptionDto,
   dispatchNotificationSchema,
   notificationListQuerySchema,
@@ -279,7 +276,7 @@ export class NotificationsController {
   async listWebhookDeliveries(
     @ZodParam(subIdSchema) params: { subscriptionId: string },
     @Req() req: FastifyRequest,
-  ): Promise<WebhookDeliveryDto[]> {
+  ): Promise<NotificationWebhookDeliveryDto[]> {
     return this.webhooks.listDeliveries(this.callerCtx(req), params.subscriptionId);
   }
 

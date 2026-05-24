@@ -72,7 +72,9 @@ export const NOTIFICATION_EVENTS = {
 } as const;
 
 export type NotificationEvent = (typeof NOTIFICATION_EVENTS)[keyof typeof NOTIFICATION_EVENTS];
-export const NOTIFICATION_EVENT_VALUES = Object.values(NOTIFICATION_EVENTS) as readonly NotificationEvent[];
+export const NOTIFICATION_EVENT_VALUES = Object.values(
+  NOTIFICATION_EVENTS,
+) as readonly NotificationEvent[];
 
 export const NOTIFICATION_EVENT_CATEGORY = {
   DISPATCH: 'dispatch',
@@ -132,13 +134,7 @@ export const EVENT_CATEGORY_BY_EVENT: Record<NotificationEvent, NotificationEven
  * Channels / priority / status
  * ============================================================ */
 
-export const NOTIFICATION_CHANNEL_VALUES = [
-  'push',
-  'sms',
-  'email',
-  'in_app',
-  'webhook',
-] as const;
+export const NOTIFICATION_CHANNEL_VALUES = ['push', 'sms', 'email', 'in_app', 'webhook'] as const;
 export type NotificationChannel = (typeof NOTIFICATION_CHANNEL_VALUES)[number];
 
 export const NOTIFICATION_PRIORITY_VALUES = ['emergency', 'high', 'normal', 'low'] as const;
@@ -198,14 +194,13 @@ export type NotificationRecipientInput = z.infer<typeof notificationRecipientSch
 
 export const dispatchNotificationSchema = z.object({
   recipient: notificationRecipientSchema,
-  eventType: z.enum(NOTIFICATION_EVENT_VALUES as unknown as [NotificationEvent, ...NotificationEvent[]]),
+  eventType: z.enum(
+    NOTIFICATION_EVENT_VALUES as unknown as [NotificationEvent, ...NotificationEvent[]],
+  ),
   templateKey: z.string().min(1).optional(),
   payload: z.record(z.unknown()).default({}),
   channels: z
-    .union([
-      z.literal('auto'),
-      z.array(z.enum(NOTIFICATION_CHANNEL_VALUES)).min(1),
-    ])
+    .union([z.literal('auto'), z.array(z.enum(NOTIFICATION_CHANNEL_VALUES)).min(1)])
     .default('auto'),
   priority: z.enum(NOTIFICATION_PRIORITY_VALUES).default('normal'),
   idempotencyKey: z.string().min(8).max(128).optional(),
@@ -383,7 +378,7 @@ export const webhookDeliveryDtoSchema = z.object({
   deliveredAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
 });
-export type WebhookDeliveryDto = z.infer<typeof webhookDeliveryDtoSchema>;
+export type NotificationWebhookDeliveryDto = z.infer<typeof webhookDeliveryDtoSchema>;
 
 /* ============================================================
  * Dead letters
