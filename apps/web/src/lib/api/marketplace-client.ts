@@ -12,6 +12,7 @@ import type {
   BidderLoginPayload,
   BidderRegisterPayload,
   BidderRegisterResponse,
+  InstalledAppDto,
   PublicAuctionListingDto,
 } from '@ustowdispatch/shared';
 
@@ -46,11 +47,16 @@ async function call<T>(path: string, init?: RequestInit, token?: string | null):
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`/api/auctionpub/${path}`, { ...init, headers });
- * Browser-side marketplace client (Session 46) — thin wrappers over the
- * operator BFF routes for the Installed Apps screen. Mirrors lien-client.ts.
- */
-import type { InstalledAppDto } from '@ustowdispatch/shared';
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(body?.message ?? `Request failed (HTTP ${res.status})`);
+  }
+  if (res.status === 204) return null as unknown as T;
+  return (await res.json()) as T;
+}
 
+// ---- installed apps (Session 46) — operator BFF routes for the Installed
+// Apps screen. Mirrors lien-client.ts.
 const BASE = '/api/installed-apps';
 
 async function req<T>(url: string, init?: RequestInit): Promise<T> {

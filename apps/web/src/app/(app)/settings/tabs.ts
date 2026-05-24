@@ -72,19 +72,18 @@ export const SETTINGS_TABS = [
     description: 'Stripe Connect onboarding, platform margin, and SaaS subscription billing.',
   },
   {
-<<<<<<< HEAD
     slug: 'branding',
     label: 'White-Label Portal',
     description:
       'Logo, colors, support contact, and custom domain for your branded customer portal.',
-=======
+  },
+  {
     slug: 'sso',
     // TODO(i18n): /settings tab labels are English-only today; add es/fr
     // parity when the settings surface migrates to next-intl (Session 47).
     label: 'Enterprise SSO',
     description:
       'SAML 2.0 / OIDC single sign-on connections, SCIM 2.0 provisioning tokens, and the login audit.',
->>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
   },
 ] as const satisfies readonly SettingsTab[];
 

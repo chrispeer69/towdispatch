@@ -183,7 +183,7 @@ export const webhookDeliverySchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
-export type WebhookDeliveryDto = z.infer<typeof webhookDeliverySchema>;
+export type PublicApiWebhookDeliveryDto = z.infer<typeof webhookDeliverySchema>;
 
 // ----------------------------------------------------------------------
 // /v1 public resource DTOs — deliberately trimmed + stable. Internal fields

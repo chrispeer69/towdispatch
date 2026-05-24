@@ -164,31 +164,21 @@ export class ConfigService {
     mfaSecret: string;
     driverSecret: string;
     portalSecret: string;
-    accessTtl: string;
-    refreshTtl: string;
-    driverTtl: string;
-    portalTtl: string;
+    bidderSecret: string;
     developerSecret: string;
     accessTtl: string;
     refreshTtl: string;
     driverTtl: string;
+    portalTtl: string;
+    bidderTtl: string;
     developerTtl: string;
     issuer: string;
     audience: string;
   } {
-    // Domain-separate the access/refresh/mfa/driver/portal secrets from a
-    bidderSecret: string;
-    accessTtl: string;
-    refreshTtl: string;
-    driverTtl: string;
-    bidderTtl: string;
-    issuer: string;
-    audience: string;
-  } {
-    // Domain-separate the access/refresh/mfa/driver/bidder secrets from a
-    // single JWT_SECRET so an attacker who somehow obtained a refresh-token
-    // forgery oracle can't trivially mint access tokens. Explicit
-    // overrides win when set.
+    // Domain-separate the access/refresh/mfa/driver/portal/bidder/developer
+    // secrets from a single JWT_SECRET so an attacker who somehow obtained a
+    // refresh-token forgery oracle can't trivially mint access tokens.
+    // Explicit overrides win when set.
     const base = this.config.JWT_SECRET;
     return {
       accessSecret: this.config.JWT_ACCESS_SECRET || `${base}::access`,
@@ -196,19 +186,13 @@ export class ConfigService {
       mfaSecret: this.config.JWT_MFA_SECRET || `${base}::mfa`,
       driverSecret: this.config.JWT_DRIVER_SECRET || `${base}::driver`,
       portalSecret: this.config.JWT_PORTAL_SECRET || `${base}::portal`,
-      accessTtl: this.config.JWT_ACCESS_TTL,
-      refreshTtl: this.config.JWT_REFRESH_TTL,
-      driverTtl: this.config.JWT_DRIVER_TTL,
-      portalTtl: this.config.JWT_PORTAL_TTL,
       bidderSecret: this.config.JWT_BIDDER_SECRET || `${base}::bidder`,
-      accessTtl: this.config.JWT_ACCESS_TTL,
-      refreshTtl: this.config.JWT_REFRESH_TTL,
-      driverTtl: this.config.JWT_DRIVER_TTL,
-      bidderTtl: this.config.JWT_BIDDER_TTL,
       developerSecret: this.config.JWT_DEVELOPER_SECRET || `${base}::developer`,
       accessTtl: this.config.JWT_ACCESS_TTL,
       refreshTtl: this.config.JWT_REFRESH_TTL,
       driverTtl: this.config.JWT_DRIVER_TTL,
+      portalTtl: this.config.JWT_PORTAL_TTL,
+      bidderTtl: this.config.JWT_BIDDER_TTL,
       developerTtl: this.config.JWT_DEVELOPER_TTL,
       issuer: this.config.JWT_ISSUER,
       audience: this.config.JWT_AUDIENCE,
@@ -217,6 +201,7 @@ export class ConfigService {
   /** White-Label Customer Portal (Session 32). */
   get portal(): { baseDomain: string } {
     return { baseDomain: this.config.PORTAL_BASE_DOMAIN };
+  }
 
   /**
    * Auction & Remarketing Marketplace (Session 33). `cronEnabled` gates the
@@ -237,7 +222,6 @@ export class ConfigService {
   get voiceDriverConfidenceMin(): number {
     return this.config.VOICE_DRIVER_CONFIDENCE_MIN;
   }
-<<<<<<< HEAD
   get marketplaceApiEnabled(): boolean {
     return this.config.MARKETPLACE_API_ENABLED;
   }
@@ -252,7 +236,7 @@ export class ConfigService {
   }
   get marketplaceWebhookDeliveryEnabled(): boolean {
     return this.config.MARKETPLACE_WEBHOOK_DELIVERY_ENABLED;
-=======
+  }
 
   /**
    * Enterprise SSO (Session 38). `enabled` is the master gate. `allowedTenants`
@@ -277,7 +261,6 @@ export class ConfigService {
       tokenEncryptionKey: this.config.SSO_TOKEN_ENCRYPTION_KEY,
       isTenantAllowed: (tenantId: string): boolean => enabled && allowedTenants.includes(tenantId),
     };
->>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
   }
   get smtp(): {
     host: string;
@@ -535,6 +518,10 @@ export class ConfigService {
       cronEnabled: this.config.BACKUP_VERIFY_CRON_ENABLED,
       maxAgeHours: this.config.BACKUP_MAX_AGE_HOURS,
       railwayApiToken: this.config.RAILWAY_API_TOKEN.trim(),
+    };
+  }
+
+  /**
    * Public REST API + Webhooks (Session 29). `deliveryEnabled` gates the
    * webhook delivery cron body; `signingEncryptionKey` is the AES-256-GCM key
    * for endpoint signing secrets at rest; `defaultRateLimitPerMin` is stamped
@@ -549,6 +536,10 @@ export class ConfigService {
       deliveryEnabled: this.config.WEBHOOK_DELIVERY_ENABLED,
       signingEncryptionKey: this.config.WEBHOOK_SIGNING_ENCRYPTION_KEY,
       defaultRateLimitPerMin: this.config.PUBLIC_API_RATE_LIMIT_PER_MIN,
+    };
+  }
+
+  /**
    * AI Smart Dispatch (Session 41). `cronEnabled` gates the 60-second
    * recompute tick. `etaProvider` selects the ETA engine (heuristic default).
    * `weights` are the raw factor points (normalised by the scoring engine).

@@ -42,9 +42,9 @@ import { ImpoundModule } from './modules/impound/impound.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
 import { MarketplaceApiModule } from './modules/marketplace-api/marketplace-api.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { OpsModule } from './modules/ops/ops.module.js';
-import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { PublicApiModule } from './modules/public-api/public-api.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
@@ -108,7 +108,6 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     LienProcessingModule,
     EvRecoveryModule,
     VoiceDriverModule,
-<<<<<<< HEAD
     PublicApiModule,
     CustomerPortalModule,
     AuctionModule,
@@ -117,9 +116,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     DotModule,
     AiDispatchModule,
     MarketplaceApiModule,
-=======
     SsoModule,
->>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
     DashboardModule,
     ReportingModule,
     AdminModule,

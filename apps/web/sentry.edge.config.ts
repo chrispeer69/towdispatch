@@ -1,23 +1,8 @@
 /**
- * Sentry init for the Next.js edge runtime (middleware, edge routes).
- * DSN-gated — inert when SENTRY_DSN is empty. Loaded by instrumentation.ts
- * only on the edge runtime. See sentry.server.config.ts for rationale.
- */
-import * as Sentry from '@sentry/nextjs';
-
-const dsn = process.env.SENTRY_DSN;
-
-if (dsn) {
-  Sentry.init({
-    dsn,
-    environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV ?? 'development',
-    release: process.env.RELEASE_TAG,
-    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 0,
-  });
-}
- * Sentry Edge-runtime SDK init (R-06). Loaded by src/instrumentation.ts's
- * register() when NEXT_RUNTIME === 'edge' (middleware, edge routes). Mirrors
- * sentry.server.config.ts. No DSN → disabled.
+ * Sentry init for the Next.js edge runtime (middleware, edge routes), R-06.
+ * Loaded by src/instrumentation.ts register() when NEXT_RUNTIME === 'edge'.
+ * Mirrors sentry.server.config.ts — reads the server-only SENTRY_DSN_WEB
+ * (falling back to the public mirror). No DSN → the SDK is disabled.
  */
 import * as Sentry from '@sentry/nextjs';
 

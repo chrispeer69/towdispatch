@@ -22,7 +22,7 @@ export const disputeOutcomeSchema = z.object({
 });
 export type DisputeOutcomeDto = z.infer<typeof disputeOutcomeSchema>;
 
-export const recordOutcomeSchema = z
+export const recordFraudOutcomeSchema = z
   .object({
     wasFraud: z.boolean(),
     signalId: z.string().uuid().optional(),
@@ -30,4 +30,4 @@ export const recordOutcomeSchema = z
     notes: z.string().max(5000).optional(),
   })
   .strict();
-export type RecordOutcomePayload = z.infer<typeof recordOutcomeSchema>;
+export type RecordFraudOutcomePayload = z.infer<typeof recordFraudOutcomeSchema>;

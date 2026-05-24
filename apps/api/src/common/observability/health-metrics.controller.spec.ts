@@ -9,8 +9,21 @@ import { ServiceUnavailableException } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { describe, expect, it, vi } from 'vitest';
 import type { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import type { RegionContextService } from '../region/region-context.service.js';
 import { HealthMetricsController } from './health-metrics.controller.js';
 import type { MetricsService } from './metrics.service.js';
+
+// Multi-Region (S44): readiness reports region health via RegionContextService.
+const stubRegion = {
+  health: () =>
+    Promise.resolve({
+      regionId: 'us-east',
+      role: 'primary',
+      isPrimary: true,
+      replicaLagSeconds: null,
+      peer: null,
+    }),
+} as unknown as RegionContextService;
 
 function build(opts: {
   dbOk?: boolean;
@@ -29,7 +42,7 @@ function build(opts: {
   const metrics = {
     snapshot: vi.fn(() => Promise.resolve('# metrics')),
   } as unknown as MetricsService;
-  return new HealthMetricsController(db, redis, metrics);
+  return new HealthMetricsController(db, redis, metrics, stubRegion);
 }
 
 describe('HealthMetricsController', () => {
@@ -41,7 +54,7 @@ describe('HealthMetricsController', () => {
 
   it('readiness returns ok when db and redis both answer', async () => {
     const res = await build({ dbOk: true, redisOk: true }).readiness();
-    expect(res).toEqual({ status: 'ok', checks: { db: 'ok', redis: 'ok' } });
+    expect(res).toMatchObject({ status: 'ok', checks: { db: 'ok', redis: 'ok' } });
   });
 
   it('readiness throws 503 when the database is unreachable', async () => {
@@ -60,7 +73,7 @@ describe('HealthMetricsController', () => {
     const redis = { ping: vi.fn(() => Promise.resolve('NOPE')) } as unknown as Redis;
     const db = { ping: vi.fn(() => Promise.resolve()) } as unknown as TenantAwareDb;
     const metrics = { snapshot: vi.fn() } as unknown as MetricsService;
-    const controller = new HealthMetricsController(db, redis, metrics);
+    const controller = new HealthMetricsController(db, redis, metrics, stubRegion);
     await expect(controller.readiness()).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 
