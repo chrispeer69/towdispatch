@@ -17,7 +17,7 @@ shared/db/api/web builds ✅ · biome clean on changed files ✅.
 
 ## What shipped (✅)
 
-- **DB** — `0037_lien_processing.sql` + 4 Drizzle schema files:
+- **DB** — `0038_lien_processing.sql` + 4 Drizzle schema files:
   `lien_cases`, `lien_notices`, `lien_timeline_events` (FORCE RLS, audit
   triggers, cross-tenant consistency triggers, soft delete) and
   `lien_state_rules` (global reference, seeded for all 10 states). Idempotency:

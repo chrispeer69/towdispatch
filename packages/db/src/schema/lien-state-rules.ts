@@ -12,7 +12,7 @@
  * package is self-contained (it does not import shared, to keep tsc's
  * rootDir clean — same convention as the impound schema files).
  *
- * Defined in packages/db/sql/0037_lien_processing.sql.
+ * Defined in packages/db/sql/0038_lien_processing.sql.
  */
 import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 

@@ -3,7 +3,7 @@
  * Processing, Session 23).
  *
  * This module is the RUNTIME SOURCE OF TRUTH for the rule engine. The
- * lien_state_rules table (seeded in 0037_lien_processing.sql) mirrors these
+ * lien_state_rules table (seeded in 0038_lien_processing.sql) mirrors these
  * values so they are queryable / auditable; if the two ever drift, code
  * wins and a follow-up migration should re-seed.
  *

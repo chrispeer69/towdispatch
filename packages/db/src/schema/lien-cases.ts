@@ -8,7 +8,7 @@
  * deadline for the next operator action (the nightly cron recomputes it).
  * One live case per impound record (partial unique index in the migration).
  *
- * Defined in packages/db/sql/0037_lien_processing.sql.
+ * Defined in packages/db/sql/0038_lien_processing.sql.
  */
 import { sql } from 'drizzle-orm';
 import { bigint, boolean, index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';

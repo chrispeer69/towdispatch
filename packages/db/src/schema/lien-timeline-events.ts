@@ -7,7 +7,7 @@
  * Soft-delete columns are present for invariant parity though the table is
  * written append-only in practice.
  *
- * Defined in packages/db/sql/0037_lien_processing.sql.
+ * Defined in packages/db/sql/0038_lien_processing.sql.
  */
 import { sql } from 'drizzle-orm';
 import { index, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';

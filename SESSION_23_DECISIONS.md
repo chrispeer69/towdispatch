@@ -24,7 +24,7 @@ decision (see "Observation-only cron" and "No auto-advance" below).
 ## Per-state rules (statute cited · conservative choice · why)
 
 Runtime source of truth: `apps/api/src/modules/lien-processing/state-rules.config.ts`.
-Mirrored (seeded) into `lien_state_rules` by `0037_lien_processing.sql`.
+Mirrored (seeded) into `lien_state_rules` by `0038_lien_processing.sql`.
 
 | State | Statute (best-effort) | DMV win | Owner/lien wait | Publication | Min→sale | Low-value pub exempt |
 |-------|----------------------|--------:|----------------:|-------------|---------:|----------------------|
@@ -119,9 +119,13 @@ needs counsel sign-off.
 - **State-rules endpoint serves the typed config** (`GET /lien-cases/state-rules`)
   rather than the DB row — the config is the source of truth and is always
   available, even before the seed runs.
-- **Migration numbering**: `0037_lien_processing.sql`. Two pre-existing `0036_*`
-  files (impound + onboarding) are parallel-session artifacts; `0037` is unique.
-  `scripts/check-migrations.sh` (pre-existing `0034` dupe) was not touched.
+- **Migration numbering**: `0038_lien_processing.sql`. Originally `0037`, bumped
+  to `0038` after merging `origin/master`, which had landed `0037_reporting.sql`
+  from a parallel session — `0038` avoids introducing a new duplicate number.
+  The migrate runner applies SQL files in lexicographic order; `0038` only
+  depends on pre-existing tables (impound_records, tenants, users), so ordering
+  after reporting is safe. `scripts/check-migrations.sh` (pre-existing `0034`
+  dupe) was not touched.
 
 ## Deferred (🟡)
 

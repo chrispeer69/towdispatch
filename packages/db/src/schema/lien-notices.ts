@@ -7,7 +7,7 @@
  * in the migration. Once response_received_at is set, the row drops out of
  * the index so a follow-up notice of the same type can be issued.
  *
- * Defined in packages/db/sql/0037_lien_processing.sql.
+ * Defined in packages/db/sql/0038_lien_processing.sql.
  */
 import { sql } from 'drizzle-orm';
 import { index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
