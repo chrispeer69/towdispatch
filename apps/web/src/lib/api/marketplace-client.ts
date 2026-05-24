@@ -8,6 +8,14 @@
  *      localStorage keyed by tenant slug; a bidder is scoped to one tenant's
  *      marketplace at a time.
  *   2. Installed Apps (Session 46) — operator BFF (/api/installed-apps).
+ * Browser-side helpers for the public bidder marketplace (Session 33).
+ * Hits the same-origin public BFF (/api/auctionpub/*). The bidder session
+ * (JWT + bidder DTO) lives in localStorage keyed by tenant slug, since a
+ * bidder is scoped to one tenant's marketplace at a time.
+ *
+ * Also carries the operator-side Installed Apps wrappers (Session 46) over the
+ * /api/installed-apps BFF — a prior merge mashed the two clients into this
+ * file; kept together here so every existing import keeps resolving.
  */
 'use client';
 import type {
@@ -107,6 +115,24 @@ export const fetchMyBids = (slug: string) =>
 
 // ---- installed apps (operator) ----
 export const clientListInstalled = (): Promise<InstalledAppDto[]> => req<InstalledAppDto[]>(BASE);
+// ---- installed apps (operator BFF, Session 46) ----
+const INSTALLED_APPS_BASE = '/api/installed-apps';
+
+async function req<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(body?.message ?? `Request failed (HTTP ${res.status})`);
+  }
+  if (res.status === 204) return null as unknown as T;
+  return (await res.json()) as T;
+}
+
+export const clientListInstalled = (): Promise<InstalledAppDto[]> =>
+  req<InstalledAppDto[]>(INSTALLED_APPS_BASE);
 
 export const clientUninstall = (id: string): Promise<null> =>
-  req<null>(`${BASE}/${id}`, { method: 'DELETE' });
+  req<null>(`${INSTALLED_APPS_BASE}/${id}`, { method: 'DELETE' });

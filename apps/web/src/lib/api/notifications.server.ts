@@ -3,6 +3,7 @@ import type {
   DeliveryMetrics,
   NotificationTemplateDto,
   NotificationWebhookDeliveryDto,
+  NotifyWebhookDeliveryDto,
   UserPreferencesDto,
   WebhookSubscriptionDto,
 } from '@ustowdispatch/shared';
@@ -39,6 +40,8 @@ export async function fetchWebhookDeliveries(
   subscriptionId: string,
 ): Promise<NotificationWebhookDeliveryDto[]> {
   return apiServer<NotificationWebhookDeliveryDto[]>(
+): Promise<NotifyWebhookDeliveryDto[]> {
+  return apiServer<NotifyWebhookDeliveryDto[]>(
     `/admin/notifications/webhooks/${subscriptionId}/deliveries`,
   );
 }

@@ -25,6 +25,12 @@ const stubRegion = {
       peer: null,
     }),
 } as unknown as RegionContextService;
+const REGION_HEALTH = {
+  regionId: 'primary',
+  role: 'primary',
+  replicaLagSeconds: 0,
+  lastWriteTs: null,
+};
 
 function build(opts: {
   dbOk?: boolean;
@@ -47,6 +53,8 @@ function build(opts: {
   return new HealthMetricsController(db, redis, metrics, {} as unknown as RegionContextService);
   const region = {
     health: vi.fn(() => Promise.resolve({ id: 'test-region', role: 'primary', isPrimary: true })),
+  const region = {
+    health: vi.fn(() => Promise.resolve(REGION_HEALTH)),
   } as unknown as RegionContextService;
   return new HealthMetricsController(db, redis, metrics, region);
 }
@@ -65,6 +73,11 @@ describe('HealthMetricsController', () => {
     expect(res.checks).toEqual({ db: 'ok', redis: 'ok' });
     // Session 44 added an additive `region` field; assert it is surfaced.
     expect(res.region).toBeDefined();
+    expect(res).toEqual({
+      status: 'ok',
+      checks: { db: 'ok', redis: 'ok' },
+      region: REGION_HEALTH,
+    });
   });
 
   it('readiness throws 503 when the database is unreachable', async () => {
@@ -90,6 +103,10 @@ describe('HealthMetricsController', () => {
       metrics,
       {} as unknown as RegionContextService,
     );
+    const region = {
+      health: vi.fn(() => Promise.resolve(REGION_HEALTH)),
+    } as unknown as RegionContextService;
+    const controller = new HealthMetricsController(db, redis, metrics, region);
     await expect(controller.readiness()).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 

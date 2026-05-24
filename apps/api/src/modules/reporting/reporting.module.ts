@@ -16,7 +16,15 @@
  * DatabaseModule / ConfigModule.
  */
 import { Module } from '@nestjs/common';
+import { AgingService } from './aging/aging.service.js';
+import { ReportBuilderController } from './builder/report-builder.controller.js';
+import { ReportBuilderService } from './builder/report-builder.service.js';
+import { ReportTemplateScheduler } from './builder/report-template-scheduler.service.js';
 import { ReportExportService } from './export/report-export.service.js';
+import { KpiController } from './kpi/kpi.controller.js';
+import { KpiService } from './kpi/kpi.service.js';
+import { PnlAgingController } from './pnl/pnl-aging.controller.js';
+import { PnlService } from './pnl/pnl.service.js';
 import { ReportingCacheService } from './reporting-cache.service.js';
 import { ReportingController } from './reporting.controller.js';
 import { ReportingService } from './reporting.service.js';
@@ -33,7 +41,13 @@ import { ReportScheduler } from './scheduling/report-scheduler.service.js';
 import { SavedReportsService } from './scheduling/saved-reports.service.js';
 
 @Module({
-  controllers: [ReportingController],
+  controllers: [
+    ReportingController,
+    // Session 53 — custom builder + KPI dashboard + P&L/aging surfaces.
+    ReportBuilderController,
+    KpiController,
+    PnlAgingController,
+  ],
   providers: [
     ReportingService,
     ReportingCacheService,
@@ -49,6 +63,12 @@ import { SavedReportsService } from './scheduling/saved-reports.service.js';
     TaxReporter,
     ComplianceReporter,
     EvRecoveryReporter,
+    // Session 53.
+    ReportBuilderService,
+    ReportTemplateScheduler,
+    KpiService,
+    PnlService,
+    AgingService,
   ],
   exports: [ReportingService],
 })

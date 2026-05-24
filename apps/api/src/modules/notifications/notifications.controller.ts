@@ -27,6 +27,7 @@ import {
   type NotificationListQuery,
   type NotificationTemplateDto,
   type NotificationWebhookDeliveryDto,
+  type NotifyWebhookDeliveryDto,
   type PreviewTemplatePayload,
   ROLES,
   type RegisterDeviceTokenPayload,
@@ -277,6 +278,7 @@ export class NotificationsController {
     @ZodParam(subIdSchema) params: { subscriptionId: string },
     @Req() req: FastifyRequest,
   ): Promise<NotificationWebhookDeliveryDto[]> {
+  ): Promise<NotifyWebhookDeliveryDto[]> {
     return this.webhooks.listDeliveries(this.callerCtx(req), params.subscriptionId);
   }
 

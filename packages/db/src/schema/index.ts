@@ -77,6 +77,8 @@ export * from './storage-charges';
 export * from './release-workflows';
 export * from './commission-rules';
 export * from './reporting';
+// Reporting builder + KPI dashboard (Session 53) — additive to ./reporting.
+export * from './reporting-builder';
 // Lien Processing (Session 23) — statutory lien-sale workflow for unclaimed
 // impounded vehicles. Tables in packages/db/sql/0038_lien_processing.sql.
 export * from './lien-state-rules';

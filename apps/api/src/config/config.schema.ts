@@ -588,6 +588,19 @@ export const configSchema = z.object({
     .default('true')
     .transform((v) => v === 'true'),
   STORAGE_AUTOBILLING_CRON_ENABLED: z
+  // Reporting builder + KPI dashboard (Session 53).
+  // REPORTING_BUILDER_ENABLED gates the /reporting/builder/* and
+  // /reporting/kpi/* surfaces. Default true: it is additive and read-only, so
+  // it ships on. Flip false to hide the builder per environment.
+  REPORTING_BUILDER_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+  // REPORT_SCHEDULER_CRON_ENABLED gates the builder template scheduler's tick
+  // (5-minute scan of report_template_schedules → render + email). Default
+  // false so dev/CI never email or render against seed data. Independent of the
+  // Session 14 REPORT_SCHEDULER_DISABLED gate (the canned-reporter lane).
+  REPORT_SCHEDULER_CRON_ENABLED: z
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
