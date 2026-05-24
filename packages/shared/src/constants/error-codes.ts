@@ -52,6 +52,19 @@ export const ERROR_CODES = {
   AUCTION_ENDED: 'auction_ended',
   BIDDER_EMAIL_NOT_VERIFIED: 'bidder_email_not_verified',
   BIDDER_BLOCKED: 'bidder_blocked',
+  /**
+   * Marketplace API / OAuth2 (Session 46). OAuth-layer codes follow RFC 6749
+   * §5.2 names where one exists so standards-aware clients can branch on them.
+   */
+  OAUTH_INVALID_CLIENT: 'oauth_invalid_client',
+  OAUTH_INVALID_GRANT: 'oauth_invalid_grant',
+  OAUTH_INVALID_SCOPE: 'oauth_invalid_scope',
+  OAUTH_INVALID_REQUEST: 'oauth_invalid_request',
+  OAUTH_UNSUPPORTED_GRANT_TYPE: 'oauth_unsupported_grant_type',
+  MARKETPLACE_APP_NOT_LISTED: 'marketplace_app_not_listed',
+  MARKETPLACE_INVALID_APP_STATE: 'marketplace_invalid_app_state',
+  MARKETPLACE_SCOPE_NOT_GRANTED: 'marketplace_scope_not_granted',
+  MARKETPLACE_NOT_INSTALLED: 'marketplace_not_installed',
 
   // 5xx
   INTERNAL_ERROR: 'internal_error',

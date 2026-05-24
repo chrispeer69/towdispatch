@@ -46,6 +46,18 @@ async function call<T>(path: string, init?: RequestInit, token?: string | null):
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetch(`/api/auctionpub/${path}`, { ...init, headers });
+ * Browser-side marketplace client (Session 46) — thin wrappers over the
+ * operator BFF routes for the Installed Apps screen. Mirrors lien-client.ts.
+ */
+import type { InstalledAppDto } from '@ustowdispatch/shared';
+
+const BASE = '/api/installed-apps';
+
+async function req<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+  });
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { message?: string } | null;
     throw new Error(body?.message ?? `Request failed (HTTP ${res.status})`);
@@ -81,3 +93,7 @@ export const placeBid = (slug: string, listingId: string, bidAmountCents: number
   );
 export const fetchMyBids = (slug: string) =>
   call<AuctionBidDto[]>('marketplace/my-bids', undefined, getBidderToken(slug));
+export const clientListInstalled = (): Promise<InstalledAppDto[]> => req<InstalledAppDto[]>(BASE);
+
+export const clientUninstall = (id: string): Promise<null> =>
+  req<null>(`${BASE}/${id}`, { method: 'DELETE' });

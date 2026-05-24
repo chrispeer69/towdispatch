@@ -52,6 +52,14 @@ export interface BidderAccessClaims extends JWTPayload {
   sub: 'bidder';
   bidderId: string;
   tid: string;
+ * Marketplace developer-portal session claims (Session 46). Audience suffix
+ * `-developer` isolates the developer keyspace from operator and driver
+ * tokens — a developer JWT can never be accepted by JwtAuthGuard or the
+ * driver guard, and vice-versa. `sub` is the developer_accounts.id.
+ */
+export interface DeveloperAccessClaims extends JWTPayload {
+  sub: string;
+  devel: true;
 }
 
 @Injectable()
@@ -61,6 +69,7 @@ export class JwtService {
   private readonly driverKey: Uint8Array;
   private readonly portalKey: Uint8Array;
   private readonly bidderKey: Uint8Array;
+  private readonly developerKey: Uint8Array;
 
   constructor(private readonly config: ConfigService) {
     this.accessKey = new TextEncoder().encode(config.jwt.accessSecret);
@@ -68,6 +77,7 @@ export class JwtService {
     this.driverKey = new TextEncoder().encode(config.jwt.driverSecret);
     this.portalKey = new TextEncoder().encode(config.jwt.portalSecret);
     this.bidderKey = new TextEncoder().encode(config.jwt.bidderSecret);
+    this.developerKey = new TextEncoder().encode(config.jwt.developerSecret);
   }
 
   async signAccess(claims: {
@@ -280,6 +290,35 @@ export class JwtService {
       throw new Error('Invalid bidder token');
     }
     return payload as BidderAccessClaims;
+  /**
+   * Marketplace developer-portal session token (Session 46). `sub` is the
+   * developer_accounts.id; audience `…-developer` keeps it off the operator
+   * and driver keyspaces.
+   */
+  async signDeveloper(claims: { sub: string }): Promise<string> {
+    return new SignJWT({ ...claims, devel: true })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(`${this.config.jwt.audience}-developer`)
+      .setExpirationTime(this.config.jwt.developerTtl)
+      .sign(this.developerKey);
+  }
+
+  async verifyDeveloper(token: string): Promise<DeveloperAccessClaims> {
+    const { payload } = await jwtVerify(token, this.developerKey, {
+      issuer: this.config.jwt.issuer,
+      audience: `${this.config.jwt.audience}-developer`,
+      algorithms: ['HS256'],
+    });
+    if (payload.devel !== true || typeof payload.sub !== 'string') {
+      throw new Error('Invalid developer token');
+    }
+    return payload as DeveloperAccessClaims;
+  }
+
+  developerTtlSeconds(): number {
+    return parseDuration(this.config.jwt.developerTtl);
   }
 }
 

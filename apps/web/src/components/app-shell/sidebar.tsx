@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import type { AuthTenantDto, AuthUserDto } from '@ustowdispatch/shared';
 import {
   BarChart3,
+  Blocks,
   Building2,
   Calculator,
   CarFront,
@@ -14,6 +15,7 @@ import {
   Mail,
   Navigation,
   PhoneCall,
+  Plug,
   Radio,
   Receipt,
   Settings,
@@ -251,6 +253,21 @@ const SECTIONS: NavSection[] = [
         href: '/settings/notifications',
         icon: Mail,
         match: (p) => p.startsWith('/settings/notifications'),
+      },
+      {
+        label: 'App Marketplace',
+        href: '/marketplace',
+        icon: Blocks,
+        match: (p) => p.startsWith('/marketplace'),
+      },
+      {
+        // Operator-managed third-party app connections (Session 46). The page
+        // itself surfaces a friendly access-denied state for roles the API
+        // gates out (OWNER/ADMIN only).
+        label: 'Installed Apps',
+        href: '/installed-apps',
+        icon: Plug,
+        match: (p) => p.startsWith('/installed-apps'),
       },
     ],
   },

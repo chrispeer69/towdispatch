@@ -27,3 +27,6 @@ export * from './i18n/index';
 // AI Smart Dispatch (Session 41) — advisory candidate scoring + predictive
 // ETA + feedback-loop / accuracy reporting contracts.
 export * from './ai-dispatch/index';
+// Public Marketplace API (Session 46) — 3rd-party developer ecosystem: developer
+// accounts, marketplace apps, OAuth2 PKCE flow, public directory, install lifecycle.
+export * from './marketplace-api/index';

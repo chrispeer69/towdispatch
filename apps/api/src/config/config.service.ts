@@ -160,6 +160,11 @@ export class ConfigService {
     refreshTtl: string;
     driverTtl: string;
     portalTtl: string;
+    developerSecret: string;
+    accessTtl: string;
+    refreshTtl: string;
+    driverTtl: string;
+    developerTtl: string;
     issuer: string;
     audience: string;
   } {
@@ -192,6 +197,11 @@ export class ConfigService {
       refreshTtl: this.config.JWT_REFRESH_TTL,
       driverTtl: this.config.JWT_DRIVER_TTL,
       bidderTtl: this.config.JWT_BIDDER_TTL,
+      developerSecret: this.config.JWT_DEVELOPER_SECRET || `${base}::developer`,
+      accessTtl: this.config.JWT_ACCESS_TTL,
+      refreshTtl: this.config.JWT_REFRESH_TTL,
+      driverTtl: this.config.JWT_DRIVER_TTL,
+      developerTtl: this.config.JWT_DEVELOPER_TTL,
       issuer: this.config.JWT_ISSUER,
       audience: this.config.JWT_AUDIENCE,
     };
@@ -218,6 +228,21 @@ export class ConfigService {
   }
   get voiceDriverConfidenceMin(): number {
     return this.config.VOICE_DRIVER_CONFIDENCE_MIN;
+  }
+  get marketplaceApiEnabled(): boolean {
+    return this.config.MARKETPLACE_API_ENABLED;
+  }
+  get marketplaceAdminToken(): string | undefined {
+    return this.config.MARKETPLACE_ADMIN_TOKEN;
+  }
+  get marketplaceOauthCodeTtl(): string {
+    return this.config.MARKETPLACE_OAUTH_CODE_TTL;
+  }
+  get marketplaceAccessTokenTtl(): string {
+    return this.config.MARKETPLACE_ACCESS_TOKEN_TTL;
+  }
+  get marketplaceWebhookDeliveryEnabled(): boolean {
+    return this.config.MARKETPLACE_WEBHOOK_DELIVERY_ENABLED;
   }
   get smtp(): {
     host: string;
