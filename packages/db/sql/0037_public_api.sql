@@ -252,16 +252,10 @@ END $$;
 -- Indexes only apply if S29 schema columns exist (endpoint_id, deleted_at).
 DO $$ BEGIN
 IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'webhook_deliveries' AND column_name = 'endpoint_id') THEN
-  CREATE INDEX IF NOT EXISTS webhook_deliveries_tenant_endpoint_idx
-    ON webhook_deliveries (tenant_id, endpoint_id, created_at)
-    WHERE deleted_at IS NULL;
-  CREATE INDEX IF NOT EXISTS webhook_deliveries_due_idx
-    ON webhook_deliveries (next_retry_at)
-    WHERE status = 'pending' AND deleted_at IS NULL;
+  EXECUTE 'CREATE INDEX IF NOT EXISTS webhook_deliveries_tenant_endpoint_idx ON webhook_deliveries (tenant_id, endpoint_id, created_at) WHERE deleted_at IS NULL';
+  EXECUTE 'CREATE INDEX IF NOT EXISTS webhook_deliveries_due_idx ON webhook_deliveries (next_retry_at) WHERE status = ''pending'' AND deleted_at IS NULL';
 END IF;
 END $$;
-  ON webhook_deliveries (next_retry_at)
-  WHERE status = 'pending' AND deleted_at IS NULL;
 
 ALTER TABLE webhook_deliveries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE webhook_deliveries FORCE ROW LEVEL SECURITY;
