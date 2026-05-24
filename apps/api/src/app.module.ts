@@ -30,13 +30,14 @@ import { HealthModule } from './modules/health/health.module.js';
 import { ImportModule } from './modules/import/import.module.js';
 import { ImpoundModule } from './modules/impound/impound.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
+import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
+import { ReportingModule } from './modules/reporting/reporting.module.js';
 import { ServiceCatalogModule } from './modules/service-catalog/service-catalog.module.js';
 import { ServiceRatesModule } from './modules/service-rates/service-rates.module.js';
-import { ReportingModule } from './modules/reporting/reporting.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
 import { TenantsModule } from './modules/tenants/tenants.module.js';
 import { TierOffersModule } from './modules/tier-offers/tier-offers.module.js';
@@ -83,6 +84,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     AccountingModule,
     ImportModule,
     ImpoundModule,
+    LienProcessingModule,
     DashboardModule,
     ReportingModule,
     HealthModule,

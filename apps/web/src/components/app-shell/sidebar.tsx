@@ -7,6 +7,7 @@ import {
   Building2,
   Calculator,
   CarFront,
+  Gavel,
   LayoutDashboard,
   LogOut,
   type LucideIcon,
@@ -136,6 +137,16 @@ const SECTIONS: NavSection[] = [
         href: '/tier-offers',
         icon: Mail,
         match: (p) => p.startsWith('/tier-offers'),
+      },
+      {
+        // Lien Processing (Session 23) — statutory lien-sale workflow for
+        // unclaimed impounded vehicles. The page gates access by role
+        // (OWNER / ADMIN / DISPATCHER / AUDITOR) with a friendly 403, so the
+        // link itself is unguarded here.
+        label: 'Lien Cases',
+        href: '/lien-cases',
+        icon: Gavel,
+        match: (p) => p.startsWith('/lien-cases'),
       },
     ],
   },
