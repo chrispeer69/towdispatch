@@ -1,6 +1,6 @@
 /**
  * Heavy-Duty Specialist (Session 36) — shared enums. Mirror the DB CHECK
- * constraints in packages/db/sql/0039_heavy_duty.sql and the Drizzle enum
+ * constraints in packages/db/sql/0040_heavy_duty.sql and the Drizzle enum
  * arrays in packages/db/src/schema/hd-*.ts. Kept in sync by hand (same
  * convention as the impound module).
  */

@@ -1,5 +1,5 @@
 -- =====================================================================
--- 0039_heavy_duty.sql  (Heavy-Duty Specialist Module — Session 36)
+-- 0040_heavy_duty.sql  (Heavy-Duty Specialist Module — Session 36)
 --
 -- An HD-aware layer on top of the existing truck / driver / job entities
 -- for Class 7/8 + commercial recoveries. NOT a fork: each table hangs off

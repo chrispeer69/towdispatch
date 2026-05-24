@@ -3,7 +3,7 @@
  * Specialist, Session 36). Added ALONGSIDE jobs (no jobs-table change);
  * one live row per job. requires_* drive the eligibility filters;
  * on_scene_estimate_cents → final_invoice_cents is the HD ticket
- * lifecycle. Defined in packages/db/sql/0039_heavy_duty.sql.
+ * lifecycle. Defined in packages/db/sql/0040_heavy_duty.sql.
  */
 import { sql } from 'drizzle-orm';
 import {

@@ -3,6 +3,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor.js';
 import { ObservabilityModule } from './common/observability/observability.module.js';
+import { RegionModule } from './common/region/region.module.js';
 import { ThrottleModule } from './common/throttle/throttle.module.js';
 import { ConfigModule } from './config/config.module.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -31,6 +32,7 @@ import { HeavyDutyModule } from './modules/heavy-duty/heavy-duty.module.js';
 import { ImportModule } from './modules/import/import.module.js';
 import { ImpoundModule } from './modules/impound/impound.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
+import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
@@ -49,6 +51,10 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
   imports: [
     ConfigModule,
     ObservabilityModule,
+    // RegionModule is @Global; imported early so RegionContextService is
+    // resolvable by the HealthMetricsController (ObservabilityModule) and any
+    // future region-aware service.
+    RegionModule,
     DatabaseModule,
     RedisModule,
     EmailModule,
@@ -85,6 +91,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     ImportModule,
     ImpoundModule,
     HeavyDutyModule,
+    LienProcessingModule,
     DashboardModule,
     ReportingModule,
     HealthModule,

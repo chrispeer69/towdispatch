@@ -2,7 +2,7 @@
  * hd_truck_capabilities — per-truck heavy-duty equipment / rating detail
  * (Heavy-Duty Specialist, Session 36). One live row per truck; the
  * dispatch hot-path flag trucks.heavy_duty_capable is kept in sync by the
- * service layer. Defined in packages/db/sql/0039_heavy_duty.sql.
+ * service layer. Defined in packages/db/sql/0040_heavy_duty.sql.
  */
 import { sql } from 'drizzle-orm';
 import {

@@ -3,7 +3,7 @@
 ## TL;DR
 
 Shipped an HD-aware layer (Class 7/8 + commercial recovery) on top of the
-existing truck / driver / job entities — **no fork**. DB: migration `0039` + 4
+existing truck / driver / job entities — **no fork**. DB: migration `0040` + 4
 FORCE-RLS / audited / soft-delete tables. API: a NestJS module with pure
 eligibility + rate-math helpers, an upsert-style service, a tenant-scoped
 controller, an env-gated observation-only cert-expiry cron, and three reports.
@@ -17,7 +17,7 @@ files ✅ · shared/db/api/web builds ✅ (all 6 HD routes in the manifest).
 
 ## What shipped (✅)
 
-- **DB** — `0039_heavy_duty.sql` + 4 Drizzle schema files:
+- **DB** — `0040_heavy_duty.sql` + 4 Drizzle schema files:
   `hd_truck_capabilities` (1:1 truck), `hd_driver_certifications` (1 live per
   driver/type), `hd_job_attributes` (1:1 job), `hd_rate_sheets` (tenant rate
   cards). FORCE RLS + audit + shared `updated_at` trigger on all four;
@@ -96,9 +96,9 @@ cron; reports as HD-module endpoints (not the central registry); web under
   specs). The shared integration `tearDown()` was extended to clear the HD
   tables (`hd_rate_sheets` explicitly; the three child tables FK-cascade with
   trucks/drivers/jobs).
-- Migration `0039` sits one ahead of master's `0037` because
-  `0038_lien_processing` is on an as-yet-unmerged branch; the gap is harmless
-  (see decisions doc).
+- Migration was renumbered `0039 → 0040` at the merge with master (master had
+  advanced to `0039_tenant_preferred_region`); `0040` only depends on
+  pre-existing parents, so ordering after region is safe (see decisions doc).
 - Only the targeted web helper spec was run (`hd-ui-helpers.spec`), not the full
   `pnpm -F web test`. The pre-existing `offline-queue.spec` failure
   (driver-app `window.location`/env gap, not in CI) is unrelated to this session

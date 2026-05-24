@@ -86,7 +86,13 @@ d('OnboardingService (integration)', () => {
     const seeded = await seedTenantWithOwner();
     tenantId = seeded.tenantId;
     ownerId = seeded.ownerId;
-    service = new OnboardingService(new TenantAwareDb(app));
+    // TenantAwareDb gained a read-replica pool + config (Session 44). Single
+    // region here: replica pool == primary, no distinct replica configured.
+    service = new OnboardingService(
+      new TenantAwareDb(app, app, {
+        readReplicaConfigured: false,
+      } as unknown as import('../src/config/config.service.js').ConfigService),
+    );
     ctx = { tenantId, userId: ownerId, requestId: uuidv7(), ipAddress: null, userAgent: null };
   });
 

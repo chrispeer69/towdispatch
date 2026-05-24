@@ -24,7 +24,9 @@ import * as schema from '@ustowdispatch/db/schema';
 import { sql } from 'drizzle-orm';
 import { type NodePgDatabase, drizzle } from 'drizzle-orm/node-postgres';
 import type { Pool, PoolClient } from 'pg';
-import { APP_POOL } from './database.tokens.js';
+import { ConfigService } from '../config/config.service.js';
+import { selectPoolToken } from './connection.js';
+import { APP_POOL, REPLICA_POOL } from './database.tokens.js';
 
 export interface TenantContextValues {
   tenantId: string;
@@ -38,7 +40,24 @@ export type Tx = NodePgDatabase<typeof schema> & { $client: PoolClient };
 
 @Injectable()
 export class TenantAwareDb {
-  constructor(@Inject(APP_POOL) private readonly pool: Pool) {}
+  constructor(
+    @Inject(APP_POOL) private readonly pool: Pool,
+    @Inject(REPLICA_POOL) private readonly replicaPool: Pool,
+    private readonly config: ConfigService,
+  ) {}
+
+  /**
+   * Resolve the pool a unit of work should run against. The decision rule
+   * (`selectPoolToken`) is pure and unit-tested; here we just map the token to
+   * the injected instance. Default is always the primary — see connection.ts.
+   */
+  private pickPool(readonly: boolean): Pool {
+    const token = selectPoolToken({
+      readonly,
+      replicaConfigured: this.config.readReplicaConfigured,
+    });
+    return token === REPLICA_POOL ? this.replicaPool : this.pool;
+  }
 
   async runInTenantContext<T>(
     ctx: TenantContextValues,
@@ -100,11 +119,70 @@ export class TenantAwareDb {
     }
   }
 
+  /**
+   * Read-only tenant work, routed to the read replica when one is configured
+   * (otherwise the primary). The transaction is opened READ ONLY so a stray
+   * write fails loud rather than silently hitting a replica. RLS still applies:
+   * the same SET LOCAL tenant GUCs are set, and the replica enforces the same
+   * policies as the primary. Callers MUST guarantee the work issues no writes —
+   * this is an explicit opt-in, never the default (see connection.ts).
+   */
+  async runReadOnly<T>(
+    ctx: TenantContextValues,
+    work: (db: Tx, client: PoolClient) => Promise<T>,
+  ): Promise<T> {
+    const client = await this.pickPool(true).connect();
+    try {
+      await client.query('BEGIN TRANSACTION READ ONLY');
+      await client.query("SELECT set_config('app.current_tenant_id', $1, true)", [ctx.tenantId]);
+      await client.query("SELECT set_config('app.current_user_id', $1, true)", [ctx.userId]);
+      if (ctx.requestId) {
+        await client.query("SELECT set_config('app.request_id', $1, true)", [ctx.requestId]);
+      }
+      const db = drizzle(client, { schema, logger: false });
+      const result = await work(db, client);
+      await client.query('COMMIT');
+      return result;
+    } catch (err) {
+      try {
+        await client.query('ROLLBACK');
+      } catch {
+        // already rolled back / connection broken
+      }
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
   /** Cheap reachability ping for the readiness probe. */
   async ping(): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query(sql`SELECT 1`.toString());
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Best-effort replication lag in seconds, measured against the read replica.
+   * Returns null when no distinct replica is configured (single region), when
+   * the replica is actually the primary, or when the monitoring function is
+   * not grantable to app_user (needs pg_monitor — documented in the runbook).
+   * Never throws: the readiness probe must not fail because lag is unknowable.
+   */
+  async replicaLagSeconds(): Promise<number | null> {
+    if (!this.config.readReplicaConfigured) return null;
+    const client = await this.replicaPool.connect();
+    try {
+      const res = await client.query<{ lag: number | null }>(
+        'SELECT EXTRACT(EPOCH FROM (now() - pg_last_xact_replay_timestamp()))::float8 AS lag',
+      );
+      const lag = res.rows[0]?.lag ?? null;
+      return lag === null ? null : Math.max(0, lag);
+    } catch {
+      return null;
     } finally {
       client.release();
     }

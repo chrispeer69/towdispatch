@@ -17,7 +17,7 @@ import pg from 'pg';
 const { Pool } = pg;
 import { SlowQueryService } from '../common/observability/slow-query.service.js';
 import { ConfigService } from '../config/config.service.js';
-import { ADMIN_POOL, APP_POOL } from './database.tokens.js';
+import { ADMIN_POOL, APP_POOL, REPLICA_POOL } from './database.tokens.js';
 import { TenantAwareDb } from './tenant-aware-db.service.js';
 import { TransactionRunner } from './transaction-runner.service.js';
 
@@ -25,10 +25,17 @@ import { TransactionRunner } from './transaction-runner.service.js';
 class PoolBinder implements OnModuleInit {
   constructor(
     @Inject(APP_POOL) private readonly appPool: pg.Pool,
+    @Inject(REPLICA_POOL) private readonly replicaPool: pg.Pool,
     private readonly slowQuery: SlowQueryService,
   ) {}
   onModuleInit(): void {
     this.appPool.on('connect', (client) => this.slowQuery.wrapClient(client));
+    // Only wrap the replica when it's a DISTINCT pool — when no read replica
+    // is configured REPLICA_POOL is the very same APP_POOL instance and is
+    // already wrapped above (double-wrapping would log every query twice).
+    if (this.replicaPool !== this.appPool) {
+      this.replicaPool.on('connect', (client) => this.slowQuery.wrapClient(client));
+    }
   }
 }
 
@@ -59,10 +66,28 @@ class PoolBinder implements OnModuleInit {
         }),
       inject: [ConfigService],
     },
+    {
+      // Read-replica pool (Session 44). When no DISTINCT DATABASE_READ_URL is
+      // set we return the SAME APP_POOL instance — every existing single-region
+      // deploy keeps exactly one runtime pool, no doubled connection slots. A
+      // separate, smaller pool is created only when a real replica is wired.
+      provide: REPLICA_POOL,
+      useFactory: (config: ConfigService, appPool: pg.Pool) =>
+        config.readReplicaConfigured
+          ? new Pool({
+              connectionString: config.databaseReadUrl,
+              max: 10,
+              idleTimeoutMillis: 30_000,
+              connectionTimeoutMillis: 5_000,
+              application_name: 'ustowdispatch-api-replica',
+            })
+          : appPool,
+      inject: [ConfigService, APP_POOL],
+    },
     TenantAwareDb,
     TransactionRunner,
     PoolBinder,
   ],
-  exports: [APP_POOL, ADMIN_POOL, TenantAwareDb, TransactionRunner],
+  exports: [APP_POOL, ADMIN_POOL, REPLICA_POOL, TenantAwareDb, TransactionRunner],
 })
 export class DatabaseModule {}

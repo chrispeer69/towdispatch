@@ -3,7 +3,7 @@
  * (Heavy-Duty Specialist, Session 36). One live row per (driver,
  * cert_type); a renewal supersedes the prior live row. expires_at drives
  * the eligibility gate + the expiry-roster report + the daily expiry cron.
- * Defined in packages/db/sql/0039_heavy_duty.sql.
+ * Defined in packages/db/sql/0040_heavy_duty.sql.
  */
 import { sql } from 'drizzle-orm';
 import { date, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';

@@ -3,7 +3,7 @@
  * Session 36). All money is cents-per-unit; the two multipliers are
  * numeric(4,2) (Drizzle surfaces them as strings — the service parses to
  * number at the boundary). Tenant-scoped reference data: RLS + tenant FK
- * are the isolation guarantee. Defined in packages/db/sql/0039_heavy_duty.sql.
+ * are the isolation guarantee. Defined in packages/db/sql/0040_heavy_duty.sql.
  */
 import { sql } from 'drizzle-orm';
 import {

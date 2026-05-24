@@ -66,9 +66,15 @@ export * from './impound-fees';
 export * from './impound-releases';
 export * from './commission-rules';
 export * from './reporting';
+// Lien Processing (Session 23) — statutory lien-sale workflow for unclaimed
+// impounded vehicles. Tables in packages/db/sql/0038_lien_processing.sql.
+export * from './lien-state-rules';
+export * from './lien-cases';
+export * from './lien-notices';
+export * from './lien-timeline-events';
 // Heavy-Duty Specialist (Session 36) — Class 7/8 + commercial recovery
 // layer on trucks / drivers / jobs. Tables in
-// packages/db/sql/0039_heavy_duty.sql.
+// packages/db/sql/0040_heavy_duty.sql.
 export * from './hd-truck-capabilities';
 export * from './hd-driver-certifications';
 export * from './hd-job-attributes';

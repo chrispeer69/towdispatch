@@ -120,11 +120,13 @@ reference data.
 
 ## Migration numbering
 
-- `0039_heavy_duty.sql`. Master is at `0037`; `0038_lien_processing.sql` is on
-  the Session-23 branch (PR open, not yet merged). The migrate runner applies
-  files in lexicographic order and `0039` only depends on pre-existing parents
-  (trucks, drivers, jobs, tenants, users), so the temporary gap at `0038` is
-  harmless (master already carries duplicate numbers at `0034`/`0036`).
+- Launched as `0039_heavy_duty.sql`; **reconciled to `0040_heavy_duty.sql` at
+  merge** when master had advanced to carry `0038_lien_processing.sql` (S23) and
+  `0039_tenant_preferred_region.sql` (S44 multi-region). `0040` is the next free
+  contiguous number on master. The migrate runner applies files in lexicographic
+  order and `0040` only depends on pre-existing parents (trucks, drivers, jobs,
+  tenants, users), so ordering after region is safe. (Per the migration-numbering
+  convention: keep the launch-assigned number, reconcile contiguity at merge.)
 
 ## Deferred (🟡)
 
