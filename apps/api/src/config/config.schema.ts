@@ -249,6 +249,16 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+
+  // Lien Processing (Session 23).
+  // LIEN_ADVANCE_CRON_ENABLED gates the nightly lien-advance sweep (03:00
+  // tick that recomputes next_action_due_at and logs overdue actions). It is
+  // OBSERVATION-ONLY: it never sends notices or advances a case. Default
+  // false so dev/CI don't write timeline rows against seed data.
+  LIEN_ADVANCE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
