@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { etaBilingual } from '@/lib/ai-dispatch/ui-helpers';
 import { DriverApiError, driverApi } from '@/lib/driver/api-client';
 import { uploadEvidence } from '@/lib/driver/evidence-upload';
 import { currentPosition } from '@/lib/driver/gps';
@@ -45,6 +46,7 @@ import {
 import type { DriverShiftDto, JobDto, JobEvidenceKind, JobStatus } from '@/lib/driver/types';
 import {
   Camera,
+  Clock,
   CreditCard,
   Loader2,
   MapPin,
@@ -82,20 +84,28 @@ export default function DriverJobPage(): JSX.Element {
   const [notes, setNotes] = useState<{ id: string; text: string; addedAt: string }[]>([]);
   const [newNote, setNewNote] = useState('');
   const [busyStatus, setBusyStatus] = useState<JobStatus | null>(null);
+  const [etaMinutes, setEtaMinutes] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
-      const [j, s, ev] = await Promise.all([
+      const [j, s, ev, eta] = await Promise.all([
         driverApi<JobDto>('GET', `/driver-jobs/${jobId}`),
         driverApi<DriverShiftDto | null>('GET', '/driver-shifts/me'),
         driverApi<EvidenceEntry[]>('GET', `/jobs/${jobId}/evidence`).catch(
           () => [] as EvidenceEntry[],
         ),
+        // Predicted drive-to-scene ETA (advisory, display-only). Degrades to
+        // "unavailable" offline or before assignment — never blocks the page.
+        driverApi<{ predictedMinutes: number | null }>(
+          'GET',
+          `/driver-dispatch/jobs/${jobId}/eta`,
+        ).catch(() => ({ predictedMinutes: null })),
       ]);
       setJob(j);
       setShift(s);
       setEvidence(ev);
+      setEtaMinutes(eta.predictedMinutes);
       setError(null);
     } catch (err) {
       if (err instanceof DriverApiError) setError(err.message);
@@ -202,6 +212,7 @@ export default function DriverJobPage(): JSX.Element {
          already shows the job number, so the redundant card is gone.
          The status pill now lives inside the Service headline. */}
       <ServiceHeadline job={job} />
+      <EtaCard minutes={etaMinutes} />
       <CustomerCard job={job} />
       <VehicleCard job={job} />
       <Card className="mb-3">
@@ -375,6 +386,30 @@ function ServiceHeadline({ job }: { job: JobDto }): JSX.Element {
       </span>
       <Badge tone={badgeToneForStatus(job.status)}>{STATUS_LABEL[job.status]}</Badge>
     </div>
+  );
+}
+
+/**
+ * Predicted drive-to-scene ETA (AI Smart Dispatch, Session 41). Advisory and
+ * display-only — it does NOT gate or change the accept/transition controls; it
+ * just lets the driver sanity-check an offer. Bilingual EN/ES for parity.
+ * Hidden when no ETA is available (offline / unassigned / no position).
+ */
+function EtaCard({ minutes }: { minutes: number | null }): JSX.Element | null {
+  if (minutes === null) return null;
+  const { en, es } = etaBilingual(minutes);
+  return (
+    <Card className="mb-3 border-brand-primary/40 bg-brand-primary/5">
+      <CardContent className="flex items-center gap-2 p-3">
+        <Clock className="h-4 w-4 shrink-0 text-brand-primary" aria-hidden />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-text-primary-on-dark">{en}</p>
+          <p className="text-xs text-text-secondary-on-dark" lang="es">
+            {es}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

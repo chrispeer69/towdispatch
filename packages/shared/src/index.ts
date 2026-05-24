@@ -24,3 +24,6 @@ export * from './dot/index';
 // locale resolution, presentation formatting + unit conversion, postal
 // validation. Shared by API and web.
 export * from './i18n/index';
+// AI Smart Dispatch (Session 41) — advisory candidate scoring + predictive
+// ETA + feedback-loop / accuracy reporting contracts.
+export * from './ai-dispatch/index';

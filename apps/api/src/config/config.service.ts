@@ -483,6 +483,36 @@ export class ConfigService {
       deliveryEnabled: this.config.WEBHOOK_DELIVERY_ENABLED,
       signingEncryptionKey: this.config.WEBHOOK_SIGNING_ENCRYPTION_KEY,
       defaultRateLimitPerMin: this.config.PUBLIC_API_RATE_LIMIT_PER_MIN,
+   * AI Smart Dispatch (Session 41). `cronEnabled` gates the 60-second
+   * recompute tick. `etaProvider` selects the ETA engine (heuristic default).
+   * `weights` are the raw factor points (normalised by the scoring engine).
+   * `recommendationLimit` is the default top-N. Advisory only — never assigns.
+   */
+  get aiDispatch(): {
+    cronEnabled: boolean;
+    etaProvider: AppConfig['ETA_PROVIDER'];
+    recommendationLimit: number;
+    weights: {
+      distance: number;
+      capability: number;
+      cert_match: number;
+      fatigue: number;
+      historical_performance: number;
+      utilization_balance: number;
+    };
+  } {
+    return {
+      cronEnabled: this.config.AI_DISPATCH_RECOMPUTE_CRON_ENABLED,
+      etaProvider: this.config.ETA_PROVIDER,
+      recommendationLimit: this.config.AI_DISPATCH_RECOMMENDATION_LIMIT,
+      weights: {
+        distance: this.config.AI_DISPATCH_WEIGHT_DISTANCE,
+        capability: this.config.AI_DISPATCH_WEIGHT_CAPABILITY,
+        cert_match: this.config.AI_DISPATCH_WEIGHT_CERT_MATCH,
+        fatigue: this.config.AI_DISPATCH_WEIGHT_FATIGUE,
+        historical_performance: this.config.AI_DISPATCH_WEIGHT_HISTORICAL,
+        utilization_balance: this.config.AI_DISPATCH_WEIGHT_UTILIZATION,
+      },
     };
   }
 

@@ -1,6 +1,7 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
 import { requireUser } from '@/lib/auth/session';
 import type {
+  DispatchRecommendationDto,
   JobDto,
   JobEvidenceWithUrlDto,
   JobServiceType,
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { EvidenceGrid } from './evidence-grid';
+import { SmartRecommendationsPanel } from './smart-recommendations-panel';
 
 export const metadata = { title: 'Job — US Tow DISPATCH' };
 export const dynamic = 'force-dynamic';
@@ -73,6 +75,13 @@ export default async function JobDetailPage({
   );
   const evidence = evidenceResult.data ?? [];
 
+  // Latest advisory recommendation set (may be null until one is computed).
+  // A failure degrades to the panel's empty state rather than 404-ing the page.
+  const recResult = await tryFetch(() =>
+    apiServer<DispatchRecommendationDto | null>(`/ai-dispatch/jobs/${jobId}/recommendations`),
+  );
+  const recommendation = recResult.data ?? null;
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <header className="space-y-1">
@@ -129,6 +138,8 @@ export default async function JobDetailPage({
         </div>
         <EvidenceGrid jobId={jobId} items={evidence} canDelete={canDelete} />
       </section>
+
+      <SmartRecommendationsPanel jobId={jobId} role={session.user.role} initial={recommendation} />
     </div>
   );
 }

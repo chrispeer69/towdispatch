@@ -132,3 +132,8 @@ export * from './dot-incident-reports';
 // packages/db/sql/0047_canada_expansion.sql.
 export * from './jurisdictions';
 export * from './tax-rules';
+// AI Smart Dispatch (Session 41) — advisory candidate scoring + predictive ETA
+// + feedback loop. Tables in packages/db/sql/0045_ai_dispatch.sql.
+export * from './dispatch-recommendations';
+export * from './dispatch-outcomes';
+export * from './eta-predictions';
