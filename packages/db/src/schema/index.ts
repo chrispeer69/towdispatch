@@ -64,3 +64,5 @@ export * from './impound-records';
 export * from './impound-holds';
 export * from './impound-fees';
 export * from './impound-releases';
+export * from './commission-rules';
+export * from './reporting';

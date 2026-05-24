@@ -524,6 +524,27 @@ export class EmailService {
     return this.smtpTransporter;
   }
 
+  async sendScheduledReport(opts: {
+    to: string;
+    reportName: string;
+    reportTitle: string;
+    downloadUrl: string;
+    format: 'csv' | 'pdf';
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Scheduled report: ${opts.reportName}`,
+      template: 'scheduled-report',
+      variables: {
+        ...this.brand(),
+        reportName: opts.reportName,
+        reportTitle: opts.reportTitle,
+        downloadUrl: opts.downloadUrl,
+        format: opts.format.toUpperCase(),
+      },
+    });
+  }
+
   private urlFor(path: string, query: Record<string, string>): string {
     const url = new URL(path, this.config.webPublicUrl);
     for (const [k, v] of Object.entries(query)) url.searchParams.set(k, v);
