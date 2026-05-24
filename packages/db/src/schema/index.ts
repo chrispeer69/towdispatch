@@ -106,3 +106,10 @@ export * from './auction-bidders';
 export * from './auction-listings';
 export * from './auction-bids';
 export * from './auction-listing-photos';
+// Fraud Detection (Session 43) — defensive analytics scoring job fraud /
+// dispute risk + a dispute log with ground-truth feedback. Tables in
+// packages/db/sql/0043_fraud_detection.sql.
+export * from './fraud-risk-signals';
+export * from './fraud-risk-scores';
+export * from './dispute-records';
+export * from './dispute-outcomes';

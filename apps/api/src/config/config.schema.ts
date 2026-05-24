@@ -381,6 +381,12 @@ export const configSchema = z.object({
   // that closes expired live listings and awards the highest bid >= reserve).
   // Default false so dev/CI don't mutate seed listings.
   AUCTION_LIFECYCLE_CRON_ENABLED: z
+  // Fraud Detection (Session 43).
+  // FRAUD_SCORE_CRON_ENABLED gates the nightly fraud re-score sweep (03:30
+  // tick that re-scores every job invoiced in the last 24h). It is ADVISORY
+  // ONLY: scoring never blocks or mutates an invoice. Default false so dev/CI
+  // don't write signal/score rows against seed data.
+  FRAUD_SCORE_CRON_ENABLED: z
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),

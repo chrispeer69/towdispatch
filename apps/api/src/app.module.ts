@@ -31,6 +31,7 @@ import { DynamicPricingModule } from './modules/dynamic-pricing/dynamic-pricing.
 import { EmailModule } from './modules/email/email.module.js';
 import { EvRecoveryModule } from './modules/ev-recovery/ev-recovery.module.js';
 import { FleetModule } from './modules/fleet/fleet.module.js';
+import { FraudDetectionModule } from './modules/fraud-detection/fraud-detection.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { HeavyDutyModule } from './modules/heavy-duty/heavy-duty.module.js';
 import { ImportModule } from './modules/import/import.module.js';
@@ -104,6 +105,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     PublicApiModule,
     CustomerPortalModule,
     AuctionModule,
+    FraudDetectionModule,
     DashboardModule,
     ReportingModule,
     AdminModule,
