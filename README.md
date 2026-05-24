@@ -171,6 +171,42 @@ The deploy script:
 
 ---
 
+## Rollback
+
+Deploys are forward-only at the database layer but **reversible at the application layer**. The decision is always: *roll back the code, or forward-fix?* — and that hinges on whether the bad deploy ran an **irreversible migration**.
+
+### Roll back vs forward-fix — decision matrix
+
+| Situation | Action |
+|---|---|
+| Bad deploy, **no migration** (or additive-only: new nullable column / new table / new index) | **Roll back** to the previous release. Safe — the old code runs fine against the new-but-additive schema. |
+| Bad deploy, **migration is reversible** and you have a tested down-path | Roll back code, then reverse the migration only if the new columns/constraints break the old code. Prefer leaving additive schema in place. |
+| Bad deploy, **migration is irreversible** (column drop/rename, type rewrite, data backfill, `NOT NULL` added) | **Forward-fix.** Do *not* roll back code onto a schema the old build can't read. Ship a new corrective deploy from `master`. |
+| Data loss / corruption (not just a bad deploy) | This is not a rollback — use [`docs/runbooks/database-restore.md`](docs/runbooks/database-restore.md) (PITR / snapshot restore). |
+
+Migrations in this repo are **forward-only and idempotent** (`scripts/deploy.sh` step 5; `packages/db` migrate runner). A code rollback does **not** undo a migration — that is the entire reason the matrix above exists.
+
+### Railway rollback (application code)
+
+The fast path — no rebuild, re-points traffic at a previously-built image:
+
+1. Railway dashboard → the **`api`** service → **Deployments** tab.
+2. Find the last-known-good deployment (cross-reference the `release/<timestamp>-<sha>` git tag that `scripts/deploy.sh` pushed on the good deploy — `git tag --list 'release/*' --sort=-creatordate | head`).
+3. **⋯ → Redeploy** on that deployment. Repeat for the **`web`** service so api + web stay in lockstep.
+4. Verify: `curl -sf https://api.towcommand.cloud/health` and `/ready` both return 200 (mirror of `scripts/deploy.sh` step 7).
+5. If the bad deploy ran a migration, re-read the matrix above **before** redeploying — additive schema is safe to leave; an irreversible migration means forward-fix, not rollback.
+
+CLI equivalent: `railway deployments` to list, then redeploy the target deployment id via the Railway CLI / dashboard.
+
+### Forward-fix (when the migration is irreversible)
+
+1. Branch from `master`, write the corrective change (and a new forward migration if schema repair is needed — never edit an already-applied migration; add a new one).
+2. Open a PR, get it green in CI.
+3. Merge to `master` → `scripts/deploy.sh production` (CI runs this on master push). The deploy gate (migrations check, tests, typecheck, `/health` + `/ready` probes) is the safety net.
+4. For an emergency hotfix that must skip the test gate, `SKIP_TESTS=1` is documented in `scripts/deploy.sh` for the incident-response path only — see [`docs/runbooks/incident-response.md`](docs/runbooks/incident-response.md).
+
+---
+
 ## Runbooks
 
 Production operating procedures — read **before** something breaks at 2 AM:
