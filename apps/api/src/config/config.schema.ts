@@ -316,6 +316,18 @@ export const configSchema = z.object({
   // Minimum parser confidence (0–1) to act on a recognized intent; below it
   // the command is downgraded to 'clarify' and the driver is asked to repeat.
   VOICE_DRIVER_CONFIDENCE_MIN: z.coerce.number().min(0).max(1).default(0.75),
+  // Phase 0 hardening (Session 17) — daily DB-backup freshness verification.
+  // BACKUP_VERIFY_CRON_ENABLED gates the 03:00 cron that asserts the most
+  // recent backup is younger than BACKUP_MAX_AGE_HOURS and raises a Sentry
+  // alert otherwise. Default false so dev/CI don't alert. RAILWAY_API_TOKEN
+  // is needed to read backup metadata from Railway; when absent the check
+  // fails closed (an unverifiable backup is treated as a failed check).
+  BACKUP_VERIFY_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  BACKUP_MAX_AGE_HOURS: z.coerce.number().int().min(1).max(720).default(24),
+  RAILWAY_API_TOKEN: z.string().optional().default(''),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

@@ -36,6 +36,7 @@ import { ImpoundModule } from './modules/impound/impound.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
 import { LienProcessingModule } from './modules/lien-processing/lien-processing.module.js';
 import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
+import { OpsModule } from './modules/ops/ops.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
@@ -102,6 +103,8 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     AdminModule,
     HealthModule,
     DebugModule,
+    AdminModule,
+    OpsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

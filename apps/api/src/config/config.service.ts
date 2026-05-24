@@ -400,6 +400,20 @@ export class ConfigService {
   }
 
   /**
+   * Phase 0 hardening (Session 17). `cronEnabled` gates the daily backup-
+   * freshness cron; `maxAgeHours` is the staleness threshold; `railwayApiToken`
+   * authorizes reading backup metadata from Railway (empty ⇒ check fails
+   * closed). See BackupVerifyCron + scripts/ops/verify-db-backup.ts.
+   */
+  get backupVerify(): { cronEnabled: boolean; maxAgeHours: number; railwayApiToken: string } {
+    return {
+      cronEnabled: this.config.BACKUP_VERIFY_CRON_ENABLED,
+      maxAgeHours: this.config.BACKUP_MAX_AGE_HOURS,
+      railwayApiToken: this.config.RAILWAY_API_TOKEN.trim(),
+    };
+  }
+
+  /**
    * Driver Experience S3 settings. `configured` is true only when both
    * bucket and region are set; otherwise the evidence module falls back
    * to LocalStubEvidenceStorageProvider so the API still boots cleanly

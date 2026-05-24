@@ -30,6 +30,25 @@ interface CallerContext {
   ipAddress: string | null;
   userAgent: string | null;
 }
+ * Admin-only operational endpoints (Phase 0 hardening, Session 17).
+ *
+ * GET /admin/sentry-test — throws an unhandled error to verify the
+ * GlobalExceptionFilter → Sentry capture path end-to-end against a live
+ * deploy. Restricted to OWNER/ADMIN (the global JwtAuthGuard authenticates;
+ * RolesGuard authorizes). Unlike the public smoke endpoint /_debug/boom
+ * (bearer-token gated, used by the unauthenticated production-smoke harness),
+ * this one is authenticated and always mounted — an operator hits it from the
+ * admin UI / curl with a valid session to confirm errors are reaching Sentry.
+ *
+ * The thrown error is a plain Error (NOT an HttpException) so the global
+ * filter routes it through its `instanceof Error` branch — log + Sentry
+ * captureException + 500. No PII in the message.
+ */
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { ROLES } from '@ustowdispatch/shared';
+import type { FastifyRequest } from 'fastify';
+import { Roles } from '../../common/decorators/roles.decorator.js';
+import { RolesGuard } from '../../common/guards/roles.guard.js';
 
 @UseGuards(RolesGuard)
 @Controller('admin')
@@ -70,5 +89,10 @@ export class AdminController {
       ipAddress: c.ipAddress,
       userAgent: c.userAgent,
     };
+  @Get('sentry-test')
+  @Roles(ROLES.OWNER, ROLES.ADMIN)
+  sentryTest(@Req() req: FastifyRequest): never {
+    const requestId = req.requestContext?.requestId ?? 'unknown';
+    throw new Error(`admin sentry-test deliberate error [requestId=${requestId}]`);
   }
 }

@@ -16,6 +16,7 @@ import { ERROR_CODES, type ProblemDetails } from '@ustowdispatch/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from 'pino';
 import { ZodError } from 'zod';
+import { redactPii } from '../observability/redact-pii.js';
 import type { SentryService } from '../observability/sentry.service.js';
 
 @Catch()
@@ -71,8 +72,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ...(requestId ? { requestId } : {}),
       };
     } else if (exception instanceof Error) {
+      // Scrub free-text PII (email/phone/SSN) from the LOG line. The pino
+      // logger already redacts known structured keys; this catches PII that
+      // ends up inline in an error message (e.g. a Postgres constraint error
+      // echoing a value). Sentry receives the ORIGINAL exception below, so
+      // its own beforeSend scrubbing + stack grouping are unaffected.
       this.logger.error(
-        { err: exception, requestId, path: req.url, method: req.method },
+        {
+          errName: exception.name,
+          errMessage: redactPii(exception.message),
+          errStack: redactPii(exception.stack),
+          requestId,
+          path: req.url,
+          method: req.method,
+        },
         'Unhandled exception',
       );
       this.sentry?.captureException(exception, {
