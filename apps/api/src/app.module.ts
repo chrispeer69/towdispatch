@@ -21,6 +21,7 @@ import { BillingModule } from './modules/billing/billing.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { CustomerPortalModule } from './modules/customer-portal/customer-portal.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
+import { DamageAnalysisModule } from './modules/damage-analysis/damage-analysis.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { DebugModule } from './modules/debug/debug.module.js';
 import { DirectionsModule } from './modules/directions/directions.module.js';
@@ -106,6 +107,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     CustomerPortalModule,
     AuctionModule,
     FraudDetectionModule,
+    DamageAnalysisModule,
     DashboardModule,
     ReportingModule,
     AdminModule,

@@ -115,9 +115,17 @@ export default async function JobDetailPage({
           <h2 className="font-condensed text-base font-extrabold uppercase tracking-wide text-text-primary-on-dark">
             Evidence
           </h2>
-          <span className="text-xs text-text-secondary-on-dark" data-testid="evidence-count">
-            {evidence.length} item{evidence.length === 1 ? '' : 's'}
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/jobs/${jobId}/damage`}
+              className="text-xs font-semibold text-accent-orange underline"
+            >
+              Damage analysis →
+            </Link>
+            <span className="text-xs text-text-secondary-on-dark" data-testid="evidence-count">
+              {evidence.length} item{evidence.length === 1 ? '' : 's'}
+            </span>
+          </div>
         </div>
         <EvidenceGrid jobId={jobId} items={evidence} canDelete={canDelete} />
       </section>
