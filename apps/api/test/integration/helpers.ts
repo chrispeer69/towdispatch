@@ -183,6 +183,24 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           await c.query('DELETE FROM invoice_number_sequences WHERE tenant_id = ANY($1::uuid[])', [
             tenantIds,
           ]);
+          // Heavy-Duty Specialist (Session 36) — the three child tables
+          // (hd_truck_capabilities / hd_driver_certifications /
+          // hd_job_attributes) FK-cascade when trucks / drivers / jobs are
+          // deleted below, but hd_rate_sheets has only a tenant_id
+          // ON DELETE RESTRICT FK, so it must be cleared explicitly. Delete
+          // all four explicitly to keep the order intentional.
+          await c.query('DELETE FROM hd_job_attributes WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM hd_driver_certifications WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM hd_truck_capabilities WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM hd_rate_sheets WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           // Driver Experience (Session 1/2) — must clear before jobs / drivers /
           // trucks because every table has tenant_id ON DELETE RESTRICT and
           // most carry FK references back to jobs/drivers/trucks/shifts.
