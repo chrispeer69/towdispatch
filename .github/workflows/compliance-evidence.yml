@@ -36,7 +36,7 @@ jobs:
       MONITORING_HEALTH_URL: ${{ secrets.COMPLIANCE_MONITORING_HEALTH_URL }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
