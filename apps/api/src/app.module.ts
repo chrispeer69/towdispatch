@@ -27,6 +27,7 @@ import { DebugModule } from './modules/debug/debug.module.js';
 import { DirectionsModule } from './modules/directions/directions.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
+import { DotModule } from './modules/dot/dot.module.js';
 import { DriverExperienceModule } from './modules/driver-experience/driver-experience.module.js';
 import { DynamicPricingModule } from './modules/dynamic-pricing/dynamic-pricing.module.js';
 import { EmailModule } from './modules/email/email.module.js';
@@ -108,6 +109,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     AuctionModule,
     FraudDetectionModule,
     DamageAnalysisModule,
+    DotModule,
     DashboardModule,
     ReportingModule,
     AdminModule,

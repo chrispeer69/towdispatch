@@ -402,6 +402,12 @@ export const configSchema = z.object({
   OPENAI_API_KEY: z.string().optional().default(''),
   OPENAI_VISION_MODEL: z.string().default('gpt-4o'),
   DAMAGE_ANALYSIS_WORKER_ENABLED: z
+  // Full DOT Compliance (Session 37).
+  // DOT_EXPIRY_CRON_ENABLED gates the daily 06:00 DQ-file expiry scan that
+  // logs alerts for medical-card / license / MVR items expiring within 60
+  // days. Observation-only (never mutates data). Default false so dev/CI
+  // don't emit alert noise against seed data.
+  DOT_EXPIRY_CRON_ENABLED: z
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
