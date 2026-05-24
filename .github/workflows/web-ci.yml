@@ -1,0 +1,33 @@
+name: Web CI
+
+# R-13: typecheck + Vitest unit tests for apps/web. Kept separate from e2e.yml
+# (which needs Postgres + Redis + the full stack) because these run against
+# TypeScript source via tsconfig paths / Vitest aliases — no database, no build
+# of workspace packages, so the feedback loop stays fast on every PR.
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  web-unit:
+    name: Web typecheck + unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter @ustowdispatch/web typecheck
+
+      - name: Unit tests
+        run: pnpm --filter @ustowdispatch/web test

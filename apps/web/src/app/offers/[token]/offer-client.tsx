@@ -1,4 +1,5 @@
 'use client';
+import { publicApiBase as apiBase } from '@/lib/api/public-base';
 /**
  * Client-side accept / decline interaction for the public offer page.
  *
@@ -14,8 +15,6 @@ interface Props {
   recipientName: string;
   initialAction: 'accept' | 'decline' | null;
 }
-
-const apiBase = (): string => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 type Phase =
   | { kind: 'idle' }

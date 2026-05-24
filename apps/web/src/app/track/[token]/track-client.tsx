@@ -1,4 +1,5 @@
 'use client';
+import { publicApiBase as apiBase } from '@/lib/api/public-base';
 /**
  * Customer-facing live tracking UI.
  *
@@ -25,8 +26,6 @@ interface Props {
   lang: 'en' | 'es';
   mapboxToken: string | null;
 }
-
-const apiBase = (): string => process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 const COPY = {
   en: {

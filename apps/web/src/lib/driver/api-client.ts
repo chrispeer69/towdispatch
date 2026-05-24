@@ -20,6 +20,7 @@
  * are not retried here — the offline queue handles that at a different
  * layer (see driver-offline-queue.ts).
  */
+import { publicApiBase } from '../api/public-base';
 import { DRIVER_JWT_KEY, DRIVER_PROFILE_KEY } from './storage-keys';
 
 export class DriverApiError extends Error {
@@ -60,8 +61,8 @@ export function driverApiBase(): string {
   //      to the production API explicitly. Survives misconfigured
   //      build envs where the var didn't bake in (Railway has a known
   //      quirk with NEXT_PUBLIC_* vars in Dockerfile builds).
-  //   3. Local-dev fallback when window is undefined or hostname is
-  //      localhost.
+  //   3. publicApiBase(): localhost in dev, throws in a prod bundle (R-14) —
+  //      no silent localhost fallback ships to production.
   if (env.NEXT_PUBLIC_API_URL) return env.NEXT_PUBLIC_API_URL;
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
@@ -72,7 +73,7 @@ export function driverApiBase(): string {
       return `https://api.${host.split('.').slice(1).join('.')}`;
     }
   }
-  return 'http://localhost:3001';
+  return publicApiBase();
 }
 
 export function readDriverJwt(): string | null {

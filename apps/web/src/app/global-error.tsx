@@ -6,6 +6,7 @@
  * root layout itself. Must define its own <html> and <body> because the
  * root layout has already failed by the time this renders.
  */
+import * as Sentry from '@sentry/nextjs';
 import { AlertOctagon } from 'lucide-react';
 import { useEffect } from 'react';
 
@@ -16,6 +17,9 @@ interface Props {
 
 export default function GlobalError({ error, reset }: Props): JSX.Element {
   useEffect(() => {
+    // Report the layout-level crash to Sentry (no-op without a DSN). This is
+    // the last boundary before the browser shows nothing, so it must capture.
+    Sentry.captureException(error);
     // eslint-disable-next-line no-console
     console.error('[global-error]', { message: error.message, digest: error.digest });
   }, [error]);
