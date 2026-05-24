@@ -293,6 +293,16 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+
+  // Heavy-Duty Specialist (Session 36).
+  // HD_CERT_EXPIRY_CRON_ENABLED gates the daily (04:00) HD driver
+  // certification expiry sweep. Observation-only — it logs expiring /
+  // expired certs (PII-redacted); the cert-expiry roster report is the
+  // operator-facing surface. Default false so dev/CI don't emit noise.
+  HD_CERT_EXPIRY_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

@@ -78,3 +78,10 @@ export * from './ev-oem-procedures';
 export * from './ev-job-attributes';
 export * from './ev-thermal-events';
 export * from './ev-charge-station-visits';
+// Heavy-Duty Specialist (Session 36) — Class 7/8 + commercial recovery
+// layer on trucks / drivers / jobs. Tables in
+// packages/db/sql/0040_heavy_duty.sql.
+export * from './hd-truck-capabilities';
+export * from './hd-driver-certifications';
+export * from './hd-job-attributes';
+export * from './hd-rate-sheets';

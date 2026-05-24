@@ -7,3 +7,7 @@ export * from './lien-processing/index';
 export * from './region/index';
 // EV-Specific Recovery Workflows (Session 48).
 export * from './ev-recovery/index';
+// Heavy-Duty Specialist (Session 36) — Class 7/8 + commercial recovery
+// contracts (capabilities, certs, job attributes, rate sheets, eligibility,
+// reports).
+export * from './heavy-duty/index';

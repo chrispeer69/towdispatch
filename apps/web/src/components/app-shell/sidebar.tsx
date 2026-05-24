@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Sparkles,
   Truck,
+  Wrench,
   Zap,
 } from 'lucide-react';
 /**
@@ -114,6 +115,16 @@ const SECTIONS: NavSection[] = [
         href: '/fleet',
         icon: CarFront,
         match: (p) => p.startsWith('/fleet'),
+      },
+      {
+        // Session 36 — Heavy-Duty Specialist. Class 7/8 + commercial
+        // recovery: truck capabilities, driver certs, HD job intake +
+        // eligibility, rate sheets, and HD reports. Page surfaces a
+        // friendly access-denied state for roles the API gates out.
+        label: 'Heavy-Duty',
+        href: '/heavy-duty',
+        icon: Wrench,
+        match: (p) => p.startsWith('/heavy-duty'),
       },
       {
         // Moat #1 — Dynamic Pricing Engine Control Panel. Top-level so
