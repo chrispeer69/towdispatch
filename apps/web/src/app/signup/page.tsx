@@ -1,6 +1,6 @@
 import { AuthShell } from '@/components/auth/auth-shell';
 import Link from 'next/link';
-import { SignupForm } from './signup-form';
+import { SignupWizard } from './signup-wizard';
 
 export const metadata = {
   title: 'Create your US Tow DISPATCH account',
@@ -23,7 +23,7 @@ export default function SignupPage(): JSX.Element {
         </>
       }
     >
-      <SignupForm />
+      <SignupWizard />
     </AuthShell>
   );
 }

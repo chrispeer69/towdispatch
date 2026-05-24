@@ -3,21 +3,21 @@
 import { PasswordStrength } from '@/components/auth/password-strength';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-/**
- * Signup form. Validates with the same Zod schema the API uses (signupSchema)
- * — adds local-only fields (confirmPassword, authorizedCheckbox) on top.
- *
- * The slug auto-derives from the company name, but stays editable. Once the
- * user manually edits the slug, we stop syncing to avoid clobbering it.
- */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signupSchema } from '@ustowdispatch/shared';
-import { useRouter } from 'next/navigation';
-import * as React from 'react';
+/**
+ * Account step — step 1 of the self-serve onboarding wizard.
+ *
+ * Validates with the same Zod schema the API uses (signupSchema) plus
+ * local-only confirmPassword / authorized fields. Posts to the onboarding
+ * BFF (/api/onboarding/start), which provisions the tenant + owner, sends the
+ * verification email, sets the session cookies, and returns the initial
+ * onboarding progress. On success it hands that progress up to the wizard.
+ */
+import { type OnboardingProgressDto, signupSchema } from '@ustowdispatch/shared';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Field } from './field';
 
 const formSchema = signupSchema
   .extend({
@@ -42,14 +42,13 @@ function slugify(name: string): string {
     .slice(0, 40);
 }
 
-export function SignupForm(): JSX.Element {
-  const router = useRouter();
+export function AccountStep({
+  onComplete,
+}: {
+  onComplete: (progress: OnboardingProgressDto) => void;
+}): JSX.Element {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [slugDirty, setSlugDirty] = useState(false);
-  /**
-   * 'idle' | 'checking' | 'available' | 'taken' | 'too-short'.
-   * Drives the inline slug status indicator under the slug input.
-   */
   const [slugStatus, setSlugStatus] = useState<
     'idle' | 'checking' | 'available' | 'taken' | 'too-short'
   >('idle');
@@ -84,12 +83,7 @@ export function SignupForm(): JSX.Element {
     }
   }, [tenantName, slugDirty, setValue]);
 
-  // Debounced slug-availability check. As the user types, we ask the
-  // API whether the slug is free; if it isn\u2019t, we fetch the next
-  // free suggestion and (when the user hasn\u2019t manually edited the
-  // slug field) silently substitute it. Either way, the user sees a
-  // green check or a yellow "already registered" hint right under the
-  // slug input.
+  // Debounced slug-availability check (reuses the public /auth/check-slug BFF).
   useEffect(() => {
     const candidate = (tenantSlug ?? '').trim();
     if (candidate.length < 2) {
@@ -107,8 +101,6 @@ export function SignupForm(): JSX.Element {
         });
         if (cancelled) return;
         if (!res.ok) {
-          // Fall back to idle if the probe itself errors out \u2014 the
-          // 409 path on submit will still catch it.
           setSlugStatus('idle');
           return;
         }
@@ -119,8 +111,6 @@ export function SignupForm(): JSX.Element {
         } else {
           setSlugStatus('taken');
           if (!slugDirty && data.suggested && data.suggested !== candidate) {
-            // Auto-uniquify only when the user hasn\u2019t manually
-            // touched the slug field. Respect their explicit choice.
             setValue('tenantSlug', data.suggested, { shouldValidate: false });
           }
         }
@@ -136,7 +126,7 @@ export function SignupForm(): JSX.Element {
 
   async function onSubmit(values: FormValues): Promise<void> {
     setSubmitError(null);
-    const res = await fetch('/api/auth/signup', {
+    const res = await fetch('/api/onboarding/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -156,20 +146,27 @@ export function SignupForm(): JSX.Element {
         res.status === 409 ||
         data?.code === 'conflict' ||
         (data?.message ?? '').toLowerCase().includes('already taken');
+      const isRateLimited = res.status === 429 || data?.code === 'rate_limited';
       if (isConflict) {
         setSubmitError(
           'This company name is already registered. Try a different name or sign in to your existing account.',
+        );
+      } else if (isRateLimited) {
+        setSubmitError(
+          data?.message ?? 'Too many signups from this network. Please try again later.',
         );
       } else {
         setSubmitError(data?.message ?? 'Signup failed. Please try again.');
       }
       return;
     }
-    router.push('/verify-email-pending');
+    const data = (await res.json()) as { onboarding: OnboardingProgressDto };
+    onComplete(data.onboarding);
   }
 
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* TODO(i18n): Spanish parity once the web app gains an i18n framework. */}
       <Field label="Company name" error={errors.tenantName?.message}>
         <Input placeholder="Acme Towing" autoComplete="organization" {...register('tenantName')} />
       </Field>
@@ -180,16 +177,14 @@ export function SignupForm(): JSX.Element {
         hint="Lowercase letters, numbers, hyphens. This is your workspace URL."
       >
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
+          <span className="font-mono text-xs text-text-secondary-on-dark/60">
             ustowdispatch.app/
           </span>
           <Input
             className="flex-1"
             placeholder="acme-towing"
             autoComplete="off"
-            {...register('tenantSlug', {
-              onChange: () => setSlugDirty(true),
-            })}
+            {...register('tenantSlug', { onChange: () => setSlugDirty(true) })}
           />
         </div>
         {slugStatus === 'available' && (
@@ -246,12 +241,6 @@ export function SignupForm(): JSX.Element {
         <p className="text-xs text-danger">{errors.authorized.message}</p>
       ) : null}
 
-      <p className="text-xs text-text-secondary-on-dark-on-dark/60">
-        By creating an account you agree to our{' '}
-        <span className="text-text-secondary-on-dark">Terms</span> and{' '}
-        <span className="text-text-secondary-on-dark">Privacy Policy</span>.
-      </p>
-
       {submitError ? (
         <div
           role="alert"
@@ -266,45 +255,5 @@ export function SignupForm(): JSX.Element {
         {isSubmitting ? 'Creating workspace…' : 'Create workspace'}
       </Button>
     </form>
-  );
-}
-
-interface FieldProps {
-  label: string;
-  error?: string | undefined;
-  hint?: string;
-  children: React.ReactNode;
-}
-
-function Field({ label, error, hint, children }: FieldProps): JSX.Element {
-  const id = React.useId();
-  const errorId = `${id}-error`;
-  const hintId = `${id}-hint`;
-  const describedBy = error ? errorId : hint ? hintId : undefined;
-  // Inject id + aria-describedby + aria-invalid into the single child
-  // input when the child is a valid element. Robust against arrays or
-  // non-element children — those render unchanged.
-  let enhanced: React.ReactNode = children;
-  if (React.isValidElement(children)) {
-    const extra: Record<string, string | boolean> = { id };
-    if (describedBy) extra['aria-describedby'] = describedBy;
-    if (error) extra['aria-invalid'] = true;
-    enhanced = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, extra);
-  }
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      {enhanced}
-      {hint && !error ? (
-        <p id={hintId} className="text-xs text-text-secondary-on-dark-on-dark/60">
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={errorId} className="text-xs text-danger">
-          {error}
-        </p>
-      ) : null}
-    </div>
   );
 }

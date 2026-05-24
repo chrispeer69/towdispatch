@@ -43,3 +43,5 @@ export * from './driver-experience';
 // Tier Offer Composer (Session 1) — Moat #3 Zod contracts.
 export * from './tier-offer';
 export * from './tier-offer-recipient';
+// Self-Serve Onboarding (Session 25) — public signup wizard + activation.
+export * from './onboarding';

@@ -57,3 +57,7 @@ export * from './driver-offline-actions';
 // packages/db/sql/0034_tier_offer_composer.sql.
 export * from './tier-offers';
 export * from './tier-offer-recipients';
+// Self-Serve Onboarding (Session 25) — wizard progress + activation ledger.
+// Tables in packages/db/sql/0036_onboarding.sql.
+export * from './onboarding-progress';
+export * from './tenant-activation-events';
