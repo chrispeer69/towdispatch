@@ -53,9 +53,7 @@ export class MotorClubController {
    */
   @Public()
   @Post('dispatch')
-  async dispatch(
-    @Body() payload: InboundDispatchPayload,
-  ): Promise<{
+  async dispatch(@Body() payload: InboundDispatchPayload): Promise<{
     jobId: string;
     stormSurgeOfferAvailable?: boolean;
     stormSurge?: { tierName: string | null; multiplier: number | null };

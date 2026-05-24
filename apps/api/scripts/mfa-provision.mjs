@@ -69,11 +69,5 @@ const verify = await post('/api/auth/mfa/verify', { totpCode: totp1 });
 if (verify.status !== 'authenticated') throw new Error(`verify: ${JSON.stringify(verify)}`);
 
 process.stdout.write(
-  `\n✅ MFA-enrolled test account provisioned\n` +
-    `  email:    ${email}\n` +
-    `  password: ${password}\n` +
-    `  tenant:   ${slug}\n` +
-    `  secret:   ${setup.secret}\n` +
-    `  current:  ${authenticator.generate(setup.secret)}\n` +
-    `  recovery: ${setup.recoveryCodes.join(', ')}\n`,
+  `\n✅ MFA-enrolled test account provisioned\n  email:    ${email}\n  password: ${password}\n  tenant:   ${slug}\n  secret:   ${setup.secret}\n  current:  ${authenticator.generate(setup.secret)}\n  recovery: ${setup.recoveryCodes.join(', ')}\n`,
 );

@@ -62,7 +62,14 @@ describeIfDb('RLS tenant isolation — user_invites', () => {
         `INSERT INTO users (id, tenant_id, email, password_hash, first_name, last_name, role)
          VALUES ($1, $2, $3, 'x', 'Inv', 'A', 'owner'),
                 ($4, $5, $6, 'x', 'Inv', 'B', 'owner')`,
-        [inviterA, tenantA, `${slugA}-inviter@spec.test`, inviterB, tenantB, `${slugB}-inviter@spec.test`],
+        [
+          inviterA,
+          tenantA,
+          `${slugA}-inviter@spec.test`,
+          inviterB,
+          tenantB,
+          `${slugB}-inviter@spec.test`,
+        ],
       );
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       await c.query(
@@ -71,8 +78,18 @@ describeIfDb('RLS tenant isolation — user_invites', () => {
          VALUES ($1, $2, $3, 'dispatcher', $4, $5, $6),
                 ($7, $8, $9, 'dispatcher', $10, $11, $12)`,
         [
-          inviteIdA, tenantA, `pending-a-${Date.now()}@spec.test`, inviterA, hashToken(tokenA), expiresAt,
-          inviteIdB, tenantB, `pending-b-${Date.now()}@spec.test`, inviterB, hashToken(tokenB), expiresAt,
+          inviteIdA,
+          tenantA,
+          `pending-a-${Date.now()}@spec.test`,
+          inviterA,
+          hashToken(tokenA),
+          expiresAt,
+          inviteIdB,
+          tenantB,
+          `pending-b-${Date.now()}@spec.test`,
+          inviterB,
+          hashToken(tokenB),
+          expiresAt,
         ],
       );
       await c.query('COMMIT');
@@ -138,10 +155,9 @@ describeIfDb('RLS tenant isolation — user_invites', () => {
     try {
       await c.query('BEGIN');
       await c.query("SELECT set_config('app.current_tenant_id', $1, true)", [tenantA]);
-      const upd = await c.query(
-        "UPDATE user_invites SET full_name = 'pwned' WHERE id = $1::uuid",
-        [inviteIdB],
-      );
+      const upd = await c.query("UPDATE user_invites SET full_name = 'pwned' WHERE id = $1::uuid", [
+        inviteIdB,
+      ]);
       expect(upd.rowCount).toBe(0);
       await c.query('COMMIT');
     } finally {
@@ -160,7 +176,14 @@ describeIfDb('RLS tenant isolation — user_invites', () => {
           `INSERT INTO user_invites
              (id, tenant_id, email, role, invited_by, token_hash, expires_at)
            VALUES ($1::uuid, $2::uuid, $3, 'dispatcher', $4::uuid, $5, $6)`,
-          [uuidv7(), tenantB, `injected-${Date.now()}@spec.test`, inviterA, hashToken('x'), expiresAt],
+          [
+            uuidv7(),
+            tenantB,
+            `injected-${Date.now()}@spec.test`,
+            inviterA,
+            hashToken('x'),
+            expiresAt,
+          ],
         ),
       ).rejects.toThrowError(/row-level security|policy/i);
     } finally {

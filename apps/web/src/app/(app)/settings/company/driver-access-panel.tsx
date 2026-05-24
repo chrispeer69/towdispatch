@@ -14,7 +14,7 @@
  */
 import { Button } from '@/components/ui/button';
 import { Check, Copy, Smartphone } from 'lucide-react';
-import { useState, type JSX } from 'react';
+import { type JSX, useState } from 'react';
 
 interface DriverAccessPanelProps {
   companyCode: string;
@@ -47,10 +47,9 @@ export function DriverAccessPanel({ companyCode }: DriverAccessPanelProps): JSX.
       </header>
 
       <p className="mb-4 max-w-prose text-sm text-text-secondary-on-dark">
-        Drivers sign into the in-truck app at{' '}
-        <span className="font-mono">/driver/login</span> using your 6-digit company code. They only
-        need to enter it once on each device — their phone or tablet remembers it on subsequent
-        sign-ins.
+        Drivers sign into the in-truck app at <span className="font-mono">/driver/login</span> using
+        your 6-digit company code. They only need to enter it once on each device — their phone or
+        tablet remembers it on subsequent sign-ins.
       </p>
 
       <div className="grid gap-3 md:grid-cols-2">

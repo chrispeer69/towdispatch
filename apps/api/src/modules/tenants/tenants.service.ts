@@ -98,7 +98,10 @@ export class TenantsService {
         patch.settings = merged;
       }
 
-      const [row] = await tx.update(tenants).set(patch).where(eq(tenants.id, ctx.tenantId))
+      const [row] = await tx
+        .update(tenants)
+        .set(patch)
+        .where(eq(tenants.id, ctx.tenantId))
         .returning();
       return row;
     });

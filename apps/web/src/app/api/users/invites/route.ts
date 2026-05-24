@@ -8,9 +8,12 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const status = req.nextUrl.searchParams.get('status') ?? 'pending';
   try {
-    const data = await apiServerBff<unknown>(`/users/invites?status=${encodeURIComponent(status)}`, {
-      method: 'GET',
-    });
+    const data = await apiServerBff<unknown>(
+      `/users/invites?status=${encodeURIComponent(status)}`,
+      {
+        method: 'GET',
+      },
+    );
     return NextResponse.json(data);
   } catch (err) {
     if (err instanceof ApiError) {

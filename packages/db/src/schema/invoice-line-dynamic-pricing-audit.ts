@@ -35,5 +35,4 @@ export const invoiceLineDynamicPricingAudit = pgTable(
 );
 
 export type InvoiceLineDynamicPricingAudit = typeof invoiceLineDynamicPricingAudit.$inferSelect;
-export type NewInvoiceLineDynamicPricingAudit =
-  typeof invoiceLineDynamicPricingAudit.$inferInsert;
+export type NewInvoiceLineDynamicPricingAudit = typeof invoiceLineDynamicPricingAudit.$inferInsert;

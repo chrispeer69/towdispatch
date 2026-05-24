@@ -20,8 +20,14 @@ const ROOT = join(__dirname, '..');
 const DIST_API = join(ROOT, 'dist', 'apps', 'api', 'src');
 
 const ASSETS = [
-  { src: join(ROOT, 'src', 'modules', 'email', 'templates'), dst: join(DIST_API, 'modules', 'email', 'templates') },
-  { src: join(ROOT, 'src', 'modules', 'import', 'column-mappings'), dst: join(DIST_API, 'modules', 'import', 'column-mappings') },
+  {
+    src: join(ROOT, 'src', 'modules', 'email', 'templates'),
+    dst: join(DIST_API, 'modules', 'email', 'templates'),
+  },
+  {
+    src: join(ROOT, 'src', 'modules', 'import', 'column-mappings'),
+    dst: join(DIST_API, 'modules', 'import', 'column-mappings'),
+  },
 ];
 
 for (const { src, dst } of ASSETS) {

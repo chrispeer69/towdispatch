@@ -92,9 +92,9 @@ describeIfDb('Company Profile (PATCH /tenants/current)', () => {
     expect(tenant.settings.brand_color).toBe('#FF5500');
     expect(tenant.settings.federal_ein).toBe(FULL_SETTINGS.federal_ein);
     expect(tenant.settings.timezone).toBe(FULL_SETTINGS.timezone);
-    expect(
-      (tenant.settings.physical_address as { city?: string } | undefined)?.city,
-    ).toBe(FULL_SETTINGS.physical_address.city);
+    expect((tenant.settings.physical_address as { city?: string } | undefined)?.city).toBe(
+      FULL_SETTINGS.physical_address.city,
+    );
   });
 
   it('name patch is independent from settings', async () => {

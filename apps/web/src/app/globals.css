@@ -209,7 +209,7 @@ body {
    spec. */
 @layer utilities {
   .nums-tabular {
-    font-feature-settings: 'tnum' 1;
+    font-feature-settings: "tnum" 1;
   }
 }
 
@@ -221,7 +221,7 @@ body {
   background-position: -1px -1px;
 }
 
-. {
+.bg-orange-glow-radial {
   background: radial-gradient(
     ellipse at center,
     var(--orange-glow-radial-rgba) 0%,

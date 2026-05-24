@@ -10,8 +10,8 @@
  * accepted_count, contribution_cents } }.
  */
 import { bigint, integer, jsonb, pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { tenants } from './tenants';
 import { date } from 'drizzle-orm/pg-core';
+import { tenants } from './tenants';
 
 export const dynamicPricingPulseDaily = pgTable(
   'dynamic_pricing_pulse_daily',
