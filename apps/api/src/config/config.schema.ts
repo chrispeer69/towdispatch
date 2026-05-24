@@ -305,6 +305,16 @@ export const configSchema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
 
+  // Repo Compliance (Session 50).
+  // REPO_ADVANCE_CRON_ENABLED gates the nightly repo-advance sweep (03:30 tick
+  // that flags response-overdue required notices). OBSERVATION-ONLY: it never
+  // sends notices, advances a case, or releases property. Default false so
+  // dev/CI don't write timeline rows against seed data.
+  REPO_ADVANCE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+
   // Multi-Region (Session 44) — active-active foundation.
   // Defaults make every existing single-region deploy a no-op: us-east /
   // primary, no read replica, no peer healthcheck. A deploy becomes the
