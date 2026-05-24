@@ -42,36 +42,25 @@ const nextConfig = {
   },
 };
 
-// Wrap with Sentry. Source-map upload runs ONLY when SENTRY_AUTH_TOKEN is set
-// (CI/deploy); a local/tokenless build skips upload and is otherwise
-// unaffected. The runtime SDK is DSN-gated in the instrumentation files, so
-// this wrapper is a no-op at runtime when SENTRY_DSN is empty.
-const hasSentryAuth = Boolean(process.env.SENTRY_AUTH_TOKEN);
-
-export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: !process.env.CI,
-  sourcemaps: { disable: !hasSentryAuth },
-  widenClientFileUpload: true,
-  disableLogger: true,
-  telemetry: false,
-});
-export default withNextIntl(nextConfig);
+// Compose next-intl (per-request locale resolution) then Sentry. Source-map
+// upload runs ONLY when SENTRY_AUTH_TOKEN is set (CI/deploy); a tokenless build
+// (PR / e2e / local) skips upload and is otherwise unaffected. The runtime SDK
+// is DSN-gated in the instrumentation files, so the wrapper is a no-op at
+// runtime when the DSN is empty.
 /** @type {import('@sentry/nextjs').SentryBuildOptions} */
 const sentryBuildOptions = {
-  silent: true,
+  silent: !process.env.CI,
   // R-06: route the browser SDK's transport through the Next server so
   // ad-blockers (which block sentry.io directly) don't drop error reports.
   tunnelRoute: '/monitoring',
   // Source-map upload needs org/project/token (set in prod CI/CD only).
-  // Without a token, skip upload so PR + e2e + local builds stay offline-safe.
   sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
   ...(process.env.SENTRY_ORG ? { org: process.env.SENTRY_ORG } : {}),
   ...(process.env.SENTRY_PROJECT_WEB ? { project: process.env.SENTRY_PROJECT_WEB } : {}),
   ...(process.env.SENTRY_AUTH_TOKEN ? { authToken: process.env.SENTRY_AUTH_TOKEN } : {}),
   widenClientFileUpload: true,
+  disableLogger: true,
+  telemetry: false,
 };
 
-export default withSentryConfig(nextConfig, sentryBuildOptions);
+export default withSentryConfig(withNextIntl(nextConfig), sentryBuildOptions);
