@@ -242,9 +242,13 @@ ALTER TABLE webhook_deliveries DROP CONSTRAINT IF EXISTS webhook_deliveries_stat
 ALTER TABLE webhook_deliveries ADD CONSTRAINT webhook_deliveries_status_chk
   CHECK (status IN ('pending', 'delivering', 'delivered', 'failed'));
 
-ALTER TABLE webhook_deliveries DROP CONSTRAINT IF EXISTS webhook_deliveries_attempt_nonneg;
+-- Constraint only applies if the "attempt" column exists (S29 schema).
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'webhook_deliveries' AND column_name = 'attempt') THEN
 ALTER TABLE webhook_deliveries ADD CONSTRAINT webhook_deliveries_attempt_nonneg
   CHECK (attempt >= 0 AND attempt <= max_attempts);
+END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS webhook_deliveries_tenant_endpoint_idx
   ON webhook_deliveries (tenant_id, endpoint_id, created_at)
