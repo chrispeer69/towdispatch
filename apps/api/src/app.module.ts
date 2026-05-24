@@ -49,6 +49,7 @@ import { PaymentsModule } from './modules/payments/payments.module.js';
 import { PublicApiModule } from './modules/public-api/public-api.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
+import { RepoModule } from './modules/repo/repo.module.js';
 import { ReportingModule } from './modules/reporting/reporting.module.js';
 import { ServiceCatalogModule } from './modules/service-catalog/service-catalog.module.js';
 import { ServiceRatesModule } from './modules/service-rates/service-rates.module.js';
@@ -106,6 +107,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     ImpoundModule,
     HeavyDutyModule,
     LienProcessingModule,
+    RepoModule,
     EvRecoveryModule,
     VoiceDriverModule,
     PublicApiModule,

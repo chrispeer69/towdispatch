@@ -37,6 +37,7 @@ export const jobServiceTypeValues = [
   'winch',
   'recovery',
   'impound',
+  'repo',
   'other',
 ] as const;
 export type JobServiceType = (typeof jobServiceTypeValues)[number];

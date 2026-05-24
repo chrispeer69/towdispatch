@@ -146,3 +146,13 @@ export * from './scim-tokens';
 export * from './sso-login-audit';
 export * from './scim-groups';
 export * from './scim-group-members';
+// Repossession Workflow (Session 49) — lienholder book + case lifecycle
+// (attempts, recovery, personal property, condition photos). Distinct legal
+// posture from impound (S22) and lien sale (S23/S35). Tables in
+// packages/db/sql/0051_repo_workflow.sql.
+export * from './lienholders';
+export * from './repo-cases';
+export * from './repo-location-attempts';
+export * from './repo-recovery-events';
+export * from './repo-personal-property';
+export * from './repo-condition-photos';

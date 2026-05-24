@@ -571,6 +571,16 @@ export const configSchema = z.object({
     .string()
     .min(32, 'SSO_TOKEN_ENCRYPTION_KEY must be 32+ chars')
     .default('change-me-sso-token-encryption-key-please-rotate-in-prod'),
+
+  // Repossession Workflow (Session 49). REPO_MODULE_ENABLED real-gates the
+  // /repo-cases + /lienholders surface — when false (default) every controller
+  // returns 503 repo_module_disabled. Default false: the module ships dark and
+  // ops flips it on per environment. The 'repo' job service_type and the
+  // repo_case_id column are inert without it. See SESSION_49_DECISIONS.md.
+  REPO_MODULE_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

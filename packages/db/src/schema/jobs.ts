@@ -67,6 +67,7 @@ export const jobServiceTypeValues = [
   'winch',
   'recovery',
   'impound',
+  'repo',
   'other',
 ] as const;
 export type JobServiceType = (typeof jobServiceTypeValues)[number];
@@ -159,6 +160,16 @@ export const jobs = pgTable(
       .notNull()
       .default('none'),
 
+    /**
+     * Repossession Workflow linkage (Session 49). Set when a dispatcher
+     * creates a `repo` service_type job from a repo_case; the case row drives
+     * the prefill (debtor as customer, lienholder as payer, no signature/SMS).
+     * Null for every non-repo job. FK lives in 0051_repo_workflow.sql; left
+     * uncoupled here like dispatchYardId / tierOfferId to avoid a core→feature
+     * schema import cycle.
+     */
+    repoCaseId: uuid('repo_case_id'),
+
     notes: text('notes'),
 
     cancelledReason: text('cancelled_reason'),
@@ -197,6 +208,10 @@ export const jobs = pgTable(
     tenantTierOfferEnforcementIdx: index('jobs_tenant_tier_offer_enforcement_idx')
       .on(t.tenantId, t.tierOfferEnforcementStatus)
       .where(sql`tier_offer_enforcement_status <> 'none'`),
+    // Repo Workflow (Session 49): the handful of jobs linked to a repo case.
+    tenantRepoCaseIdx: index('jobs_tenant_repo_case_idx')
+      .on(t.tenantId, t.repoCaseId)
+      .where(sql`repo_case_id IS NOT NULL`),
   }),
 );
 

@@ -234,6 +234,7 @@ export function serviceTypeLabel(s: JobServiceType): string {
     winch: 'Winch service',
     recovery: 'Recovery service',
     impound: 'Impound tow',
+    repo: 'Repossession',
     other: 'Service',
   };
   return map[s];

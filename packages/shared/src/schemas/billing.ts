@@ -50,6 +50,10 @@ export const invoiceLineItemTypeValues = [
   'equipment_surcharge',
   'environmental',
   'storage_daily',
+  // Repossession Workflow (Session 49): repo recovery reuses 'recovery' and
+  // repo storage reuses 'storage_daily'; these two are repo-specific.
+  'skip_trace',
+  'repo_attempt',
   'admin',
   'discount',
   'custom',

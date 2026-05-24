@@ -219,6 +219,10 @@ export class ConfigService {
   get voiceDriverEnabled(): boolean {
     return this.config.VOICE_DRIVER_ENABLED;
   }
+  /** Repossession Workflow (Session 49) — master gate; off ⇒ surface 503s. */
+  get repoModuleEnabled(): boolean {
+    return this.config.REPO_MODULE_ENABLED;
+  }
   get voiceDriverConfidenceMin(): number {
     return this.config.VOICE_DRIVER_CONFIDENCE_MIN;
   }

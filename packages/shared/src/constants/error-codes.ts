@@ -76,6 +76,12 @@ export const ERROR_CODES = {
   SCIM_TOKEN_INVALID: 'scim_token_invalid',
   SCIM_FILTER_UNSUPPORTED: 'scim_filter_unsupported',
 
+  // Repossession Workflow (Session 49)
+  REPO_CASE_INVALID_STATE: 'repo_case_invalid_state',
+  REPO_CASE_DUPLICATE_NUMBER: 'repo_case_duplicate_number',
+  REPO_MODULE_DISABLED: 'repo_module_disabled',
+  LIENHOLDER_IN_USE: 'lienholder_in_use',
+
   // 5xx
   INTERNAL_ERROR: 'internal_error',
   SERVICE_UNAVAILABLE: 'service_unavailable',
