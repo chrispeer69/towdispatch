@@ -66,6 +66,12 @@ export * from './impound-fees';
 export * from './impound-releases';
 export * from './commission-rules';
 export * from './reporting';
+// Lien Processing (Session 23) — statutory lien-sale workflow for unclaimed
+// impounded vehicles. Tables in packages/db/sql/0038_lien_processing.sql.
+export * from './lien-state-rules';
+export * from './lien-cases';
+export * from './lien-notices';
+export * from './lien-timeline-events';
 // EV-Specific Recovery Workflows (Session 48) — EV-aware recovery layer over
 // the jobs module. Tables in packages/db/sql/0042_ev_recovery.sql.
 export * from './ev-oem-procedures';
