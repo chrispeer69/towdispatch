@@ -260,6 +260,29 @@ export const configSchema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
 
+  // Multi-Region (Session 44) — active-active foundation.
+  // Defaults make every existing single-region deploy a no-op: us-east /
+  // primary, no read replica, no peer healthcheck. A deploy becomes the
+  // secondary by setting REGION_ID=us-west and REGION_ROLE=secondary.
+  REGION_ID: z.enum(['us-east', 'us-west']).default('us-east'),
+  REGION_ROLE: z.enum(['primary', 'secondary']).default('primary'),
+  // Origin of the OTHER region's API (e.g. https://api-west.ustowdispatch.cloud).
+  // Used to (a) build the Location header on write-redirect 503s and (b) probe
+  // the peer in GET /admin/region-status. Unset = peer unknown (single region).
+  // Left .optional() WITHOUT a '' default on purpose: z.string().url() rejects
+  // '' (Zod re-validates defaults), which would crash the boot of every
+  // single-region deploy. The config.service getter coerces undefined → ''.
+  PRIMARY_REGION_HEALTHCHECK_URL: z.string().url().optional(),
+  // Read-replica connection string. When unset (default) reads use the primary
+  // pool — fully backwards-compatible. When set AND distinct from DATABASE_URL,
+  // a separate replica pool is created and opted-in read-only queries route to
+  // it. The app_user credential swap (APP_USER_PASSWORD) applies to this URL too.
+  DATABASE_READ_URL: z.string().url().optional(),
+  // Replication-lag threshold (seconds) above which failover tooling / Sentry
+  // should alert. Config only this session — alert wiring depends on Railway
+  // metrics (see infra/architecture.md). RPO target.
+  REPLICATION_LAG_ALERT_SECONDS: z.coerce.number().int().min(1).default(60),
+
   // EV-Specific Recovery Workflows (Session 48).
   // EV_RECOVERY_ENABLED is an ops kill-switch placeholder for the EV-aware
   // recovery surface (intake, OEM lookup, thermal events, charge stops). No

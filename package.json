@@ -26,6 +26,8 @@
     "db:seed:demo": "pnpm --filter @ustowdispatch/db run seed:demo",
     "db:studio": "pnpm --filter @ustowdispatch/db run studio",
     "db:reset": "pnpm --filter @ustowdispatch/db run reset",
+    "ops:failover-check": "tsx scripts/ops/failover-check.ts",
+    "ops:promote-secondary": "tsx scripts/ops/promote-secondary.ts",
     "prepare": "husky"
   },
   "devDependencies": {
