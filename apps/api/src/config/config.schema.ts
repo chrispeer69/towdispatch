@@ -303,6 +303,19 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+
+  // Voice-Controlled Driver Workflows (Session 45).
+  // VOICE_DRIVER_ENABLED real-gates the /voice-driver/command surface — when
+  // false the controller returns 503. Default false: the feature ships dark
+  // and ops flips it on per environment once the native apps are wired. See
+  // SESSION_45_DECISIONS.md.
+  VOICE_DRIVER_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  // Minimum parser confidence (0–1) to act on a recognized intent; below it
+  // the command is downgraded to 'clarify' and the driver is asked to repeat.
+  VOICE_DRIVER_CONFIDENCE_MIN: z.coerce.number().min(0).max(1).default(0.75),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

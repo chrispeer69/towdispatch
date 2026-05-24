@@ -11,3 +11,6 @@ export * from './ev-recovery/index';
 // contracts (capabilities, certs, job attributes, rate sheets, eligibility,
 // reports).
 export * from './heavy-duty/index';
+// Voice-Controlled Driver Workflows (Session 45) — CarPlay / Android Auto
+// hands-free job-action contracts (12-intent catalog, command request/response).
+export * from './voice-driver/index';
