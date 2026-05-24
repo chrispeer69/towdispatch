@@ -50,7 +50,7 @@ const originalGlobals = {
 beforeEach(() => {
   const storage = fakeStorage();
   // @ts-expect-error -- minimal Window mock for module-under-test
-  globalThis.window = { localStorage: storage };
+  globalThis.window = { localStorage: storage, location: { hostname: 'localhost' } };
   // @ts-expect-error -- match-browser API
   globalThis.localStorage = storage;
   // crypto.randomUUID is required by enqueueAction.
