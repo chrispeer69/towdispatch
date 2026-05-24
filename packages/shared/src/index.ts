@@ -5,3 +5,5 @@ export * from './types/index';
 export * from './lien-processing/index';
 // Multi-Region (Session 44) — region identity, health, and status contracts.
 export * from './region/index';
+// EV-Specific Recovery Workflows (Session 48).
+export * from './ev-recovery/index';

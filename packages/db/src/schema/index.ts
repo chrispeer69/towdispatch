@@ -72,3 +72,9 @@ export * from './lien-state-rules';
 export * from './lien-cases';
 export * from './lien-notices';
 export * from './lien-timeline-events';
+// EV-Specific Recovery Workflows (Session 48) — EV-aware recovery layer over
+// the jobs module. Tables in packages/db/sql/0042_ev_recovery.sql.
+export * from './ev-oem-procedures';
+export * from './ev-job-attributes';
+export * from './ev-thermal-events';
+export * from './ev-charge-station-visits';

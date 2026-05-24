@@ -26,6 +26,7 @@ import { DispatchModule } from './modules/dispatch/dispatch.module.js';
 import { DriverExperienceModule } from './modules/driver-experience/driver-experience.module.js';
 import { DynamicPricingModule } from './modules/dynamic-pricing/dynamic-pricing.module.js';
 import { EmailModule } from './modules/email/email.module.js';
+import { EvRecoveryModule } from './modules/ev-recovery/ev-recovery.module.js';
 import { FleetModule } from './modules/fleet/fleet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ImportModule } from './modules/import/import.module.js';
@@ -90,6 +91,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     ImportModule,
     ImpoundModule,
     LienProcessingModule,
+    EvRecoveryModule,
     DashboardModule,
     ReportingModule,
     HealthModule,
