@@ -1,0 +1,4 @@
+# Committed Type II evidence sets land here as compliance/evidence/automated/<YYYY-MM-DD>/
+# (one <collector>.json per control + manifest.json). Written by `pnpm compliance:collect`
+# and committed daily by .github/workflows/compliance-evidence.yml. Git history is the
+# 18-month retention store. PII CSVs go to ../generated/ (git-ignored), never here.

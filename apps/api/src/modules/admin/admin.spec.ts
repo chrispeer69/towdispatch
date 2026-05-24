@@ -21,6 +21,7 @@ import { REDACTED } from './audit-redaction.js';
 function thenable<T>(result: T) {
   const b = {
     from: () => b,
+    innerJoin: () => b,
     where: () => b,
     orderBy: () => b,
     limit: () => b,
@@ -94,6 +95,80 @@ describe('AdminService.queryAuditLog', () => {
     expect(result.data[0]?.afterState?.name).toBe('New');
     // No secret value leaks anywhere in the payload.
     expect(JSON.stringify(result)).not.toContain('SECRET');
+  });
+});
+
+describe('AdminService.queryAnomalies', () => {
+  it('tenant-scopes, classifies audit signals, and maps failed-login spikes', async () => {
+    // Admin DELETE at 23:00 UTC → both an admin-delete and off-hours activity.
+    const auditRows = [
+      {
+        id: 'ev1',
+        actorId: 'admin-1',
+        action: 'DELETE' as const,
+        resourceType: 'jobs',
+        resourceId: 'job-1',
+        createdAt: new Date('2026-05-24T23:00:00.000Z'),
+        actorEmail: 'admin@acme.test',
+        actorRole: 'admin',
+      },
+    ];
+    const spikeRows = [
+      {
+        userId: 'user-9',
+        email: 'locked@acme.test',
+        role: 'dispatcher',
+        failedLoginCount: 7,
+        lockedUntil: new Date('2026-05-24T23:30:00.000Z'),
+      },
+    ];
+
+    const holder: { ctx: { tenantId: string } | null } = { ctx: null };
+    const select = vi
+      .fn()
+      .mockImplementationOnce(() => thenable(auditRows))
+      .mockImplementationOnce(() => thenable(spikeRows));
+    const db = {
+      runInTenantContext: vi.fn(
+        async (ctx: { tenantId: string }, work: (tx: unknown) => unknown) => {
+          holder.ctx = ctx;
+          return work({ select });
+        },
+      ),
+    } as unknown as TenantAwareDb;
+
+    const result = await new AdminService(db).queryAnomalies(
+      {
+        tenantId: 'tenant-1',
+        userId: 'user-1',
+        requestId: 'req-1',
+        ipAddress: null,
+        userAgent: null,
+      },
+      {
+        windowDays: 7,
+        offHoursStartUtc: 22,
+        offHoursEndUtc: 6,
+        failedLoginThreshold: 5,
+        limit: 200,
+      },
+    );
+
+    expect(holder.ctx?.tenantId).toBe('tenant-1');
+    expect(result.adminDeletes).toHaveLength(1);
+    expect(result.adminDeletes[0]?.actorEmail).toBe('admin@acme.test');
+    expect(result.offHoursAdminActivity).toHaveLength(1);
+    expect(result.offHoursAdminActivity[0]?.hourUtc).toBe(23);
+    expect(result.failedLoginSpikes[0]).toMatchObject({
+      email: 'locked@acme.test',
+      failedLoginCount: 7,
+    });
+    expect(result.summary).toEqual({
+      adminDeletes: 1,
+      offHoursAdminActivity: 1,
+      failedLoginSpikes: 1,
+      truncated: false,
+    });
   });
 });
 

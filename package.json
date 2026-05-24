@@ -17,9 +17,12 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "pnpm -r run typecheck",
-    "test": "pnpm -r run test",
+    "test": "pnpm -r run test && vitest run",
     "test:e2e": "pnpm --filter @ustowdispatch/web run test:e2e",
     "compliance:check": "tsx scripts/compliance/check.ts",
+    "compliance:collect": "tsx scripts/compliance/collect-evidence.ts",
+    "compliance:type2-check": "tsx scripts/compliance/type2-check.ts",
+    "test:scripts": "vitest run",
     "smoke:prod": "pnpm --filter @ustowdispatch/e2e run smoke:prod",
     "db:generate": "pnpm --filter @ustowdispatch/db run generate",
     "db:migrate": "pnpm --filter @ustowdispatch/db run migrate",
@@ -40,7 +43,8 @@
     "rimraf": "6.0.1",
     "tsx": "4.19.2",
     "typescript": "5.6.3",
-    "@types/pg": "8.11.10"
+    "@types/pg": "8.11.10",
+    "vitest": "2.1.6"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,md}": ["biome check --write --no-errors-on-unmatched"]

@@ -1,0 +1,62 @@
+name: Compliance Evidence
+
+# SOC 2 Type II continuous evidence collection (Session 40).
+# Runs daily at 04:00 UTC and commits the dated evidence set under
+# compliance/evidence/automated/<date>/, so the git history is the 18-month
+# retention store (see SESSION_40_DECISIONS.md D4/D5).
+#
+# Env-gated: the scheduled job only does work when the repo variable
+# COMPLIANCE_EVIDENCE_CRON_ENABLED == 'true' (default off). Flip it on in
+# Settings → Secrets and variables → Actions → Variables when the audit window
+# opens. workflow_dispatch always runs (manual collection on demand).
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compliance-evidence
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: Collect evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Manual dispatch always runs; the scheduled tick is gated by the repo var.
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.COMPLIANCE_EVIDENCE_CRON_ENABLED == 'true' }}
+    env:
+      # Sources the collectors read; unset ones SKIP cleanly (non-fatal).
+      DATABASE_ADMIN_URL: ${{ secrets.COMPLIANCE_DATABASE_ADMIN_URL }}
+      BACKUP_STATUS_URL: ${{ secrets.COMPLIANCE_BACKUP_STATUS_URL }}
+      MONITORING_HEALTH_URL: ${{ secrets.COMPLIANCE_MONITORING_HEALTH_URL }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Collect evidence
+        # Non-strict: WARN/SKIP are non-fatal; a hard FAIL (e.g. a PAN leak) exits 1.
+        run: pnpm compliance:collect
+
+      - name: Commit evidence
+        run: |
+          git config user.name "compliance-bot"
+          git config user.email "compliance-bot@users.noreply.github.com"
+          git add compliance/evidence/automated
+          if git diff --cached --quiet; then
+            echo "No new evidence to commit."
+          else
+            git commit -m "chore(compliance): automated evidence $(date -u +%F)"
+            git push
+          fi

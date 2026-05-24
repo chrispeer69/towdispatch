@@ -28,8 +28,32 @@ subprocessor. Each vendor's own SOC 2 / ISO report is collected and filed.
 - **Sub-processor changes**: a new subprocessor requires a CTO-approved risk
   review (CC9.2) and an update to this file before production use.
 
+## Subprocessor SOC report tracking (Type II — Session 40)
+
+For SOC 2 Type II we must show vendor risk review *operated* over the window:
+each critical/high subprocessor's own attestation is collected and kept current.
+`next_review_at` is the trigger for the annual re-collection (CC9.2).
+
+| Vendor | Report type | last_soc_report_received_at | expires_at | next_review_at |
+|---|---|---|---|---|
+| Railway | SOC 2 Type II | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+| Stripe | PCI DSS L1 AOC + SOC 2 | 2026-05-24 | 2027-04-30 | 2027-03-01 |
+| SendGrid (Twilio) | SOC 2 Type II | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+| Twilio | SOC 2 Type II | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+| Sentry | SOC 2 Type II | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+| Mapbox | SOC 2 Type II | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+| GitHub | SOC 2 Type II | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+| Intuit QBO | SOC 2 | 2026-05-24 | 2027-03-31 | 2027-02-01 |
+
+> Dates are placeholders set at inventory creation; replace `*_received_at` with
+> the actual collection date and `expires_at` with the report's stated coverage
+> end when each report is filed. Collected reports are stored under
+> `compliance/evidence/vendors/<vendor>/<year>/` (access restricted; retention
+> ≥ 18 months). A report past `expires_at` without a refresh is a CC9.2 finding.
+
 ## Review log
 
 | Date | Reviewer | Notes |
 |---|---|---|
 | 2026-05-24 | CTO | Initial inventory for SOC 2 Type I (Session 31). |
+| 2026-05-24 | CTO | Added SOC report tracking (received/expires/next-review) for Type II; PCI SAQ A-EP scope assessed (Session 40). |
