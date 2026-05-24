@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>You've been outbid</title>
+  </head>
+  <body style="margin:0;padding:0;background:{{steel}};font-family:'Helvetica Neue',Arial,sans-serif;color:#F0EDE8;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:{{steel}};padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="background:#252A38;border:1px solid #3A4158;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="padding:24px 28px;border-bottom:1px solid #3A4158;font-size:16px;font-weight:800;letter-spacing:0.04em;color:#F0EDE8;">
+                {{productName}} <span style="color:{{orange}};">Marketplace</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 28px;font-size:15px;line-height:1.6;color:#F0EDE8;">
+                <p style="margin:0 0 16px;font-size:20px;font-weight:700;">You've been outbid, {{recipientName}}.</p>
+                <p style="margin:0 0 16px;">A higher bid of <strong>{{newHighFormatted}}</strong> was placed on <strong>{{listingLabel}}</strong>. There's still time to bid again.</p>
+                <p style="margin:24px 0;text-align:center;">
+                  <a href="{{listingUrl}}" style="display:inline-block;background:{{orange}};color:#FFFFFF;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:10px;">Place a new bid</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

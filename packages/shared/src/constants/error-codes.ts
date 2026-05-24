@@ -46,6 +46,13 @@ export const ERROR_CODES = {
    */
   PIN_NOT_SET: 'pin_not_set',
 
+  // Auction & Remarketing Marketplace (Session 33).
+  AUCTION_BID_TOO_LOW: 'auction_bid_too_low',
+  AUCTION_NOT_LIVE: 'auction_not_live',
+  AUCTION_ENDED: 'auction_ended',
+  BIDDER_EMAIL_NOT_VERIFIED: 'bidder_email_not_verified',
+  BIDDER_BLOCKED: 'bidder_blocked',
+
   // 5xx
   INTERNAL_ERROR: 'internal_error',
   SERVICE_UNAVAILABLE: 'service_unavailable',

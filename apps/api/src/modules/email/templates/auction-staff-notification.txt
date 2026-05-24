@@ -1,0 +1,11 @@
+{{headline}}
+
+Hi {{recipientName}},
+
+{{message}}
+
+Listing: {{listingLabel}}
+
+Open in dashboard: {{listingUrl}}
+
+— {{productName}} Auctions

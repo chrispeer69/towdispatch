@@ -1,0 +1,8 @@
+You've been outbid, {{recipientName}}.
+
+A higher bid of {{newHighFormatted}} was placed on {{listingLabel}}.
+There's still time to bid again:
+
+  {{listingUrl}}
+
+— {{productName}} Marketplace

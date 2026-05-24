@@ -15,6 +15,7 @@ import { AccountingModule } from './modules/accounting/accounting.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { ArModule } from './modules/ar/ar.module.js';
+import { AuctionModule } from './modules/auction/auction.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
@@ -102,6 +103,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     VoiceDriverModule,
     PublicApiModule,
     CustomerPortalModule,
+    AuctionModule,
     DashboardModule,
     ReportingModule,
     AdminModule,

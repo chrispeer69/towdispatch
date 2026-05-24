@@ -405,6 +405,121 @@ export class EmailService {
     return this.attemptSend({ to, subject, html, text, template: 'diagnostic' });
   }
 
+  // ====== Auction & Remarketing Marketplace (Session 33) ======
+
+  async sendBidderVerificationEmail(opts: {
+    to: string;
+    name: string;
+    verifyUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Confirm your email to start bidding on ${BRAND.productName}`,
+      template: 'auction-bidder-verification',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.name,
+        verifyUrl: this.absolute(opts.verifyUrl),
+      },
+    });
+  }
+
+  async sendAuctionBidPlacedEmail(opts: {
+    to: string;
+    bidderName: string;
+    listingLabel: string;
+    bidAmountFormatted: string;
+    listingUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `Bid confirmed — ${opts.listingLabel}`,
+      template: 'auction-bidder-bid-placed',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.bidderName,
+        listingLabel: opts.listingLabel,
+        bidAmountFormatted: opts.bidAmountFormatted,
+        listingUrl: this.absolute(opts.listingUrl),
+      },
+    });
+  }
+
+  async sendAuctionOutbidEmail(opts: {
+    to: string;
+    bidderName: string;
+    listingLabel: string;
+    newHighFormatted: string;
+    listingUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `You've been outbid — ${opts.listingLabel}`,
+      template: 'auction-bidder-outbid',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.bidderName,
+        listingLabel: opts.listingLabel,
+        newHighFormatted: opts.newHighFormatted,
+        listingUrl: this.absolute(opts.listingUrl),
+      },
+    });
+  }
+
+  async sendAuctionResultEmail(opts: {
+    to: string;
+    bidderName: string;
+    listingLabel: string;
+    won: boolean;
+    amountFormatted: string;
+    listingUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: opts.won
+        ? `You won — ${opts.listingLabel}`
+        : `Auction closed — ${opts.listingLabel}`,
+      template: 'auction-bidder-result',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.bidderName,
+        listingLabel: opts.listingLabel,
+        won: opts.won,
+        amountFormatted: opts.amountFormatted,
+        listingUrl: this.absolute(opts.listingUrl),
+      },
+    });
+  }
+
+  async sendAuctionStaffNotificationEmail(opts: {
+    to: string;
+    staffName: string;
+    headline: string;
+    message: string;
+    listingLabel: string;
+    listingUrl: string;
+  }): Promise<void> {
+    await this.send({
+      to: opts.to,
+      subject: `${opts.headline} — ${opts.listingLabel}`,
+      template: 'auction-staff-notification',
+      variables: {
+        ...this.brand(),
+        recipientName: opts.staffName,
+        headline: opts.headline,
+        message: opts.message,
+        listingLabel: opts.listingLabel,
+        listingUrl: this.absolute(opts.listingUrl),
+      },
+    });
+  }
+
+  /** Make a relative app path absolute against WEB_PUBLIC_URL for emails. */
+  private absolute(path: string): string {
+    if (path.startsWith('http')) return path;
+    return `${this.config.webPublicUrl.replace(/\/$/, '')}${path}`;
+  }
+
   private async send(args: SendArgs): Promise<void> {
     const { html, text } = this.renderer.render(args.template, args.variables);
     const result = await this.attemptSend({

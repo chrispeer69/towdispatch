@@ -1,0 +1,8 @@
+Bid confirmed, {{recipientName}}.
+
+Your bid of {{bidAmountFormatted}} on {{listingLabel}} is in. We'll email
+you if you're outbid or when the auction closes.
+
+View listing: {{listingUrl}}
+
+— {{productName}} Marketplace

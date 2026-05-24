@@ -164,6 +164,15 @@ export class ConfigService {
     audience: string;
   } {
     // Domain-separate the access/refresh/mfa/driver/portal secrets from a
+    bidderSecret: string;
+    accessTtl: string;
+    refreshTtl: string;
+    driverTtl: string;
+    bidderTtl: string;
+    issuer: string;
+    audience: string;
+  } {
+    // Domain-separate the access/refresh/mfa/driver/bidder secrets from a
     // single JWT_SECRET so an attacker who somehow obtained a refresh-token
     // forgery oracle can't trivially mint access tokens. Explicit
     // overrides win when set.
@@ -178,6 +187,11 @@ export class ConfigService {
       refreshTtl: this.config.JWT_REFRESH_TTL,
       driverTtl: this.config.JWT_DRIVER_TTL,
       portalTtl: this.config.JWT_PORTAL_TTL,
+      bidderSecret: this.config.JWT_BIDDER_SECRET || `${base}::bidder`,
+      accessTtl: this.config.JWT_ACCESS_TTL,
+      refreshTtl: this.config.JWT_REFRESH_TTL,
+      driverTtl: this.config.JWT_DRIVER_TTL,
+      bidderTtl: this.config.JWT_BIDDER_TTL,
       issuer: this.config.JWT_ISSUER,
       audience: this.config.JWT_AUDIENCE,
     };
@@ -185,6 +199,13 @@ export class ConfigService {
   /** White-Label Customer Portal (Session 32). */
   get portal(): { baseDomain: string } {
     return { baseDomain: this.config.PORTAL_BASE_DOMAIN };
+
+  /**
+   * Auction & Remarketing Marketplace (Session 33). `cronEnabled` gates the
+   * lifecycle cron body so dev/CI don't mutate seed listings every tick.
+   */
+  get auction(): { cronEnabled: boolean } {
+    return { cronEnabled: this.config.AUCTION_LIFECYCLE_CRON_ENABLED };
   }
   get totpEncryptionKey(): string {
     return this.config.TOTP_ENCRYPTION_KEY;
