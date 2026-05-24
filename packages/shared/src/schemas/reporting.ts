@@ -25,6 +25,7 @@ export const reportIdValues = [
   'commission',
   'tax',
   'compliance',
+  'ev-recovery',
 ] as const;
 export type ReportId = (typeof reportIdValues)[number];
 
@@ -174,6 +175,7 @@ export const reportTitles: Record<ReportId, string> = {
   commission: 'Commission',
   tax: 'Tax',
   compliance: 'Compliance',
+  'ev-recovery': 'EV Recovery',
 };
 
 export const reportShortDescriptions: Record<ReportId, string> = {
@@ -186,4 +188,6 @@ export const reportShortDescriptions: Record<ReportId, string> = {
   commission: 'Per-driver commission with full per-job audit trail and pay-period summaries.',
   tax: 'Sales tax collected by jurisdiction, exemption activity, monthly/quarterly export.',
   compliance: 'HOS exposure, expired credentials, missing COIs, hold-vehicle aging.',
+  'ev-recovery':
+    'EV jobs by month, thermal events by severity, charge stops and reimbursable cost.',
 };

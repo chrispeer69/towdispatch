@@ -56,6 +56,14 @@ const REPORT_ROLES: Record<ReportId, Role[]> = {
   ],
   tax: [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTING, ROLES.AUDITOR],
   compliance: [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER, ROLES.AUDITOR],
+  'ev-recovery': [
+    ROLES.OWNER,
+    ROLES.ADMIN,
+    ROLES.MANAGER,
+    ROLES.DISPATCHER,
+    ROLES.ACCOUNTING,
+    ROLES.AUDITOR,
+  ],
 };
 
 export function rolesForReport(id: ReportId): Role[] {

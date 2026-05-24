@@ -53,6 +53,7 @@ const DIMENSIONS: Record<ReportId, Array<{ key: string; label: string }>> = {
   commission: [{ key: 'driverId', label: 'Driver ID' }],
   tax: [{ key: 'jurisdiction', label: 'Jurisdiction' }],
   compliance: [],
+  'ev-recovery': [],
 };
 
 interface SearchParams {

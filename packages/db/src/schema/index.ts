@@ -72,6 +72,12 @@ export * from './lien-state-rules';
 export * from './lien-cases';
 export * from './lien-notices';
 export * from './lien-timeline-events';
+// EV-Specific Recovery Workflows (Session 48) — EV-aware recovery layer over
+// the jobs module. Tables in packages/db/sql/0042_ev_recovery.sql.
+export * from './ev-oem-procedures';
+export * from './ev-job-attributes';
+export * from './ev-thermal-events';
+export * from './ev-charge-station-visits';
 // Heavy-Duty Specialist (Session 36) — Class 7/8 + commercial recovery
 // layer on trucks / drivers / jobs. Tables in
 // packages/db/sql/0040_heavy_duty.sql.

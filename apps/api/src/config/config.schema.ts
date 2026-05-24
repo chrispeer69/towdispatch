@@ -283,6 +283,17 @@ export const configSchema = z.object({
   // metrics (see infra/architecture.md). RPO target.
   REPLICATION_LAG_ALERT_SECONDS: z.coerce.number().int().min(1).default(60),
 
+  // EV-Specific Recovery Workflows (Session 48).
+  // EV_RECOVERY_ENABLED is an ops kill-switch placeholder for the EV-aware
+  // recovery surface (intake, OEM lookup, thermal events, charge stops). No
+  // cron this session. Default true — the module is always wired; the flag is
+  // reserved so ops can disable the surface without a redeploy if a data
+  // issue surfaces. See SESSION_48_DECISIONS.md.
+  EV_RECOVERY_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+
   // Heavy-Duty Specialist (Session 36).
   // HD_CERT_EXPIRY_CRON_ENABLED gates the daily (04:00) HD driver
   // certification expiry sweep. Observation-only — it logs expiring /
