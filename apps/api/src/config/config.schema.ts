@@ -581,6 +581,32 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  // Customer Self-Serve Portal (Session 55) — account-less per-impound portal.
+  // CUSTOMER_PORTAL_ENABLED is the master gate: when false (default) the
+  // /self-serve/* surface returns 503 (feature ships dark, ops flips it on per
+  // environment). CUSTOMER_PORTAL_PAYMENT_ENABLED is a SEPARATE gate so the
+  // portal can launch read-only first (lookup + balance, no pay) — pay
+  // endpoints 503 when it is false. See SESSION_55_DECISIONS.md D12.
+  CUSTOMER_PORTAL_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  CUSTOMER_PORTAL_PAYMENT_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  // Session lifetime (sliding) for the signed self-serve session cookie.
+  CUSTOMER_PORTAL_SESSION_TTL_MIN: z.coerce.number().int().min(5).max(240).default(60),
+  // HMAC secret for the self-serve session cookie. Domain-separated from the
+  // JWT realms (this is NOT a JWT). When unset, derived from JWT_SECRET via a
+  // ::self-serve-portal suffix in the config getter.
+  CUSTOMER_PORTAL_SESSION_SECRET: z.string().optional(),
+  // 32+ chars; AES-256-GCM key encrypting customer_portal_id_verifications.
+  // id_last4 at rest. Distinct from the QBO/SSO keys (key separation, D7).
+  CUSTOMER_PORTAL_ID_ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'CUSTOMER_PORTAL_ID_ENCRYPTION_KEY must be 32+ chars')
+    .default('change-me-self-serve-portal-id-encryption-key-rotate-in-prod'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

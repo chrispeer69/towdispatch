@@ -36,3 +36,7 @@ export * from './sso/index';
 // Repossession Workflow (Session 49) — lienholder book + case lifecycle,
 // attempts, recovery, personal property, condition photos, billing.
 export * from './repo/index';
+
+// Customer Self-Serve Portal (Session 55) — account-less, per-impound vehicle
+// lookup + ID self-attestation + Stripe pay + release-intent contracts.
+export * from './self-serve-portal/index';
