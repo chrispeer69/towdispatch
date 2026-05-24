@@ -159,6 +159,14 @@ const SECTIONS: NavSection[] = [
         href: '/lien-cases',
         icon: Gavel,
         match: (p) => p.startsWith('/lien-cases'),
+        // Full DOT Compliance (Session 37) — FMCSA recordkeeping: carrier
+        // profile, driver qualifications, hours-of-service, drug & alcohol
+        // program, incident register, and audit-packet PDF. The page gates
+        // access by role with a friendly 403, so the link is unguarded here.
+        label: 'DOT Compliance',
+        href: '/dot',
+        icon: ShieldCheck,
+        match: (p) => p.startsWith('/dot'),
       },
     ],
   },

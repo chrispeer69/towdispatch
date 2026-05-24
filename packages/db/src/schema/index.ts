@@ -119,3 +119,11 @@ export * from './dispute-outcomes';
 export * from './damage-analyses';
 export * from './damage-findings';
 export * from './damage-comparisons';
+// Full DOT Compliance (Session 37) — carrier profile, DQ-file extension,
+// HOS logs, drug & alcohol tests, incident register. DVIR is reused from
+// the existing `dvirs` table. Tables in packages/db/sql/0040_dot_compliance.sql.
+export * from './dot-carrier-profile';
+export * from './dot-driver-qualifications';
+export * from './dot-hos-logs';
+export * from './dot-drug-alcohol-tests';
+export * from './dot-incident-reports';

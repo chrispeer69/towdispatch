@@ -18,3 +18,5 @@ export * from './voice-driver/index';
 export * from './fraud-detection/index';
 // Photo Damage Analysis (Session 42) — AI-vision damage detection contracts.
 export * from './damage-analysis/index';
+// Full DOT Compliance (Session 37) — FMCSA recordkeeping contracts.
+export * from './dot/index';
