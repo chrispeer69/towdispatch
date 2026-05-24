@@ -137,3 +137,4 @@ export * from './tax-rules';
 export * from './dispatch-recommendations';
 export * from './dispatch-outcomes';
 export * from './eta-predictions';
+export * from './notifications';

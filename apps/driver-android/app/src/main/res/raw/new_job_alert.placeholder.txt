@@ -1,0 +1,17 @@
+PLACEHOLDER — replace with a real MP3 named `new_job_alert.mp3` in this
+directory. The Session-15 build references `R.raw.new_job_alert`; the
+build will fail until an MP3 (or OGG/WAV) of that base name lives here.
+
+Recommended characteristics:
+  * 2-3 seconds long
+  * Distinct from any default Android ringtone — a klaxon, an air-horn,
+    a bold "incoming" cue
+  * Audible over road noise and a closed cab window. Reference loudness:
+    -6 LUFS integrated, peaks no higher than -1 dBFS
+  * Loops cleanly if the system replays it (not strictly required, but
+    cheap insurance — Android can repeat the sound when the notification
+    is re-posted)
+
+This file (`.placeholder.txt`) does not ship as a resource — only `.mp3`,
+`.ogg`, `.wav` files get compiled into `R.raw.*`. It exists so the
+directory is tracked in git and the build engineer knows what to drop in.

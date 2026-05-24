@@ -98,6 +98,29 @@ export class DispatchController {
   }
 
   /**
+   * Session 15 FCM-fallback poll. Hit every 15 seconds by the driver app's
+   * foreground service when no FCM message has arrived in 30 seconds.
+   * Returns assigned-but-unaccepted jobs only.
+   */
+  @Get('driver/jobs/pending')
+  @Roles(ROLES.DRIVER, ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async driverPendingJobs(@Req() req: FastifyRequest): Promise<{
+    jobs: Array<{
+      jobId: string;
+      jobNumber: string;
+      status: string;
+      serviceType: string;
+      pickup: { address: string; lat: number | null; lng: number | null };
+      customerName: string | null;
+      assignedAt: string;
+      priorityLabel: string;
+    }>;
+    serverTime: string;
+  }> {
+    return this.driverMobile.myPendingJobs(this.callerCtx(req));
+  }
+
+  /**
    * Driver-uploaded job photo (pre-tow walkaround, GOA photo, customer
    * signature, etc.). Stored as a tenant document with ownerType=job.
    */

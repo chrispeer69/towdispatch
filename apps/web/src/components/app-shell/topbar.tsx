@@ -1,7 +1,8 @@
 'use client';
 
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Bell, HelpCircle, Search } from 'lucide-react';
+import { HelpCircle, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useUser } from './session-provider';
 
@@ -33,21 +34,7 @@ export function AppTopbar(): JSX.Element {
         >
           <HelpCircle className="h-4 w-4" />
         </Link>
-        <Link
-          href="/notifications"
-          aria-label="Notifications"
-          title="Notifications"
-          className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-divider bg-bg-surface-elevated/40 text-text-secondary-on-dark transition-colors hover:text-text-primary-on-dark"
-        >
-          <Bell className="h-4 w-4" />
-          {/*
-            The hard-coded brand-primary "unread" dot was removed —
-            it was always on regardless of state, which made the bell
-            look like there was a notification to read even when the
-            feed is empty (it isn't wired yet). Restore the dot only
-            when a real unread-count is available.
-          */}
-        </Link>
+        <NotificationBell />
         <div className="flex items-center gap-2 rounded-[8px] border border-divider bg-bg-surface-elevated/40 px-2 py-1">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-primary text-xs font-extrabold text-white">
             {(user.firstName?.[0] ?? '?').toUpperCase()}

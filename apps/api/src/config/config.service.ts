@@ -543,4 +543,91 @@ export class ConfigService {
       configured: !!bucket && !!region,
     };
   }
+  get notifications(): {
+    sendgrid: {
+      apiKey: string;
+      fromEmail: string;
+      fromName: string;
+      verificationKey: string;
+      configured: boolean;
+    };
+    mailgun: {
+      apiKey: string;
+      domain: string;
+      fromEmail: string;
+      region: 'us' | 'eu';
+      configured: boolean;
+    };
+    fcm: { projectId: string; clientEmail: string; privateKey: string; configured: boolean };
+    apns: {
+      keyId: string;
+      teamId: string;
+      bundleId: string;
+      privateKey: string;
+      configured: boolean;
+    };
+    webhookSecretKey: string;
+    rateLimits: { smsHourly: number; emailHourly: number; pushHourly: number };
+    deadLetterRetentionDays: number;
+    concurrency: {
+      push: number;
+      sms: number;
+      email: number;
+      webhook: number;
+      inApp: number;
+    };
+  } {
+    const sg = {
+      apiKey: this.config.SENDGRID_API_KEY,
+      fromEmail: this.config.SENDGRID_FROM_EMAIL,
+      fromName: this.config.SENDGRID_FROM_NAME,
+      verificationKey: this.config.SENDGRID_WEBHOOK_VERIFICATION_KEY,
+      configured: !!(this.config.SENDGRID_API_KEY && this.config.SENDGRID_FROM_EMAIL),
+    };
+    const mg = {
+      apiKey: this.config.MAILGUN_API_KEY,
+      domain: this.config.MAILGUN_DOMAIN,
+      fromEmail: this.config.MAILGUN_FROM_EMAIL,
+      region: this.config.MAILGUN_REGION,
+      configured: !!(this.config.MAILGUN_API_KEY && this.config.MAILGUN_DOMAIN),
+    };
+    const fcm = {
+      projectId: this.config.FCM_PROJECT_ID,
+      clientEmail: this.config.FCM_CLIENT_EMAIL,
+      privateKey: this.config.FCM_PRIVATE_KEY,
+      configured: !!(
+        this.config.FCM_PROJECT_ID &&
+        this.config.FCM_CLIENT_EMAIL &&
+        this.config.FCM_PRIVATE_KEY
+      ),
+    };
+    const apns = {
+      keyId: this.config.APNS_KEY_ID,
+      teamId: this.config.APNS_TEAM_ID,
+      bundleId: this.config.APNS_BUNDLE_ID,
+      privateKey: this.config.APNS_PRIVATE_KEY,
+      // Intentionally false until Session 6 — adapter exists but no cert.
+      configured: false,
+    };
+    return {
+      sendgrid: sg,
+      mailgun: mg,
+      fcm,
+      apns,
+      webhookSecretKey: this.config.WEBHOOK_SECRET_ENCRYPTION_KEY,
+      rateLimits: {
+        smsHourly: this.config.NOTIFY_SMS_HOURLY_LIMIT,
+        emailHourly: this.config.NOTIFY_EMAIL_HOURLY_LIMIT,
+        pushHourly: this.config.NOTIFY_PUSH_HOURLY_LIMIT,
+      },
+      deadLetterRetentionDays: this.config.NOTIFY_DEAD_LETTER_RETENTION_DAYS,
+      concurrency: {
+        push: this.config.NOTIFY_PUSH_CONCURRENCY,
+        sms: this.config.NOTIFY_SMS_CONCURRENCY,
+        email: this.config.NOTIFY_EMAIL_CONCURRENCY,
+        webhook: this.config.NOTIFY_WEBHOOK_CONCURRENCY,
+        inApp: this.config.NOTIFY_IN_APP_CONCURRENCY,
+      },
+    };
+  }
 }
