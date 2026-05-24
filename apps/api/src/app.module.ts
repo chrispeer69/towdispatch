@@ -47,6 +47,7 @@ import { TierOffersModule } from './modules/tier-offers/tier-offers.module.js';
 import { TrackingModule } from './modules/tracking/tracking.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
+import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     HeavyDutyModule,
     LienProcessingModule,
     EvRecoveryModule,
+    VoiceDriverModule,
     DashboardModule,
     ReportingModule,
     HealthModule,

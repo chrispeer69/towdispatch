@@ -184,6 +184,12 @@ export class ConfigService {
   get mfaLoginGateEnabled(): boolean {
     return this.config.MFA_LOGIN_GATE_ENABLED;
   }
+  get voiceDriverEnabled(): boolean {
+    return this.config.VOICE_DRIVER_ENABLED;
+  }
+  get voiceDriverConfidenceMin(): number {
+    return this.config.VOICE_DRIVER_CONFIDENCE_MIN;
+  }
   get smtp(): {
     host: string;
     port: number;

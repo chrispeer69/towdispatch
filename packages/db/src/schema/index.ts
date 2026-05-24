@@ -85,3 +85,6 @@ export * from './hd-truck-capabilities';
 export * from './hd-driver-certifications';
 export * from './hd-job-attributes';
 export * from './hd-rate-sheets';
+// Voice-Controlled Driver Workflows (Session 45) — CarPlay / Android Auto
+// hands-free job actions. Audit table in packages/db/sql/0046_voice_commands.sql.
+export * from './voice-command-log';
