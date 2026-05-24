@@ -9,12 +9,12 @@ describe('isSensitiveKey', () => {
   it('flags hash/secret/password field names', () => {
     for (const k of [
       'password_hash',
-      'password_reset_token_hash',
-      'mfa_secret_encrypted',
-      'mfa_backup_codes_hash',
       'token_hash',
       'refresh_token_hash',
+      'pin_hash',
       'totp_secret_encrypted',
+      'mfa_recovery_codes',
+      'mfa_backup_codes',
       'PASSWORD_HASH',
     ]) {
       expect(isSensitiveKey(k)).toBe(true);
@@ -54,6 +54,16 @@ describe('redactState', () => {
   it('NEVER leaks a password_hash value in the output', () => {
     const out = redactState({ password_hash: 'super-secret-value' });
     expect(JSON.stringify(out)).not.toContain('super-secret-value');
+  });
+
+  it('redacts array-valued secret columns (users.mfa_recovery_codes)', () => {
+    const out = redactState({
+      email: 'owner@example.com',
+      mfa_recovery_codes: ['code-1', 'code-2', 'code-3'],
+    });
+    expect(out?.mfa_recovery_codes).toBe(REDACTED);
+    expect(out?.email).toBe('owner@example.com');
+    expect(JSON.stringify(out)).not.toContain('code-1');
   });
 
   it('recurses into nested objects and arrays', () => {

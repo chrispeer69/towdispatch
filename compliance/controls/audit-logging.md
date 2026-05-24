@@ -62,12 +62,14 @@ migration header so the auditor sees one answer in two places:
 - Filters: actor, resource type (table), resource id, action, date range;
   paginated, newest first.
 - **Secret redaction (critical):** `before_state`/`after_state` are full row
-  snapshots that can contain `password_hash`, `mfa_secret_encrypted`,
-  `token_hash`, etc. The service redacts any field whose name ends in `_hash`
-  or contains `secret`/`password` before serialization
-  (`apps/api/src/modules/admin/audit-redaction.ts`). A unit test asserts
-  `password_hash` never appears in a response. Without this, the audit reader
-  would leak the very secrets this control exists to protect.
+  snapshots that can contain `password_hash`, `totp_secret_encrypted`,
+  `mfa_recovery_codes`, `token_hash`, `pin_hash`, etc. The service redacts any
+  field whose name ends in `_hash` or contains
+  `secret`/`password`/`recovery_codes`/`backup_codes` before serialization
+  (`apps/api/src/modules/admin/audit-redaction.ts`). Unit tests assert
+  `password_hash` and the array-valued `mfa_recovery_codes` never appear in a
+  response. Without this, the audit reader would leak the very secrets this
+  control exists to protect.
 - A web viewer at `/admin/audit-log` (admin/auditor only) renders the same data.
 
 ## Retention
