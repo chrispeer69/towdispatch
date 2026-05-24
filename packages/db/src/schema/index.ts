@@ -100,3 +100,9 @@ export * from './api-idempotency-keys';
 export * from './tenant-branding';
 export * from './customer-portal-users';
 export * from './customer-portal-auth-tokens';
+// Auction & Remarketing Marketplace (Session 33) — listings, bids, bidders,
+// photos. Tables in packages/db/sql/0038_auction_marketplace.sql.
+export * from './auction-bidders';
+export * from './auction-listings';
+export * from './auction-bids';
+export * from './auction-listing-photos';

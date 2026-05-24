@@ -66,6 +66,14 @@ export const configSchema = z.object({
    * convenience against a stolen-token window.
    */
   JWT_PORTAL_TTL: z.string().default('24h'),
+   * Auction bidder JWT signing secret (Session 33). When unset, derived
+   * from JWT_SECRET via ::bidder suffix (same pattern as driver).
+   * Domain-separated so a leaked operator/driver token oracle can't mint
+   * bidder tokens or vice-versa. Audience suffix is `…-bidder`.
+   */
+  JWT_BIDDER_SECRET: z.string().optional(),
+  /** Bidder session length. Default 24h for online bidding sessions. */
+  JWT_BIDDER_TTL: z.string().default('24h'),
   JWT_ISSUER: z.string().default('ustowdispatch'),
   JWT_AUDIENCE: z.string().default('ustowdispatch-api'),
 
@@ -368,6 +376,14 @@ export const configSchema = z.object({
   // vanity domain (tenant_branding.custom_domain) at the portal; that is
   // resolved by exact Host match. See CUSTOM_DOMAIN_RUNBOOK.md.
   PORTAL_BASE_DOMAIN: z.string().min(1).default('portal.towcommand.cloud'),
+  // Auction & Remarketing Marketplace (Session 33).
+  // AUCTION_LIFECYCLE_CRON_ENABLED gates the lifecycle cron (5-minute tick
+  // that closes expired live listings and awards the highest bid >= reserve).
+  // Default false so dev/CI don't mutate seed listings.
+  AUCTION_LIFECYCLE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

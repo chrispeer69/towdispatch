@@ -1,0 +1,9 @@
+Welcome to the {{productName}} Marketplace, {{recipientName}}.
+
+Confirm your email to start bidding:
+
+  {{verifyUrl}}
+
+This link expires in 24 hours. If you didn't register, ignore this email.
+
+— {{productName}}

@@ -45,6 +45,12 @@ export interface DriverAccessClaims extends JWTPayload {
 export interface PortalAccessClaims extends JWTPayload {
   sub: string;
   cid: string;
+ * Auction bidder session claims (Session 33). Audience suffix `-bidder`
+ * keeps the bidder keyspace fully separate from operator/driver tokens.
+ */
+export interface BidderAccessClaims extends JWTPayload {
+  sub: 'bidder';
+  bidderId: string;
   tid: string;
 }
 
@@ -54,12 +60,14 @@ export class JwtService {
   private readonly mfaKey: Uint8Array;
   private readonly driverKey: Uint8Array;
   private readonly portalKey: Uint8Array;
+  private readonly bidderKey: Uint8Array;
 
   constructor(private readonly config: ConfigService) {
     this.accessKey = new TextEncoder().encode(config.jwt.accessSecret);
     this.mfaKey = new TextEncoder().encode(config.jwt.mfaSecret);
     this.driverKey = new TextEncoder().encode(config.jwt.driverSecret);
     this.portalKey = new TextEncoder().encode(config.jwt.portalSecret);
+    this.bidderKey = new TextEncoder().encode(config.jwt.bidderSecret);
   }
 
   async signAccess(claims: {
@@ -239,6 +247,39 @@ export class JwtService {
       throw new Error('Invalid portal token');
     }
     return payload as PortalAccessClaims;
+  bidderTtlSeconds(): number {
+    return parseDuration(this.config.jwt.bidderTtl);
+  }
+
+  /**
+   * Auction bidder session token (Session 33). `sub` is the literal string
+   * 'bidder'; the human buyer is identified by `bidderId`. Audience
+   * `…-bidder` keeps the keyspace separate from operator/driver tokens.
+   */
+  async signBidder(claims: { bidderId: string; tid: string; jti: string }): Promise<string> {
+    return new SignJWT({ ...claims, sub: 'bidder' })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(`${this.config.jwt.audience}-bidder`)
+      .setExpirationTime(this.config.jwt.bidderTtl)
+      .sign(this.bidderKey);
+  }
+
+  async verifyBidder(token: string): Promise<BidderAccessClaims> {
+    const { payload } = await jwtVerify(token, this.bidderKey, {
+      issuer: this.config.jwt.issuer,
+      audience: `${this.config.jwt.audience}-bidder`,
+      algorithms: ['HS256'],
+    });
+    if (
+      payload.sub !== 'bidder' ||
+      typeof payload.tid !== 'string' ||
+      typeof payload.bidderId !== 'string'
+    ) {
+      throw new Error('Invalid bidder token');
+    }
+    return payload as BidderAccessClaims;
   }
 }
 

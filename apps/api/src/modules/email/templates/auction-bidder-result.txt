@@ -1,0 +1,15 @@
+{{#if won}}
+You won, {{recipientName}}!
+
+Your winning bid of {{amountFormatted}} on {{listingLabel}} took it. The
+seller will be in touch about payment and pickup.
+{{else}}
+Auction closed, {{recipientName}}.
+
+Bidding on {{listingLabel}} has closed and your bid wasn't the winner this
+time. Plenty more vehicles are listed.
+{{/if}}
+
+View listing: {{listingUrl}}
+
+— {{productName}} Marketplace
