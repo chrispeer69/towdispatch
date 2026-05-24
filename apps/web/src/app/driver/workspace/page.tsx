@@ -38,7 +38,6 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleDot,
-  HelpCircle,
   Inbox,
   MapPin,
   PlayCircle,
@@ -258,10 +257,14 @@ export default function DriverWorkspacePage(): JSX.Element {
               </Link>
             </span>
           ) : null}
+          {/* End shift styled to match the size of the per-job 'En route'
+             status badge so the two pills carry the same visual weight
+             across the workspace. Same height, same padding, same
+             tracking. Tone is the only thing that differs. */}
           <button
             type="button"
             onClick={() => setEndShiftOpen(true)}
-            className="ml-auto rounded-full border border-danger/60 bg-danger/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-danger hover:bg-danger/20"
+            className="ml-auto inline-flex h-6 items-center rounded-full border border-danger/60 bg-danger/10 px-2.5 text-[11px] font-semibold uppercase tracking-wide text-danger hover:bg-danger/20"
           >
             End shift
           </button>
@@ -315,22 +318,20 @@ export default function DriverWorkspacePage(): JSX.Element {
 
       {/* Active jobs */}
       <section className="mb-3">
-        <header className="mb-2 flex items-center justify-between">
+        <header className="mb-2 flex items-center gap-2">
           <h2 className="font-condensed text-base font-extrabold uppercase tracking-tight">
             Active jobs
           </h2>
-          {/* Prominent Refresh — drivers tap this many times a day to
-             pull a freshly-assigned job onto their phone. Branded fill
-             + larger touch target so it reads as the primary action on
-             this row. */}
+          {/* Refresh as an icon-only circle right next to the heading.
+             The arrow icon is universally understood; dropping the
+             text reclaims real estate on a phone. */}
           <button
             type="button"
             onClick={() => void refreshAll()}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-brand-primary px-4 text-sm font-semibold text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.98]"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary text-brand-primary-foreground shadow-sm hover:opacity-90 active:scale-[0.96]"
             aria-label="Refresh jobs"
           >
             <RefreshCw className="h-4 w-4" />
-            Refresh
           </button>
         </header>
         {jobs.length === 0 ? (
@@ -369,13 +370,21 @@ export default function DriverWorkspacePage(): JSX.Element {
                     {j.vehicle ? formatVehicle(j.vehicle) : 'Vehicle pending'}
                   </p>
                   {j.vehicle ? <VehicleIdMeta vehicle={j.vehicle} /> : null}
-                  <p className="mt-2 flex items-center gap-1 text-sm">
-                    <MapPin className="h-4 w-4" />
-                    {(j.pickupAddress ?? '—').split(',')[0]}
-                  </p>
-                  <p className="mt-2 flex items-center justify-end text-xs text-text-secondary-on-dark">
-                    Open job <ChevronRight className="h-4 w-4" />
-                  </p>
+                  {/* Pickup address + Open-job button on the SAME row to
+                     reduce vertical height by one line. The button gets
+                     a saturated blue glow to read as the primary action
+                     on the card, matching the visual weight of End Shift
+                     / En route. */}
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <p className="flex min-w-0 flex-1 items-center gap-1 truncate text-sm">
+                      <MapPin className="h-4 w-4 shrink-0" />
+                      {(j.pickupAddress ?? '—').split(',')[0]}
+                    </p>
+                    <span className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-blue-500 px-3 text-xs font-semibold uppercase tracking-wide text-white shadow-[0_0_18px_rgba(59,130,246,0.55)] hover:bg-blue-400">
+                      Open job
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
                 </Link>
               </li>
             ))}
@@ -417,14 +426,6 @@ export default function DriverWorkspacePage(): JSX.Element {
               {queueCount}
             </span>
           ) : null}
-        </Link>
-        <span className="opacity-30">·</span>
-        <Link
-          href="/help"
-          className="inline-flex items-center gap-1 hover:text-text-primary-on-dark"
-        >
-          <HelpCircle className="h-3.5 w-3.5" />
-          Help
         </Link>
       </section>
 
