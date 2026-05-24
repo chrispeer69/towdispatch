@@ -74,11 +74,14 @@ export class ScimController {
 
   private list(
     startIndex: number,
+    total: number,
     resources: (ScimUserResource | ScimGroupResource)[],
   ): ScimListResponse {
     return {
       schemas: [SCIM_LIST_RESPONSE_SCHEMA],
-      totalResults: resources.length,
+      // totalResults is the count of ALL matches (not this page) so IdPs
+      // paginate correctly; itemsPerPage is the page size.
+      totalResults: total,
       startIndex,
       itemsPerPage: resources.length,
       Resources: resources,
@@ -98,8 +101,8 @@ export class ScimController {
       );
     }
     const clauses = parsed.supported ? parsed.clauses : [];
-    const { resources } = await this.scim.listUsers(this.ctx(req), clauses, this.page(q));
-    return this.list(this.page(q).startIndex, resources);
+    const { total, resources } = await this.scim.listUsers(this.ctx(req), clauses, this.page(q));
+    return this.list(this.page(q).startIndex, total, resources);
   }
 
   @Get('Users/:id')
@@ -160,8 +163,8 @@ export class ScimController {
       );
     }
     const clauses = parsed.supported ? parsed.clauses : [];
-    const { resources } = await this.scim.listGroups(this.ctx(req), clauses, this.page(q));
-    return this.list(this.page(q).startIndex, resources);
+    const { total, resources } = await this.scim.listGroups(this.ctx(req), clauses, this.page(q));
+    return this.list(this.page(q).startIndex, total, resources);
   }
 
   @Get('Groups/:id')

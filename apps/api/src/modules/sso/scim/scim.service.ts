@@ -28,7 +28,7 @@ import {
   type ScimUserInput,
   type ScimUserResource,
 } from '@ustowdispatch/shared';
-import { and, eq, ilike, isNotNull, isNull } from 'drizzle-orm';
+import { and, count, eq, ilike, isNotNull, isNull } from 'drizzle-orm';
 import { uuidv7 } from 'uuidv7';
 import { ConfigService } from '../../../config/config.service.js';
 import { TenantAwareDb, type Tx } from '../../../database/tenant-aware-db.service.js';
@@ -80,8 +80,13 @@ export class ScimService {
         .where(and(...conds))
         .limit(Math.min(page.count, 200))
         .offset(Math.max(page.startIndex - 1, 0));
-      const total = rows.length;
-      return { total, resources: rows.map((r) => this.toScimUser(r)) };
+      // totalResults must be the count of ALL matches, not the page size —
+      // IdPs paginate until startIndex+itemsPerPage >= totalResults.
+      const [c] = await tx
+        .select({ n: count() })
+        .from(users)
+        .where(and(...conds));
+      return { total: c?.n ?? rows.length, resources: rows.map((r) => this.toScimUser(r)) };
     });
   }
 
@@ -241,7 +246,11 @@ export class ScimService {
         .limit(Math.min(page.count, 200))
         .offset(Math.max(page.startIndex - 1, 0));
       const resources = await Promise.all(rows.map((r) => this.toScimGroup(tx, r)));
-      return { total: rows.length, resources };
+      const [cnt] = await tx
+        .select({ n: count() })
+        .from(scimGroups)
+        .where(and(...conds));
+      return { total: cnt?.n ?? rows.length, resources };
     });
   }
 
