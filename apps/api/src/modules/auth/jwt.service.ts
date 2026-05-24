@@ -36,16 +36,30 @@ export interface DriverAccessClaims extends JWTPayload {
   tid: string;
 }
 
+/**
+ * Customer-portal session claims (Session 32). `sub` is the portal user id,
+ * `cid` the bound customer id, `tid` the tenant. Audience `-portal` and a
+ * dedicated signing key keep portal customers off the operator and driver
+ * surfaces entirely.
+ */
+export interface PortalAccessClaims extends JWTPayload {
+  sub: string;
+  cid: string;
+  tid: string;
+}
+
 @Injectable()
 export class JwtService {
   private readonly accessKey: Uint8Array;
   private readonly mfaKey: Uint8Array;
   private readonly driverKey: Uint8Array;
+  private readonly portalKey: Uint8Array;
 
   constructor(private readonly config: ConfigService) {
     this.accessKey = new TextEncoder().encode(config.jwt.accessSecret);
     this.mfaKey = new TextEncoder().encode(config.jwt.mfaSecret);
     this.driverKey = new TextEncoder().encode(config.jwt.driverSecret);
+    this.portalKey = new TextEncoder().encode(config.jwt.portalSecret);
   }
 
   async signAccess(claims: {
@@ -182,6 +196,49 @@ export class JwtService {
       throw new Error('Invalid driver token');
     }
     return payload as DriverAccessClaims;
+  }
+
+  /** Returns portal-customer session TTL in seconds (the `expires_in`). */
+  portalTtlSeconds(): number {
+    return parseDuration(this.config.jwt.portalTtl);
+  }
+
+  /**
+   * Customer-portal session token (Session 32). `sub` is the portal user id,
+   * `cid` the bound customer id. Audience `…-portal` and a dedicated key keep
+   * the keyspace separate from operator and driver tokens.
+   */
+  async signPortal(claims: {
+    sub: string;
+    cid: string;
+    tid: string;
+    jti: string;
+  }): Promise<string> {
+    return new SignJWT({ cid: claims.cid, tid: claims.tid })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setSubject(claims.sub)
+      .setJti(claims.jti)
+      .setIssuedAt()
+      .setIssuer(this.config.jwt.issuer)
+      .setAudience(`${this.config.jwt.audience}-portal`)
+      .setExpirationTime(this.config.jwt.portalTtl)
+      .sign(this.portalKey);
+  }
+
+  async verifyPortal(token: string): Promise<PortalAccessClaims> {
+    const { payload } = await jwtVerify(token, this.portalKey, {
+      issuer: this.config.jwt.issuer,
+      audience: `${this.config.jwt.audience}-portal`,
+      algorithms: ['HS256'],
+    });
+    if (
+      typeof payload.sub !== 'string' ||
+      typeof payload.tid !== 'string' ||
+      typeof payload.cid !== 'string'
+    ) {
+      throw new Error('Invalid portal token');
+    }
+    return payload as PortalAccessClaims;
   }
 }
 

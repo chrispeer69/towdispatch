@@ -71,6 +71,12 @@ export const SETTINGS_TABS = [
     label: 'Billing & Subscription',
     description: 'Stripe Connect onboarding, platform margin, and SaaS subscription billing.',
   },
+  {
+    slug: 'branding',
+    label: 'White-Label Portal',
+    description:
+      'Logo, colors, support contact, and custom domain for your branded customer portal.',
+  },
 ] as const satisfies readonly SettingsTab[];
 
 export type SettingsTabSlug = (typeof SETTINGS_TABS)[number]['slug'];

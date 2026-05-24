@@ -95,3 +95,8 @@ export * from './api-keys';
 export * from './webhook-endpoints';
 export * from './webhook-deliveries';
 export * from './api-idempotency-keys';
+// White-Label Customer Portal (Session 32) — tenant branding + portal
+// logins. Tables in packages/db/sql/0037_white_label_portal.sql.
+export * from './tenant-branding';
+export * from './customer-portal-users';
+export * from './customer-portal-auth-tokens';

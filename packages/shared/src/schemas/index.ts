@@ -51,3 +51,7 @@ export * from './audit-log';
 // Public REST API + Webhooks (Session 29) — scopes, webhook catalog, API-key
 // + endpoint management contracts, /v1 resource DTOs, cursor pagination.
 export * from './public-api';
+// White-Label Customer Portal (Session 32) — tenant branding + portal auth,
+// jobs, invoices, pay-link.
+export * from './tenant-branding';
+export * from './customer-portal';
