@@ -361,7 +361,6 @@ export const configSchema = z.object({
   // Minimum parser confidence (0–1) to act on a recognized intent; below it
   // the command is downgraded to 'clarify' and the driver is asked to repeat.
   VOICE_DRIVER_CONFIDENCE_MIN: z.coerce.number().min(0).max(1).default(0.75),
-<<<<<<< HEAD
   // Phase 0 hardening (Session 17) — daily DB-backup freshness verification.
   // BACKUP_VERIFY_CRON_ENABLED gates the 03:00 cron that asserts the most
   // recent backup is younger than BACKUP_MAX_AGE_HOURS and raises a Sentry
@@ -405,12 +404,18 @@ export const configSchema = z.object({
   // that closes expired live listings and awards the highest bid >= reserve).
   // Default false so dev/CI don't mutate seed listings.
   AUCTION_LIFECYCLE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   // Fraud Detection (Session 43).
   // FRAUD_SCORE_CRON_ENABLED gates the nightly fraud re-score sweep (03:30
   // tick that re-scores every job invoiced in the last 24h). It is ADVISORY
   // ONLY: scoring never blocks or mutates an invoice. Default false so dev/CI
   // don't write signal/score rows against seed data.
   FRAUD_SCORE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   // Photo Damage Analysis (Session 42). DAMAGE_ANALYSIS_PROVIDER selects the
   // vision engine: `stub` (default) produces deterministic findings from a
   // photo-key hash and NEVER calls a third party (safe for dev/CI/tests);
@@ -426,6 +431,9 @@ export const configSchema = z.object({
   OPENAI_API_KEY: z.string().optional().default(''),
   OPENAI_VISION_MODEL: z.string().default('gpt-4o'),
   DAMAGE_ANALYSIS_WORKER_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
   // Full DOT Compliance (Session 37).
   // DOT_EXPIRY_CRON_ENABLED gates the daily 06:00 DQ-file expiry scan that
   // logs alerts for medical-card / license / MVR items expiring within 60
@@ -541,7 +549,6 @@ export const configSchema = z.object({
     .transform((v) => v === 'true'),
   // Rows mutated per statement before the sweep loops — caps lock duration.
   AI_DISPATCH_RETENTION_BATCH_SIZE: z.coerce.number().int().min(1).max(10_000).default(500),
-=======
 
   // Enterprise SSO (Session 38) — SAML 2.0 / OIDC / SCIM 2.0.
   // ENTERPRISE_SSO_ENABLED is the master gate: when false (default) every
@@ -562,7 +569,6 @@ export const configSchema = z.object({
     .string()
     .min(32, 'SSO_TOKEN_ENCRYPTION_KEY must be 32+ chars')
     .default('change-me-sso-token-encryption-key-please-rotate-in-prod'),
->>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

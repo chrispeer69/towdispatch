@@ -108,7 +108,6 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     LienProcessingModule,
     EvRecoveryModule,
     VoiceDriverModule,
-<<<<<<< HEAD
     PublicApiModule,
     CustomerPortalModule,
     AuctionModule,
@@ -117,9 +116,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     DotModule,
     AiDispatchModule,
     MarketplaceApiModule,
-=======
     SsoModule,
->>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
     DashboardModule,
     ReportingModule,
     AdminModule,

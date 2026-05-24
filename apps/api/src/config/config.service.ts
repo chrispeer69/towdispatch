@@ -237,7 +237,6 @@ export class ConfigService {
   get voiceDriverConfidenceMin(): number {
     return this.config.VOICE_DRIVER_CONFIDENCE_MIN;
   }
-<<<<<<< HEAD
   get marketplaceApiEnabled(): boolean {
     return this.config.MARKETPLACE_API_ENABLED;
   }
@@ -252,7 +251,7 @@ export class ConfigService {
   }
   get marketplaceWebhookDeliveryEnabled(): boolean {
     return this.config.MARKETPLACE_WEBHOOK_DELIVERY_ENABLED;
-=======
+  }
 
   /**
    * Enterprise SSO (Session 38). `enabled` is the master gate. `allowedTenants`
@@ -277,7 +276,6 @@ export class ConfigService {
       tokenEncryptionKey: this.config.SSO_TOKEN_ENCRYPTION_KEY,
       isTenantAllowed: (tenantId: string): boolean => enabled && allowedTenants.includes(tenantId),
     };
->>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
   }
   get smtp(): {
     host: string;
