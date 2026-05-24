@@ -127,3 +127,8 @@ export * from './dot-driver-qualifications';
 export * from './dot-hos-logs';
 export * from './dot-drug-alcohol-tests';
 export * from './dot-incident-reports';
+// Canada Expansion (Session 47) — country/province lookup + jurisdiction tax
+// rates (GST/HST/PST/QST). Global reference data. Tables in
+// packages/db/sql/0047_canada_expansion.sql.
+export * from './jurisdictions';
+export * from './tax-rules';

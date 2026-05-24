@@ -22,6 +22,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   Optional,
 } from '@nestjs/common';
@@ -38,6 +39,8 @@ import {
   jobs,
   payments,
   recurringBillingSchedules,
+  taxRules,
+  tenants,
   uuidv7,
 } from '@ustowdispatch/db';
 import {
@@ -66,6 +69,7 @@ import {
   type PaymentStatus,
   type RecordPaymentPayload,
   type RecurringScheduleDto,
+  type SupportedLocale,
   dueDaysForTerms,
   termsFromAccountBilling,
 } from '@ustowdispatch/shared';
@@ -84,6 +88,7 @@ import {
   assertCanTransition,
   statusAfterPayment,
 } from './invoice-state-machine.js';
+import { computeTax } from './tax.js';
 
 interface CallerContext {
   tenantId: string;
@@ -95,6 +100,8 @@ interface CallerContext {
 
 @Injectable()
 export class InvoicesService {
+  private readonly logger = new Logger(InvoicesService.name);
+
   constructor(
     private readonly db: TenantAwareDb,
     @Optional() private readonly accounting: AccountingService | null = null,
@@ -1206,41 +1213,103 @@ export class InvoicesService {
       where: eq(invoiceLineItems.invoiceId, invoiceId),
     });
     const subtotal = lineRows.reduce((acc, li) => acc + li.lineTotalCents, 0);
-    // Compute taxes by rolling up taxable lines per tax-rate-pct.
-    type TaxAcc = { taxable: number; rate: number; jurisdiction: string; name: string };
-    const taxBucket = new Map<string, TaxAcc>();
-    for (const li of lineRows) {
-      if (!li.taxable) continue;
-      const ratePct = Number(li.taxRatePct);
-      if (ratePct === 0) continue;
-      const key = `${ratePct.toFixed(4)}`;
-      const acc = taxBucket.get(key) ?? {
-        taxable: 0,
-        rate: ratePct,
-        jurisdiction: 'default',
-        name: `Sales tax ${ratePct}%`,
-      };
-      acc.taxable += li.lineTotalCents;
-      taxBucket.set(key, acc);
-    }
-    const taxesArr: Array<{
+
+    type TaxOut = {
       jurisdiction: string;
       name: string;
       ratePct: number;
       taxable: number;
       tax: number;
-    }> = [];
+    };
+    let taxesArr: TaxOut[] = [];
     let totalTax = 0;
-    for (const acc of taxBucket.values()) {
-      const taxCents = Math.round(acc.taxable * (acc.rate / 100));
-      totalTax += taxCents;
-      taxesArr.push({
-        jurisdiction: acc.jurisdiction,
-        name: acc.name,
-        ratePct: acc.rate,
-        taxable: acc.taxable,
-        tax: taxCents,
+
+    // Canada Expansion (S47): tenants in a multi-line tax country (CA) source
+    // their rates from the `tax_rules` reference by province; the US keeps the
+    // existing per-line-rate model. Province is taken from the snapshotted
+    // billing address (where sales/value tax legally sources from).
+    const tenantRow = await tx.query.tenants.findFirst({
+      where: eq(tenants.id, inv.tenantId),
+      columns: { country: true, defaultLocale: true },
+    });
+    const country = tenantRow?.country ?? 'US';
+    // Normalize the bill-to province to a 2-letter uppercase code before the
+    // tax_rules lookup. Without this, a value like "on" / "Ontario " misses the
+    // exact-match query and the invoice would silently produce $0 tax.
+    const rawRegion = (inv.billingAddress as InvoiceBillingAddress | null)?.state ?? null;
+    const region = rawRegion ? rawRegion.trim().toUpperCase() : null;
+
+    if (country === 'CA' && region) {
+      const taxableBase = lineRows.reduce(
+        (acc, li) => acc + (li.taxable ? li.lineTotalCents : 0),
+        0,
+      );
+      const ruleRows = await tx.query.taxRules.findMany({
+        where: and(
+          eq(taxRules.country, 'CA'),
+          eq(taxRules.region, region),
+          isNull(taxRules.tenantOverrideId),
+          isNull(taxRules.expiresAt),
+        ),
       });
+      if (ruleRows.length === 0) {
+        // A CA tenant with a bill-to province but no matching tax rule means an
+        // unrecognized/misspelled province (or a not-yet-seeded jurisdiction).
+        // Surface it instead of silently charging $0 tax.
+        this.logger.warn(
+          `No tax_rules for CA region "${region}" on invoice ${invoiceId} — tax computed as $0.`,
+        );
+      }
+      const locale = (tenantRow?.defaultLocale ?? 'en-CA') as SupportedLocale;
+      const computed = computeTax(
+        taxableBase,
+        ruleRows.map((r) => ({
+          taxType: r.taxType,
+          nameEn: r.nameEn,
+          nameFr: r.nameFr,
+          rateBps: Number(r.rateBps),
+          displayOrder: r.displayOrder,
+        })),
+        locale,
+      );
+      taxesArr = computed.lines.map((l) => ({
+        jurisdiction: `CA-${region}`,
+        name: l.name,
+        ratePct: l.rateBps / 100,
+        taxable: l.taxableCents,
+        tax: l.amountCents,
+      }));
+      totalTax = computed.totalTaxCents;
+    } else {
+      // US (and CA without a province on the bill-to): roll up taxable lines
+      // per tax-rate-pct into a single sales-tax line per distinct rate.
+      type TaxAcc = { taxable: number; rate: number; jurisdiction: string; name: string };
+      const taxBucket = new Map<string, TaxAcc>();
+      for (const li of lineRows) {
+        if (!li.taxable) continue;
+        const ratePct = Number(li.taxRatePct);
+        if (ratePct === 0) continue;
+        const key = `${ratePct.toFixed(4)}`;
+        const acc = taxBucket.get(key) ?? {
+          taxable: 0,
+          rate: ratePct,
+          jurisdiction: 'default',
+          name: `Sales tax ${ratePct}%`,
+        };
+        acc.taxable += li.lineTotalCents;
+        taxBucket.set(key, acc);
+      }
+      for (const acc of taxBucket.values()) {
+        const taxCents = Math.round(acc.taxable * (acc.rate / 100));
+        totalTax += taxCents;
+        taxesArr.push({
+          jurisdiction: acc.jurisdiction,
+          name: acc.name,
+          ratePct: acc.rate,
+          taxable: acc.taxable,
+          tax: taxCents,
+        });
+      }
     }
     // Replace the invoice_taxes rows.
     await tx.delete(invoiceTaxes).where(eq(invoiceTaxes.invoiceId, invoiceId));

@@ -27,6 +27,12 @@ export const stripeAccountStatusValues = [
 ] as const;
 export type StripeAccountStatus = (typeof stripeAccountStatusValues)[number];
 
+// Canada Expansion (Session 47). Unit system is a closed two-value set;
+// country/locale/currency are validated by format in sql/0047, not enum, to
+// stay forward-compatible with future markets.
+export const unitSystemValues = ['imperial', 'metric'] as const;
+export type UnitSystem = (typeof unitSystemValues)[number];
+
 export const tenants = pgTable(
   'tenants',
   {
@@ -66,6 +72,20 @@ export const tenants = pgTable(
      * the X-Preferred-Region header. See migration 0039.
      */
     preferredRegion: text('preferred_region'),
+
+    /**
+     * Canada Expansion (Session 47). Localization defaults for the tenant.
+     * `country` (ISO 3166-1 alpha-2) drives postal validation + the tax engine;
+     * `defaultLocale` (BCP-47) tops the locale-resolution chain; `defaultCurrency`
+     * (ISO 4217) and `defaultUnitSystem` are presentation-only — money stays in
+     * cents and distance stays in miles internally. See migration 0047.
+     */
+    country: text('country').notNull().default('US'),
+    defaultLocale: text('default_locale').notNull().default('en-US'),
+    defaultCurrency: text('default_currency').notNull().default('USD'),
+    defaultUnitSystem: text('default_unit_system', { enum: unitSystemValues })
+      .notNull()
+      .default('imperial'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

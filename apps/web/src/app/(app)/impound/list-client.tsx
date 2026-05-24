@@ -1,16 +1,11 @@
 'use client';
 import { useUser } from '@/components/app-shell/session-provider';
+import { useTenantFormatters } from '@/lib/i18n/formatters';
 import type { ImpoundRecordDto, ImpoundRecordStatus, ImpoundYardDto } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type JSX, useTransition } from 'react';
-import {
-  STATUS_LABEL,
-  STATUS_TONE,
-  formatCents,
-  formatDate,
-  vehicleLabel,
-} from './impound-ui-helpers';
+import { STATUS_LABEL, STATUS_TONE, formatDate, vehicleLabel } from './impound-ui-helpers';
 
 interface Props {
   records: ImpoundRecordDto[];
@@ -41,6 +36,8 @@ export function ImpoundListClient({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const user = useUser();
+  // Canada Expansion (S47): money formatted in the tenant's currency/locale.
+  const fmt = useTenantFormatters();
   const canWrite = WRITER_ROLES.has(user.role);
   const yardName = (id: string): string => yards.find((y) => y.id === id)?.name ?? '—';
 
@@ -176,7 +173,7 @@ export function ImpoundListClient({
                   {formatDate(r.arrivedAt)}
                 </td>
                 <td className="px-4 py-2.5 text-right tabular-nums">
-                  {formatCents(r.accruedFeeCents)}
+                  {fmt.money(r.accruedFeeCents)}
                 </td>
                 <td className="px-4 py-2.5">
                   {r.lienEligible ? (

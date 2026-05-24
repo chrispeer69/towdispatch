@@ -31,6 +31,7 @@ import {
   type SignupPayload,
   type TenantSelectionDto,
   type VerifyEmailPayload,
+  coerceToSupportedLocale,
 } from '@ustowdispatch/shared';
 import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { type JWTPayload, SignJWT, jwtVerify } from 'jose';
@@ -1227,6 +1228,7 @@ export class AuthService {
       role: u.role,
       emailVerifiedAt: u.emailVerifiedAt ? u.emailVerifiedAt.toISOString() : null,
       mfaEnabled: u.mfaEnabled ?? false,
+      localePreference: u.localePreference ?? null,
     };
   }
 
@@ -1236,6 +1238,13 @@ export class AuthService {
       slug: t.slug,
       name: t.name,
       status: t.status,
+      // Canada Expansion (S47): localization defaults from the tenant row.
+      // defaultLocale is coerced onto a supported locale (the DB only checks
+      // BCP-47 format, not membership in the supported set).
+      country: t.country,
+      defaultLocale: coerceToSupportedLocale(t.defaultLocale) ?? undefined,
+      defaultCurrency: t.defaultCurrency,
+      defaultUnitSystem: t.defaultUnitSystem,
     };
   }
 }

@@ -1,4 +1,9 @@
 import { withSentryConfig } from '@sentry/nextjs';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+// Canada Expansion (S47): next-intl without i18n routing. Locale is resolved
+// per request (cookie → Accept-Language → en-US) in src/i18n/request.ts.
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -38,3 +43,4 @@ export default withSentryConfig(nextConfig, {
   disableLogger: true,
   telemetry: false,
 });
+export default withNextIntl(nextConfig);
