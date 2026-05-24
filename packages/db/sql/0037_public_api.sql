@@ -238,9 +238,23 @@ CREATE TABLE IF NOT EXISTS webhook_deliveries (
   deleted_at    timestamptz
 );
 
-ALTER TABLE webhook_deliveries DROP CONSTRAINT IF EXISTS webhook_deliveries_status_chk;
-ALTER TABLE webhook_deliveries ADD CONSTRAINT webhook_deliveries_status_chk
-  CHECK (status IN ('pending', 'delivering', 'delivered', 'failed'));
+-- The S29 status vocabulary ('pending'/'delivering'/'delivered'/'failed')
+-- differs from the Session 15 notifications module, which shares this physical
+-- table name (created first by drizzle/0011_notifications.sql) but uses the
+-- 'queued'/'sent'/'bounced'/... vocabulary with a 'queued' default. Apply the
+-- S29 CHECK only when this is genuinely the S29 table (endpoint_id present).
+-- On the notifications-shaped table the ADD CONSTRAINT would be validated
+-- against existing rows (status='queued') and crash the migration → boot loop.
+-- NOTE: `status` is shared by both shapes, so — unlike the other guarded
+-- blocks below — this one keys on endpoint_id (an S29-only column) rather than
+-- on the column it references.
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'webhook_deliveries' AND column_name = 'endpoint_id') THEN
+  ALTER TABLE webhook_deliveries DROP CONSTRAINT IF EXISTS webhook_deliveries_status_chk;
+  ALTER TABLE webhook_deliveries ADD CONSTRAINT webhook_deliveries_status_chk
+    CHECK (status IN ('pending', 'delivering', 'delivered', 'failed'));
+END IF;
+END $$;
 
 -- Constraint only applies if the "attempt" column exists (S29 schema).
 DO $$ BEGIN
