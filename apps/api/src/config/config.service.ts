@@ -410,6 +410,20 @@ export class ConfigService {
       cronEnabled: this.config.BACKUP_VERIFY_CRON_ENABLED,
       maxAgeHours: this.config.BACKUP_MAX_AGE_HOURS,
       railwayApiToken: this.config.RAILWAY_API_TOKEN.trim(),
+   * Public REST API + Webhooks (Session 29). `deliveryEnabled` gates the
+   * webhook delivery cron body; `signingEncryptionKey` is the AES-256-GCM key
+   * for endpoint signing secrets at rest; `defaultRateLimitPerMin` is stamped
+   * on newly-minted API keys.
+   */
+  get publicApi(): {
+    deliveryEnabled: boolean;
+    signingEncryptionKey: string;
+    defaultRateLimitPerMin: number;
+  } {
+    return {
+      deliveryEnabled: this.config.WEBHOOK_DELIVERY_ENABLED,
+      signingEncryptionKey: this.config.WEBHOOK_SIGNING_ENCRYPTION_KEY,
+      defaultRateLimitPerMin: this.config.PUBLIC_API_RATE_LIMIT_PER_MIN,
     };
   }
 

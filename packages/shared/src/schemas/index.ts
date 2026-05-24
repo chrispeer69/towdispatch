@@ -48,3 +48,6 @@ export * from './impound';
 export * from './reporting';
 // Audit Log reader (Session 31) — SOC 2 Type I query contracts for /admin/audit-log.
 export * from './audit-log';
+// Public REST API + Webhooks (Session 29) — scopes, webhook catalog, API-key
+// + endpoint management contracts, /v1 resource DTOs, cursor pagination.
+export * from './public-api';

@@ -21,6 +21,10 @@ export const DISPATCH_EVENTS = {
   TRACKING_LINK_UPDATED: 'tracking.link_updated',
   TRACKING_LINK_VIEWED: 'tracking.link_viewed',
   TRACKING_MESSAGE_RECEIVED: 'tracking.message_received',
+  // Session 29 — impound lifecycle. Emitted by ImpoundService so the Public
+  // API webhook publisher can fan them out to subscribed endpoints.
+  IMPOUND_OPENED: 'impound.opened',
+  IMPOUND_RELEASED: 'impound.released',
 } as const;
 export type DispatchEventName = (typeof DISPATCH_EVENTS)[keyof typeof DISPATCH_EVENTS];
 
@@ -113,3 +117,22 @@ export const driverStatusChangedEventSchema = z.object({
   status: z.string(),
 });
 export type DriverStatusChangedEvent = z.infer<typeof driverStatusChangedEventSchema>;
+
+export const impoundOpenedEventSchema = z.object({
+  impoundRecordId: z.string().uuid(),
+  yardId: z.string().uuid(),
+  status: z.string(),
+  vehicleVin: z.string().nullable(),
+  licensePlate: z.string().nullable(),
+  arrivedAt: z.string().datetime(),
+});
+export type ImpoundOpenedEvent = z.infer<typeof impoundOpenedEventSchema>;
+
+export const impoundReleasedEventSchema = z.object({
+  impoundRecordId: z.string().uuid(),
+  releasedToName: z.string(),
+  releasedToType: z.string(),
+  totalFeesCents: z.number().int(),
+  releasedAt: z.string().datetime(),
+});
+export type ImpoundReleasedEvent = z.infer<typeof impoundReleasedEventSchema>;

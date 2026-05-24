@@ -61,6 +61,12 @@ export const SETTINGS_TABS = [
       'Daily briefing message + video shown to every driver once per day before their first job.',
   },
   {
+    slug: 'api',
+    label: 'API & Webhooks',
+    description:
+      'Issue API keys for the public REST API and register webhook endpoints for job & impound events.',
+  },
+  {
     slug: 'billing',
     label: 'Billing & Subscription',
     description: 'Stripe Connect onboarding, platform margin, and SaaS subscription billing.',

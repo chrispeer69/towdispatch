@@ -15,6 +15,8 @@ import type {
   DriverShiftEndedEvent,
   DriverShiftStartedEvent,
   DriverStatusChangedEvent,
+  ImpoundOpenedEvent,
+  ImpoundReleasedEvent,
   JobAssignedEvent,
   JobCreatedEvent,
   JobStatusChangedEvent,
@@ -39,7 +41,9 @@ export type DispatchEventPayload =
   | {
       name: typeof DISPATCH_EVENTS.TRACKING_MESSAGE_RECEIVED;
       payload: TrackingMessageReceivedEvent;
-    };
+    }
+  | { name: typeof DISPATCH_EVENTS.IMPOUND_OPENED; payload: ImpoundOpenedEvent }
+  | { name: typeof DISPATCH_EVENTS.IMPOUND_RELEASED; payload: ImpoundReleasedEvent };
 
 export type DispatchSubscriber = (
   tenantId: string,

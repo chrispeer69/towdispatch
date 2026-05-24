@@ -45,8 +45,10 @@ import type {
   UpdateImpoundRecordPayload,
   UpdateImpoundYardPayload,
 } from '@ustowdispatch/shared';
+import { DISPATCH_EVENTS } from '@ustowdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 import { diffUtcDays, sumFeeCents, toUtcDateString } from './impound-fees.logic.js';
 import { buildImpoundFormStub, evaluateReleaseGate } from './impound-release.logic.js';
 
@@ -58,7 +60,10 @@ export interface CallerCtx {
 
 @Injectable()
 export class ImpoundService {
-  constructor(private readonly db: TenantAwareDb) {}
+  constructor(
+    private readonly db: TenantAwareDb,
+    private readonly events: DispatchEventsService,
+  ) {}
 
   // ===================================================================
   // Yards
@@ -252,6 +257,16 @@ export class ImpoundService {
         })
         .returning();
       if (!row) throw new Error('intakeRecord: insert returning() yielded no row');
+      // Fire impound.opened so the Public API webhook publisher can fan it
+      // out. Fire-and-forget; the publisher defers its work past commit.
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.IMPOUND_OPENED, {
+        impoundRecordId: row.id,
+        yardId: row.yardId,
+        status: row.status,
+        vehicleVin: row.vehicleVin,
+        licensePlate: row.licensePlate,
+        arrivedAt: row.arrivedAt.toISOString(),
+      });
       return toRecordDto(row);
     });
   }
@@ -525,6 +540,14 @@ export class ImpoundService {
         .where(eq(impoundRecords.id, recordId))
         .returning();
       if (!recordRow) throw notFound('Impound record not found');
+
+      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.IMPOUND_RELEASED, {
+        impoundRecordId: recordId,
+        releasedToName: releaseRow.releasedToName,
+        releasedToType: releaseRow.releasedToType,
+        totalFeesCents: releaseRow.totalFeesCents,
+        releasedAt: releaseRow.releasedAt.toISOString(),
+      });
 
       return { record: toRecordDto(recordRow), release: toReleaseDto(releaseRow) };
     });
