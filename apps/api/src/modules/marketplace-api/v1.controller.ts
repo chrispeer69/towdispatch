@@ -1,6 +1,6 @@
 /**
- * /v1/* (Session 46) — DEMO public resource surface authenticated by a
- * marketplace OAuth access token (MarketplaceTokenGuard) and gated per-route by
+ * /marketplace/v1/* (Session 46) — DEMO public resource surface authenticated
+ * by a marketplace OAuth access token (MarketplaceTokenGuard) and gated per-route by
  * @RequireScopes. It exists to exercise the OAuth flow against a real,
  * scope-checked, tenant-isolated request. @Public keeps the operator
  * JwtAuthGuard out of the way; the opaque-token guard does the auth.
@@ -16,7 +16,10 @@ import { type JobsSummary, V1Service } from './v1.service.js';
 
 @Public()
 @UseGuards(MarketplaceEnabledGuard, MarketplaceTokenGuard)
-@Controller('v1')
+// Namespaced under `marketplace/v1` so it does not collide with the Session 29
+// public-api PublicV1Controller, which owns the canonical `/v1` consumer REST
+// surface (both previously declared GET /v1/jobs → Fastify route conflict).
+@Controller('marketplace/v1')
 export class V1Controller {
   constructor(private readonly v1: V1Service) {}
 
