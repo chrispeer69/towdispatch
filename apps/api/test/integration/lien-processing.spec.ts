@@ -11,8 +11,10 @@
  * waiting period has elapsed in test time. DB-gated via skipIfNoDb; cleans up
  * its own lien + impound rows before tearDown (tenant ON DELETE RESTRICT).
  */
+import type { LienState } from '@ustowdispatch/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { LienAdvanceCron } from '../../src/modules/lien-processing/lien-advance.cron.js';
+import { LIEN_STATE_RULES } from '../../src/modules/lien-processing/state-rules.config.js';
 import {
   type AuthedResp,
   type TestContext,
@@ -103,13 +105,32 @@ describeIfDb('integration — lien processing', () => {
     await tearDown(ctx);
   });
 
-  it('seeds the state-rule reference for all 10 states', async () => {
+  it('seeds the state-rule reference for all 50 states + DC', async () => {
     const res = await inject('GET', '/lien-cases/state-rules');
     expect(res.statusCode, res.body).toBe(200);
-    const rules = res.json() as Array<{ state: string }>;
-    expect(rules.map((r) => r.state).sort()).toEqual(
-      ['CA', 'FL', 'GA', 'IL', 'MI', 'NC', 'NY', 'OH', 'PA', 'TX'].sort(),
-    );
+    const states = (res.json() as Array<{ state: string }>).map((r) => r.state);
+    // Session 23 shipped 10; Session 35 added the remaining 40 + DC = 51.
+    expect(states).toHaveLength(51);
+    // The Session 23 top 10 plus a sample of the Session 35 additions.
+    for (const s of [
+      'CA',
+      'TX',
+      'FL',
+      'NY',
+      'GA',
+      'NC',
+      'OH',
+      'IL',
+      'PA',
+      'MI',
+      'DC',
+      'WA',
+      'HI',
+      'MA',
+      'MO',
+    ]) {
+      expect(states).toContain(s);
+    }
   });
 
   it('opens a case and refuses a duplicate for the same impound record', async () => {
@@ -124,44 +145,53 @@ describeIfDb('integration — lien processing', () => {
     expect(dup.statusCode).toBe(409);
   });
 
-  // Drives a case from opened → ready_for_sale, then records the sale.
+  // Drives a case from opened → ready_for_sale, then records the sale, for
+  // ANY state. Publication / lienholder branches and the backdating window
+  // are derived from that state's actual rule config, so the same helper
+  // exercises a short no-publication timeline (WA) and a long, strict
+  // publication + lienholder timeline (HI, MA) identically.
   async function driveToSale(
-    state: 'CA' | 'TX' | 'FL',
-    requiresPublication: boolean,
+    state: LienState,
+    opts: { lienholderFound?: boolean } = {},
   ): Promise<void> {
+    const rules = LIEN_STATE_RULES[state];
+    const requiresPublication = rules.publicationRequired;
+    const lienholderFound = opts.lienholderFound ?? false;
+    // Age the case past the longest statutory window so the hold has elapsed.
+    const holdDays = rules.minDaysToSale + 40;
+    const noticeDaysAgo =
+      Math.max(
+        rules.ownerNoticeWaitDays,
+        rules.lienholderNoticeWaitDays,
+        rules.publicationWaitDays,
+      ) + 20;
+
     const recordId = await makeRecord();
     const opened = (
       await inject('POST', '/lien-cases', {
         impoundRecordId: recordId,
         state,
         ownerFound: true,
-        lienholderFound: false,
+        lienholderFound,
         estimatedValueCents: 700_000,
       })
     ).json() as { case: { id: string; status: string } };
     const caseId = opened.case.id;
     expect(opened.case.status).toBe('open');
 
-    // Age the case so the statutory waiting period has elapsed.
-    await backdateOpenedAt(caseId, 90);
+    await backdateOpenedAt(caseId, holdDays);
 
     // opened → dmv_lookup_requested → dmv_lookup_complete
     expect((await inject('POST', `/lien-cases/${caseId}/advance`, {})).statusCode).toBe(201);
     expect(
-      (
-        await inject('POST', `/lien-cases/${caseId}/advance`, {
-          ownerFound: true,
-          lienholderFound: false,
-        })
-      ).statusCode,
+      (await inject('POST', `/lien-cases/${caseId}/advance`, { ownerFound: true, lienholderFound }))
+        .statusCode,
     ).toBe(201);
 
     // Cannot advance past the required owner notice.
-    const blocked = await inject('POST', `/lien-cases/${caseId}/advance`, {});
-    expect(blocked.statusCode).toBe(409);
+    expect((await inject('POST', `/lien-cases/${caseId}/advance`, {})).statusCode).toBe(409);
 
-    // Record the owner notice (sent 60 days ago).
-    const sentLongAgo = new Date(Date.now() - 60 * DAY_MS).toISOString();
+    const sentLongAgo = new Date(Date.now() - noticeDaysAgo * DAY_MS).toISOString();
     expect(
       (
         await inject('POST', `/lien-cases/${caseId}/notices`, {
@@ -173,10 +203,24 @@ describeIfDb('integration — lien processing', () => {
       ).statusCode,
     ).toBe(201);
 
+    if (lienholderFound) {
+      // A found lienholder must be served before publishing / waiting.
+      expect((await inject('POST', `/lien-cases/${caseId}/advance`, {})).statusCode).toBe(409);
+      expect(
+        (
+          await inject('POST', `/lien-cases/${caseId}/notices`, {
+            noticeType: 'lienholder_notice',
+            recipientRole: 'lienholder',
+            deliveryMethod: 'certified_mail',
+            sentAt: sentLongAgo,
+          })
+        ).statusCode,
+      ).toBe(201);
+    }
+
     if (requiresPublication) {
       // Must publish before the waiting period for publication states.
-      const stillBlocked = await inject('POST', `/lien-cases/${caseId}/advance`, {});
-      expect(stillBlocked.statusCode).toBe(409);
+      expect((await inject('POST', `/lien-cases/${caseId}/advance`, {})).statusCode).toBe(409);
       expect(
         (
           await inject('POST', `/lien-cases/${caseId}/notices`, {
@@ -206,16 +250,43 @@ describeIfDb('integration — lien processing', () => {
     expect((sold.json() as { case: { status: string } }).case.status).toBe('sold');
   }
 
+  // Session 23 states (publication-required CA/FL, no-publication TX).
   it('drives a CA case (publication required) to sale', async () => {
-    await driveToSale('CA', true);
+    await driveToSale('CA');
   });
 
   it('drives a TX case (no publication) to sale', async () => {
-    await driveToSale('TX', false);
+    await driveToSale('TX');
   });
 
   it('drives a FL case (publication required) to sale', async () => {
-    await driveToSale('FL', true);
+    await driveToSale('FL');
+  });
+
+  // Session 35 — 5 representatives chosen from the rule properties:
+  //   WA = min(minDaysToSale)=30 + no publication  → short timeline
+  //   HI = max(minDaysToSale)=60 + publication      → long timeline
+  //   MD = publicationRequired:true                 → publication path
+  //   MO = publicationRequired:false                → no-publication path
+  //   MA = max(lienholderNoticeWaitDays)=45 + pub   → strict lienholder
+  it('drives a WA case (shortest timeline, no publication) to sale', async () => {
+    await driveToSale('WA');
+  });
+
+  it('drives a HI case (longest timeline, publication) to sale', async () => {
+    await driveToSale('HI');
+  });
+
+  it('drives a MD case (publication required) to sale', async () => {
+    await driveToSale('MD');
+  });
+
+  it('drives a MO case (no publication) to sale', async () => {
+    await driveToSale('MO');
+  });
+
+  it('drives a MA case (strict lienholder + publication) to sale with a lienholder served', async () => {
+    await driveToSale('MA', { lienholderFound: true });
   });
 
   it('blocks a sale before the case is ready', async () => {
