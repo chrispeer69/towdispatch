@@ -92,6 +92,9 @@ export default async function JobDetailPage({
           <span aria-hidden>·</span>
           <span>{job.customer?.name ?? 'No customer'}</span>
         </p>
+        <Link href={`/jobs/${jobId}/ev`} className="text-accent-orange text-sm">
+          ⚡ EV recovery →
+        </Link>
       </header>
 
       <section className="grid gap-4 rounded-[14px] border border-divider bg-bg-surface p-5 sm:grid-cols-2">

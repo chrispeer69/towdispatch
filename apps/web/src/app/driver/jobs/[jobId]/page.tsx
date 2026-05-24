@@ -204,6 +204,18 @@ export default function DriverJobPage(): JSX.Element {
       <ServiceHeadline job={job} />
       <CustomerCard job={job} />
       <VehicleCard job={job} />
+      <Card className="mb-3">
+        <CardContent className="p-3">
+          <Button
+            size="touch"
+            variant="secondary"
+            className="w-full"
+            onClick={() => router.push(`/driver/jobs/${job.id}/ev`)}
+          >
+            ⚡ EV recovery procedures
+          </Button>
+        </CardContent>
+      </Card>
       <RouteCard job={job} />
       <OfficeNotesCard job={job} />
 
