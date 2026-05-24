@@ -46,6 +46,7 @@ export const ERROR_CODES = {
    */
   PIN_NOT_SET: 'pin_not_set',
 
+<<<<<<< HEAD
   // Auction & Remarketing Marketplace (Session 33).
   AUCTION_BID_TOO_LOW: 'auction_bid_too_low',
   AUCTION_NOT_LIVE: 'auction_not_live',
@@ -65,6 +66,18 @@ export const ERROR_CODES = {
   MARKETPLACE_INVALID_APP_STATE: 'marketplace_invalid_app_state',
   MARKETPLACE_SCOPE_NOT_GRANTED: 'marketplace_scope_not_granted',
   MARKETPLACE_NOT_INSTALLED: 'marketplace_not_installed',
+=======
+  // Enterprise SSO (Session 38)
+  SSO_DISABLED: 'sso_disabled',
+  SSO_TENANT_NOT_ALLOWED: 'sso_tenant_not_allowed',
+  SSO_CONNECTION_NOT_FOUND: 'sso_connection_not_found',
+  SSO_INVALID_ASSERTION: 'sso_invalid_assertion',
+  SSO_INVALID_STATE: 'sso_invalid_state',
+  SSO_PROVIDER_ERROR: 'sso_provider_error',
+  SSO_USER_NOT_PROVISIONED: 'sso_user_not_provisioned',
+  SCIM_TOKEN_INVALID: 'scim_token_invalid',
+  SCIM_FILTER_UNSUPPORTED: 'scim_filter_unsupported',
+>>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
 
   // 5xx
   INTERNAL_ERROR: 'internal_error',

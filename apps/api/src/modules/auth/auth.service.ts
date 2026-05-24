@@ -1020,6 +1020,24 @@ export class AuthService {
   }
 
   // ===========================================================================
+  // ENTERPRISE SSO (Session 38)
+  // ===========================================================================
+  /**
+   * Mint an operator session for a user who authenticated through an external
+   * IdP (SAML / OIDC). This reuses the EXACT password-login token path
+   * (issueTokens → mintTokensInTransaction), so the access + refresh tokens
+   * are the same shape, the same /auth/refresh endpoint accepts them, and
+   * there is no second auth realm. The SSO module owns assertion verification
+   * + user provisioning and calls in here only to issue the session.
+   */
+  async issueSsoTokens(
+    ctx: { tenantId: string; userId: string; role: string },
+    meta: AuthRequestMeta,
+  ): Promise<IssuedTokens> {
+    return this.issueTokens(ctx, meta, null);
+  }
+
+  // ===========================================================================
   // INTERNALS
   // ===========================================================================
   private async issueTokens(

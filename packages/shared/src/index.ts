@@ -30,3 +30,6 @@ export * from './ai-dispatch/index';
 // Public Marketplace API (Session 46) — 3rd-party developer ecosystem: developer
 // accounts, marketplace apps, OAuth2 PKCE flow, public directory, install lifecycle.
 export * from './marketplace-api/index';
+// Enterprise SSO (Session 38) — SAML 2.0 / OIDC connection + SCIM 2.0
+// provisioning + login-audit contracts.
+export * from './sso/index';

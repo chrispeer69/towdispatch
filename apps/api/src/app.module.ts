@@ -52,6 +52,7 @@ import { RedisModule } from './modules/redis/redis.module.js';
 import { ReportingModule } from './modules/reporting/reporting.module.js';
 import { ServiceCatalogModule } from './modules/service-catalog/service-catalog.module.js';
 import { ServiceRatesModule } from './modules/service-rates/service-rates.module.js';
+import { SsoModule } from './modules/sso/sso.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
 import { TenantsModule } from './modules/tenants/tenants.module.js';
 import { TierOffersModule } from './modules/tier-offers/tier-offers.module.js';
@@ -107,6 +108,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     LienProcessingModule,
     EvRecoveryModule,
     VoiceDriverModule,
+<<<<<<< HEAD
     PublicApiModule,
     CustomerPortalModule,
     AuctionModule,
@@ -115,6 +117,9 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     DotModule,
     AiDispatchModule,
     MarketplaceApiModule,
+=======
+    SsoModule,
+>>>>>>> 5eaf71e (feat(sso): Enterprise SSO — SAML 2.0 + OIDC + SCIM 2.0 (Session 38))
     DashboardModule,
     ReportingModule,
     AdminModule,

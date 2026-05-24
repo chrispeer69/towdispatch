@@ -13,6 +13,7 @@ import { AppModule } from '../../src/app.module.js';
 import { GlobalExceptionFilter } from '../../src/common/filters/global-exception.filter.js';
 import { registerRawBodyJsonParser } from '../../src/common/middleware/raw-body.middleware.js';
 import { registerRequestContext } from '../../src/common/middleware/request-context.middleware.js';
+import { registerSsoBodyParsers } from '../../src/common/middleware/sso-body-parsers.js';
 import { ZodValidationPipe } from '../../src/common/pipes/zod-validation.pipe.js';
 import { ConfigService } from '../../src/config/config.service.js';
 
@@ -76,6 +77,7 @@ export async function bootApp(): Promise<NestFastifyApplication> {
     { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 * 1024 },
     (_req, body, done) => done(null, body),
   );
+  registerSsoBodyParsers(fi);
   await app.getHttpAdapter().getInstance().ready();
   return app;
 }
@@ -293,6 +295,21 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           // user_invites references users(invited_by) ON DELETE RESTRICT, so
           // wipe invites for the tenants before deleting the users.
           await c.query('DELETE FROM user_invites WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          // Enterprise SSO (Session 38) — all carry tenant_id ON DELETE RESTRICT.
+          // Order: members -> groups/tokens/audit -> connections, then users.
+          // (users.sso_connection_id is ON DELETE SET NULL, so connections can
+          // go before users.)
+          await c.query('DELETE FROM scim_group_members WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM scim_groups WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM scim_tokens WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM sso_login_audit WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM sso_connections WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           await c.query('DELETE FROM users WHERE email = ANY($1::text[])', [ctx.createdEmails]);
           await c.query('DELETE FROM audit_log WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('ALTER TABLE tenants DISABLE TRIGGER trg_audit_tenants');
