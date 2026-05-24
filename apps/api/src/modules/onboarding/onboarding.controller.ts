@@ -25,6 +25,11 @@ import {
 } from './onboarding.contracts.js';
 import { type CallerContext, OnboardingService } from './onboarding.service.js';
 
+// Step ORDERING is owned by the wizard (server-driven `nextStep`). These
+// endpoints are individually idempotent and intentionally do not enforce that
+// steps run in sequence — only `complete` requires `company_info` first. A
+// direct caller could therefore activate a tier with no prior progress; that's
+// acceptable (the row is created on demand and the cap still applies).
 @UseGuards(RolesGuard)
 @Controller('onboarding')
 export class OnboardingController {
