@@ -25,11 +25,17 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"https://api.ustowdispatch.cloud\"")
+            // Emulator → host machine's local API (config.schema API_PORT default 3001).
+            // 10.0.2.2 is the Android emulator's loopback alias for the host. Cleartext
+            // is already permitted in AndroidManifest.xml (usesCleartextTraffic=true).
+            // Physical device over USB: run `adb reverse tcp:3001 tcp:3001` first, or
+            // override this string locally. See DOCS_ANDROID_CLEANUP_DECISIONS.md (R-15).
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3001\"")
             isMinifyEnabled = false
         }
         release {
-            buildConfigField("String", "API_BASE_URL", "\"https://api.ustowdispatch.cloud\"")
+            // Verified-live production API (BUILD_STATUS_2026-05-17.md, smoke harness).
+            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.cloud\"")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

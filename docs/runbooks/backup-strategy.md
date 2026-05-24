@@ -1,7 +1,29 @@
 # Runbook — Backup Strategy
 
 **Owner:** _founder + on-call engineer_
-**Last reviewed:** 2026-05-12
+**Last reviewed:** 2026-05-24
+
+---
+
+## Recovery objectives (RTO / RPO)
+
+| Objective | Target | Mechanism (target-state) |
+|---|---|---|
+| **RTO** — max time to restore service after a data-loss incident | **1 hour** | Postgres PITR + warm standby promotion |
+| **RPO** — max acceptable data loss (window of un-recovered writes) | **15 minutes** | Continuous WAL streaming to object storage |
+
+These are **targets**, not the posture available today. They drive the Phase 1 work in §"Open work" below (WAL archiving, PITR, cross-region replication). Measure RTO from incident declaration to `/ready` returning 200 on the restored primary.
+
+### Railway tier verification — gap analysis
+
+The canonical Postgres runs on **Railway's managed Postgres**. As verified against Railway's offering, the standard Postgres service (Hobby / Pro tiers) provides **scheduled daily snapshots only** — it does **not** natively offer continuous WAL streaming, point-in-time recovery, or an automatically-promotable warm standby. (This matches the multi-region constraint already noted in `SESSION_44_REPORT.md`: Railway's managed DB caps at primary + read replicas, not true active-active.)
+
+**Conclusion: the current tier cannot meet RTO 1h / RPO 15min as-is.** Today's effective posture is daily snapshot only → RPO ≈ 24h, RTO = snapshot-restore time. Two paths close the gap:
+
+1. **Stay on Railway, self-manage durability** — wire `archive_mode = on` with an S3-backed `archive_command` for WAL archiving (PITR), plus a self-managed streaming replica for the warm standby. Achieves the targets without leaving Railway, but the WAL/replica plumbing is ours to operate.
+2. **Migrate canonical Postgres to a PITR-native managed provider** — e.g. AWS RDS Multi-AZ, Crunchy Bridge, or Neon — where PITR + standby are first-class.
+
+> **Cost delta:** *estimate, verify against the live Railway account before committing.* Path (1) adds Railway usage cost for the replica instance (roughly a second DB instance's worth of compute/storage) plus S3 WAL-archive storage; no plan-tier jump is strictly required on Railway. Path (2) replaces Railway DB spend with the target provider's managed-PITR tier (RDS Multi-AZ / Crunchy / Neon Scale), typically a higher monthly line item in exchange for first-class recovery. A precise dollar delta is **not** assertable from the codebase — it depends on the current Railway DB size/usage and the chosen target — so it is left as a verification TODO rather than a fabricated figure.
 
 ---
 
@@ -138,4 +160,4 @@ Until those land, the **effective backup posture** is: daily Railway snapshot, n
 
 ## Last reviewed
 
-2026-05-12 — Session 17C.
+2026-05-24 — added RTO/RPO objectives + Railway tier gap analysis (R-08). Prior: 2026-05-12, Session 17C.
