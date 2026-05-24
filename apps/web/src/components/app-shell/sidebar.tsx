@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import type { AuthTenantDto, AuthUserDto } from '@ustowdispatch/shared';
 import {
+  BarChart3,
   Building2,
   Calculator,
   CarFront,
@@ -183,6 +184,17 @@ const SECTIONS: NavSection[] = [
         href: '/accounting/settings',
         icon: Calculator,
         match: (p) => p.startsWith('/accounting'),
+      },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      {
+        label: 'Reports',
+        href: '/reports',
+        icon: BarChart3,
+        match: (p) => p.startsWith('/reports'),
       },
     ],
   },

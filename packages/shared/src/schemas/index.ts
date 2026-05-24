@@ -45,3 +45,4 @@ export * from './tier-offer';
 export * from './tier-offer-recipient';
 // Impound & Storage (Session 22) — yard management, holds, fees, release.
 export * from './impound';
+export * from './reporting';

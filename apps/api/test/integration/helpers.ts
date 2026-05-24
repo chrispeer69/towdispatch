@@ -109,6 +109,20 @@ export async function tearDown(ctx: TestContext): Promise<void> {
           // Delete dependent data inside the captured tenants. Using
           // tenant_id keeps us from touching unrelated test data.
           // Order matters — children (FK referrers) before parents.
+          // Session 14 reporting leaves: report_runs and report_schedules
+          // reference saved_reports; saved_reports references tenants. Clear
+          // these before the tenant DELETE.
+          await c.query('DELETE FROM report_runs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          await c.query('DELETE FROM report_schedules WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM saved_reports WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          // commission_rules: drivers.commission_rule_id is ON DELETE SET NULL
+          // so we can delete safely after drivers below; but drop here too
+          // to be explicit.
+          await c.query('DELETE FROM commission_rules WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           // Session 12 accounting tables — wipe before tenants.
           await c.query('DELETE FROM sync_jobs WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
           await c.query('DELETE FROM account_mappings WHERE tenant_id = ANY($1::uuid[])', [
