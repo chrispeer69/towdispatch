@@ -10,6 +10,16 @@ account), gets a magic link, self-attests ID (last-4 encrypted), sees a
 fee-ledger balance, pays via Stripe Connect (Elements, PCI SAQ A), and the
 release intent flips to `ready_for_gate` for the yard to finish in person.
 
+**Flow status:** lookup (plate/VIN), session/cookie, ID-attest, balance,
+pay→webhook→ready_for_gate, and the web are all built and the logic is
+unit-tested. The **end-to-end happy path is gated on one v1 limitation**:
+magic-link delivery is wired (SMS via `NotificationService`) but the S22
+`impound_records` model exposes no owner phone/email, so `resolveOwnerContact`
+returns no channel and the lookup responds with the documented "contact the
+yard" error rather than sending — by design (the DO-NOT list forbids sending
+without a channel). The portal becomes end-to-end functional the moment the
+impound→owner-contact join lands; see Deferred 🟡.
+
 **Two things to know up front:**
 1. `origin/master` did **not** compile — it carried pervasive pre-existing
    corruption (committed merge-conflict markers, dropped `/**`/braces, merged
@@ -93,6 +103,8 @@ Full rationale in **SESSION_55_DECISIONS.md** (D0–D13). Highlights:
 
 Operator console routes; the S32 `customer-portal` module + `/portal` routes;
 billing/invoice flows; refund logic; any DB table outside the 4 new ones.
+(Noted in passing, not fixed: `app.module.ts` registers `AdminModule` twice —
+a pre-existing dup, out of Session-55 scope.)
 
 ## Test coverage
 
