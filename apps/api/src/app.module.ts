@@ -13,6 +13,7 @@ import { NotificationModule } from './integrations/notification/notification.mod
 import { AccountRateCardsModule } from './modules/account-rate-cards/account-rate-cards.module.js';
 import { AccountingModule } from './modules/accounting/accounting.module.js';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
 import { ArModule } from './modules/ar/ar.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
@@ -98,6 +99,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     VoiceDriverModule,
     DashboardModule,
     ReportingModule,
+    AdminModule,
     HealthModule,
     DebugModule,
   ],

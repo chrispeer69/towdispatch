@@ -1,0 +1,5 @@
+# Generated evidence artifacts (CSVs, exports) are produced on demand by
+# `pnpm compliance:check` against a live DB. They contain user PII and are not
+# committed — they are handed to the auditor out-of-band. Keep the directory.
+*
+!.gitignore

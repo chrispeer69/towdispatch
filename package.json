@@ -19,6 +19,7 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "test:e2e": "pnpm --filter @ustowdispatch/web run test:e2e",
+    "compliance:check": "tsx scripts/compliance/check.ts",
     "smoke:prod": "pnpm --filter @ustowdispatch/e2e run smoke:prod",
     "db:generate": "pnpm --filter @ustowdispatch/db run generate",
     "db:migrate": "pnpm --filter @ustowdispatch/db run migrate",
@@ -35,9 +36,11 @@
     "@types/node": "22.9.3",
     "husky": "9.1.7",
     "lint-staged": "15.2.10",
+    "pg": "8.13.1",
     "rimraf": "6.0.1",
     "tsx": "4.19.2",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "@types/pg": "8.11.10"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,md}": ["biome check --write --no-errors-on-unmatched"]
