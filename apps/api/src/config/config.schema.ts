@@ -387,6 +387,21 @@ export const configSchema = z.object({
   // ONLY: scoring never blocks or mutates an invoice. Default false so dev/CI
   // don't write signal/score rows against seed data.
   FRAUD_SCORE_CRON_ENABLED: z
+  // Photo Damage Analysis (Session 42). DAMAGE_ANALYSIS_PROVIDER selects the
+  // vision engine: `stub` (default) produces deterministic findings from a
+  // photo-key hash and NEVER calls a third party (safe for dev/CI/tests);
+  // `anthropic` and `openai` call the respective vision API (raw fetch, no
+  // SDK) and need the matching key. Photo bytes (and only non-PII vehicle
+  // hints) are sent to the live providers — VIN/plate/owner are never sent.
+  // DAMAGE_ANALYSIS_WORKER_ENABLED gates the retry worker that drains queued
+  // runs (inline-first processing is the common path; the worker is the
+  // transient-failure backstop, max 3 retries).
+  DAMAGE_ANALYSIS_PROVIDER: z.enum(['stub', 'anthropic', 'openai']).default('stub'),
+  ANTHROPIC_API_KEY: z.string().optional().default(''),
+  ANTHROPIC_VISION_MODEL: z.string().default('claude-sonnet-4-6'),
+  OPENAI_API_KEY: z.string().optional().default(''),
+  OPENAI_VISION_MODEL: z.string().default('gpt-4o'),
+  DAMAGE_ANALYSIS_WORKER_ENABLED: z
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),

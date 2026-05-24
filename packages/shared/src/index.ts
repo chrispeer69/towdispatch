@@ -16,3 +16,5 @@ export * from './heavy-duty/index';
 export * from './voice-driver/index';
 // Fraud Detection (Session 43) — dispute/fraud risk analytics contracts.
 export * from './fraud-detection/index';
+// Photo Damage Analysis (Session 42) — AI-vision damage detection contracts.
+export * from './damage-analysis/index';

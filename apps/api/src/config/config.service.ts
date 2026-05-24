@@ -356,6 +356,36 @@ export class ConfigService {
     };
   }
 
+  /**
+   * Photo Damage Analysis (Session 42). `provider` selects the vision engine
+   * (stub | anthropic | openai). `workerEnabled` gates the retry worker. The
+   * `configured` flags let the module refuse to boot in a live provider mode
+   * with no key (mirrors the payments cutover guard).
+   */
+  get damageAnalysis(): {
+    provider: 'stub' | 'anthropic' | 'openai';
+    workerEnabled: boolean;
+    anthropic: { apiKey: string; model: string; configured: boolean };
+    openai: { apiKey: string; model: string; configured: boolean };
+  } {
+    const anthropicKey = this.config.ANTHROPIC_API_KEY;
+    const openaiKey = this.config.OPENAI_API_KEY;
+    return {
+      provider: this.config.DAMAGE_ANALYSIS_PROVIDER,
+      workerEnabled: this.config.DAMAGE_ANALYSIS_WORKER_ENABLED,
+      anthropic: {
+        apiKey: anthropicKey,
+        model: this.config.ANTHROPIC_VISION_MODEL,
+        configured: !!anthropicKey,
+      },
+      openai: {
+        apiKey: openaiKey,
+        model: this.config.OPENAI_VISION_MODEL,
+        configured: !!openaiKey,
+      },
+    };
+  }
+
   get sentryDsn(): string {
     return this.config.SENTRY_DSN;
   }

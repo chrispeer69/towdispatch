@@ -113,3 +113,9 @@ export * from './fraud-risk-signals';
 export * from './fraud-risk-scores';
 export * from './dispute-records';
 export * from './dispute-outcomes';
+// Photo Damage Analysis (Session 42) — AI-vision damage detection over
+// evidence photos, pre/post comparison. Tables in
+// packages/db/sql/0041_damage_analysis.sql.
+export * from './damage-analyses';
+export * from './damage-findings';
+export * from './damage-comparisons';
