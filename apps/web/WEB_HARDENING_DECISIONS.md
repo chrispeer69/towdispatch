@@ -34,7 +34,7 @@ Scope: close 4 Phase 0 audit items in `apps/web` in one PR. No `apps/api` change
 
 11. **New `web-ci.yml` workflow instead of bolting onto `e2e.yml`.** Typecheck + Vitest resolve workspace packages from TypeScript source (tsconfig paths / Vitest aliases), so the job needs no Postgres/Redis and no package builds — fast feedback on every PR, decoupled from the heavy e2e job.
 
-12. **R-14 keeps a dev-only localhost fallback.** The guard throws only outside `development`; server-side page/route handlers keep their localhost dev fallback (they are not browser-bound and the guard + `publicApiBase()` cover prod). The two browser-bound clients (`offer-client`, `track-client`) now route through `publicApiBase()`, which throws in a prod bundle. `lib/driver/api-client.ts` was left as-is — it already prefers `NEXT_PUBLIC_API_URL` and has a protective `app.*→api.*` hostname fallback for Railway's known `NEXT_PUBLIC_*` bake quirk.
+12. **R-14 keeps a dev-only localhost fallback.** The guard throws only outside `development`; server-side page/route handlers keep their localhost dev fallback (they are not browser-bound and the guard + `publicApiBase()` cover prod). All three browser-bound clients route through `publicApiBase()` (localhost in dev, throws in a prod bundle): `offer-client`, `track-client`, and `lib/driver/api-client.ts`. The driver client keeps its `NEXT_PUBLIC_API_URL`-first preference and the protective `app.*→api.*` hostname fallback (Railway's `NEXT_PUBLIC_*` bake quirk), but its *final* fallback is now `publicApiBase()` instead of a hardcoded `http://localhost:3001` — so a misconfigured prod build on a non-`towcommand.cloud` host fails fast instead of silently pointing at localhost.
 
 ## Shipped ✅
 
