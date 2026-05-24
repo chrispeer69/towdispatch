@@ -13,6 +13,7 @@ import {
   type CreateWebhookEndpointResult,
   ERROR_CODES,
   type PublicApiWebhookDeliveryDto,
+  type PublicWebhookDeliveryDto,
   type UpdateWebhookEndpointPayload,
   type WebhookEndpointDto,
   type WebhookEventType,
@@ -112,6 +113,7 @@ export class WebhooksService {
   }
 
   async listDeliveries(ctx: CallerCtx, endpointId: string): Promise<PublicApiWebhookDeliveryDto[]> {
+  async listDeliveries(ctx: CallerCtx, endpointId: string): Promise<PublicWebhookDeliveryDto[]> {
     return this.db.runInTenantContext(ctx, async (tx) => {
       // Confirm the endpoint is ours (RLS already enforces, 404 is friendlier).
       const endpoint = await tx.query.webhookEndpoints.findFirst({
@@ -133,6 +135,7 @@ export class WebhooksService {
 
   /** Enqueue + immediately attempt a synthetic ping delivery to the endpoint. */
   async testSend(ctx: CallerCtx, endpointId: string): Promise<PublicApiWebhookDeliveryDto> {
+  async testSend(ctx: CallerCtx, endpointId: string): Promise<PublicWebhookDeliveryDto> {
     const deliveryId = await this.db.runInTenantContext(ctx, async (tx) => {
       const endpoint = await tx.query.webhookEndpoints.findFirst({
         where: and(eq(webhookEndpoints.id, endpointId), isNull(webhookEndpoints.deletedAt)),
@@ -164,6 +167,7 @@ export class WebhooksService {
   }
 
   async retryDelivery(ctx: CallerCtx, deliveryId: string): Promise<PublicApiWebhookDeliveryDto> {
+  async retryDelivery(ctx: CallerCtx, deliveryId: string): Promise<PublicWebhookDeliveryDto> {
     await this.db.runInTenantContext(ctx, async (tx) => {
       const row = await tx.query.webhookDeliveries.findFirst({
         where: and(eq(webhookDeliveries.id, deliveryId), isNull(webhookDeliveries.deletedAt)),
@@ -179,6 +183,7 @@ export class WebhooksService {
     ctx: CallerCtx,
     deliveryId: string,
   ): Promise<PublicApiWebhookDeliveryDto> {
+  private async getDelivery(ctx: CallerCtx, deliveryId: string): Promise<PublicWebhookDeliveryDto> {
     return this.db.runInTenantContext(ctx, async (tx) => {
       const row = await tx.query.webhookDeliveries.findFirst({
         where: and(eq(webhookDeliveries.id, deliveryId), isNull(webhookDeliveries.deletedAt)),
@@ -206,6 +211,7 @@ function toEndpointDto(row: typeof webhookEndpoints.$inferSelect): WebhookEndpoi
 }
 
 function toDeliveryDto(row: typeof webhookDeliveries.$inferSelect): PublicApiWebhookDeliveryDto {
+function toDeliveryDto(row: typeof webhookDeliveries.$inferSelect): PublicWebhookDeliveryDto {
   return {
     id: row.id,
     tenantId: row.tenantId,

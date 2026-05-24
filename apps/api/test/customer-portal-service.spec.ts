@@ -126,6 +126,9 @@ d('Customer portal services (integration)', () => {
     } as unknown as EmailService;
 
     const tenantDb = new TenantAwareDb(app, app, portalConfig);
+    const tenantDb = new TenantAwareDb(app, app, {
+      readReplicaConfigured: false,
+    } as unknown as import('../src/config/config.service.js').ConfigService);
     const runner = new TransactionRunner(admin);
     auth = new PortalAuthService(
       portalConfig,

@@ -8,6 +8,7 @@
 import { ServiceUnavailableException } from '@nestjs/common';
 import type { Redis } from 'ioredis';
 import { describe, expect, it, vi } from 'vitest';
+import type { RegionContextService } from '../../common/region/region-context.service.js';
 import type { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import type { RegionContextService } from '../region/region-context.service.js';
 import { HealthMetricsController } from './health-metrics.controller.js';
@@ -43,6 +44,7 @@ function build(opts: {
     snapshot: vi.fn(() => Promise.resolve('# metrics')),
   } as unknown as MetricsService;
   return new HealthMetricsController(db, redis, metrics, stubRegion);
+  return new HealthMetricsController(db, redis, metrics, {} as unknown as RegionContextService);
 }
 
 describe('HealthMetricsController', () => {
@@ -74,6 +76,12 @@ describe('HealthMetricsController', () => {
     const db = { ping: vi.fn(() => Promise.resolve()) } as unknown as TenantAwareDb;
     const metrics = { snapshot: vi.fn() } as unknown as MetricsService;
     const controller = new HealthMetricsController(db, redis, metrics, stubRegion);
+    const controller = new HealthMetricsController(
+      db,
+      redis,
+      metrics,
+      {} as unknown as RegionContextService,
+    );
     await expect(controller.readiness()).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 

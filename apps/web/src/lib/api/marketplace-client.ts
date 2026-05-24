@@ -1,8 +1,13 @@
 /**
- * Browser-side helpers for the public bidder marketplace (Session 33).
- * Hits the same-origin public BFF (/api/auctionpub/*). The bidder session
- * (JWT + bidder DTO) lives in localStorage keyed by tenant slug, since a
- * bidder is scoped to one tenant's marketplace at a time.
+ * Browser-side marketplace clients. Two concerns share this module (a bad
+ * merge had concatenated two same-named files; reunified here — see
+ * SESSION_54_DECISIONS.md):
+ *
+ *   1. Public bidder marketplace (Session 33) — same-origin public BFF
+ *      (/api/auctionpub/*). The bidder session (JWT + bidder DTO) lives in
+ *      localStorage keyed by tenant slug; a bidder is scoped to one tenant's
+ *      marketplace at a time.
+ *   2. Installed Apps (Session 46) — operator BFF (/api/installed-apps).
  */
 'use client';
 import type {
@@ -99,6 +104,8 @@ export const placeBid = (slug: string, listingId: string, bidAmountCents: number
   );
 export const fetchMyBids = (slug: string) =>
   call<AuctionBidDto[]>('marketplace/my-bids', undefined, getBidderToken(slug));
+
+// ---- installed apps (operator) ----
 export const clientListInstalled = (): Promise<InstalledAppDto[]> => req<InstalledAppDto[]>(BASE);
 
 export const clientUninstall = (id: string): Promise<null> =>

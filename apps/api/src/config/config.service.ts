@@ -179,6 +179,8 @@ export class ConfigService {
     // secrets from a single JWT_SECRET so an attacker who somehow obtained a
     // refresh-token forgery oracle can't trivially mint access tokens.
     // Explicit overrides win when set.
+    // secrets from a single JWT_SECRET so an attacker who obtained one forgery
+    // oracle can't trivially mint another token class. Explicit overrides win.
     const base = this.config.JWT_SECRET;
     return {
       accessSecret: this.config.JWT_ACCESS_SECRET || `${base}::access`,
@@ -198,6 +200,7 @@ export class ConfigService {
       audience: this.config.JWT_AUDIENCE,
     };
   }
+
   /** White-Label Customer Portal (Session 32). */
   get portal(): { baseDomain: string } {
     return { baseDomain: this.config.PORTAL_BASE_DOMAIN };

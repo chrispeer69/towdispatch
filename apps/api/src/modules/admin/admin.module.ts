@@ -3,6 +3,10 @@
  * (Phase 0 hardening, Session 17). AdminService backs the audit-log + anomaly
  * queries; the Sentry capture for GET /admin/sentry-test happens in the global
  * exception filter (SentryService comes from the global ObservabilityModule).
+ * Hosts admin-only endpoints: the SOC 2 audit-log reader (GET /admin/audit-log
+ * + anomalies) and the operational GET /admin/sentry-test probe (Phase 0
+ * hardening, Session 17). SentryService comes from the global
+ * ObservabilityModule and capture happens in the global exception filter.
  */
 import { Module } from '@nestjs/common';
 import { AdminController } from './admin.controller.js';
