@@ -28,6 +28,7 @@ import { FleetModule } from './modules/fleet/fleet.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ImportModule } from './modules/import/import.module.js';
 import { JobsModule } from './modules/jobs/jobs.module.js';
+import { OnboardingModule } from './modules/onboarding/onboarding.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { RatesModule } from './modules/rates/rates.module.js';
 import { RedisModule } from './modules/redis/redis.module.js';
@@ -66,6 +67,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     JobsModule,
     DispatchModule,
     TierOffersModule,
+    OnboardingModule,
     DriverExperienceModule,
     DirectionsModule,
     ChatModule,

@@ -165,7 +165,10 @@ export function SignupForm(): JSX.Element {
       }
       return;
     }
-    router.push('/verify-email-pending');
+    // Signup sets the session cookies via the BFF route, so the new owner is
+    // authenticated immediately — send them straight into the onboarding
+    // wizard. Email verification is surfaced (non-blocking) inside the wizard.
+    router.push('/signup/wizard');
   }
 
   return (
