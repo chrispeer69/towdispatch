@@ -531,6 +531,8 @@ export class ConfigService {
     cronEnabled: boolean;
     etaProvider: AppConfig['ETA_PROVIDER'];
     recommendationLimit: number;
+    retentionCronEnabled: boolean;
+    retentionBatchSize: number;
     weights: {
       distance: number;
       capability: number;
@@ -544,6 +546,8 @@ export class ConfigService {
       cronEnabled: this.config.AI_DISPATCH_RECOMPUTE_CRON_ENABLED,
       etaProvider: this.config.ETA_PROVIDER,
       recommendationLimit: this.config.AI_DISPATCH_RECOMMENDATION_LIMIT,
+      retentionCronEnabled: this.config.AI_DISPATCH_RETENTION_CRON_ENABLED,
+      retentionBatchSize: this.config.AI_DISPATCH_RETENTION_BATCH_SIZE,
       weights: {
         distance: this.config.AI_DISPATCH_WEIGHT_DISTANCE,
         capability: this.config.AI_DISPATCH_WEIGHT_CAPABILITY,

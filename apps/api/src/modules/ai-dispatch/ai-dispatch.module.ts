@@ -15,12 +15,21 @@ import { DriverAuthGuard } from '../driver-experience/driver-auth.guard.js';
 import { AiDispatchRecomputeCron } from './ai-dispatch-recompute.cron.js';
 import { AiDispatchController } from './ai-dispatch.controller.js';
 import { DriverDispatchController } from './driver-dispatch.controller.js';
+import { AdminRetentionController } from './retention/admin-retention.controller.js';
+import { AiDispatchRetentionCron } from './retention/retention.cron.js';
+import { RetentionService } from './retention/retention.service.js';
 import { SmartDispatchService } from './smart-dispatch.service.js';
 
 @Module({
   imports: [DatabaseModule, AuthModule, ScheduleModule.forRoot()],
-  controllers: [AiDispatchController, DriverDispatchController],
-  providers: [SmartDispatchService, AiDispatchRecomputeCron, DriverAuthGuard],
-  exports: [SmartDispatchService],
+  controllers: [AiDispatchController, DriverDispatchController, AdminRetentionController],
+  providers: [
+    SmartDispatchService,
+    AiDispatchRecomputeCron,
+    RetentionService,
+    AiDispatchRetentionCron,
+    DriverAuthGuard,
+  ],
+  exports: [SmartDispatchService, RetentionService],
 })
 export class AiDispatchModule {}

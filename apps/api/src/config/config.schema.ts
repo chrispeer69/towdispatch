@@ -529,6 +529,17 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  // Retention sweep for the three high-volume ai-dispatch tables
+  // (dispatch_recommendations / dispatch_outcomes / eta_predictions).
+  // AI_DISPATCH_RETENTION_CRON_ENABLED gates the daily 03:00 two-phase purge.
+  // Default false so dev/CI never delete. Windows are code constants
+  // (retention-policy.ts), not env — a data-lifetime change is a reviewed PR.
+  AI_DISPATCH_RETENTION_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+  // Rows mutated per statement before the sweep loops — caps lock duration.
+  AI_DISPATCH_RETENTION_BATCH_SIZE: z.coerce.number().int().min(1).max(10_000).default(500),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
