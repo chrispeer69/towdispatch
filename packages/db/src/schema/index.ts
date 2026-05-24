@@ -57,3 +57,10 @@ export * from './driver-offline-actions';
 // packages/db/sql/0034_tier_offer_composer.sql.
 export * from './tier-offers';
 export * from './tier-offer-recipients';
+// Impound & Storage (Session 22) — yard management, holds, fee accrual,
+// release workflow. Tables in packages/db/sql/0036_impound_storage.sql.
+export * from './impound-yards';
+export * from './impound-records';
+export * from './impound-holds';
+export * from './impound-fees';
+export * from './impound-releases';

@@ -223,6 +223,15 @@ export const configSchema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
   SENDGRID_WEBHOOK_PUBLIC_KEY: z.string().optional().default(''),
+
+  // Impound & Storage (Session 22).
+  // IMPOUND_FEE_CRON_ENABLED gates the daily storage-fee accrual cron
+  // (02:00 tick that writes daily_storage fees and flips lien eligibility).
+  // Default false so dev/CI don't accrue fees against seed data.
+  IMPOUND_FEE_CRON_ENABLED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;

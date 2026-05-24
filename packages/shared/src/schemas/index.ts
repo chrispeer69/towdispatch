@@ -43,3 +43,5 @@ export * from './driver-experience';
 // Tier Offer Composer (Session 1) — Moat #3 Zod contracts.
 export * from './tier-offer';
 export * from './tier-offer-recipient';
+// Impound & Storage (Session 22) — yard management, holds, fees, release.
+export * from './impound';
