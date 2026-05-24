@@ -18,6 +18,7 @@ import { BillingModule } from './modules/billing/billing.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
 import { DashboardModule } from './modules/dashboard/dashboard.module.js';
+import { DebugModule } from './modules/debug/debug.module.js';
 import { DirectionsModule } from './modules/directions/directions.module.js';
 import { DispatchEventsModule } from './modules/dispatch/dispatch-events.module.js';
 import { DispatchModule } from './modules/dispatch/dispatch.module.js';
@@ -79,6 +80,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
     ImportModule,
     DashboardModule,
     HealthModule,
+    DebugModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

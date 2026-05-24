@@ -19,6 +19,7 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "test:e2e": "pnpm --filter @ustowdispatch/web run test:e2e",
+    "smoke:prod": "pnpm --filter @ustowdispatch/e2e run smoke:prod",
     "db:generate": "pnpm --filter @ustowdispatch/db run generate",
     "db:migrate": "pnpm --filter @ustowdispatch/db run migrate",
     "db:seed": "pnpm --filter @ustowdispatch/db run seed",

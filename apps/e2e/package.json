@@ -7,6 +7,7 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:chromium": "playwright test --project=chromium",
+    "smoke:prod": "SMOKE_RUN_AGAINST_PROD=1 playwright test production-smoke.spec.ts --project=chromium",
     "test:report": "playwright show-report",
     "typecheck": "tsc --noEmit"
   },

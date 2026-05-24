@@ -16,7 +16,20 @@
  *                       `pnpm --filter @ustowdispatch/e2e test` is safe to
  *                       run on developer machines without docker.
  */
+import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
+
+// Production smoke harness loads its own env file (apps/e2e/.env.smoke) so
+// `pnpm smoke:prod` doesn't require exporting a dozen vars by hand. Uses the
+// Node built-in loader — no new dependency. Only runs when the smoke flag is
+// set, so the normal CI suite is untouched.
+if (process.env.SMOKE_RUN_AGAINST_PROD === '1' && typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile(fileURLToPath(new URL('./.env.smoke', import.meta.url)));
+  } catch {
+    // No .env.smoke present — fall back to already-exported env vars.
+  }
+}
 
 const BASE_URL = process.env.WEB_E2E_BASE_URL ?? 'http://localhost:3600';
 const isCi = !!process.env.CI;
