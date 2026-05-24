@@ -23,11 +23,6 @@ interface StripeJs {
     redirect: 'if_required';
   }): Promise<{ error?: { message?: string } }>;
 }
-declare global {
-  interface Window {
-    Stripe?: (publishableKey: string, options?: { stripeAccount?: string }) => StripeJs;
-  }
-}
 
 export default function RecoverPayPage(): JSX.Element {
   const t = useMemo(() => recoverMessages(detectRecoverLocale()), []);
@@ -44,7 +39,7 @@ export default function RecoverPayPage(): JSX.Element {
   useEffect(() => {
     let cancelled = false;
     const ensureStripe = async (): Promise<void> => {
-      if (window.Stripe) return;
+      if ((window as unknown as { Stripe?: (...args: unknown[]) => StripeJs }).Stripe) return;
       await new Promise<void>((resolve, reject) => {
         const existing = document.querySelector(`script[src="${STRIPE_JS_SRC}"]`);
         if (existing) {
@@ -69,10 +64,10 @@ export default function RecoverPayPage(): JSX.Element {
           throw new Error('Online payment is not available for this yard.');
         }
         await ensureStripe();
-        if (cancelled || !window.Stripe) return;
+        if (cancelled || !(window as unknown as { Stripe?: (k: string, o?: { stripeAccount?: string }) => StripeJs }).Stripe) return;
         const stripe = init.stripeAccountId
-          ? window.Stripe(init.publishableKey, { stripeAccount: init.stripeAccountId })
-          : window.Stripe(init.publishableKey);
+          ? ((window as any).Stripe as (k: string, o?: { stripeAccount?: string }) => StripeJs)(init.publishableKey, { stripeAccount: init.stripeAccountId })
+          : ((window as any).Stripe as (k: string) => StripeJs)(init.publishableKey);
         const elements = stripe.elements({ clientSecret: init.clientSecret });
         const card = elements.create('payment');
         if (mountRef.current) card.mount(mountRef.current);
