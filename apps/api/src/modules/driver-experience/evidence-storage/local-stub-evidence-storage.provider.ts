@@ -13,11 +13,14 @@
 import { Injectable } from '@nestjs/common';
 import {
   type EvidenceStorageProvider,
+  type GenerateThumbnailInput,
   type PresignGetInput,
+  type PresignGetThumbnailInput,
   type PresignPutInput,
   type PresignedGet,
   type PresignedPut,
   buildEvidenceKey,
+  isThumbnailableKind,
 } from './evidence-storage.provider.js';
 
 const STUB_TTL_SECONDS = 5 * 60;
@@ -45,5 +48,28 @@ export class LocalStubEvidenceStorageProvider implements EvidenceStorageProvider
     }
     const url = `${this.publicBaseUrl}/__stub-evidence-download/${encodeURIComponent(input.key)}?token=stub`;
     return { url, expiresAt: Math.floor(Date.now() / 1000) + STUB_TTL_SECONDS };
+  }
+
+  /**
+   * Dev/CI has no thumbnail-generation pipeline, so we point the
+   * thumbnail at the source asset's stub URL. The HTTP shape (a non-null
+   * URL for thumbnailable kinds, null otherwise) matches production.
+   */
+  async presignGetThumbnail(input: PresignGetThumbnailInput): Promise<PresignedGet | null> {
+    if (!isThumbnailableKind(input.kind)) return null;
+    if (!input.key.startsWith(`tenants/${input.tenantId}/`)) {
+      throw new Error('Cross-tenant key access denied');
+    }
+    const url = `${this.publicBaseUrl}/__stub-evidence-download/${encodeURIComponent(input.key)}?token=stub&thumb=1`;
+    return { url, expiresAt: Math.floor(Date.now() / 1000) + STUB_TTL_SECONDS };
+  }
+
+  /**
+   * The stub never persisted the source bytes, so there is nothing to resize.
+   * Returns false; `presignGetThumbnail` already points dev/CI at the source
+   * asset's stub URL, so the operator console still renders a tile.
+   */
+  async generateThumbnail(_input: GenerateThumbnailInput): Promise<boolean> {
+    return false;
   }
 }

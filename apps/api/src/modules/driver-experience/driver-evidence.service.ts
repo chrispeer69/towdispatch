@@ -2,20 +2,29 @@
  * DriverEvidenceService — manages job_evidence rows and brokers
  * presigned upload / download URLs via the EvidenceStorageProvider.
  *
- * CRITICAL: this service never proxies bytes. The driver app uploads
- * directly to object storage with a server-issued presigned URL; we
- * just track the row's lifecycle (`pending` → `uploaded` → `failed`).
- * That keeps the API instance from buffering 100MB videos in process
- * memory and lets the same code path scale to thousands of concurrent
- * drivers without a queue.
+ * CRITICAL: the upload + playback paths never proxy bytes. The driver app
+ * uploads directly to object storage with a server-issued presigned URL and
+ * the dispatch UI reads back via presigned GET; we just track the row's
+ * lifecycle (`pending` → `uploaded` → `failed`). That keeps the API instance
+ * from buffering 100MB videos in process memory and lets the same code path
+ * scale to thousands of concurrent drivers without a queue. The one bounded
+ * exception is best-effort thumbnail generation on finalize (small images
+ * only, size-capped, failures swallowed) — see `finalize`.
  */
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { driverShifts, jobEvidence, jobs, uuidv7 } from '@ustowdispatch/db';
-import { ERROR_CODES, type JobEvidenceDto, type JobEvidenceKind } from '@ustowdispatch/shared';
+import {
+  ERROR_CODES,
+  type JobEvidenceDto,
+  type JobEvidenceKind,
+  type JobEvidenceWithUrlDto,
+} from '@ustowdispatch/shared';
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import type { EvidenceStorageProvider } from './evidence-storage/evidence-storage.provider.js';
 import { EVIDENCE_STORAGE_PROVIDER } from './evidence-storage/evidence-storage.tokens.js';
+
+export type { JobEvidenceWithUrlDto } from '@ustowdispatch/shared';
 
 export interface PresignEvidencePayload {
   jobId: string;
@@ -36,12 +45,6 @@ export interface FailEvidencePayload {
   reason: string;
 }
 
-export interface JobEvidenceWithUrlDto extends JobEvidenceDto {
-  /** Short-lived presigned GET URL — null for items still in `pending`. */
-  downloadUrl: string | null;
-  downloadUrlExpiresAt: number | null;
-}
-
 /** Unified actor for surfaces accepting BOTH driver + operator JWTs. */
 interface DriverOrOperatorActor {
   tenantId: string;
@@ -56,6 +59,8 @@ interface DriverOrOperatorActor {
 
 @Injectable()
 export class DriverEvidenceService {
+  private readonly logger = new Logger(DriverEvidenceService.name);
+
   constructor(
     private readonly db: TenantAwareDb,
     @Inject(EVIDENCE_STORAGE_PROVIDER)
@@ -158,7 +163,7 @@ export class DriverEvidenceService {
     evidenceId: string,
     input: FinalizeEvidencePayload,
   ): Promise<JobEvidenceDto> {
-    return this.db.runInTenantContext(this.toTenantCtx(actor), async (tx) => {
+    const dto = await this.db.runInTenantContext(this.toTenantCtx(actor), async (tx) => {
       const existing = await tx.query.jobEvidence.findFirst({
         where: and(eq(jobEvidence.id, evidenceId), isNull(jobEvidence.deletedAt)),
       });
@@ -192,6 +197,31 @@ export class DriverEvidenceService {
       if (!row) throw new Error('update job_evidence .. yielded no row');
       return evidenceRowToDto(row);
     });
+
+    // Best-effort 200x200 jpg thumbnail. Runs AFTER the status flip commits
+    // and OUTSIDE the tenant tx so an S3 round-trip never holds a row lock.
+    // The row is already `uploaded`; a generation failure (or a non-image /
+    // oversized / stub source) just degrades the UI to the full-size asset.
+    // The provider's tenant-prefix guard scopes the object access. Video
+    // posters are skipped here (Sharp can't decode video).
+    if (dto.uploadStatus === 'uploaded' && dto.contentType !== null && dto.sizeBytes !== null) {
+      try {
+        await this.storage.generateThumbnail({
+          tenantId: actor.tenantId,
+          key: dto.s3Key,
+          kind: dto.kind,
+          contentType: dto.contentType,
+          sizeBytes: dto.sizeBytes,
+        });
+      } catch (err) {
+        this.logger.warn(
+          `thumbnail generation failed for evidence ${dto.id}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+    }
+    return dto;
   }
 
   async fail(
@@ -245,23 +275,79 @@ export class DriverEvidenceService {
       const out: JobEvidenceWithUrlDto[] = [];
       for (const r of rows) {
         const base = evidenceRowToDto(r);
-        if (r.uploadStatus === 'uploaded') {
-          try {
-            const get = await this.storage.presignGet({
-              tenantId: actor.tenantId,
-              key: r.s3Key,
-            });
-            out.push({ ...base, downloadUrl: get.url, downloadUrlExpiresAt: get.expiresAt });
-          } catch {
-            // Failure to sign should not poison the whole list — surface
-            // the row without a URL so the UI can still show it.
-            out.push({ ...base, downloadUrl: null, downloadUrlExpiresAt: null });
-          }
-        } else {
-          out.push({ ...base, downloadUrl: null, downloadUrlExpiresAt: null });
+        if (r.uploadStatus !== 'uploaded') {
+          out.push({
+            ...base,
+            downloadUrl: null,
+            downloadUrlExpiresAt: null,
+            thumbnailUrl: null,
+            thumbnailUrlExpiresAt: null,
+          });
+          continue;
         }
+        // Failure to sign either URL should not poison the whole list —
+        // surface the row with whatever URLs we could mint.
+        let downloadUrl: string | null = null;
+        let downloadUrlExpiresAt: number | null = null;
+        let thumbnailUrl: string | null = null;
+        let thumbnailUrlExpiresAt: number | null = null;
+        try {
+          const get = await this.storage.presignGet({ tenantId: actor.tenantId, key: r.s3Key });
+          downloadUrl = get.url;
+          downloadUrlExpiresAt = get.expiresAt;
+        } catch {
+          /* leave download URL null */
+        }
+        try {
+          const thumb = await this.storage.presignGetThumbnail({
+            tenantId: actor.tenantId,
+            key: r.s3Key,
+            kind: r.kind,
+          });
+          if (thumb) {
+            thumbnailUrl = thumb.url;
+            thumbnailUrlExpiresAt = thumb.expiresAt;
+          }
+        } catch {
+          /* leave thumbnail URL null */
+        }
+        out.push({
+          ...base,
+          downloadUrl,
+          downloadUrlExpiresAt,
+          thumbnailUrl,
+          thumbnailUrlExpiresAt,
+        });
       }
       return out;
+    });
+  }
+
+  /**
+   * Operator-only soft delete. Sets `deleted_at` inside the tenant
+   * context so RLS scopes the row and the `trg_audit_job_evidence`
+   * trigger records the deletion. A row belonging to another tenant is
+   * invisible under RLS, so this 404s rather than leaking existence.
+   * The S3 object (and its thumbnail) is intentionally left in place —
+   * the API never manipulates object bytes; lifecycle/retention is an
+   * object-store policy concern.
+   */
+  async delete(actor: DriverOrOperatorActor, evidenceId: string): Promise<void> {
+    await this.db.runInTenantContext(this.toTenantCtx(actor), async (tx) => {
+      const existing = await tx.query.jobEvidence.findFirst({
+        where: and(eq(jobEvidence.id, evidenceId), isNull(jobEvidence.deletedAt)),
+        columns: { id: true },
+      });
+      if (!existing) {
+        throw new NotFoundException({
+          code: ERROR_CODES.NOT_FOUND,
+          message: 'Evidence not found',
+        });
+      }
+      await tx
+        .update(jobEvidence)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(eq(jobEvidence.id, evidenceId));
     });
   }
 

@@ -347,6 +347,21 @@ export const jobEvidenceSchema = z.object({
 export type JobEvidenceDto = z.infer<typeof jobEvidenceSchema>;
 
 /**
+ * A job_evidence row enriched with short-lived presigned GET URLs for the
+ * dispatch UI — the full-size asset (`downloadUrl`) and its 200x200 jpg
+ * `thumbnailUrl`. All four URL fields are null while the row is still
+ * `pending`; `thumbnailUrl` is also null for kinds with no thumbnail
+ * (documents / other). The `*ExpiresAt` fields are unix seconds.
+ */
+export const jobEvidenceWithUrlSchema = jobEvidenceSchema.extend({
+  downloadUrl: z.string().nullable(),
+  downloadUrlExpiresAt: z.number().int().nullable(),
+  thumbnailUrl: z.string().nullable(),
+  thumbnailUrlExpiresAt: z.number().int().nullable(),
+});
+export type JobEvidenceWithUrlDto = z.infer<typeof jobEvidenceWithUrlSchema>;
+
+/**
  * The driver POST to register an evidence record. The actual upload is
  * a separate presigned-URL step keyed by s3Key. uploadStatus starts at
  * 'pending' and flips to 'uploaded' via PATCH after the S3 HEAD check.

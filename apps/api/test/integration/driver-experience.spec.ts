@@ -364,12 +364,94 @@ describeIfDb('Driver Experience (Session 2) — API integration', () => {
       expect(listRes.statusCode).toBe(200);
       const list = listRes.json() as Array<{
         id: string;
+        kind: string;
         uploadStatus: string;
         downloadUrl: string | null;
+        thumbnailUrl: string | null;
       }>;
       const row = list.find((r) => r.id === presigned.evidence.id);
       expect(row?.uploadStatus).toBe('uploaded');
       expect(row?.downloadUrl).toBeTruthy();
+      // photo_pickup is thumbnailable, so the list must carry a thumbnail URL.
+      expect(row?.thumbnailUrl).toBeTruthy();
+    });
+
+    /** Stage an uploaded evidence row and return its id. */
+    async function stageEvidence(kind = 'photo_damage'): Promise<string> {
+      const presignRes = await app.inject({
+        method: 'POST',
+        url: '/job-evidence/presign',
+        headers: { ...auth(driverToken), 'content-type': 'application/json' },
+        payload: { jobId: job.id, kind, contentType: 'image/jpeg', sizeBytes: 64_000 },
+      });
+      const id = (presignRes.json() as { evidence: { id: string } }).evidence.id;
+      await app.inject({
+        method: 'POST',
+        url: `/job-evidence/${id}/finalize`,
+        headers: { ...auth(driverToken), 'content-type': 'application/json' },
+        payload: {},
+      });
+      return id;
+    }
+
+    it('owner soft-deletes evidence (204) and it disappears from the list', async () => {
+      const id = await stageEvidence();
+      const delRes = await app.inject({
+        method: 'DELETE',
+        url: `/job-evidence/${id}`,
+        headers: auth(owner.accessToken),
+      });
+      expect(delRes.statusCode).toBe(204);
+
+      const listRes = await app.inject({
+        method: 'GET',
+        url: `/jobs/${job.id}/evidence`,
+        headers: auth(owner.accessToken),
+      });
+      const list = listRes.json() as Array<{ id: string }>;
+      expect(list.some((r) => r.id === id)).toBe(false);
+    });
+
+    it('deleting a non-existent evidence id returns 404', async () => {
+      const res = await app.inject({
+        method: 'DELETE',
+        url: `/job-evidence/${uuidv7()}`,
+        headers: auth(owner.accessToken),
+      });
+      expect(res.statusCode).toBe(404);
+    });
+
+    it('a foreign tenant cannot delete this tenant’s evidence (404 under RLS)', async () => {
+      const id = await stageEvidence();
+      const attacker = await signup(ctx, makeSignupBody(`${SUFFIX}-atk`, ctx));
+      const res = await app.inject({
+        method: 'DELETE',
+        url: `/job-evidence/${id}`,
+        headers: auth(attacker.accessToken),
+      });
+      // RLS hides the row from the attacker's tenant, so it reads as absent.
+      expect(res.statusCode).toBe(404);
+
+      // And the row is still there for the real owner.
+      const listRes = await app.inject({
+        method: 'GET',
+        url: `/jobs/${job.id}/evidence`,
+        headers: auth(owner.accessToken),
+      });
+      const list = listRes.json() as Array<{ id: string }>;
+      expect(list.some((r) => r.id === id)).toBe(true);
+    });
+
+    it('a driver token cannot reach the operator-only delete (401)', async () => {
+      const id = await stageEvidence();
+      const res = await app.inject({
+        method: 'DELETE',
+        url: `/job-evidence/${id}`,
+        headers: auth(driverToken),
+      });
+      // The DELETE controller is operator-auth only; a driver JWT is rejected
+      // by the global JwtAuthGuard before RolesGuard runs.
+      expect(res.statusCode).toBe(401);
     });
   });
 
