@@ -2,6 +2,8 @@ package ai.bluecollar.ustowdispatch.driver.di
 
 import ai.bluecollar.ustowdispatch.driver.data.local.DriverDatabase
 import ai.bluecollar.ustowdispatch.driver.data.local.JobDao
+import ai.bluecollar.ustowdispatch.driver.data.local.OfflineActionDao
+import ai.bluecollar.ustowdispatch.driver.data.local.PendingEvidenceDao
 import ai.bluecollar.ustowdispatch.driver.data.local.PendingPhotoDao
 import android.content.Context
 import androidx.room.Room
@@ -28,4 +30,10 @@ object DatabaseModule {
 
     @Provides
     fun providePhotoDao(db: DriverDatabase): PendingPhotoDao = db.photoDao()
+
+    @Provides
+    fun provideOfflineActionDao(db: DriverDatabase): OfflineActionDao = db.offlineActionDao()
+
+    @Provides
+    fun providePendingEvidenceDao(db: DriverDatabase): PendingEvidenceDao = db.pendingEvidenceDao()
 }

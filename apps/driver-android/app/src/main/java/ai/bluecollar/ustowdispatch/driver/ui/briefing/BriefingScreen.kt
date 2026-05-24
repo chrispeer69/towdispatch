@@ -36,7 +36,7 @@ fun BriefingScreen(
     onAcknowledged: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    val scroll = remember { rememberScrollState() }
+    val scroll = rememberScrollState()
     LaunchedEffect(state.acknowledged) { if (state.acknowledged) onAcknowledged() }
 
     Column(

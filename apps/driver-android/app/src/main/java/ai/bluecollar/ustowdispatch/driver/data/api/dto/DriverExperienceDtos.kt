@@ -203,6 +203,52 @@ data class OfflineReplayResultItem(
 @Serializable
 data class OfflineReplayResponse(val results: List<OfflineReplayResultItem>)
 
+// ---------------- Telemetry ----------------
+
+@Serializable
+data class TelemetryEventDto(
+    val shiftId: String? = null,
+    /** ISO-8601 timestamp from the GPS sample. */
+    val recordedAt: String,
+    val lat: Double,
+    val lng: Double,
+    val speedMph: Double? = null,
+    val headingDegrees: Double? = null,
+    val accuracyMeters: Double? = null,
+    /** "ping" | "shift_start" | "shift_end" | "job_transition" */
+    val eventKind: String = "ping",
+    val jobId: String? = null,
+)
+
+@Serializable
+data class TelemetryBatchRequest(val events: List<TelemetryEventDto>)
+
+// ---------------- Field payment ----------------
+
+@Serializable
+data class FieldPaymentCreateIntentRequest(
+    val jobId: String,
+    val amountCents: Long,
+    val tipCents: Long = 0,
+    val currency: String = "usd",
+    /** "card_present_tap" — Tap to Pay; "manual_entry" — keyed; etc. */
+    val paymentMethod: String = "card_present_tap",
+    val receiptEmail: String? = null,
+    val shiftId: String? = null,
+)
+
+@Serializable
+data class JobFieldPaymentDto(
+    val id: String,
+    val jobId: String,
+    val status: String,
+    val amountCents: Long,
+    val tipCents: Long = 0,
+    val currency: String,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
 // ---------------- Generic error shape ----------------
 
 /**
