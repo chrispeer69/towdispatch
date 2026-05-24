@@ -17,6 +17,7 @@ import {
   Radio,
   Receipt,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   Truck,
@@ -206,6 +207,16 @@ const SECTIONS: NavSection[] = [
         href: '/reports',
         icon: BarChart3,
         match: (p) => p.startsWith('/reports'),
+      },
+      {
+        // Fraud Detection (Session 43) — defensive analytics scoring job
+        // fraud/dispute risk + a motor-club dispute log. The page gates
+        // access by role (OWNER / ADMIN / DISPATCHER / AUDITOR) with a
+        // friendly 403, so the link itself is unguarded here.
+        label: 'Fraud Risk',
+        href: '/fraud',
+        icon: ShieldAlert,
+        match: (p) => p.startsWith('/fraud'),
       },
     ],
   },
