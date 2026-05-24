@@ -10,6 +10,7 @@ import type {
   CustomerDto,
   CustomerWithVehiclesDto,
   PaginatedAccounts,
+  PaginatedAuditLog,
   PaginatedCustomers,
   PaginatedVehicles,
   ServiceCatalogEntryDto,
@@ -90,6 +91,16 @@ export async function fetchTenantCurrent(accessToken?: string | null): Promise<T
 
 export async function fetchUsers(accessToken?: string | null): Promise<UserDto[]> {
   return apiServer<UserDto[]>('/users', {
+    accessToken: accessToken ?? null,
+  });
+}
+
+export async function fetchAuditLog(
+  query: Record<string, string | undefined>,
+  accessToken?: string | null,
+): Promise<PaginatedAuditLog> {
+  const qs = toQuery(query);
+  return apiServer<PaginatedAuditLog>(`/admin/audit-log${qs}`, {
     accessToken: accessToken ?? null,
   });
 }

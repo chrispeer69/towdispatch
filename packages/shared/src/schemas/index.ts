@@ -46,3 +46,5 @@ export * from './tier-offer-recipient';
 // Impound & Storage (Session 22) — yard management, holds, fees, release.
 export * from './impound';
 export * from './reporting';
+// Audit Log reader (Session 31) — SOC 2 Type I query contracts for /admin/audit-log.
+export * from './audit-log';
