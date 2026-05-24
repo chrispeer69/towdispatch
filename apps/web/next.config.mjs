@@ -1,11 +1,11 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
+import { buildCsp } from './csp.mjs';
+import { assertPublicApiUrl } from './env-guard.mjs';
 
 // Canada Expansion (S47): next-intl without i18n routing. Locale is resolved
 // per request (cookie → Accept-Language → en-US) in src/i18n/request.ts.
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
-import { buildCsp } from './csp.mjs';
-import { assertPublicApiUrl } from './env-guard.mjs';
 
 // R-14: refuse to build a production bundle with no NEXT_PUBLIC_API_URL — it
 // would silently fall back to http://localhost:3001 in the browser.
@@ -69,4 +69,7 @@ const sentryBuildOptions = {
   telemetry: false,
 };
 
+// Wrap with next-intl then Sentry. The runtime SDK is DSN-gated in the
+// instrumentation files, so the Sentry wrapper is a no-op at runtime when no
+// DSN is set; source-map upload runs only when SENTRY_AUTH_TOKEN is present.
 export default withSentryConfig(withNextIntl(nextConfig), sentryBuildOptions);

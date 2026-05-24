@@ -294,6 +294,13 @@ export class ConfigService {
       isTenantAllowed: (tenantId: string): boolean => enabled && allowedTenants.includes(tenantId),
     };
   }
+
+  get reportingBuilderEnabled(): boolean {
+    return this.config.REPORTING_BUILDER_ENABLED;
+  }
+  get reportSchedulerCronEnabled(): boolean {
+    return this.config.REPORT_SCHEDULER_CRON_ENABLED;
+  }
   get smtp(): {
     host: string;
     port: number;

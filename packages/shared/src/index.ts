@@ -1,6 +1,9 @@
 export * from './constants/index';
 export * from './schemas/index';
 export * from './types/index';
+// Reporting builder + KPI dashboard + P&L + aging (Session 53) — additive to
+// schemas/reporting.ts (the Session 14 canned-reporter contracts).
+export * from './reporting/index';
 // Lien Processing (Session 23) — statutory lien-sale workflow contracts.
 export * from './lien-processing/index';
 // Repo Compliance (Session 51) — statutory self-help repossession workflow
