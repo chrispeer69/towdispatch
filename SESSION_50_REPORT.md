@@ -51,6 +51,7 @@ Literal launch command was `pnpm typecheck && pnpm biome check && pnpm test && p
 | `pnpm --filter @ustowdispatch/db typecheck` | ✅ clean (my Drizzle schemas + the collision repair) |
 | pure-trio `tsc` (engine, state-config, renderer) | ✅ clean |
 | `vitest run src/modules/repo` | ✅ 145 passed |
+| full `apps/api` vitest | ✅ 1549 passed, 0 failed; 🟡 71 suites fail to *collect* on pre-existing corruption (swc parse errors in `config.service.ts`/`admin/*`/`jwt.service.ts`) — no assertion failures, no collision-rename regression |
 | `biome check` (all new repo files) | ✅ clean |
 | `pnpm --filter @ustowdispatch/api typecheck` (whole project) | 🟡 blocked by pre-existing corruption in `config.schema.ts`, `config.service.ts`, `admin/*`, `auth/jwt.service.ts` (NOT Session 50 files) |
 | `pnpm --filter @ustowdispatch/web typecheck` (whole project) | 🟡 blocked by pre-existing corruption in `sentry.*.config.ts`, `marketplace-client.ts`, `sidebar.tsx` (NOT Session 50 files) |

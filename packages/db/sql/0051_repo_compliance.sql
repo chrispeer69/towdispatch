@@ -91,8 +91,11 @@ CREATE TRIGGER trg_repo_state_rules_set_updated_at
   FOR EACH ROW EXECUTE FUNCTION fn_repo_set_updated_at();
 
 -- Seed the top 10 states. Re-runnable: ON CONFLICT refreshes the rules.
--- Generated from state-rules.config.ts (code wins on drift). Day-counts are
--- best-effort and require legal review before production use.
+-- These JSON rows are GENERATED from state-rules.config.ts (the runtime source
+-- of truth); code wins on drift. If you edit the config, regenerate this seed
+-- (the generator that produced these rows is described in SESSION_50_REPORT.md)
+-- or land a follow-up migration that re-seeds. Day-counts are best-effort and
+-- require legal review before production use.
 INSERT INTO repo_state_rules (state, rules) VALUES
   ('CA', '{"statute":"CA Civil Code 2983.2 / 2983.3 (Rees-Levering) / 7507.x","peacefulRepoDefinition":"Self-help repossession is lawful only without a breach of the peace (UCC §9-609). A breach occurs on the debtor’s objection at the scene, entry into a residence or a closed/locked enclosure, any use or threat of force, or an officer directing the repossession (state action). California additionally regulates repossession agencies (Bus. & Prof. Code 7500 et seq.).","preRepoNoticeRequired":false,"preRepoNoticeDays":0,"postRepoNoticeRequired":true,"postRepoNoticeDays":2,"postRepoNoticeMethod":"certified","redemptionPeriodDays":15,"cureRight":true,"cureRightDays":15,"personalPropertyHoldDays":60,"personalPropertyReleaseMethod":"owner_pickup_after_notice","secondaryContactRequired":true,"sheriffNoticeRequired":false,"sheriffNoticeJurisdiction":null,"nightRepoIsBreach":false,"presenceObjectionStrict":true}'::jsonb),
   ('TX', '{"statute":"TX Bus. & Com. Code 9.609 / Finance Code Ch. 348","peacefulRepoDefinition":"Self-help repossession is lawful only without a breach of the peace (UCC §9-609). A breach occurs on the debtor’s objection at the scene, entry into a residence or a closed/locked enclosure, any use or threat of force, or an officer directing the repossession (state action).","preRepoNoticeRequired":false,"preRepoNoticeDays":0,"postRepoNoticeRequired":true,"postRepoNoticeDays":5,"postRepoNoticeMethod":"certified","redemptionPeriodDays":0,"cureRight":true,"cureRightDays":10,"personalPropertyHoldDays":30,"personalPropertyReleaseMethod":"owner_pickup_after_notice","secondaryContactRequired":false,"sheriffNoticeRequired":false,"sheriffNoticeJurisdiction":null,"nightRepoIsBreach":false,"presenceObjectionStrict":true}'::jsonb),
