@@ -43,6 +43,9 @@ import { TokenEncryptionService } from './token-encryption.service.js';
             return new QboProvider({
               clientId: qbo.clientId,
               clientSecret: qbo.clientSecret,
+              appcenterBase: qbo.appcenterBase,
+              oauthBase: qbo.oauthBase,
+              apiBase: qbo.apiBase,
             });
           } catch (err) {
             config.logger.warn(

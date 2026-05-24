@@ -17,6 +17,14 @@ export const configSchema = z.object({
   WEB_PUBLIC_URL: z.string().url().default('http://localhost:3000'),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
 
+  // Base URI for RFC 9457 problem-type identifiers. The GlobalExceptionFilter
+  // renders every error's `type` as `${PROBLEM_TYPE_BASE}/<error-code>`. These
+  // URNs are identifiers, not links that must resolve — but prod infra is on
+  // `.cloud` (api.ustowdispatch.cloud), so the default matches that TLD rather
+  // than the legacy `.com` the value used to hardcode (audit R-10). Trailing
+  // slash, if any, is stripped by the config getter.
+  PROBLEM_TYPE_BASE: z.string().url().default('https://errors.ustowdispatch.cloud'),
+
   DATABASE_URL: z.string().url(),
   DATABASE_ADMIN_URL: z.string().url().optional(),
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(500).default(20),
@@ -212,6 +220,14 @@ export const configSchema = z.object({
   QBO_CLIENT_ID: z.string().optional().default(''),
   QBO_CLIENT_SECRET: z.string().optional().default(''),
   QBO_REDIRECT_URI: z.string().optional().default(''),
+  // Intuit endpoint bases (audit R-11). Defaults are Intuit's production hosts;
+  // the path suffixes (/connect/oauth2, /oauth2/v1/tokens/bearer, /v3/company)
+  // are part of the API contract and live in QboProvider. Sandbox differs ONLY
+  // on the data-API host (sandbox-quickbooks.api.intuit.com) — derived from
+  // QBO_API_BASE per-credential; OAuth + AppCenter are identical for sandbox.
+  QBO_APPCENTER_BASE: z.string().url().default('https://appcenter.intuit.com'),
+  QBO_OAUTH_BASE: z.string().url().default('https://oauth.platform.intuit.com'),
+  QBO_API_BASE: z.string().url().default('https://quickbooks.api.intuit.com'),
   QBO_SANDBOX: z
     .enum(['true', 'false'])
     .default('true')

@@ -107,7 +107,7 @@ describeIfDb('Auth integration', () => {
     const config = app.get(ConfigService);
     registerRequestContext(app.getHttpAdapter().getInstance());
     app.useGlobalPipes(new ZodValidationPipe());
-    app.useGlobalFilters(new GlobalExceptionFilter(config.logger));
+    app.useGlobalFilters(new GlobalExceptionFilter(config));
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });

@@ -59,15 +59,29 @@ const PROVIDER_DESCRIPTOR: ProviderDescriptor = {
   ],
 };
 
-const APPCENTER_BASE = 'https://appcenter.intuit.com';
-const OAUTH_TOKEN_URL = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer';
-const API_BASE_PROD = 'https://quickbooks.api.intuit.com/v3/company';
-const API_BASE_SANDBOX = 'https://sandbox-quickbooks.api.intuit.com/v3/company';
+// Intuit endpoint bases. Overridable via config (audit R-11); these are the
+// production defaults. Path suffixes below are part of Intuit's API contract.
+const DEFAULT_APPCENTER_BASE = 'https://appcenter.intuit.com';
+const DEFAULT_OAUTH_BASE = 'https://oauth.platform.intuit.com';
+const DEFAULT_API_BASE = 'https://quickbooks.api.intuit.com';
+const AUTHORIZE_PATH = '/connect/oauth2';
+const OAUTH_TOKEN_PATH = '/oauth2/v1/tokens/bearer';
+const API_COMPANY_PATH = '/v3/company';
 const SCOPE = 'com.intuit.quickbooks.accounting';
 
 interface QboProviderOptions {
   clientId: string;
   clientSecret: string;
+  /** Intuit AppCenter base (OAuth front door). Defaults to production. */
+  appcenterBase?: string;
+  /** Intuit OAuth token-service base. Defaults to production. */
+  oauthBase?: string;
+  /**
+   * Intuit data-API base (production). The sandbox data-API base is derived
+   * from this by prefixing the host with `sandbox-` — sandbox differs from
+   * prod ONLY on the data host, so OAuth/AppCenter need no sandbox variant.
+   */
+  apiBase?: string;
   fetchImpl?: typeof fetch;
 }
 
@@ -126,9 +140,18 @@ export class QboProvider implements AccountingProvider {
   readonly descriptor = PROVIDER_DESCRIPTOR;
 
   private readonly fetchImpl: typeof fetch;
+  private readonly appcenterBase: string;
+  private readonly oauthTokenUrl: string;
+  private readonly apiCompanyBaseProd: string;
+  private readonly apiCompanyBaseSandbox: string;
 
   constructor(private readonly opts: QboProviderOptions) {
     this.fetchImpl = opts.fetchImpl ?? globalThis.fetch.bind(globalThis);
+    const apiBase = trimTrailingSlash(opts.apiBase ?? DEFAULT_API_BASE);
+    this.appcenterBase = trimTrailingSlash(opts.appcenterBase ?? DEFAULT_APPCENTER_BASE);
+    this.oauthTokenUrl = `${trimTrailingSlash(opts.oauthBase ?? DEFAULT_OAUTH_BASE)}${OAUTH_TOKEN_PATH}`;
+    this.apiCompanyBaseProd = `${apiBase}${API_COMPANY_PATH}`;
+    this.apiCompanyBaseSandbox = `${toSandboxHost(apiBase)}${API_COMPANY_PATH}`;
   }
 
   // ===== OAuth =====
@@ -146,7 +169,7 @@ export class QboProvider implements AccountingProvider {
       state: input.state,
     });
     return {
-      url: `${APPCENTER_BASE}/connect/oauth2?${params.toString()}`,
+      url: `${this.appcenterBase}${AUTHORIZE_PATH}?${params.toString()}`,
       state: input.state,
     };
   }
@@ -412,7 +435,7 @@ export class QboProvider implements AccountingProvider {
   // ===== internals =====
 
   private apiBaseFor(creds: AccountingProviderCredentials): string {
-    return creds.sandbox ? API_BASE_SANDBOX : API_BASE_PROD;
+    return creds.sandbox ? this.apiCompanyBaseSandbox : this.apiCompanyBaseProd;
   }
 
   private requireRealm(creds: AccountingProviderCredentials): string {
@@ -422,7 +445,7 @@ export class QboProvider implements AccountingProvider {
 
   private async tokenRequest(body: URLSearchParams): Promise<QboTokenResponse> {
     const basic = Buffer.from(`${this.opts.clientId}:${this.opts.clientSecret}`).toString('base64');
-    const res = await this.fetchImpl(OAUTH_TOKEN_URL, {
+    const res = await this.fetchImpl(this.oauthTokenUrl, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -486,4 +509,21 @@ function safeEqual(a: string, b: string): boolean {
 
 function escapeSoql(v: string): string {
   return v.replace(/'/g, "\\'");
+}
+
+function trimTrailingSlash(u: string): string {
+  return u.replace(/\/+$/, '');
+}
+
+/**
+ * Derive Intuit's sandbox data-API base from the production base by prefixing
+ * the host with `sandbox-` (e.g. quickbooks.api.intuit.com →
+ * sandbox-quickbooks.api.intuit.com). No trailing slash.
+ */
+function toSandboxHost(base: string): string {
+  const url = new URL(base);
+  if (!url.hostname.startsWith('sandbox-')) {
+    url.hostname = `sandbox-${url.hostname}`;
+  }
+  return trimTrailingSlash(url.toString());
 }
