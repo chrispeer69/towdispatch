@@ -311,6 +311,17 @@ export class ConfigService {
       from: this.config.SMTP_FROM,
     };
   }
+
+  /** Yard Management (Session 54). `enabled` is the additive module gate. */
+  get yardManagement(): { enabled: boolean } {
+    return { enabled: this.config.YARD_MANAGEMENT_ENABLED };
+  }
+
+  /** Storage auto-billing cron (Session 54). Default off — see config schema. */
+  get storageAutobilling(): { cronEnabled: boolean } {
+    return { cronEnabled: this.config.STORAGE_AUTOBILLING_CRON_ENABLED };
+  }
+
   get email(): {
     sendgridApiKey: string;
     sendgridConfigured: boolean;

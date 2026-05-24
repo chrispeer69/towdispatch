@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Sparkles,
   Truck,
+  Warehouse,
   Wrench,
   Zap,
 } from 'lucide-react';
@@ -190,6 +191,16 @@ const SECTIONS: NavSection[] = [
         href: '/dot',
         icon: ShieldCheck,
         match: (p) => p.startsWith('/dot'),
+      },
+      {
+        // Yard Management (Session 54) — facilities, stall map, storage rate
+        // cards, auto-billing, gate search, and the release workflow. The
+        // pages gate access by role with a friendly 403, so the link is
+        // unguarded here.
+        label: 'Yard',
+        href: '/yard/facilities',
+        icon: Warehouse,
+        match: (p) => p.startsWith('/yard'),
       },
     ],
   },

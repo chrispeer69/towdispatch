@@ -62,6 +62,7 @@ import { TrackingModule } from './modules/tracking/tracking.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { VehiclesModule } from './modules/vehicles/vehicles.module.js';
 import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js';
+import { YardModule } from './modules/yard/yard.module.js';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { VoiceDriverModule } from './modules/voice-driver/voice-driver.module.js
     AccountingModule,
     ImportModule,
     ImpoundModule,
+    YardModule,
     HeavyDutyModule,
     LienProcessingModule,
     RepoModule,

@@ -45,6 +45,10 @@ function build(opts: {
   } as unknown as MetricsService;
   return new HealthMetricsController(db, redis, metrics, stubRegion);
   return new HealthMetricsController(db, redis, metrics, {} as unknown as RegionContextService);
+  const region = {
+    health: vi.fn(() => Promise.resolve({ id: 'test-region', role: 'primary', isPrimary: true })),
+  } as unknown as RegionContextService;
+  return new HealthMetricsController(db, redis, metrics, region);
 }
 
 describe('HealthMetricsController', () => {
@@ -57,6 +61,10 @@ describe('HealthMetricsController', () => {
   it('readiness returns ok when db and redis both answer', async () => {
     const res = await build({ dbOk: true, redisOk: true }).readiness();
     expect(res).toMatchObject({ status: 'ok', checks: { db: 'ok', redis: 'ok' } });
+    expect(res.status).toBe('ok');
+    expect(res.checks).toEqual({ db: 'ok', redis: 'ok' });
+    // Session 44 added an additive `region` field; assert it is surfaced.
+    expect(res.region).toBeDefined();
   });
 
   it('readiness throws 503 when the database is unreachable', async () => {
