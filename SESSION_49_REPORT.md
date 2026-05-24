@@ -86,11 +86,20 @@ Lien processing (S23/S35), motor-club gateway, the JobsService state machine
 
 ## Known issues
 
-- **Pre-existing data-model collision (flagged):** `webhook_deliveries` is
-  defined by TWO Drizzle tables (notifications S15 + public-api S29) pointing at
-  the same physical table. The repair renamed the notifications-side TS const to
-  unblock compilation but did NOT reconcile the underlying duplication — a
-  separate cleanup.
+- **Pre-existing data-model collision (flagged, NOT introduced here):**
+  `webhook_deliveries` is defined by TWO Drizzle tables with **conflicting
+  columns** — notifications S15 (`subscription_id`, `notification_id`,
+  `signature`, …) and public-api S29 (`endpoint_id`, `event_id`, `payload`,
+  `max_attempts`, …) — both doing `CREATE TABLE IF NOT EXISTS webhook_deliveries`.
+  Migration 0037 (public-api) runs first, so the physical table has the
+  public-api columns and the notifications columns are silently never created;
+  the notifications webhook-subscription queries therefore reference columns that
+  don't exist at runtime. The repair only renamed the notifications-side TS const
+  (`webhookDeliveries`→`notificationWebhookDeliveries`) to break a TS2308 barrel
+  ambiguity so the repo compiles — **runtime behavior is unchanged** (both consts
+  already targeted the same `pgTable('webhook_deliveries')`). The real fix is a
+  dedicated migration renaming one physical table (e.g. `notification_webhook_deliveries`);
+  out of scope for this session.
 - iOS/Android changes are unverified (no native toolchain in session env).
 
 ## Verification (this session)
