@@ -12,13 +12,13 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.10.0",
-    "@playwright/test": "1.49.0",
+    "@axe-core/playwright": "4.11.3",
+    "@playwright/test": "1.60.0",
     "playwright-lighthouse": "4.0.0",
-    "lighthouse": "12.2.1",
-    "chrome-launcher": "1.1.2",
+    "lighthouse": "13.3.0",
+    "chrome-launcher": "1.2.1",
     "@ustowdispatch/shared": "workspace:*",
-    "@types/node": "22.9.3",
-    "typescript": "5.6.3"
+    "@types/node": "25.9.1",
+    "typescript": "6.0.3"
   }
 }
