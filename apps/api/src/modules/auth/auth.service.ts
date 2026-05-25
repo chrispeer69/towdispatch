@@ -1332,15 +1332,19 @@ function generateRecoveryCodes(count: number): string[] {
   const out: string[] = [];
   const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
   const seen = new Set<string>();
+  // CodeQL #1: rejection sampling to eliminate modulo bias.
+  // For an alphabet of length N, the largest unbiased multiple of N <= 256
+  // is `maxAcceptable`; bytes >= maxAcceptable are rejected and re-drawn.
+  const maxAcceptable = Math.floor(256 / alphabet.length) * alphabet.length;
   while (out.length < count) {
-    const buf = randomBytes(10);
     let code = '';
-    for (let i = 0; i < 10; i += 1) {
-      // Cast forced because TS noUncheckedIndexedAccess flags buf[i] as
-      // possibly undefined despite the bounded loop. Buffer indexing is
-      // always defined for i < length.
-      const b = buf[i] as number;
-      code += alphabet[b % alphabet.length];
+    while (code.length < 10) {
+      const buf = randomBytes(20); // oversample to reduce reroll loops
+      for (let i = 0; i < buf.length && code.length < 10; i += 1) {
+        const b = buf[i] as number;
+        if (b >= maxAcceptable) continue; // reject biased bytes
+        code += alphabet[b % alphabet.length];
+      }
     }
     if (seen.has(code)) continue;
     seen.add(code);

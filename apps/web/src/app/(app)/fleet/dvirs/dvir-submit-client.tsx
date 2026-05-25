@@ -31,7 +31,8 @@ export function DvirSubmitClient({ trucks, drivers }: Props): JSX.Element {
   const [success, setSuccess] = useState<string | null>(null);
 
   function addDefect(): void {
-    const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    // CodeQL #11: use crypto.randomUUID() instead of Math.random()
+    const uid = crypto.randomUUID();
     setDefects((prev) => [...prev, { uid, component: '', severity: 'minor' }]);
   }
 
