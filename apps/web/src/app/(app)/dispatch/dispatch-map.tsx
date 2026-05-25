@@ -16,6 +16,7 @@
 import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import { AlertTriangle } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface Props {
   token: string | null;

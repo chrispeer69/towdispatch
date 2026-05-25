@@ -18,6 +18,7 @@ import {
   DRIVER_PROFILE_KEY,
   DRIVER_TENANT_CODE_KEY,
   DRIVER_TENANT_SLUG_KEY,
+  DRIVER_STORAGE_KEYS,
 } from './storage-keys';
 
 export interface DriverProfile {
@@ -86,8 +87,9 @@ export function persistDriverSession(jwt: string, profile: DriverProfile): void 
 
 export function clearDriverSessionStorage(): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(DRIVER_JWT_KEY);
-  window.localStorage.removeItem(DRIVER_PROFILE_KEY);
+  for (const key of DRIVER_STORAGE_KEYS) {
+    window.localStorage.removeItem(key);
+  }
   broadcastAuthChange();
 }
 
@@ -162,7 +164,7 @@ export function useDriverAuth(): DriverAuthState & {
     };
   }, [refresh]);
 
-  const logout = useCallback((next = '/driver/login') => {
+  const logout = useCallback((next = '/') => {
     clearDriverSessionStorage();
     setState({ jwt: null, profile: null, loading: false });
     if (typeof window !== 'undefined') {

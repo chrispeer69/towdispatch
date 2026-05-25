@@ -64,7 +64,13 @@ export function DriverShell({ title, backHref, children }: Props): JSX.Element {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => logout()}
+              onClick={() => {
+                const msg =
+                  'You will be logged out to the homepage (company ecosystem) and your local session and cache will be cleared. Do you want to proceed?';
+                if (window.confirm(msg)) {
+                  logout('/');
+                }
+              }}
               aria-label="Sign out"
               className="gap-1"
             >

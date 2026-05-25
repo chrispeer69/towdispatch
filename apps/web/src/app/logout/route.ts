@@ -33,6 +33,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   // they came from (avoids the previous fallback to localhost:3000, which
   // broke in any deployment serving the web app on a different port — e.g.
   // CI runs on 3600).
-  const target = process.env.NEXT_PUBLIC_WEB_URL ?? new URL('/', req.nextUrl.origin).toString();
-  return NextResponse.redirect(new URL('/', target));
+  const target = new URL('/login', req.nextUrl.origin).toString();
+  return NextResponse.redirect(target);
 }
