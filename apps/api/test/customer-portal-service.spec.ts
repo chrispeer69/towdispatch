@@ -127,7 +127,6 @@ d('Customer portal services (integration)', () => {
 
     // Multi-region (S44) added replica pool + config args; in this single-DB
     // test the replica pool is the same pool and the config is the portal stub.
-    const tenantDb = new TenantAwareDb(app, app, portalConfig);
     const tenantDb = new TenantAwareDb(app, app, {
       readReplicaConfigured: false,
     } as unknown as import('../src/config/config.service.js').ConfigService);

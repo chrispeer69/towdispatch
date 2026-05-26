@@ -20,7 +20,7 @@ function parseSeededRows(sql: string): Record<string, unknown> {
   const re = /\('([A-Z]{2})',\s*'(\{.*?\})'::jsonb\)/g;
   let m = re.exec(sql);
   while (m !== null) {
-    out[m[1]] = JSON.parse(m[2]);
+    out[m[1] as string] = JSON.parse(m[2] as string);
     m = re.exec(sql);
   }
   return out;
