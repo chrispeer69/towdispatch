@@ -48,14 +48,12 @@ export interface QueuedAction {
 }
 
 function uuid(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
+  // crypto.randomUUID is required; all modern browsers support it.
+  // No insecure Math.random() fallback (CodeQL #12).
+  if (typeof crypto === 'undefined' || typeof crypto.randomUUID !== 'function') {
+    throw new Error('crypto.randomUUID is required for offline queue (browser too old)');
   }
-  // Minimal v4 fallback for environments where randomUUID isn't available.
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
+  return crypto.randomUUID();
 }
 
 export function readQueue(): QueuedAction[] {

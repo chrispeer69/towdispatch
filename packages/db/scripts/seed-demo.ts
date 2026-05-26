@@ -14,7 +14,7 @@
  *   pnpm db:seed:demo --reset                        # nuke tenant first
  *
  * Re-running without --reset is idempotent: every entity has a deterministic
- * UUID derived from sha1(`roadside:<kind>:<key>`) and inserts use
+ * UUID derived from sha256(`roadside:<kind>:<key>`) and inserts use
  * ON CONFLICT DO NOTHING / find-or-create. With --reset, the demo tenant is
  * deleted (cascading by FK order) before the seed runs.
  *
@@ -47,12 +47,15 @@ const INVOICE_PREFIX = 'INV';
 const INVOICE_YEAR = '2026';
 
 /**
- * Deterministic UUID-shaped string from sha1(`roadside:<scope>:<key>`).
+ * Deterministic UUID-shaped string from sha256(`roadside:<scope>:<key>`).
  * Same scope+key produces the same ID across runs, which is what makes the
  * seed safely re-runnable without --reset.
+ * CodeQL #5: upgraded sha1 → sha256. NOTE: this changes the deterministic
+ * UUIDs the seed produces — existing seeded rows must be reset before
+ * the next run, or use --reset to clear and re-seed cleanly.
  */
 function detId(scope: string, key: string): string {
-  const h = createHash('sha1').update(`${TENANT_SLUG}:${scope}:${key}`).digest('hex');
+  const h = createHash('sha256').update(`${TENANT_SLUG}:${scope}:${key}`).digest('hex');
   const v3rd = ((Number.parseInt(h.slice(12, 13), 16) & 0x3) | 0x8).toString(16); // variant nibble
   return [
     h.slice(0, 8),
