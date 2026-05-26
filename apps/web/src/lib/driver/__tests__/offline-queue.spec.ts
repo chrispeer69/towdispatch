@@ -52,7 +52,7 @@ beforeEach(() => {
   // @ts-expect-error -- minimal Window mock for module-under-test
   globalThis.window = { localStorage: storage, location: { hostname: 'localhost' } };
   // @ts-expect-error -- match-browser API
-  globalThis.localStorage = storage;
+  Object.defineProperty(globalThis, 'localStorage', { value: storage, writable: true, configurable: true });
   // crypto.randomUUID is required by enqueueAction.
   if (typeof globalThis.crypto === 'undefined') {
     // vitest node env may lack crypto.randomUUID
