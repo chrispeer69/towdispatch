@@ -335,20 +335,13 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
       {/*
-        Clicking the US Tow DISPATCH wordmark / logo signs the user
-        out and bounces them to the landing page. This is the user's
-        explicit ask — not the conventional "logo = home" gesture.
-        The /logout route handler clears session cookies server-side
-        and then redirects to '/'. Use a plain <a> (not next/link) so
-        the GET request actually hits the route handler instead of
-        being intercepted by client routing. `title` is the
-        discoverability hint on hover; `cursor-pointer` is implicit
-        from the anchor.
+        Clicking the US Tow DISPATCH wordmark / logo navigates the user
+        back to the dashboard.
       */}
-      <a
-        href="/logout"
-        title="Sign out"
-        aria-label="Sign out"
+      <Link
+        href="/dashboard"
+        title="Dashboard"
+        aria-label="Dashboard"
         className="flex items-center gap-3 border-b border-divider px-5 py-4 transition-colors hover:bg-bg-surface-elevated/40"
       >
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary ">
@@ -362,7 +355,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
           </span>
           <span className="font-extrabold italic uppercase">Dispatch</span>
         </span>
-      </a>
+      </Link>
 
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5">
         {SECTIONS.map((section) => (
