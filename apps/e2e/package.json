@@ -13,12 +13,12 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.0",
-    "@playwright/test": "1.49.0",
-    "playwright-lighthouse": "4.0.0",
-    "lighthouse": "12.2.1",
-    "chrome-launcher": "1.1.2",
-    "@ustowdispatch/shared": "workspace:*",
+    "@playwright/test": "^1.60.0",
     "@types/node": "22.9.3",
+    "@ustowdispatch/shared": "workspace:*",
+    "chrome-launcher": "1.1.2",
+    "lighthouse": "12.2.1",
+    "playwright-lighthouse": "4.0.0",
     "typescript": "5.6.3"
   }
 }

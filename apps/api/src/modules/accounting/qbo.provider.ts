@@ -508,7 +508,8 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function escapeSoql(v: string): string {
-  return v.replace(/'/g, "\\'");
+  // QBO SOQL requires escaping both backslashes and single quotes.
+  return v.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 function trimTrailingSlash(u: string): string {

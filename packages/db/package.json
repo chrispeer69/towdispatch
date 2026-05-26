@@ -19,7 +19,9 @@
       "default": "./dist/client.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json && node ../../scripts/fix-esm-imports.mjs dist",
     "generate": "drizzle-kit generate",
@@ -34,14 +36,14 @@
     "@ustowdispatch/shared": "workspace:*",
     "argon2": "0.41.1",
     "dotenv": "16.4.5",
-    "drizzle-orm": "0.36.4",
+    "drizzle-orm": "^0.45.2",
     "pg": "8.13.1",
     "postgres": "3.4.5",
     "uuidv7": "1.0.2"
   },
   "devDependencies": {
     "@types/pg": "8.11.10",
-    "drizzle-kit": "0.28.1",
+    "drizzle-kit": "0.31.10",
     "tsx": "4.19.2",
     "typescript": "5.6.3"
   }

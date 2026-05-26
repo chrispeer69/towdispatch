@@ -342,6 +342,7 @@ async function main(): Promise<void> {
       }
 
       let ownerUserId: string | null = null;
+      let driverUserId: string | null = null;
       for (const u of t.users) {
         const existingUser = await db.query.users.findFirst({
           where: (table, { and: andF, eq: eqF }) =>
@@ -350,6 +351,7 @@ async function main(): Promise<void> {
         if (existingUser) {
           log(`  user ${u.email} already exists, skipping`);
           if (u.role === 'owner') ownerUserId = existingUser.id;
+          if (u.role === 'driver') driverUserId = existingUser.id;
           continue;
         }
         const userId = uuidv7();
@@ -364,6 +366,7 @@ async function main(): Promise<void> {
         });
         log(`  inserted user ${u.email}`);
         if (u.role === 'owner') ownerUserId = userId;
+        if (u.role === 'driver') driverUserId = userId;
       }
 
       // ---------- rate_sheets (default) ----------
@@ -598,12 +601,18 @@ async function main(): Promise<void> {
         });
         if (existingDriver) {
           driverIds.push(existingDriver.id);
+          if (d.empNum.endsWith('D01') && driverUserId) {
+            await db.update(schema.drivers)
+              .set({ userId: driverUserId })
+              .where(eq(schema.drivers.id, existingDriver.id));
+          }
           continue;
         }
         const id = uuidv7();
         await db.insert(schema.drivers).values({
           id,
           tenantId,
+          userId: d.empNum.endsWith('D01') ? driverUserId : null,
           employeeNumber: d.empNum,
           firstName: d.firstName,
           lastName: d.lastName,

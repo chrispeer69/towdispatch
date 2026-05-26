@@ -16,7 +16,6 @@ function reqWith(requestId?: string): FastifyRequest {
 
 describe('AdminController GET /admin/sentry-test', () => {
   it('throws a plain Error (not an HttpException) with the request id', () => {
-    const controller = new AdminController({} as unknown as AdminService);
     // sentryTest does not touch AdminService; a stub satisfies the constructor.
     const controller = new AdminController({} as never);
     let thrown: unknown;
@@ -33,7 +32,6 @@ describe('AdminController GET /admin/sentry-test', () => {
   });
 
   it('falls back to "unknown" when no request context is present', () => {
-    const controller = new AdminController({} as unknown as AdminService);
     // sentryTest does not touch AdminService; a stub satisfies the constructor.
     const controller = new AdminController({} as never);
     expect(() => controller.sentryTest(reqWith())).toThrow(/unknown/);

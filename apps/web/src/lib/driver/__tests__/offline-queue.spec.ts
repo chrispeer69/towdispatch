@@ -51,8 +51,7 @@ beforeEach(() => {
   const storage = fakeStorage();
   // @ts-expect-error -- minimal Window mock for module-under-test
   globalThis.window = { localStorage: storage, location: { hostname: 'localhost' } };
-  // @ts-expect-error -- match-browser API
-  globalThis.localStorage = storage;
+  Object.defineProperty(globalThis, 'localStorage', { value: storage, writable: true, configurable: true });
   // crypto.randomUUID is required by enqueueAction.
   if (typeof globalThis.crypto === 'undefined') {
     // vitest node env may lack crypto.randomUUID
@@ -122,7 +121,7 @@ describe('offline queue lifecycle', () => {
   });
 
   it('drops applied + skipped entries on a successful replay and keeps failures', async () => {
-    globalThis.localStorage.setItem(DRIVER_JWT_KEY, 'fake-jwt');
+    globalThis.localStorage.setItem(DRIVER_JWT_KEY, 'ZmFrZS1qd3Q='); // btoa('fake-jwt')
     const applied = enqueueAction({ actionKind: 'note_add', payload: { text: 'a' } });
     const skipped = enqueueAction({ actionKind: 'note_add', payload: { text: 'b' } });
     const failed = enqueueAction({ actionKind: 'note_add', payload: { text: 'c' } });

@@ -326,6 +326,53 @@ export function IntakeClient({
     return () => clearTimeout(handle);
   }, [form.plate, form.plateState]);
 
+  // -------- existing-vehicle detection (debounced VIN lookup) --------
+  useEffect(() => {
+    const trimmedVin = form.vin.trim().toUpperCase();
+    if (!VIN_REGEX.test(trimmedVin)) {
+      // Don't clear vehicle summary unless it matches our lookup lifecycle
+      return;
+    }
+    const handle = setTimeout(() => {
+      void (async () => {
+        try {
+          const res = await fetch(`/api/vehicles/lookup?vin=${encodeURIComponent(trimmedVin)}`, {
+            cache: 'no-store',
+          });
+          if (res.status === 200) {
+            const v = (await res.json()) as {
+              id: string;
+              year: number | null;
+              make: string | null;
+              model: string | null;
+              color: string | null;
+              plate: string | null;
+              plateState: string | null;
+              drivetrain: string | null;
+              specialInstructions: string | null;
+            };
+            const summary = [v.year, v.color, v.make, v.model].filter(Boolean).join(' ');
+            setExistingVehicleSummary(summary || 'Existing vehicle');
+            setForm((prev) => ({
+              ...prev,
+              year: prev.year || (v.year ? String(v.year) : ''),
+              make: prev.make || v.make || '',
+              model: prev.model || v.model || '',
+              color: prev.color || v.color || '',
+              plate: prev.plate || v.plate || '',
+              plateState: prev.plateState || v.plateState || '',
+              drivetrain: prev.drivetrain || (v.drivetrain as any) || '',
+              specialInstructions: prev.specialInstructions || v.specialInstructions || '',
+            }));
+          }
+        } catch {
+          // ignore
+        }
+      })();
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [form.vin]);
+
   // -------- live rate quote (debounced) --------
   const quoteSignature = useMemo(
     () =>

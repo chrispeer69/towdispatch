@@ -17,7 +17,8 @@
       "**/drizzle",
       "**/migrations",
       "**/_reference",
-      "**/components/ui/**"
+      "**/components/ui/**",
+      "**/scripts/**"
     ]
   },
   "formatter": {

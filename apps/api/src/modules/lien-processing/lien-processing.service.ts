@@ -271,7 +271,7 @@ export class LienProcessingService {
       }
       if (input.vehicleValueTier !== undefined) patch.vehicleValueTier = input.vehicleValueTier;
 
-      const merged = { ...existing, ...patch };
+      const merged = { ...existing, ...patch } as typeof lienCases.$inferSelect;
       const notices = await this.loadNotices(tx, caseId);
       const facts = deriveFacts(merged, notices);
       const next = computeNextAction(facts, rules, new Date());
