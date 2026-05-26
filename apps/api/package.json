@@ -64,22 +64,22 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.24",
-    "@swc-node/register": "1.10.9",
-    "@swc/core": "1.13.5",
+    "@swc-node/register": "1.11.1",
+    "@swc/core": "1.15.40",
     "@types/bcryptjs": "2.4.6",
-    "@types/node": "22.9.3",
+    "@types/node": "25.9.1",
     "@types/nodemailer": "^8.0.0",
     "@types/pdfkit": "0.13.5",
     "@types/pg": "8.11.10",
-    "@types/qrcode": "1.5.5",
+    "@types/qrcode": "1.5.6",
     "@types/yauzl": "2.10.3",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^4.1.7",
     "socket.io-client": "^4.8.3",
-    "tsx": "4.19.2",
-    "typescript": "5.6.3",
-    "unplugin-swc": "1.5.1",
-    "vite": "^5.4.21",
-    "vite-node": "^2.1.9",
-    "vitest": "^2.1.9"
+    "tsx": "4.22.3",
+    "typescript": "6.0.3",
+    "unplugin-swc": "1.5.9",
+    "vite": "^8.0.14",
+    "vite-node": "^6.0.0",
+    "vitest": "^4.1.7"
   }
 }
