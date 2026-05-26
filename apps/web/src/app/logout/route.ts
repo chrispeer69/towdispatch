@@ -29,10 +29,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   } finally {
     await clearSessionCookies().catch(() => undefined);
   }
-  // Redirect to the current host's "/" so the user lands on whatever origin
-  // they came from (avoids the previous fallback to localhost:3000, which
-  // broke in any deployment serving the web app on a different port — e.g.
-  // CI runs on 3600).
-  const target = new URL('/login', req.nextUrl.origin).toString();
+  // Read the host header (or x-forwarded-host from Railway's proxy) instead of 
+  // nextUrl.origin, which can be the internal docker IP (e.g. 0.0.0.0:8080).
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || req.nextUrl.host;
+  const protocol = req.headers.get('x-forwarded-proto') || 'https';
+  
+  // For local development, it will stay http://localhost:3000
+  const finalProtocol = host.includes('localhost') ? 'http' : protocol;
+  
+  const target = `${finalProtocol}://${host}/login`;
   return NextResponse.redirect(target);
 }
