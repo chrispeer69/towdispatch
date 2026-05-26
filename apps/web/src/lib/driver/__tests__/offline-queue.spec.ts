@@ -121,7 +121,7 @@ describe('offline queue lifecycle', () => {
   });
 
   it('drops applied + skipped entries on a successful replay and keeps failures', async () => {
-    globalThis.localStorage.setItem(DRIVER_JWT_KEY, 'fake-jwt');
+    globalThis.localStorage.setItem(DRIVER_JWT_KEY, 'ZmFrZS1qd3Q='); // btoa('fake-jwt')
     const applied = enqueueAction({ actionKind: 'note_add', payload: { text: 'a' } });
     const skipped = enqueueAction({ actionKind: 'note_add', payload: { text: 'b' } });
     const failed = enqueueAction({ actionKind: 'note_add', payload: { text: 'c' } });
