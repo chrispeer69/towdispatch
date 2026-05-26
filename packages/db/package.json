@@ -34,7 +34,7 @@
     "@ustowdispatch/shared": "workspace:*",
     "argon2": "0.41.1",
     "dotenv": "16.4.5",
-    "drizzle-orm": "0.36.4",
+    "drizzle-orm": "^0.38.4",
     "pg": "8.13.1",
     "postgres": "3.4.5",
     "uuidv7": "1.0.2"
