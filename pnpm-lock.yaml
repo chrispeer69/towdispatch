@@ -130,7 +130,7 @@ importers:
         version: 6.7.0
       drizzle-orm:
         specifier: ^0.45.2
-        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5)
+        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.9)
       exceljs:
         specifier: ^4.4.0
         version: 4.4.0
@@ -414,13 +414,13 @@ importers:
         version: 16.4.5
       drizzle-orm:
         specifier: ^0.45.2
-        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5)
+        version: 0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.9)
       pg:
         specifier: 8.13.1
         version: 8.13.1
       postgres:
-        specifier: 3.4.5
-        version: 3.4.5
+        specifier: 3.4.9
+        version: 3.4.9
       uuidv7:
         specifier: 1.0.2
         version: 1.0.2
@@ -5477,8 +5477,8 @@ packages:
   postgres-range@1.1.4:
     resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
-  postgres@3.4.5:
-    resolution: {integrity: sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==}
+  postgres@3.4.9:
+    resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
     engines: {node: '>=12'}
 
   potpack@2.1.0:
@@ -10300,12 +10300,12 @@ snapshots:
       esbuild: 0.25.12
       tsx: 4.22.3
 
-  drizzle-orm@0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.5):
+  drizzle-orm@0.45.2(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(pg@8.13.1)(postgres@3.4.9):
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       '@types/pg': 8.11.10
       pg: 8.13.1
-      postgres: 3.4.5
+      postgres: 3.4.9
 
   dunder-proto@1.0.1:
     dependencies:
@@ -12041,7 +12041,7 @@ snapshots:
 
   postgres-range@1.1.4: {}
 
-  postgres@3.4.5: {}
+  postgres@3.4.9: {}
 
   potpack@2.1.0: {}
 

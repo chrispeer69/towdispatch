@@ -38,7 +38,7 @@
     "dotenv": "16.4.5",
     "drizzle-orm": "^0.45.2",
     "pg": "8.13.1",
-    "postgres": "3.4.5",
+    "postgres": "3.4.9",
     "uuidv7": "1.0.2"
   },
   "devDependencies": {
