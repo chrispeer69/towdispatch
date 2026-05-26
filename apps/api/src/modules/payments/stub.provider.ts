@@ -14,7 +14,7 @@
  * Tests can also reach into the public `intents`, `refunds`, `customers`,
  * `setupIntents` maps to assert side-effects.
  */
-import { createHmac } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import type {
   CapturePaymentInput,
   ConfirmPaymentInput,
@@ -104,7 +104,7 @@ export class StubPaymentProvider implements PaymentProvider {
       status,
       amountCents: input.amountCents,
       currency: input.currency.toUpperCase(),
-      clientSecret: `${id}_secret_${Math.random().toString(36).slice(2, 10)}`,
+      clientSecret: `${id}_secret_${randomBytes(4).toString('hex')}`,
       chargeId: status === 'succeeded' ? `ch_stub_${id.slice(8)}` : null,
       feeCents: status === 'succeeded' ? Math.round(input.amountCents * 0.029) + 30 : null,
       paymentMethodId: input.paymentMethodId ?? null,
@@ -175,7 +175,7 @@ export class StubPaymentProvider implements PaymentProvider {
     });
     return {
       externalId: id,
-      clientSecret: `${id}_secret_${Math.random().toString(36).slice(2, 10)}`,
+      clientSecret: `${id}_secret_${randomBytes(4).toString('hex')}`,
       status: 'requires_payment_method',
     };
   }

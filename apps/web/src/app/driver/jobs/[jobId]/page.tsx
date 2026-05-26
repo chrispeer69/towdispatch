@@ -693,6 +693,7 @@ function VideoTab({
       const url = URL.createObjectURL(file);
       const v = document.createElement('video');
       v.preload = 'metadata';
+      // codeql[js/html-constructed-from-input] - safe because url is a local blob: URL
       v.src = url;
       v.onloadedmetadata = () => {
         URL.revokeObjectURL(url);

@@ -157,6 +157,9 @@ export async function apiServerSafe<TResponse, TBody = unknown>(
     accessToken = await resolveAccessToken(opts);
   }
   const base = apiBase();
+  if (path.startsWith('http') && !path.startsWith(base)) {
+    throw new Error('SSRF Prevention: Cannot fetch arbitrary absolute URLs.');
+  }
   const url = path.startsWith('http') ? path : `${base}${path}`;
 
   const init: RequestInit = {
@@ -197,6 +200,9 @@ export async function apiServerBffSafe<TResponse, TBody = unknown>(
   let accessToken: string | null = null;
   if (authenticated) {
     accessToken = await resolveAccessToken(opts);
+  }
+  if (path.startsWith('http') && !path.startsWith(apiBase())) {
+    throw new Error('SSRF Prevention: Cannot fetch arbitrary absolute URLs.');
   }
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
 
@@ -331,6 +337,9 @@ export async function apiServerBffRaw(
   opts: { method?: 'GET' | 'POST' } = {},
 ): Promise<Response> {
   let accessToken = await resolveAccessToken({});
+  if (path.startsWith('http') && !path.startsWith(apiBase())) {
+    throw new Error('SSRF Prevention: Cannot fetch arbitrary absolute URLs.');
+  }
   const url = path.startsWith('http') ? path : `${apiBase()}${path}`;
   const buildInit = (token: string | null): RequestInit => ({
     method: opts.method ?? 'GET',

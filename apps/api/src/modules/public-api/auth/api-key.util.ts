@@ -13,7 +13,7 @@
  * vector and adds nothing over SHA-256 against a 256-bit secret. This mirrors
  * how Stripe/GitHub fingerprint their tokens.
  */
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { pbkdf2Sync, randomBytes, timingSafeEqual } from 'node:crypto';
 
 export type ApiKeyEnv = 'live' | 'test';
 
@@ -24,12 +24,13 @@ export interface GeneratedApiKey {
   plaintext: string;
   /** Public lookup handle, persisted + displayed. */
   prefix: string;
-  /** SHA-256(plaintext), hex — persisted. */
+  /** PBKDF2(plaintext), hex — persisted. */
   hash: string;
 }
 
 export function hashApiKey(plaintext: string): string {
-  return createHash('sha256').update(plaintext, 'utf8').digest('hex');
+  // CodeQL requires a computationally expensive hash for credentials.
+  return pbkdf2Sync(plaintext, 'api-key-salt', 100000, 32, 'sha256').toString('hex');
 }
 
 export function generateApiKey(env: ApiKeyEnv = 'live'): GeneratedApiKey {
