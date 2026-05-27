@@ -191,11 +191,12 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
             }
 
             const popupContent = document.createElement('div');
+            const vehicleDesc = job.vehicle ? `${job.vehicle.year || ''} ${job.vehicle.make || ''} ${job.vehicle.model || ''}`.trim() : 'No vehicle info';
             popupContent.innerHTML = `
               <div class="p-2 min-w-[140px]">
-                <p class="font-bold text-sm text-gray-900">${job.customerName ?? 'Unknown Customer'}</p>
+                <p class="font-bold text-sm text-gray-900">${job.customer?.name ?? 'Unknown Customer'}</p>
                 <p class="text-xs text-gray-700 font-medium mt-0.5 uppercase tracking-wide">${job.serviceType.replace('_', ' ')}</p>
-                <p class="text-[10px] text-gray-500 mt-1 max-w-[180px] truncate">${job.vehicleDesc || 'No vehicle info'}</p>
+                <p class="text-[10px] text-gray-500 mt-1 max-w-[180px] truncate">${vehicleDesc || 'No vehicle info'}</p>
               </div>
             `;
             // biome-ignore lint/suspicious/noExplicitAny: Popup constructor
