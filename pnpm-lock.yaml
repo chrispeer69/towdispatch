@@ -29,6 +29,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      '@biomejs/cli-darwin-x64':
+        specifier: 1.9.4
+        version: 1.9.4
       '@types/node':
         specifier: 22.9.3
         version: 22.9.3
@@ -7164,8 +7167,7 @@ snapshots:
   '@biomejs/cli-darwin-arm64@1.9.4':
     optional: true
 
-  '@biomejs/cli-darwin-x64@1.9.4':
-    optional: true
+  '@biomejs/cli-darwin-x64@1.9.4': {}
 
   '@biomejs/cli-linux-arm64-musl@1.9.4':
     optional: true

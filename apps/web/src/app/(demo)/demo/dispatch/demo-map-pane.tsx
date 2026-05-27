@@ -2,12 +2,19 @@
 
 import { DispatchMap } from '@/app/(app)/dispatch/dispatch-map';
 import { MapPin, Play } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SIMULATION_MESSAGES, SIMULATION_ROUTE } from '../mock-data';
 
 // ─── Types ──────────────────────────────────────────────────────────
 
-export type SimStatus = 'idle' | 'dispatched' | 'enroute' | 'on_scene' | 'in_progress' | 'towing' | 'completed';
+export type SimStatus =
+  | 'idle'
+  | 'dispatched'
+  | 'enroute'
+  | 'on_scene'
+  | 'in_progress'
+  | 'towing'
+  | 'completed';
 
 interface SimMessage {
   id: string;
@@ -15,7 +22,14 @@ interface SimMessage {
   time: string;
 }
 
-const STATUS_FLOW: SimStatus[] = ['dispatched', 'enroute', 'on_scene', 'in_progress', 'towing', 'completed'];
+const STATUS_FLOW: SimStatus[] = [
+  'dispatched',
+  'enroute',
+  'on_scene',
+  'in_progress',
+  'towing',
+  'completed',
+];
 
 const STATUS_LABELS: Record<SimStatus, string> = {
   idle: 'Ready',
@@ -53,26 +67,28 @@ export function DemoMapPane({
   mapboxToken,
   onSimUpdate,
 }: {
+  // biome-ignore lint/suspicious/noExplicitAny: demo code
   roster: any[];
+  // biome-ignore lint/suspicious/noExplicitAny: demo code
   jobs: any[];
   mapboxToken: string | null;
   onSimUpdate?: (status: SimStatus) => void;
 }) {
   const [isSimulating, setIsSimulating] = useState(false);
   const [simProgress, setSimProgress] = useState(0); // 0 to 1
-  
+
   // Simulation states
   const [status, setStatus] = useState<SimStatus>('idle');
   const [eta, setEta] = useState<number | null>(null);
   const [messages, setMessages] = useState<SimMessage[]>([]);
-  
+
   const currentProgressRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
+  }, [messages]);
 
   // Listen to tour updates to drive the simulation!
   useEffect(() => {
@@ -86,10 +102,10 @@ export function DemoMapPane({
       else if (step === 9) nextStatus = 'in_progress';
       else if (step === 10) nextStatus = 'towing';
       else if (step >= 11) nextStatus = 'completed';
-      
+
       if (nextStatus !== 'idle') setIsSimulating(true);
       else setIsSimulating(false);
-      
+
       setStatus(nextStatus);
       onSimUpdate?.(nextStatus);
     }
@@ -102,13 +118,14 @@ export function DemoMapPane({
     // Populate messages up to current status
     const currentStatusIdx = STATUS_FLOW.indexOf(status);
     if (currentStatusIdx >= 0) {
-      const newMessages = SIMULATION_MESSAGES
-        .filter(m => STATUS_FLOW.indexOf(m.status as SimStatus) <= currentStatusIdx)
-        .map((m, i) => ({
-          id: `msg-${m.status}-${i}`,
-          body: m.body,
-          time: (m as any).timeStr,
-        }));
+      const newMessages = SIMULATION_MESSAGES.filter(
+        (m) => STATUS_FLOW.indexOf(m.status as SimStatus) <= currentStatusIdx,
+      ).map((m, i) => ({
+        id: `msg-${m.status}-${i}`,
+        body: m.body,
+        // biome-ignore lint/suspicious/noExplicitAny: demo data
+        time: (m as any).timeStr,
+      }));
       setMessages(newMessages);
     } else {
       setMessages([]);
@@ -122,7 +139,7 @@ export function DemoMapPane({
     // Animate the truck to the target position
     const target = STATE_TARGETS[status];
     let frameId: number;
-    
+
     function animate() {
       const diff = target - currentProgressRef.current;
       if (Math.abs(diff) > 0.002) {
@@ -136,14 +153,14 @@ export function DemoMapPane({
         setSimProgress(currentProgressRef.current);
       }
     }
-    
+
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
   }, [status]);
 
   // Calculate current simulated driver position
-  let simulatedLat = SIMULATION_ROUTE[0].lat;
-  let simulatedLng = SIMULATION_ROUTE[0].lng;
+  let simulatedLat = SIMULATION_ROUTE[0]?.lat ?? 0;
+  let simulatedLng = SIMULATION_ROUTE[0]?.lng ?? 0;
 
   if (status !== 'idle') {
     const totalPoints = SIMULATION_ROUTE.length - 1;
@@ -152,40 +169,49 @@ export function DemoMapPane({
     const segFrac = exactIdx - segIdx;
     const from = SIMULATION_ROUTE[segIdx];
     const to = SIMULATION_ROUTE[Math.min(segIdx + 1, totalPoints)];
-    
-    simulatedLat = from && to ? from.lat + (to.lat - from.lat) * segFrac : from.lat;
-    simulatedLng = from && to ? from.lng + (to.lng - from.lng) * segFrac : from.lng;
+
+    simulatedLat = from && to ? from.lat + (to.lat - from.lat) * segFrac : (from?.lat ?? 0);
+    simulatedLng = from && to ? from.lng + (to.lng - from.lng) * segFrac : (from?.lng ?? 0);
   }
 
   // Memoize random offsets so markers don't jitter 60 times a second
-  const driverOffsets = useRef(roster.map(() => ({
-    lat: (Math.random() - 0.5) * 0.02,
-    lng: (Math.random() - 0.5) * 0.02,
-  }))).current;
+  const driverOffsets = useRef(
+    roster.map(() => ({
+      lat: (Math.random() - 0.5) * 0.02,
+      lng: (Math.random() - 0.5) * 0.02,
+    })),
+  ).current;
 
-  const jobOffsets = useRef(jobs.map(() => ({
-    lat: (Math.random() - 0.5) * 0.05,
-    lng: (Math.random() - 0.5) * 0.05,
-  }))).current;
+  const jobOffsets = useRef(
+    jobs.map(() => ({
+      lat: (Math.random() - 0.5) * 0.05,
+      lng: (Math.random() - 0.5) * 0.05,
+    })),
+  ).current;
 
   // Inject the simulated position into the Mike Ramos driver and format to DriverRosterRow
   const mappedRoster = roster.map((r, i) => {
     const isMike = r.firstName === 'Mike' && r.lastName === 'Ramos';
     const offset = driverOffsets[i] || { lat: 0, lng: 0 };
-    
+
     // During simulation, update Mike's status
     const currentShiftStatus = isMike && status !== 'idle' ? status : r.shiftStatus;
-    
+
     return {
       driver: { id: r.driverId, firstName: r.firstName, lastName: r.lastName },
-      shift: r.shiftStatus !== 'available' ? {
-        id: `shift-${r.driverId}`,
-        status: currentShiftStatus,
-        lastLat: isMike ? simulatedLat : SIMULATION_ROUTE[0].lat + offset.lat,
-        lastLng: isMike ? simulatedLng : SIMULATION_ROUTE[0].lng + offset.lng,
-        lastPositionAt: new Date().toISOString(),
-      } : undefined,
-      truck: r.truckUnitNumber ? { id: `truck-${r.truckUnitNumber}`, unitNumber: r.truckUnitNumber } : undefined,
+      shift:
+        r.shiftStatus !== 'available'
+          ? {
+              id: `shift-${r.driverId}`,
+              status: currentShiftStatus,
+              lastLat: isMike ? simulatedLat : (SIMULATION_ROUTE[0]?.lat ?? 0) + offset.lat,
+              lastLng: isMike ? simulatedLng : (SIMULATION_ROUTE[0]?.lng ?? 0) + offset.lng,
+              lastPositionAt: new Date().toISOString(),
+            }
+          : undefined,
+      truck: r.truckUnitNumber
+        ? { id: `truck-${r.truckUnitNumber}`, unitNumber: r.truckUnitNumber }
+        : undefined,
       currentJobNumber: r.currentJobNumber || undefined,
       currentJobId: r.currentJobId || undefined,
     };
@@ -195,13 +221,15 @@ export function DemoMapPane({
     const offset = jobOffsets[i] || { lat: 0, lng: 0 };
     return {
       ...j,
-      pickupLat: i === 0 ? SIMULATION_ROUTE[9].lat : SIMULATION_ROUTE[0].lat + offset.lat,
-      pickupLng: i === 0 ? SIMULATION_ROUTE[9].lng : SIMULATION_ROUTE[0].lng + offset.lng,
-      dropoffLat: i === 0 ? SIMULATION_ROUTE[12].lat : undefined,
-      dropoffLng: i === 0 ? SIMULATION_ROUTE[12].lng : undefined,
+      pickupLat:
+        i === 0 ? (SIMULATION_ROUTE[9]?.lat ?? 0) : (SIMULATION_ROUTE[0]?.lat ?? 0) + offset.lat,
+      pickupLng:
+        i === 0 ? (SIMULATION_ROUTE[9]?.lng ?? 0) : (SIMULATION_ROUTE[0]?.lng ?? 0) + offset.lng,
+      dropoffLat: i === 0 ? SIMULATION_ROUTE[12]?.lat : undefined,
+      dropoffLng: i === 0 ? SIMULATION_ROUTE[12]?.lng : undefined,
     };
   });
-  
+
   const statusIdx = STATUS_FLOW.indexOf(status);
 
   return (
@@ -222,24 +250,30 @@ export function DemoMapPane({
             <MapPin className="inline h-3.5 w-3.5" /> Mapbox
           </span>
           {status !== 'idle' ? (
-             <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent('demo-tour-reset'))}
-                className="rounded-[8px] border border-divider bg-bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-text-primary-on-dark transition-colors hover:border-divider-strong"
-              >
-                Reset Demo
-              </button>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('demo-tour-reset'))}
+              className="rounded-[8px] border border-divider bg-bg-surface-elevated px-3 py-1.5 text-xs font-semibold text-text-primary-on-dark transition-colors hover:border-divider-strong"
+            >
+              Reset Demo
+            </button>
           ) : null}
         </div>
       </header>
 
-      <div id="demo-live-map-container" className="relative flex-1 min-h-[420px] rounded-md overflow-hidden">
+      <div
+        id="demo-live-map-container"
+        className="relative flex-1 min-h-[420px] rounded-md overflow-hidden"
+      >
+        {/* biome-ignore lint/suspicious/noExplicitAny: demo props */}
         <DispatchMap token={mapboxToken} roster={mappedRoster as any} jobs={mappedJobs as any} />
 
         {status === 'idle' && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 backdrop-blur-[2px] rounded-md transition-opacity">
             <div className="text-center p-6 bg-bg-surface border border-brand-primary/50 shadow-2xl rounded-xl">
-              <p className="text-sm font-semibold mb-3 text-text-primary-on-dark">Ready to see Live Tracking in action?</p>
+              <p className="text-sm font-semibold mb-3 text-text-primary-on-dark">
+                Ready to see Live Tracking in action?
+              </p>
               <button
                 id="demo-map-simulate-btn"
                 type="button"
