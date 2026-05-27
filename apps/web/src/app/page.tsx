@@ -25,6 +25,15 @@ export default function LandingPage(): JSX.Element {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href="/demo"
+            className={cn(
+              buttonVariants({ variant: 'default', size: 'default' }),
+              'px-6 font-bold animate-fade-in-up',
+            )}
+          >
+            Try Demo
+          </Link>
           <ThemeToggle />
         </div>
       </header>

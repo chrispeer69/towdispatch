@@ -15,7 +15,7 @@
  */
 import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import { AlertTriangle } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { type JSX, useEffect, useRef, useState } from 'react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface Props {
@@ -24,7 +24,7 @@ interface Props {
   jobs: JobDto[];
 }
 
-const DEFAULT_CENTER = { lng: -82.998, lat: 39.961 }; // Columbus, OH
+const DEFAULT_CENTER = { lng: -112.074, lat: 33.4484 }; // Phoenix, AZ
 const DEFAULT_ZOOM = 11;
 
 function isUsableToken(token: string | null): boolean {
@@ -39,6 +39,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
   const mapRef = useRef<unknown>(null);
   const driverMarkersRef = useRef<Map<string, unknown>>(new Map());
   const jobMarkersRef = useRef<Map<string, unknown>>(new Map());
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (!isUsableToken(token)) return;
@@ -66,6 +67,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
           attributionControl: true,
         });
         mapRef.current = map;
+        setMapLoaded(true);
 
         cleanup = () => {
           driverMarkersRef.current.forEach((m) => {
@@ -116,17 +118,45 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
           if (existing) {
             // biome-ignore lint/suspicious/noExplicitAny: marker.setLngLat
             (existing as any).setLngLat([row.shift.lastLng, row.shift.lastLat]);
+            const statusStr = row.currentJobNumber ? `Working on #${row.currentJobNumber}` : 'Idle';
+            const dateStr = row.shift?.lastPositionAt ? new Date(row.shift.lastPositionAt).toLocaleTimeString() : 'Unknown';
+            const popupEl = (existing as any).getPopup()?.getElement();
+            if (popupEl) {
+              const statusEl = popupEl.querySelector('.driver-status');
+              if (statusEl) statusEl.textContent = statusStr;
+              const dateEl = popupEl.querySelector('.driver-updated');
+              if (dateEl) dateEl.textContent = `Last updated: ${dateStr}`;
+            }
           } else {
             const el = document.createElement('div');
             el.dataset.testid = `map-driver-${id}`;
             el.className =
-              'flex h-8 w-8 items-center justify-center rounded-full border-2 border-emerald-300 bg-emerald-500 text-[10px] font-bold uppercase text-white shadow';
+              'flex h-8 w-8 items-center justify-center rounded-full border-2 border-emerald-300 bg-emerald-500 text-[10px] font-bold uppercase text-white shadow cursor-pointer';
             el.textContent = `${row.driver.firstName[0] ?? ''}${row.driver.lastName[0] ?? ''}`;
+
+            const popupContent = document.createElement('div');
+            const statusStr = row.currentJobNumber ? `Working on #${row.currentJobNumber}` : 'Idle';
+            const dateStr = row.shift?.lastPositionAt ? new Date(row.shift.lastPositionAt).toLocaleTimeString() : 'Unknown';
+            popupContent.innerHTML = `
+              <div class="p-2 min-w-[120px]">
+                <p class="font-bold text-sm text-gray-900">${row.driver.firstName} ${row.driver.lastName}</p>
+                <p class="text-xs text-gray-700 font-medium mt-0.5 driver-status">${statusStr}</p>
+                <p class="text-[10px] text-gray-500 mt-1 driver-updated">Last updated: ${dateStr}</p>
+              </div>
+            `;
+            // biome-ignore lint/suspicious/noExplicitAny: Popup constructor
+            const popup = new (mapboxgl as any).Popup({ offset: 15, closeButton: false, closeOnClick: false }).setDOMContent(popupContent);
+
             // biome-ignore lint/suspicious/noExplicitAny: marker constructor
             const marker = new Marker({ element: el })
               .setLngLat([row.shift.lastLng, row.shift.lastLat])
+              .setPopup(popup)
               // biome-ignore lint/suspicious/noExplicitAny: marker addTo
               .addTo(map as any);
+
+            el.addEventListener('mouseenter', () => popup.addTo(map as any));
+            el.addEventListener('mouseleave', () => popup.remove());
+
             driverMarkersRef.current.set(id, marker);
           }
         }
@@ -142,24 +172,66 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
         const seenJobs = new Set<string>();
         for (const job of jobs) {
           if (job.pickupLat == null || job.pickupLng == null) continue;
-          const id = job.id;
-          seenJobs.add(id);
-          const existing = jobMarkersRef.current.get(id);
+          const pickupId = `pickup-${job.id}`;
+          seenJobs.add(pickupId);
+          const existing = jobMarkersRef.current.get(pickupId);
           if (existing) {
             // biome-ignore lint/suspicious/noExplicitAny: marker.setLngLat
             (existing as any).setLngLat([job.pickupLng, job.pickupLat]);
           } else {
             const el = document.createElement('div');
-            el.dataset.testid = `map-job-${id}`;
+            el.dataset.testid = `map-job-${job.id}`;
             el.className =
-              'flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-primary bg-brand-primary text-[10px] font-bold uppercase text-white shadow';
-            el.textContent = job.serviceType.slice(0, 1).toUpperCase();
+              'flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-primary bg-brand-primary text-[10px] font-bold uppercase text-white shadow cursor-pointer';
+            
+            if (job.serviceType === 'tow') {
+              el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+            } else {
+              el.textContent = job.serviceType.slice(0, 1).toUpperCase();
+            }
+
+            const popupContent = document.createElement('div');
+            popupContent.innerHTML = `
+              <div class="p-2 min-w-[140px]">
+                <p class="font-bold text-sm text-gray-900">${job.customerName ?? 'Unknown Customer'}</p>
+                <p class="text-xs text-gray-700 font-medium mt-0.5 uppercase tracking-wide">${job.serviceType.replace('_', ' ')}</p>
+                <p class="text-[10px] text-gray-500 mt-1 max-w-[180px] truncate">${job.vehicleDesc || 'No vehicle info'}</p>
+              </div>
+            `;
+            // biome-ignore lint/suspicious/noExplicitAny: Popup constructor
+            const popup = new (mapboxgl as any).Popup({ offset: 15, closeButton: false, closeOnClick: false }).setDOMContent(popupContent);
+
             // biome-ignore lint/suspicious/noExplicitAny: marker constructor
             const marker = new Marker({ element: el })
               .setLngLat([job.pickupLng, job.pickupLat])
+              .setPopup(popup)
               // biome-ignore lint/suspicious/noExplicitAny: marker addTo
               .addTo(map as any);
-            jobMarkersRef.current.set(id, marker);
+            
+            el.addEventListener('mouseenter', () => popup.addTo(map as any));
+            el.addEventListener('mouseleave', () => popup.remove());
+            
+            jobMarkersRef.current.set(pickupId, marker);
+          }
+
+          // Dropoff marker
+          if (job.dropoffLat != null && job.dropoffLng != null) {
+            const dropoffId = `dropoff-${job.id}`;
+            seenJobs.add(dropoffId);
+            const existingDrop = jobMarkersRef.current.get(dropoffId);
+            if (existingDrop) {
+              // biome-ignore lint/suspicious/noExplicitAny: marker.setLngLat
+              (existingDrop as any).setLngLat([job.dropoffLng, job.dropoffLat]);
+            } else {
+              const el = document.createElement('div');
+              el.className = 'flex h-6 w-6 items-center justify-center rounded-[6px] border-2 border-gray-600 bg-white text-[12px] shadow';
+              el.innerHTML = '🏁';
+              // biome-ignore lint/suspicious/noExplicitAny: marker constructor
+              const marker = new Marker({ element: el })
+                .setLngLat([job.dropoffLng, job.dropoffLat])
+                .addTo(map as any);
+              jobMarkersRef.current.set(dropoffId, marker);
+            }
           }
         }
         for (const [id, m] of jobMarkersRef.current.entries()) {
@@ -173,7 +245,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
         /* ignore reconciliation errors */
       }
     })();
-  }, [token, roster, jobs]);
+  }, [token, roster, jobs, mapLoaded]);
 
   if (!isUsableToken(token)) {
     return (
