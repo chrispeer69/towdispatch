@@ -96,23 +96,26 @@ export function SimulatePanel(): JSX.Element {
     }
 
     // Messages
-    for (const msg of SIMULATION_MESSAGES) {
+    SIMULATION_MESSAGES.forEach((msg, index) => {
       timersRef.current.push(
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `msg-${Date.now()}-${Math.random()}`,
-              body: msg.body,
-              time: new Date().toLocaleTimeString(undefined, {
-                hour: 'numeric',
-                minute: '2-digit',
-              }),
-            },
-          ]);
-        }, msg.delay),
+        setTimeout(
+          () => {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `msg-${Date.now()}-${Math.random()}`,
+                body: msg.body,
+                time: new Date().toLocaleTimeString(undefined, {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                }),
+              },
+            ]);
+          },
+          index * 3000 + 1000,
+        ),
       );
-    }
+    });
 
     // Route animation (from 3s to 16s = en route phase)
     const routeStart = 3000;
