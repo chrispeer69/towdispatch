@@ -124,15 +124,27 @@ If a real component doesn't exist yet for a demo need, note it in TODO.md as a f
 
 ## Rule 3 — Git workflow (simplified for safety)
 
+**Use ONE working branch for all your changes.** Do NOT create a new branch for every feature. Pick a branch name like `founder/working` and keep using it.
+
 ```
-1. git checkout -b feature/short-description    ← always branch from master
-2. (make your changes)
-3. git add .
-4. git commit -m "feat: short description"       ← use conventional commits
-5. git push origin feature/short-description
-6. Open a Pull Request on GitHub against master
-7. Wait for CI checks to pass before merging
+# FIRST TIME ONLY — create your working branch:
+git checkout -b founder/working
+
+# EVERY TIME you make changes:
+1. (make your changes)
+2. git add .
+3. git commit -m "feat: short description"       ← use conventional commits
+4. git push origin founder/working
+5. Open a Pull Request on GitHub against master (reuse the same PR if one is already open)
+6. Wait for CI checks to pass before merging
+
+# AFTER merging your PR — sync back to master and continue:
+git checkout master
+git pull origin master
+git checkout -b founder/working                  ← fresh branch from updated master
 ```
+
+⚠️ **Do NOT create branches like** `feature/add-button`, `feature/fix-label`, `feature/update-page` for every small change. One branch, many commits.
 
 **Commit message prefixes:**
 - `feat:` — new functionality
