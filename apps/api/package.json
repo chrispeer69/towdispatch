@@ -34,7 +34,7 @@
     "@ustowdispatch/shared": "workspace:*",
     "argon2": "0.41.1",
     "bcryptjs": "2.4.3",
-    "bullmq": "5.34.0",
+    "bullmq": "5.77.7",
     "csv-parse": "5.5.6",
     "csv-stringify": "^6.7.0",
     "drizzle-orm": "^0.45.2",
