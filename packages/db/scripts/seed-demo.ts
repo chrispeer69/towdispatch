@@ -43,7 +43,10 @@ import * as schema from '../src/schema/index';
 const TENANT_SLUG = 'roadside';
 const TENANT_NAME = 'Roadside Towing and Recovery, Inc.';
 const DEMO_PASSWORD = 'TempPass#001';
-const INVOICE_PREFIX = 'ROAD';
+// Must match the invoices_invoice_number_format CHECK constraint
+// (0013_billing.sql): INV-YYYY-NNNN. The real app allocates the same
+// "INV-" prefix in apps/api/src/modules/billing/invoice-number.ts.
+const INVOICE_PREFIX = 'INV';
 const INVOICE_YEAR = '2026';
 
 /**
@@ -1651,7 +1654,7 @@ async function main(): Promise<void> {
     // Jobs + invoices + payments
     // ────────────────────────────────────────────────────────────────────
 
-    // Helper: allocate next invoice number (ROAD-2026-NNNNN) via the
+    // Helper: allocate next invoice number (INV-2026-NNNNN) via the
     // invoice_number_sequences table. UPSERT + RETURNING is atomic.
     async function nextInvoiceNumber(): Promise<string> {
       const result = await db.execute<{ last_seq: number }>(sql`
