@@ -8,7 +8,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { CarrierProfileClient } from './carrier-profile-client';
 
-export const metadata = { title: 'Carrier Profile — DOT Compliance — US Tow DISPATCH' };
+export const metadata = { title: 'Carrier Profile — DOT Compliance — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function CarrierProfilePage(): Promise<JSX.Element> {

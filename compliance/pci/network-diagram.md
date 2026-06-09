@@ -15,7 +15,7 @@ flowchart LR
         stripeapi["api.stripe.com"]
     end
 
-    subgraph Ours["US Tow DISPATCH (CDE boundary)"]
+    subgraph Ours["US Tow Dispatch (CDE boundary)"]
         web["Web app origin"]
         api["API payments module<br/>(tokens / ids only)"]
         db[("PostgreSQL<br/>Stripe ids only — no PAN")]

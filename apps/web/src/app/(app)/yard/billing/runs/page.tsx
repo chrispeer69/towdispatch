@@ -9,7 +9,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { BillingRunsClient } from './billing-runs-client';
 
-export const metadata = { title: 'Storage Billing Runs — US Tow DISPATCH' };
+export const metadata = { title: 'Storage Billing Runs — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function BillingRunsPage(): Promise<JSX.Element> {

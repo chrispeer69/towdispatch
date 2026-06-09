@@ -18,7 +18,7 @@ import { getSessionToken } from '@/lib/auth/session';
 import type { AccountDto, StatementSendDto } from '@ustowdispatch/shared';
 import { StatementsClient } from './statements-client';
 
-export const metadata = { title: 'Statements — US Tow DISPATCH' };
+export const metadata = { title: 'Statements — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function StatementsPage({

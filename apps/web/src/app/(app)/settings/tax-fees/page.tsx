@@ -13,7 +13,7 @@ import { TaxFeesForm } from './tax-fees-form';
 
 const TAB = findSettingsTab('tax-fees');
 
-export const metadata = { title: 'Tax & Fees — US Tow DISPATCH' };
+export const metadata = { title: 'Tax & Fees — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function TaxFeesPage(): Promise<JSX.Element> {

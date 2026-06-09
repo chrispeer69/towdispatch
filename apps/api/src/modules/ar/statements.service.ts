@@ -147,7 +147,7 @@ export class StatementsService {
       const tenant = await tx.query.tenants.findFirst({
         where: eq(tenants.id, ctx.tenantId),
       });
-      const tenantName = tenant?.name ?? 'US Tow DISPATCH';
+      const tenantName = tenant?.name ?? 'US Tow Dispatch';
 
       // Render the PDF using the existing statement PDF service.
       try {
@@ -279,7 +279,7 @@ export class StatementsService {
       tx.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) }),
     );
     return this.statementPdf.renderStatement({
-      tenant: { name: tenant?.name ?? 'US Tow DISPATCH' },
+      tenant: { name: tenant?.name ?? 'US Tow Dispatch' },
       accountName: preview.accountName,
       asOf: preview.asOf,
       totals: { ...preview.aging, invoiceCount: preview.invoices.length },

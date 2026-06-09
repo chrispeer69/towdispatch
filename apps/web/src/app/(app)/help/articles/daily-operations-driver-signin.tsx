@@ -80,7 +80,7 @@ export function DriverSigninAndBriefingArticle(): JSX.Element {
     <article>
       <H2>Purpose</H2>
       <P>
-        Every shift in US Tow DISPATCH starts in the same place: the driver signs into the in-truck
+        Every shift in US Tow Dispatch starts in the same place: the driver signs into the in-truck
         app with a 4-digit PIN, acknowledges the daily briefing if one has been published, and
         completes a pre-trip vehicle inspection. This article walks a driver through that 90-second
         sequence and shows managers exactly what's recorded on the office side so the audit trail

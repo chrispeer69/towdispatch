@@ -113,7 +113,7 @@ export function CallIntakeArticle(): JSX.Element {
 
       <H2>Overview</H2>
       <P>
-        US Tow DISPATCH separates the <Em>quote</Em> from the <Em>job</Em>. As you type into the
+        US Tow Dispatch separates the <Em>quote</Em> from the <Em>job</Em>. As you type into the
         intake form, the <Em>Live Quote Box</Em> on the right side of the screen updates instantly.
         It reads the customer type (Cash vs. Account), the vehicle class (Light Duty vs. Heavy
         Duty), the service type, and the computed road miles, then runs them through your rate

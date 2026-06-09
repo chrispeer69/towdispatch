@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Seed a single driver job against a running US Tow DISPATCH backend so the iOS /
+# Seed a single driver job against a running US Tow Dispatch backend so the iOS /
 # Android driver apps can exercise the full lifecycle.
 #
 # Prereqs:

@@ -23,7 +23,7 @@ import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
 import { DynamicPricingSettingsClient } from './dynamic-pricing-settings-client';
 
-export const metadata = { title: 'Dynamic Pricing — US Tow DISPATCH' };
+export const metadata = { title: 'Dynamic Pricing — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const TAB = findSettingsTab('dynamic-pricing');

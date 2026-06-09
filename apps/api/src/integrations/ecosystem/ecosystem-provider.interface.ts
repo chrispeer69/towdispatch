@@ -12,7 +12,7 @@
 import type { IntegrationProvider } from '../types.js';
 
 export interface EcosystemPartnerCredentials {
-  /** Vendor-specific configuration. Opaque to US Tow DISPATCH core. */
+  /** Vendor-specific configuration. Opaque to US Tow Dispatch core. */
   config: Record<string, unknown>;
 }
 
@@ -62,7 +62,7 @@ export interface EcosystemReferralReceipt {
 /**
  * Webhook payload an EcosystemPartner sends back when the referred customer
  * completes a service. The partner is responsible for signing the request;
- * implementations validate and surface a normalized event to US Tow DISPATCH.
+ * implementations validate and surface a normalized event to US Tow Dispatch.
  */
 export interface EcosystemServiceCompletedEvent {
   externalReferralId: string;
@@ -79,7 +79,7 @@ export interface EcosystemServiceCompletedEvent {
 
 /**
  * EcosystemPartner — a referral target that can take a customer off
- * US Tow DISPATCH's hands for a downstream service (repair, body, rental). Each
+ * US Tow Dispatch's hands for a downstream service (repair, body, rental). Each
  * implementation declares which referral kinds it supports via descriptor
  * capabilities (e.g. ['auto_repair','body_work']).
  *

@@ -24,7 +24,7 @@ import { DriverAccessPanel } from './driver-access-panel';
 
 const TAB = findSettingsTab('company');
 
-export const metadata = { title: 'Company Profile — US Tow DISPATCH' };
+export const metadata = { title: 'Company Profile — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const VIEW_ROLES: readonly Role[] = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTING];

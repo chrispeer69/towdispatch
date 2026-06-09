@@ -104,7 +104,7 @@ export function DriverShiftArticle(): JSX.Element {
   return (
     <div className="pb-12">
       <P>
-        The driver's day begins before they ever receive a dispatch. US Tow DISPATCH enforces a
+        The driver's day begins before they ever receive a dispatch. US Tow Dispatch enforces a
         structured sign-in workflow that protects your business from liability, ensures FMCSA
         compliance, and keeps your dispatch board accurate.
       </P>

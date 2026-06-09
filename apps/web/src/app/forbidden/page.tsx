@@ -10,7 +10,7 @@ import { Home, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Access denied — US Tow DISPATCH',
+  title: 'Access denied — US Tow Dispatch',
 };
 
 export default function ForbiddenPage(): JSX.Element {

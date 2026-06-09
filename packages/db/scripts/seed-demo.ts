@@ -2452,7 +2452,7 @@ Tenant slug: \`${TENANT_SLUG}\`
 
 ## Login
 
-- URL: https://app.towcommand.cloud
+- URL: https://app.ustowdispatch.cloud
 - Email: \`chris@roadside.demo\`
 - Password: \`${DEMO_PASSWORD}\`  (force rotation on first login — lastLoginAt is NULL on every seeded user)
 
@@ -2483,15 +2483,15 @@ All non-owner users seeded with the same password and the same null lastLoginAt;
 
 Open the following in order to show every dataset state:
 
-- Open jobs: <https://app.towcommand.cloud/jobs?status=open>
-- Completed jobs awaiting invoice: <https://app.towcommand.cloud/jobs?status=completed&invoice=none>
-- Draft invoices: <https://app.towcommand.cloud/billing/invoices?status=draft>
-- Sent / aged invoices: <https://app.towcommand.cloud/billing/invoices?status=sent>
-- Partially paid invoices: <https://app.towcommand.cloud/billing/invoices?status=partially_paid>
-- Paid invoices: <https://app.towcommand.cloud/billing/invoices?status=paid>
-- Write-offs: <https://app.towcommand.cloud/billing/adjustments?kind=write_off>
-- A/R aging: <https://app.towcommand.cloud/billing/aging>
-- Rate sheets: <https://app.towcommand.cloud/billing/rate-sheets>
+- Open jobs: <https://app.ustowdispatch.cloud/jobs?status=open>
+- Completed jobs awaiting invoice: <https://app.ustowdispatch.cloud/jobs?status=completed&invoice=none>
+- Draft invoices: <https://app.ustowdispatch.cloud/billing/invoices?status=draft>
+- Sent / aged invoices: <https://app.ustowdispatch.cloud/billing/invoices?status=sent>
+- Partially paid invoices: <https://app.ustowdispatch.cloud/billing/invoices?status=partially_paid>
+- Paid invoices: <https://app.ustowdispatch.cloud/billing/invoices?status=paid>
+- Write-offs: <https://app.ustowdispatch.cloud/billing/adjustments?kind=write_off>
+- A/R aging: <https://app.ustowdispatch.cloud/billing/aging>
+- Rate sheets: <https://app.ustowdispatch.cloud/billing/rate-sheets>
 
 Several of these routes do not exist yet in the web app (no \`/billing/adjustments\`, no \`/billing/aging\`, no \`/billing/rate-sheets\`, and the \`?invoice=none\` filter on \`/jobs\` is not implemented). **Needed in Session 10.**
 

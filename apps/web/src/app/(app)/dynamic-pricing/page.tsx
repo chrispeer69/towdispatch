@@ -34,7 +34,7 @@ import type {
 import type { JSX } from 'react';
 import { ControlPanelClient } from './control-panel-client';
 
-export const metadata = { title: 'Dynamic Pricing — US Tow DISPATCH' };
+export const metadata = { title: 'Dynamic Pricing — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function DynamicPricingControlPanelPage(): Promise<JSX.Element> {

@@ -1,5 +1,5 @@
 # =====================================================================
-# US Tow DISPATCH - Railway deploy script (idempotent, Railway CLI v4 syntax).
+# US Tow Dispatch - Railway deploy script (idempotent, Railway CLI v4 syntax).
 #
 # Prerequisites:
 #   1. railway login         (one time, interactive, opens a browser)

@@ -8,16 +8,16 @@ Scope: Phase 0 audit items R-08, R-09, R-15. **Zero API/web/Kotlin source change
 ## D1 — Worktree bootstrap
 Launch named worktree `/tmp/claude-worktrees/docs-android` + branch `chore/docs-android-r08-r09-r15` did not exist. Created off fresh `origin/master` per the established bootstrap pattern. Skipped the recursive `claude --dangerously-skip-permissions` launch line (already in a session). Verified `pwd` + branch before editing.
 
-## D2 — R-15 release domain: `api.towcommand.cloud`, not `api.ustowdispatch.cloud`
-The Android build had **both** debug and release pointing at `https://api.ustowdispatch.cloud` (the bug: a debug build hits production). The task spec said use `api.towcommand.cloud`. These conflicted with the file's current value, so I checked which domain is real:
-- `api.towcommand.cloud` / `app.towcommand.cloud` are **verified live**: `END_OF_SESSION_REPORT.md` (curl'd `https://api.towcommand.cloud/customers` successfully), `SMOKE_SPRINT_DECISIONS.md` (smoke harness runs against it), `BUILD_DECISIONS.md`, and `BUILD_STATUS_2026-05-17.md` ("`towcommand.cloud` + `ustowdispatch.cloud` both live").
-- **Decision:** release → `https://api.towcommand.cloud`. The task is correct; the Android file's `ustowdispatch.cloud` value was the inconsistent one. Matches the verified-live production API used by the web app + smoke tests.
+## D2 — R-15 release domain: `api.ustowdispatch.cloud`, not `api.ustowdispatch.cloud`
+The Android build had **both** debug and release pointing at `https://api.ustowdispatch.cloud` (the bug: a debug build hits production). The task spec said use `api.ustowdispatch.cloud`. These conflicted with the file's current value, so I checked which domain is real:
+- `api.ustowdispatch.cloud` / `app.ustowdispatch.cloud` are **verified live**: `END_OF_SESSION_REPORT.md` (curl'd `https://api.ustowdispatch.cloud/customers` successfully), `SMOKE_SPRINT_DECISIONS.md` (smoke harness runs against it), `BUILD_DECISIONS.md`, and `BUILD_STATUS_2026-05-17.md` ("`ustowdispatch.cloud` + `ustowdispatch.cloud` both live").
+- **Decision:** release → `https://api.ustowdispatch.cloud`. The task is correct; the Android file's `ustowdispatch.cloud` value was the inconsistent one. Matches the verified-live production API used by the web app + smoke tests.
 
 ## D3 — R-15 debug variant: `http://10.0.2.2:3001` (emulator → host)
 Task offered staging URL OR emulator loopback. Picked **`http://10.0.2.2:3001`** because:
 - `10.0.2.2` is the Android emulator's alias for the host machine; `3001` is the confirmed local API dev port (`config.schema.ts` `API_PORT` default 3001).
 - `AndroidManifest.xml` already sets `usesCleartextTraffic="true"`, so cleartext `http` to the emulator host works with **no manifest/source change** (R-15 forbids source changes outside `build.gradle.kts`).
-- No evidence a `api-staging.towcommand.cloud` deploy exists; a dead staging URL would make fresh debug builds non-functional, whereas the emulator default works against a locally-run backend immediately.
+- No evidence a `api-staging.ustowdispatch.cloud` deploy exists; a dead staging URL would make fresh debug builds non-functional, whereas the emulator default works against a locally-run backend immediately.
 - **Tradeoff (documented in build.gradle.kts comment):** `10.0.2.2` only resolves on the emulator. For a USB-attached physical device, run `adb reverse tcp:3001 tcp:3001` first, or override the BuildConfig string locally.
 
 ## D4 — R-08 RTO/RPO stated as targets + honest Railway gap, no fabricated price
@@ -35,6 +35,6 @@ Rollback is the inverse of deploy; placed the new `## Rollback` section immediat
 ---
 
 ### Verification (results recorded at commit time)
-- `grep "api.towcommand.cloud" apps/driver-android/app/build.gradle.kts` → matches release variant.
+- `grep "api.ustowdispatch.cloud" apps/driver-android/app/build.gradle.kts` → matches release variant.
 - `./gradlew :app:assembleDebug` and `:app:assembleRelease` → see build output in PR body.
 - Both `.md` files proofread for render.

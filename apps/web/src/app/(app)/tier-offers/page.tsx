@@ -13,7 +13,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { TierOfferListClient } from './list-client';
 
-export const metadata = { title: 'Tier Offers — US Tow DISPATCH' };
+export const metadata = { title: 'Tier Offers — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {

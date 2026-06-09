@@ -5,7 +5,7 @@
 import type { JSX } from 'react';
 import { GateSearchClient } from './gate-search-client';
 
-export const metadata = { title: 'Gate Search — US Tow DISPATCH' };
+export const metadata = { title: 'Gate Search — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default function GateSearchPage(): JSX.Element {

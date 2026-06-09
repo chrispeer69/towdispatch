@@ -9,7 +9,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export const metadata = { title: 'Account — US Tow DISPATCH' };
+export const metadata = { title: 'Account — US Tow Dispatch' };
 
 const EMPTY_CUSTOMERS: PaginatedCustomers = { data: [], total: 0, page: 1, perPage: 100 };
 

@@ -808,7 +808,7 @@ export class TrackingService implements OnModuleInit, OnModuleDestroy {
     const trackingUrl = `${this.config.webPublicUrl.replace(/\/$/, '')}/track/${link.token}`;
     const body = template
       .replace(/\{\{tracking_url\}\}/g, trackingUrl)
-      .replace(/\{\{tenant_name\}\}/g, tenant?.name ?? 'US Tow DISPATCH');
+      .replace(/\{\{tenant_name\}\}/g, tenant?.name ?? 'US Tow Dispatch');
 
     const result = await this.notifications.sendSms({
       tenantId: link.tenantId,

@@ -1,4 +1,4 @@
-# Session 20 — Rebrand: TowCommand → US Tow DISPATCH
+# Session 20 — Rebrand: TowCommand → US Tow Dispatch
 
 Date: 2026-05-14
 Branch: `feat/rename-ustowdispatch` (off `master`)
@@ -8,7 +8,7 @@ Posture: feature branch + PR + manual smoke test. Auto-deploy stays OFF.
 
 ## What shipped
 
-Full repo-internal rebrand from **TowCommand** → **US Tow DISPATCH**, executed
+Full repo-internal rebrand from **TowCommand** → **US Tow Dispatch**, executed
 with a one-shot Node script (`scripts/rename-ustowdispatch.mjs`, deleted after
 use). 387 files modified, 40 files renamed via `git mv`, no untracked
 leftovers, no deleted files.
@@ -28,8 +28,8 @@ Verification:
 
 | Identifier type | Convention | Examples |
 |---|---|---|
-| Display brand (UI, docs, emails) | `US Tow DISPATCH` (italic on DISPATCH where styled) | layout title, login page, invoice PDF header |
-| Brand all-caps (wordmarks, headers) | `US TOW DISPATCH` | landing hero, invoice mocks |
+| Display brand (UI, docs, emails) | `US Tow Dispatch` (italic on DISPATCH where styled) | layout title, login page, invoice PDF header |
+| Brand all-caps (wordmarks, headers) | `US Tow Dispatch` | landing hero, invoice mocks |
 | Repo / npm package id | `ustowdispatch` (single token, no separators) | repo name, root package.json `name` |
 | Workspace package scope | `@ustowdispatch/*` | `@ustowdispatch/api`, `@ustowdispatch/web`, `@ustowdispatch/shared`, `@ustowdispatch/db`, `@ustowdispatch/ui`, `@ustowdispatch/e2e` |
 | Env var values | `ustowdispatch` (lowercase) | `JWT_ISSUER`, `POSTGRES_USER`, `DD_SERVICE`, etc. |
@@ -228,11 +228,11 @@ production surface. Left intact since it's historical reference material.
 - Auto-deploy stays OFF — this rebrand has zero customer-facing blast
   radius (zero tenants live, no public marketing surface yet) but it touches
   every workspace, so Chris should do a manual smoke pass before merging:
-  1. `pnpm install && pnpm dev` → web on :3000 should render "US Tow DISPATCH"
+  1. `pnpm install && pnpm dev` → web on :3000 should render "US Tow Dispatch"
      on the landing page + login page (header logo + hero wordmark + tab
      title).
-  2. Hit `/login` → header reads "US Tow DISPATCH", subtitle is
-     "Sign in to your US Tow DISPATCH workspace."
+  2. Hit `/login` → header reads "US Tow Dispatch", subtitle is
+     "Sign in to your US Tow Dispatch workspace."
   3. Hit `/api/health` and `/api/ready` on :3001 → 200 ok.
   4. Open Drizzle Studio (`pnpm db:studio`) and confirm tables still load
      (sanity check that no DB-bound code accidentally renamed `towcommand_id`).

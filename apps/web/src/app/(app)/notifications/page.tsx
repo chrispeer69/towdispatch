@@ -8,7 +8,7 @@ import { fetchInAppNotifications } from '@/lib/api/notifications.server';
 import type { NotificationListQuery } from '@ustowdispatch/shared';
 import { NotificationsHistory } from './history.client';
 
-export const metadata = { title: 'Notifications — TowCommand' };
+export const metadata = { title: 'Notifications — US Tow Dispatch' };
 
 export default async function NotificationsHistoryPage({
   searchParams,

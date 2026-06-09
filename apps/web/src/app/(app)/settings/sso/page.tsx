@@ -18,7 +18,7 @@ import { SsoClient } from './sso-client';
 
 const TAB = findSettingsTab('sso');
 
-export const metadata = { title: 'Enterprise SSO — US Tow DISPATCH' };
+export const metadata = { title: 'Enterprise SSO — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function SsoSettingsPage(): Promise<JSX.Element> {

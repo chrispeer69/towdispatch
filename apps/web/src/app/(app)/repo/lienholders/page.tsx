@@ -11,7 +11,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { LienholdersClient } from './lienholders-client';
 
-export const metadata = { title: 'Lienholders — US Tow DISPATCH' };
+export const metadata = { title: 'Lienholders — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function LienholdersPage(): Promise<JSX.Element> {

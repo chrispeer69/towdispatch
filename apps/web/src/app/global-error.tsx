@@ -55,7 +55,7 @@ export default function GlobalError({ error, reset }: Props): JSX.Element {
           <AlertOctagon size={48} strokeWidth={1.5} color="#EF4444" aria-hidden="true" />
           <h1 style={{ marginTop: 16, fontSize: 24 }}>Server error</h1>
           <p style={{ marginTop: 8, fontSize: 14, opacity: 0.8 }}>
-            US Tow DISPATCH hit an unexpected error. Our team has been notified.
+            US Tow Dispatch hit an unexpected error. Our team has been notified.
           </p>
           {error.digest ? (
             <code

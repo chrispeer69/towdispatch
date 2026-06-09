@@ -136,7 +136,7 @@ final class DriverCodeRedeemerTests: XCTestCase {
             "654321"
         )
         XCTAssertEqual(
-            DriverCodeURLParser.extractCode(from: URL(string: "https://app.towcommand.cloud/driver/d/987654")!),
+            DriverCodeURLParser.extractCode(from: URL(string: "https://app.ustowdispatch.cloud/driver/d/987654")!),
             "987654"
         )
         XCTAssertEqual(

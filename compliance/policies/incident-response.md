@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Define how US Tow DISPATCH detects, triages, responds to, communicates, and
+Define how US Tow Dispatch detects, triages, responds to, communicates, and
 learns from security and availability incidents.
 
 ## Severity levels
@@ -40,7 +40,7 @@ learns from security and availability incidents.
 ## Communication template
 
 ```
-[US Tow DISPATCH] Service Incident — <short title>
+[US Tow Dispatch] Service Incident — <short title>
 Status: Investigating | Identified | Monitoring | Resolved
 Start: <UTC>    Severity: Sev-<n>
 Impact: <who/what is affected, in plain language>

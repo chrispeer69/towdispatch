@@ -161,7 +161,7 @@ export class PushAdapter implements ChannelAdapter {
     return {
       token: input.targetAddress,
       notification: {
-        title: input.renderedSubject ?? 'TowCommand',
+        title: input.renderedSubject ?? 'US Tow Dispatch',
         body: input.renderedBody,
       },
       data,
@@ -195,7 +195,7 @@ export class PushAdapter implements ChannelAdapter {
         payload: {
           aps: {
             alert: {
-              title: input.renderedSubject ?? 'TowCommand',
+              title: input.renderedSubject ?? 'US Tow Dispatch',
               body: input.renderedBody,
             },
             sound: isEmergency ? 'new_job_alert.caf' : 'default',

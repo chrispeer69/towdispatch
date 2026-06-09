@@ -171,7 +171,7 @@ export function TierOfferComposerArticle(): JSX.Element {
       <P>The system instantly emails the selected account managers.</P>
       <OrderedList>
         <li>
-          The Agero manager receives an email: "US Tow DISPATCH: Severe Weather Capacity Offer from
+          The Agero manager receives an email: "US Tow Dispatch: Severe Weather Capacity Offer from
           Acme Towing."
         </li>
         <li>

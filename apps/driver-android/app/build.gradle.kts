@@ -35,7 +35,7 @@ android {
         }
         release {
             // Verified-live production API (BUILD_STATUS_2026-05-17.md, smoke harness).
-            buildConfigField("String", "API_BASE_URL", "\"https://api.towcommand.cloud\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://api.ustowdispatch.cloud\"")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

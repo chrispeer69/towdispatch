@@ -266,7 +266,7 @@ export function ArAgingArticle(): JSX.Element {
         <div>
           <strong className="block text-text-primary-on-dark">Does this replace QuickBooks?</strong>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
-            No. If you have connected QuickBooks Online, US Tow DISPATCH pushes the invoices to QBO.
+            No. If you have connected QuickBooks Online, US Tow Dispatch pushes the invoices to QBO.
             The A/R Workspace is designed for your daily operational collections workflow (sending
             reminders, generating statements), while QBO remains your official general ledger for
             tax and compliance.

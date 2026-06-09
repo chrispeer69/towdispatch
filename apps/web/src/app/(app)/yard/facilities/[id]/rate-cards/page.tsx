@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { RateCardsClient } from './rate-cards-client';
 
-export const metadata = { title: 'Storage Rate Cards — US Tow DISPATCH' };
+export const metadata = { title: 'Storage Rate Cards — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function RateCardsPage({

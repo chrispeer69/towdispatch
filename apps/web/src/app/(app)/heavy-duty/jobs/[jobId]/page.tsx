@@ -11,7 +11,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { HdJobClient } from './job-client';
 
-export const metadata = { title: 'HD Job — US Tow DISPATCH' };
+export const metadata = { title: 'HD Job — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function HdJobPage({

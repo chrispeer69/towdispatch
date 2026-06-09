@@ -20,7 +20,7 @@ export function assertPublicApiUrl(env) {
   if (nodeEnv === 'development') return 'http://localhost:3001';
   throw new Error(
     'NEXT_PUBLIC_API_URL is required for non-development builds. ' +
-      'Set it to the public API origin (e.g. https://api.towcommand.cloud) ' +
+      'Set it to the public API origin (e.g. https://api.ustowdispatch.cloud) ' +
       'before running `next build`. Refusing to ship a bundle that falls ' +
       'back to http://localhost:3001.',
   );

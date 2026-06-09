@@ -7,7 +7,7 @@ import { buildCsp } from '../../csp.mjs';
  */
 describe('buildCsp', () => {
   const csp = buildCsp({
-    NEXT_PUBLIC_API_URL: 'https://api.towcommand.cloud',
+    NEXT_PUBLIC_API_URL: 'https://api.ustowdispatch.cloud',
     NODE_ENV: 'production',
   });
 
@@ -33,8 +33,8 @@ describe('buildCsp', () => {
 
   it('derives the API origin and wss scheme from NEXT_PUBLIC_API_URL', () => {
     const connectSrc = directive('connect-src');
-    expect(connectSrc).toContain('https://api.towcommand.cloud');
-    expect(connectSrc).toContain('wss://api.towcommand.cloud');
+    expect(connectSrc).toContain('https://api.ustowdispatch.cloud');
+    expect(connectSrc).toContain('wss://api.ustowdispatch.cloud');
     expect(connectSrc).toContain('https://*.ingest.sentry.io');
   });
 

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { DrugAlcoholClient } from './drug-alcohol-client';
 
-export const metadata = { title: 'Drug & Alcohol — DOT Compliance — US Tow DISPATCH' };
+export const metadata = { title: 'Drug & Alcohol — DOT Compliance — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function DrugAlcoholPage(): Promise<JSX.Element> {

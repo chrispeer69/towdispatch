@@ -12,7 +12,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { LienCaseListClient } from './list-client';
 
-export const metadata = { title: 'Lien Cases — US Tow DISPATCH' };
+export const metadata = { title: 'Lien Cases — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const KNOWN_STATUSES: LienCaseStatus[] = ['open', 'ready_for_sale', 'sold', 'closed', 'canceled'];

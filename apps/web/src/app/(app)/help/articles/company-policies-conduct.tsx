@@ -116,7 +116,7 @@ export function DriverConductArticle(): JSX.Element {
 
       <H2>Overview</H2>
       <P>
-        A conduct policy is only effective if you can prove the driver read it. US Tow DISPATCH
+        A conduct policy is only effective if you can prove the driver read it. US Tow Dispatch
         enforces this through the <Em>Daily Briefing</Em> module. When you upload a safety video or
         post a text briefing, the system forces the driver to acknowledge it before they can start
         their shift, logging their IP address and timestamp as an unassailable audit trail.
@@ -124,7 +124,7 @@ export function DriverConductArticle(): JSX.Element {
 
       <Callout tone="tip" title="How to use this template">
         Copy the text in the gray box below. Adapt it to your specific company rules. You can paste
-        the text directly into the <Em>Daily Briefing</Em> message box in US Tow DISPATCH, or read
+        the text directly into the <Em>Daily Briefing</Em> message box in US Tow Dispatch, or read
         it aloud while recording a video on your phone, then upload that video to the platform.
       </Callout>
 
@@ -164,7 +164,7 @@ export function DriverConductArticle(): JSX.Element {
         <ul className="mb-4 list-disc pl-5">
           <li>
             Before attaching any hook, chain, or strap to a customer's vehicle, you <Em>must</Em>{' '}
-            complete a 60-second video walkaround using the US Tow DISPATCH app.
+            complete a 60-second video walkaround using the US Tow Dispatch app.
           </li>
           <li>
             You will narrate the video, clearly pointing out any pre-existing damage, scrapes, or
@@ -218,7 +218,7 @@ export function DriverConductArticle(): JSX.Element {
         </ul>
       </div>
 
-      <H2>How to Enforce This in US Tow DISPATCH</H2>
+      <H2>How to Enforce This in US Tow Dispatch</H2>
 
       <H3>Setting the Daily Briefing</H3>
       <OrderedList>

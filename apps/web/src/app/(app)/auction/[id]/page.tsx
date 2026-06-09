@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { AuctionDetailClient } from './detail-client';
 
-export const metadata = { title: 'Auction listing — US Tow DISPATCH' };
+export const metadata = { title: 'Auction listing — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function AuctionDetailPage({

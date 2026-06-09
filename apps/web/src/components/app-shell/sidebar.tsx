@@ -298,7 +298,7 @@ const SECTIONS: NavSection[] = [
     // ECOSYSTEM — Blue Collar AI sibling products surfaced as branded entry
     // points. These pages are placeholders until each product ships its own
     // integration; today they explain what the product is and why it sits
-    // next to US Tow DISPATCH.
+    // next to US Tow Dispatch.
     label: 'Ecosystem',
     items: [
       {
@@ -335,7 +335,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
       {/*
-        Clicking the US Tow DISPATCH wordmark / logo navigates the user
+        Clicking the US Tow Dispatch wordmark / logo navigates the user
         back to the dashboard.
       */}
       <Link

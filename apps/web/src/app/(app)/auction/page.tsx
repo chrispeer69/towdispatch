@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { AuctionListClient } from './list-client';
 
-export const metadata = { title: 'Auctions — US Tow DISPATCH' };
+export const metadata = { title: 'Auctions — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const KNOWN_STATUSES: AuctionListingStatus[] = ['draft', 'live', 'ended', 'sold', 'withdrawn'];

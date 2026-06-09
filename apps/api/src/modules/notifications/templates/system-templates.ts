@@ -40,7 +40,7 @@ function emailLayout(title: string, content: string): string {
 <h1 style="font-size:20px;color:#1A1E2A;margin:0 0 12px 0;">${title}</h1>
 ${content}
 <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
-<p style="font-size:12px;color:#666;margin:0;">Sent by TowCommand Pro · You are receiving this because you have a TowCommand account.</p>
+<p style="font-size:12px;color:#666;margin:0;">Sent by US Tow Dispatch Pro · You are receiving this because you have a US Tow Dispatch account.</p>
 </div></body></html>`;
 }
 
@@ -258,7 +258,7 @@ View: {{invoiceUrl}}`,
     subject: 'Payment received — invoice {{invoiceNumber}}',
     body: emailLayout(
       'Payment received',
-      `<p>We received your payment of {{amountFormatted}} for invoice {{invoiceNumber}}. Thank you.</p>`,
+      '<p>We received your payment of {{amountFormatted}} for invoice {{invoiceNumber}}. Thank you.</p>',
     ),
     bodyPlain: 'Payment of {{amountFormatted}} received for invoice {{invoiceNumber}}. Thank you.',
     variablesSchema: VARS_BILLING,
@@ -315,14 +315,15 @@ Update card: {{invoiceUrl}}`,
       `<p>Driver license for <strong>{{driverName}}</strong> expires on {{expiresOn}} ({{daysUntilExpiry}} days).</p>
 <p>Renew and upload the new document to keep dispatch eligibility.</p>`,
     ),
-    bodyPlain: 'License for {{driverName}} expires {{expiresOn}} ({{daysUntilExpiry}}d). Renew and upload.',
+    bodyPlain:
+      'License for {{driverName}} expires {{expiresOn}} ({{daysUntilExpiry}}d). Renew and upload.',
     variablesSchema: VARS_COMPLIANCE,
   },
   {
     templateKey: NOTIFICATION_EVENTS.COMPLIANCE_LICENSE_EXPIRING,
     channel: 'in_app',
     subject: 'License expiring',
-    body: '{{driverName}}\'s license expires in {{daysUntilExpiry}} days.',
+    body: "{{driverName}}'s license expires in {{daysUntilExpiry}} days.",
     bodyPlain: null,
     variablesSchema: VARS_COMPLIANCE,
   },
@@ -343,7 +344,7 @@ Update card: {{invoiceUrl}}`,
     subject: 'COI expiring on {{expiresOn}}',
     body: emailLayout(
       'COI expiring',
-      `<p>Certificate of Insurance expires {{expiresOn}}. Upload the renewed COI before that date to avoid coverage gaps.</p>`,
+      '<p>Certificate of Insurance expires {{expiresOn}}. Upload the renewed COI before that date to avoid coverage gaps.</p>',
     ),
     bodyPlain: 'COI expires {{expiresOn}}.',
     variablesSchema: VARS_COMPLIANCE,
@@ -354,13 +355,10 @@ Update card: {{invoiceUrl}}`,
     subject: '{{motorClub}} credentials expiring',
     body: emailLayout(
       'Motor club credentials expiring',
-      `<p>Your {{motorClub}} credentials expire on {{expiresOn}}. Rotate before then to avoid sync failures.</p>`,
+      '<p>Your {{motorClub}} credentials expire on {{expiresOn}}. Rotate before then to avoid sync failures.</p>',
     ),
     bodyPlain: '{{motorClub}} creds expire {{expiresOn}}.',
-    variablesSchema: [
-      ...VARS_COMPLIANCE,
-      { key: 'motorClub', example: 'Agero' },
-    ],
+    variablesSchema: [...VARS_COMPLIANCE, { key: 'motorClub', example: 'Agero' }],
   },
   {
     templateKey: NOTIFICATION_EVENTS.COMPLIANCE_DVIR_DEFECT_FLAGGED,
@@ -410,7 +408,7 @@ Update card: {{invoiceUrl}}`,
     subject: '{{integrationName}} reconnect required',
     body: emailLayout(
       'Integration reconnect required',
-      `<p>{{integrationName}} reported <code>{{errorReason}}</code>. Reconnect in TowCommand → Integrations to resume sync.</p>`,
+      '<p>{{integrationName}} reported <code>{{errorReason}}</code>. Reconnect in US Tow Dispatch → Integrations to resume sync.</p>',
     ),
     bodyPlain: '{{integrationName}}: {{errorReason}}. Reconnect required.',
     variablesSchema: [
@@ -424,11 +422,11 @@ Update card: {{invoiceUrl}}`,
     subject: 'Security alert: {{eventLabel}}',
     body: emailLayout(
       'Security event',
-      `<p><strong>{{eventLabel}}</strong> on your TowCommand account.</p>
+      `<p><strong>{{eventLabel}}</strong> on your US Tow Dispatch account.</p>
 <p>Device: {{userAgent}}<br/>IP: {{ipAddress}}<br/>When: {{occurredAt}}</p>
 <p>If this was not you, change your password and contact support.</p>`,
     ),
-    bodyPlain: `{{eventLabel}} on your TowCommand account.
+    bodyPlain: `{{eventLabel}} on your US Tow Dispatch account.
 Device: {{userAgent}}
 IP: {{ipAddress}}
 When: {{occurredAt}}`,

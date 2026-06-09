@@ -97,7 +97,7 @@ export function UnderstandingMoatsArticle(): JSX.Element {
         Most towing software is parity software. It does what every other vendor's product does,
         only with a slightly different button arrangement. When two products do roughly the same
         thing, the only thing left to compete on is price, and the operator becomes the loser of
-        every conversation. US Tow DISPATCH and CLAIM SHIELD are deliberately built the other way.
+        every conversation. US Tow Dispatch and CLAIM SHIELD are deliberately built the other way.
       </P>
       <P>
         A <Em>moat</Em>, in business strategy, is a structural advantage that makes it hard for a
@@ -169,7 +169,7 @@ export function UnderstandingMoatsArticle(): JSX.Element {
 
       <H3>2. The Dynamic Pricing Engine</H3>
       <P>
-        US Tow DISPATCH has a five-category pricing engine — Weather, Traffic, Calendar (Holidays),
+        US Tow Dispatch has a five-category pricing engine — Weather, Traffic, Calendar (Holidays),
         Time of Day, and Special Events — that lets an operator pre-configure premium pricing tiers
         and activate any combination with a single click during a high-cost-to-serve event. The
         categories stack multiplicatively, with a 3.0× hard cap so nothing accidentally runs away.

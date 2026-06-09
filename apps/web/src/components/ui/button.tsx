@@ -1,5 +1,5 @@
 /**
- * shadcn-style button. Variants tuned for US Tow DISPATCH's dark steel palette:
+ * shadcn-style button. Variants tuned for US Tow Dispatch's dark steel palette:
  *   default     — solid orange CTA
  *   secondary   — steel-light surface, used for non-primary actions
  *   ghost       — transparent, used for sign-in / inline links

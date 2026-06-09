@@ -3,7 +3,7 @@ import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 import { paymentMethodLabel } from '@ustowdispatch/shared';
 
-export const metadata = { title: 'Payments — US Tow DISPATCH' };
+export const metadata = { title: 'Payments — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const EMPTY_PAYMENTS: PaymentListResponse = { data: [], total: 0 };

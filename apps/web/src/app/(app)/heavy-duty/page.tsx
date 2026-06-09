@@ -18,7 +18,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { HeavyDutyOverviewClient } from './overview-client';
 
-export const metadata = { title: 'Heavy-Duty — US Tow DISPATCH' };
+export const metadata = { title: 'Heavy-Duty — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function HeavyDutyOverviewPage(): Promise<JSX.Element> {

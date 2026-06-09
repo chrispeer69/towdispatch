@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { FacilitiesClient } from './facilities-client';
 
-export const metadata = { title: 'Yard Facilities — US Tow DISPATCH' };
+export const metadata = { title: 'Yard Facilities — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function YardFacilitiesPage(): Promise<JSX.Element> {

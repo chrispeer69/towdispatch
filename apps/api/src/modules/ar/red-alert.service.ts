@@ -478,7 +478,7 @@ function renderRedAlertHtml(v: RedAlertEmailVars): string {
   }
 
   <p style="color:#9aa3b2;font-size:11px;margin-top:32px;line-height:1.5;">
-    This is your weekly Monday morning A/R pulse from US Tow DISPATCH.<br>
+    This is your weekly Monday morning A/R pulse from US Tow Dispatch.<br>
     Adjust per-account delinquency thresholds in Settings → Account Rate Cards → Contract Terms.
   </p>
 </div>

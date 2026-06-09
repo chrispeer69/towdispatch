@@ -9,10 +9,10 @@ items R-10 and R-11.
 ## R-10 — Problem-type URN
 
 **D1 — Default domain is `https://errors.ustowdispatch.cloud`, not the
-`towcommand.cloud` the task text named.**
-- The task text said "default `https://errors.towcommand.cloud` per actual prod
+`ustowdispatch.cloud` the task text named.**
+- The task text said "default `https://errors.ustowdispatch.cloud` per actual prod
   domain." `towcommand` is the PRE-rebrand brand. Session 20 rebranded the repo
-  to US Tow DISPATCH; the live API infra is `api.ustowdispatch.cloud` (confirmed
+  to US Tow Dispatch; the live API infra is `api.ustowdispatch.cloud` (confirmed
   by grepping SESSION_18/19/20 reports, the Android `BuildConfig`, and the
   Session 19 merge report's "rebrand domain wins" rule).
 - The current hardcode is `https://errors.ustowdispatch.com` (`.com`). R-10's

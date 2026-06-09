@@ -28,7 +28,7 @@ export async function generateMetadata({
   const { category, slug } = await params;
   const found = findDocument(category, slug);
   return {
-    title: found ? `${found.document.title} — Help Center — US Tow DISPATCH` : 'Help Center',
+    title: found ? `${found.document.title} — Help Center — US Tow Dispatch` : 'Help Center',
   };
 }
 
@@ -98,10 +98,10 @@ export default async function HelpDocumentPage({
             We're filling in the Help Center one document at a time, starting with the most-used
             workflows. Check back soon, or email{' '}
             <a
-              href="mailto:support@towcommand.cloud"
+              href="mailto:support@ustowdispatch.cloud"
               className="text-brand-primary hover:underline"
             >
-              support@towcommand.cloud
+              support@ustowdispatch.cloud
             </a>{' '}
             if you need this document urgently.
           </p>

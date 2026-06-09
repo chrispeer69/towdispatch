@@ -2,7 +2,7 @@ import { fetchRecurringSchedules, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 
-export const metadata = { title: 'Recurring billing — US Tow DISPATCH' };
+export const metadata = { title: 'Recurring billing — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function RecurringPage(): Promise<JSX.Element> {

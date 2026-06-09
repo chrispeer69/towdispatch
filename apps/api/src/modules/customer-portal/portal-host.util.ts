@@ -12,7 +12,7 @@ export function normalizeHost(raw: string): string {
 }
 
 /**
- * Given a normalized host and the portal apex (e.g. "portal.towcommand.cloud"),
+ * Given a normalized host and the portal apex (e.g. "portal.ustowdispatch.cloud"),
  * return the single-label slug for "<slug>.<base>", or null. Rejects multi-
  * label prefixes so a.b.portal.<base> doesn't masquerade as slug "a.b".
  */

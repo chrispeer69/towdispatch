@@ -9,7 +9,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { DriverCertsClient } from './drivers-client';
 
-export const metadata = { title: 'HD Driver Certifications — US Tow DISPATCH' };
+export const metadata = { title: 'HD Driver Certifications — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function HdDriversPage(): Promise<JSX.Element> {

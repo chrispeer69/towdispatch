@@ -11,7 +11,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { InstalledAppsClient } from './installed-client';
 
-export const metadata = { title: 'Installed Apps — US Tow DISPATCH' };
+export const metadata = { title: 'Installed Apps — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function InstalledAppsPage(): Promise<JSX.Element> {

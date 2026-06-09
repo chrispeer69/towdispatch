@@ -466,7 +466,7 @@ app_common = {
     "GENERATE_INFOPLIST_FILE": "NO",
     "INFOPLIST_FILE": f"{rel(info_plist)}",
     "CODE_SIGN_ENTITLEMENTS": f"{rel(entitlements)}",
-    "INFOPLIST_KEY_CFBundleDisplayName": "US Tow DISPATCH",
+    "INFOPLIST_KEY_CFBundleDisplayName": "US Tow Dispatch",
     "LD_RUNPATH_SEARCH_PATHS": "(\"$(inherited)\", \"@executable_path/Frameworks\")",
     "MARKETING_VERSION": "0.1.0",
     "PRODUCT_BUNDLE_IDENTIFIER": "com.ustowdispatch.driver",

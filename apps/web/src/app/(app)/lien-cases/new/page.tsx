@@ -13,7 +13,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { OpenLienCaseClient } from './open-client';
 
-export const metadata = { title: 'Open Lien Case — US Tow DISPATCH' };
+export const metadata = { title: 'Open Lien Case — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function NewLienCasePage({

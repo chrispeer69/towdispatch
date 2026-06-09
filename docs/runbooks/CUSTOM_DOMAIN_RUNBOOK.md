@@ -12,7 +12,7 @@ verification stamp).
 Every tenant automatically has a portal at:
 
 ```
-<slug>.portal.towcommand.cloud
+<slug>.portal.ustowdispatch.cloud
 ```
 
 `<slug>` is the tenant's URL slug. This is the `fallbackDomain` shown in
@@ -20,7 +20,7 @@ Every tenant automatically has a portal at:
 wildcard TLS cert on the apex (one-time platform setup, see §4).
 
 The apex is configured via the API env var `PORTAL_BASE_DOMAIN`
-(default `portal.towcommand.cloud`).
+(default `portal.ustowdispatch.cloud`).
 
 ---
 
@@ -87,12 +87,12 @@ No match → the portal renders a neutral "not configured" page.
 
 ## 4. One-time platform setup (apex + wildcard)
 
-- DNS: `*.portal.towcommand.cloud` → Railway web service.
-- TLS: wildcard cert for `*.portal.towcommand.cloud` (Railway-managed).
-- API env: `PORTAL_BASE_DOMAIN=portal.towcommand.cloud` on the API service.
+- DNS: `*.portal.ustowdispatch.cloud` → Railway web service.
+- TLS: wildcard cert for `*.portal.ustowdispatch.cloud` (Railway-managed).
+- API env: `PORTAL_BASE_DOMAIN=portal.ustowdispatch.cloud` on the API service.
 - Web env: nothing portal-specific required; the web reads the incoming
   `Host` / `X-Forwarded-Host`. For **local dev** without wildcard DNS, set
-  `PORTAL_DEV_HOST=<slug>.portal.towcommand.cloud` on the web service to
+  `PORTAL_DEV_HOST=<slug>.portal.ustowdispatch.cloud` on the web service to
   force-resolve a tenant.
 
 ---
@@ -101,7 +101,7 @@ No match → the portal renders a neutral "not configured" page.
 
 | Service | Var | Purpose | Default |
 |---|---|---|---|
-| api | `PORTAL_BASE_DOMAIN` | apex for fallback subdomains | `portal.towcommand.cloud` |
+| api | `PORTAL_BASE_DOMAIN` | apex for fallback subdomains | `portal.ustowdispatch.cloud` |
 | api | `JWT_PORTAL_SECRET` | portal-token signing key (override) | derived from `JWT_SECRET` |
 | api | `JWT_PORTAL_TTL` | portal session length | `24h` |
 | web | `PORTAL_DEV_HOST` | local-dev host override | _(unset)_ |

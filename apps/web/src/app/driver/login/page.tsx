@@ -222,7 +222,7 @@ export default function DriverLoginPage(): JSX.Element {
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 py-6">
         <div className="mb-6 mt-2 text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark">
-            US Tow DISPATCH
+            US Tow Dispatch
           </p>
           <h1 className="mt-1 text-2xl font-extrabold uppercase tracking-tight">Driver Sign-In</h1>
         </div>

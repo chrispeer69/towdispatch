@@ -247,7 +247,7 @@ DRIVER_EMAIL=driver@demo.test DRIVER_PASSWORD=password \
 
 5. **Mapbox account** — sign up, generate a downloads token and a public access token. Drop both into `TowCommandDriver/Resources/Info.plist` `TCConfig` and `MAPBOX_DOWNLOADS_TOKEN` in CI for SPM resolve.
 
-6. **Stripe account in payments mode** — Stripe Tap to Pay live key, plus configure the Connect / Direct flow with the US Tow DISPATCH backend.
+6. **Stripe account in payments mode** — Stripe Tap to Pay live key, plus configure the Connect / Direct flow with the US Tow Dispatch backend.
 
 7. **Sentry account / project** — DSN goes into `TCConfig.SentryDSN`.
 

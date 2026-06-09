@@ -11,7 +11,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { NewRepoCaseClient } from './new-client';
 
-export const metadata = { title: 'New Repo Case — US Tow DISPATCH' };
+export const metadata = { title: 'New Repo Case — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function NewRepoCasePage(): Promise<JSX.Element> {

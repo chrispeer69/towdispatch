@@ -151,7 +151,7 @@ export class WebhooksService {
           id,
           type: eventType,
           createdAt: now.toISOString(),
-          data: { test: true, message: 'Test delivery from US Tow DISPATCH' },
+          data: { test: true, message: 'Test delivery from US Tow Dispatch' },
         },
         status: 'pending',
         attempt: 0,

@@ -186,7 +186,7 @@ export function StatementsClient({
       {preview ? (
         <PreviewPanel
           preview={preview}
-          tenantNameFallback="US Tow DISPATCH"
+          tenantNameFallback="US Tow Dispatch"
           onClose={() => setPreview(null)}
           onDownload={downloadPdf}
           onEmail={() => setShowEmail(true)}

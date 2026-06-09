@@ -1,4 +1,4 @@
-# US Tow DISPATCH — Public REST API & Webhooks (v1)
+# US Tow Dispatch — Public REST API & Webhooks (v1)
 
 The Public API lets a tenant's own integrations read and write dispatch data
 programmatically, and receive webhook callbacks when events happen. It is

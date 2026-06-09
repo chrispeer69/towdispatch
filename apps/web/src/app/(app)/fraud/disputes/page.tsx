@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { FraudDisputesClient } from './disputes-client';
 
-export const metadata = { title: 'Dispute Log — US Tow DISPATCH' };
+export const metadata = { title: 'Dispute Log — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const KNOWN: DisputeStatus[] = ['open', 'won', 'lost', 'withdrawn', 'partial'];

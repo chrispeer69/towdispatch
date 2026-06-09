@@ -13,7 +13,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { RepoCaseListClient } from './list-client';
 
-export const metadata = { title: 'Repo Cases — US Tow DISPATCH' };
+export const metadata = { title: 'Repo Cases — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {

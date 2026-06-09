@@ -1,6 +1,6 @@
 ﻿import { ManualInvoiceFormClient } from './manual-invoice-form';
 
-export const metadata = { title: 'New invoice â€” US Tow DISPATCH' };
+export const metadata = { title: 'New invoice â€” US Tow Dispatch' };
 
 export default function NewInvoicePage(): JSX.Element {
   return (

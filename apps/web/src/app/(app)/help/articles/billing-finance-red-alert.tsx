@@ -105,7 +105,7 @@ export function RedAlertArticle(): JSX.Element {
     <div className="pb-12">
       <P>
         Most towing software relies on you remembering to run a "Past Due" report to find out who
-        owes you money. US Tow DISPATCH flips that dynamic. The <Em>RED ALERT</Em> workflow is an
+        owes you money. US Tow Dispatch flips that dynamic. The <Em>RED ALERT</Em> workflow is an
         automated engine that texts your accounts receivable directly to your inbox every Monday
         morning.
       </P>
@@ -178,7 +178,7 @@ export function RedAlertArticle(): JSX.Element {
 
       <H2>Worked Example: Receiving the Digest</H2>
       <P>
-        It is Monday morning. You open your email and see a message from US Tow DISPATCH with the
+        It is Monday morning. You open your email and see a message from US Tow Dispatch with the
         subject line: <Code>RED ALERT: 3 past-due invoices ($450.00) — Acme Towing</Code>.
       </P>
 
@@ -252,7 +252,7 @@ export function RedAlertArticle(): JSX.Element {
           <UnorderedList>
             <li>
               <Em>The system only knows what you tell it.</Em> If you received a check on Friday but
-              didn't record the payment in US Tow DISPATCH until Tuesday, the system correctly
+              didn't record the payment in US Tow Dispatch until Tuesday, the system correctly
               flagged the invoice as unpaid on Monday morning. Always record payments as soon as
               they are received to keep the digest accurate.
             </li>

@@ -8,10 +8,10 @@ describe('assertPublicApiUrl', () => {
   it('returns the configured URL when set (production)', () => {
     expect(
       assertPublicApiUrl({
-        NEXT_PUBLIC_API_URL: 'https://api.towcommand.cloud',
+        NEXT_PUBLIC_API_URL: 'https://api.ustowdispatch.cloud',
         NODE_ENV: 'production',
       }),
-    ).toBe('https://api.towcommand.cloud');
+    ).toBe('https://api.ustowdispatch.cloud');
   });
 
   it('falls back to localhost in development when unset', () => {

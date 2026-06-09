@@ -113,7 +113,7 @@ See `SESSION_54_DECISIONS.md` for the full rationale. Headlines:
 pnpm typecheck
 pnpm biome check .
 pnpm --filter @ustowdispatch/api exec vitest run src/modules/yard
-NEXT_PUBLIC_API_URL=https://api.towcommand.cloud pnpm build
+NEXT_PUBLIC_API_URL=https://api.ustowdispatch.cloud pnpm build
 # integration/RLS (needs a DB):
 DATABASE_URL=postgres://… pnpm --filter @ustowdispatch/api exec vitest run test/yard-rls.spec.ts test/yard-billing-release.spec.ts
 ```

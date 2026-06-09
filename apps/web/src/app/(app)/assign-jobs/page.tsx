@@ -8,7 +8,7 @@ import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { AssignJobsClient } from './assign-jobs-client';
 
-export const metadata = { title: 'Assign Jobs — US Tow DISPATCH' };
+export const metadata = { title: 'Assign Jobs — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface BoardResponse {

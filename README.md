@@ -1,4 +1,4 @@
-# US Tow DISPATCH
+# US Tow Dispatch
 
 The operating system for the modern towing industry.
 
@@ -193,7 +193,7 @@ The fast path — no rebuild, re-points traffic at a previously-built image:
 1. Railway dashboard → the **`api`** service → **Deployments** tab.
 2. Find the last-known-good deployment (cross-reference the `release/<timestamp>-<sha>` git tag that `scripts/deploy.sh` pushed on the good deploy — `git tag --list 'release/*' --sort=-creatordate | head`).
 3. **⋯ → Redeploy** on that deployment. Repeat for the **`web`** service so api + web stay in lockstep.
-4. Verify: `curl -sf https://api.towcommand.cloud/health` and `/ready` both return 200 (mirror of `scripts/deploy.sh` step 7).
+4. Verify: `curl -sf https://api.ustowdispatch.cloud/health` and `/ready` both return 200 (mirror of `scripts/deploy.sh` step 7).
 5. If the bad deploy ran a migration, re-read the matrix above **before** redeploying — additive schema is safe to leave; an irreversible migration means forward-fix, not rollback.
 
 CLI equivalent: `railway deployments` to list, then redeploy the target deployment id via the Railway CLI / dashboard.
@@ -258,7 +258,7 @@ The SendGrid event webhook URL to register on the SendGrid side (Settings → Ma
 
 ## License
 
-Proprietary — © US Tow DISPATCH, Inc.
+Proprietary — © US Tow Dispatch, Inc.
 
 <!-- trigger deploy May 20, 2026 -->
 

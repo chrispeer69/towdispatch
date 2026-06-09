@@ -6,7 +6,7 @@
  * drivers via text, email, or printed badge. Drivers enter the code on
  * /driver/login on their phone or tablet — they don't need to know the
  * URL slug. There's also a one-tap vanity link the dispatcher can text:
- * `https://app.towcommand.cloud/driver/d/<code>`.
+ * `https://app.ustowdispatch.cloud/driver/d/<code>`.
  *
  * Read-only on the operator side. The code is rotated only via support
  * (we don't expose a rotation control here because rotating it logs out

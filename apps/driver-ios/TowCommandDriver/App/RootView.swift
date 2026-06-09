@@ -34,7 +34,7 @@ struct SplashView: View {
         ZStack {
             TCColor.surface.ignoresSafeArea()
             VStack(spacing: 12) {
-                Text("US Tow DISPATCH")
+                Text("US Tow Dispatch")
                     .font(TCFont.title(34))
                     .foregroundStyle(.white)
                 Text("Driver")

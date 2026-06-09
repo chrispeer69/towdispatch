@@ -2,7 +2,7 @@
  * Public Marketplace API (Session 46) — developer account contracts.
  *
  * A developer account is GLOBAL (not tenant-scoped): a person/company that
- * builds apps on top of US Tow DISPATCH. Auth is its own realm (audience
+ * builds apps on top of US Tow Dispatch. Auth is its own realm (audience
  * `…-developer`), fully separate from operator and driver tokens. Email
  * verification is required before an account can publish apps.
  */

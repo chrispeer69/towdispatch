@@ -110,7 +110,7 @@ export function ImpoundYardArticle(): JSX.Element {
       <P>
         Roadside dispatch generates cash flow, but impound recovery generates margin. A single
         vehicle held for 30 days generates significant storage fees, and the eventual auction
-        proceeds represent the longest revenue tail in the industry. The US Tow DISPATCH Impound
+        proceeds represent the longest revenue tail in the industry. The US Tow Dispatch Impound
         module is designed to automate the most error-prone parts of this process: daily fee
         accruals and statutory lien notices.
       </P>
@@ -170,8 +170,8 @@ export function ImpoundYardArticle(): JSX.Element {
         state-specific lien notice ladders are legally perfect before launch. If your operation
         handles high-volume police impounds or private property towing (PPI) and you want to
         participate in the beta, contact{' '}
-        <a href="mailto:support@towcommand.cloud" className="text-brand-primary hover:underline">
-          support@towcommand.cloud
+        <a href="mailto:support@ustowdispatch.cloud" className="text-brand-primary hover:underline">
+          support@ustowdispatch.cloud
         </a>
         .
       </Callout>

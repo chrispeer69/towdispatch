@@ -17,7 +17,7 @@ import { getSessionToken } from '@/lib/auth/session';
 import type { AccountDto, ArSearchResponse } from '@ustowdispatch/shared';
 import { ArSearchClient } from './ar-search-client';
 
-export const metadata = { title: 'A/R workspace — US Tow DISPATCH' };
+export const metadata = { title: 'A/R workspace — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const EMPTY: ArSearchResponse = {

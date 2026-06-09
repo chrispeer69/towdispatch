@@ -11,7 +11,7 @@ import { requireUser } from '@/lib/auth/session';
 import type { KpiTile, ReportId, ReportSummaryDto } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'Reports — TowCommand' };
+export const metadata = { title: 'Reports — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function ReportsIndexPage(): Promise<JSX.Element> {

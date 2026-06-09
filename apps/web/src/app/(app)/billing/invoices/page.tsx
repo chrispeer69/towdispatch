@@ -4,7 +4,7 @@ import { getSessionToken } from '@/lib/auth/session';
 import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'Invoices — US Tow DISPATCH' };
+export const metadata = { title: 'Invoices — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {

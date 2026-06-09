@@ -16,22 +16,26 @@ import {
 describe('portal host parsing', () => {
   it('normalizeHost strips port and www., lowercases', () => {
     expect(normalizeHost('Portal.Acme-Towing.com:443')).toBe('portal.acme-towing.com');
-    expect(normalizeHost('www.acme.portal.towcommand.cloud')).toBe('acme.portal.towcommand.cloud');
+    expect(normalizeHost('www.acme.portal.ustowdispatch.cloud')).toBe(
+      'acme.portal.ustowdispatch.cloud',
+    );
     expect(normalizeHost('   ')).toBe('');
   });
 
   it('extractSubdomainSlug pulls the single-label slug under the base', () => {
-    expect(extractSubdomainSlug('acme.portal.towcommand.cloud', 'portal.towcommand.cloud')).toBe(
-      'acme',
-    );
+    expect(
+      extractSubdomainSlug('acme.portal.ustowdispatch.cloud', 'portal.ustowdispatch.cloud'),
+    ).toBe('acme');
   });
 
   it('extractSubdomainSlug rejects the bare base and multi-label prefixes', () => {
-    expect(extractSubdomainSlug('portal.towcommand.cloud', 'portal.towcommand.cloud')).toBeNull();
     expect(
-      extractSubdomainSlug('a.b.portal.towcommand.cloud', 'portal.towcommand.cloud'),
+      extractSubdomainSlug('portal.ustowdispatch.cloud', 'portal.ustowdispatch.cloud'),
     ).toBeNull();
-    expect(extractSubdomainSlug('acme.example.com', 'portal.towcommand.cloud')).toBeNull();
+    expect(
+      extractSubdomainSlug('a.b.portal.ustowdispatch.cloud', 'portal.ustowdispatch.cloud'),
+    ).toBeNull();
+    expect(extractSubdomainSlug('acme.example.com', 'portal.ustowdispatch.cloud')).toBeNull();
   });
 
   it('buildPortalUrl uses http for local hosts and https otherwise', () => {

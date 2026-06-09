@@ -4,7 +4,7 @@
 
 ## Purpose & scope
 
-Defines how US Tow DISPATCH protects the confidentiality, integrity, and
+Defines how US Tow Dispatch protects the confidentiality, integrity, and
 availability of customer and company data. Applies to all personnel,
 contractors, systems, and the production environment.
 

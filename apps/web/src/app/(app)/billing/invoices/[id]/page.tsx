@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { InvoiceActionsClient } from './invoice-actions-client';
 
-export const metadata = { title: 'Invoice — US Tow DISPATCH' };
+export const metadata = { title: 'Invoice — US Tow Dispatch' };
 
 export default async function InvoiceDetailPage({
   params,

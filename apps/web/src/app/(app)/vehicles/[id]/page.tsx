@@ -8,7 +8,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export const metadata = { title: 'Vehicle — US Tow DISPATCH' };
+export const metadata = { title: 'Vehicle — US Tow Dispatch' };
 
 const UUID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

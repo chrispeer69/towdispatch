@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 
-export const metadata = { title: "Driver's Day — US Tow DISPATCH" };
+export const metadata = { title: "Driver's Day — US Tow Dispatch" };
 export const dynamic = 'force-dynamic';
 
 interface DriverDayJobItem {

@@ -101,7 +101,7 @@ export function GeneratingInvoicesArticle(): JSX.Element {
   return (
     <div className="pb-12">
       <P>
-        In US Tow DISPATCH, every completed job must be converted into an invoice before it hits
+        In US Tow Dispatch, every completed job must be converted into an invoice before it hits
         your general ledger. This two-step process—Job to Draft Invoice, Draft Invoice to
         Posted—protects your accounting from field errors and ensures that dynamic pricing and
         account-specific rates are applied correctly before the customer sees the bill.

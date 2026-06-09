@@ -26,7 +26,7 @@ COPY . .
 
 # NEXT_PUBLIC_* env vars are baked at build time. Railway substitutes them
 # from the service env at build time when wired with ARG/ENV.
-ARG NEXT_PUBLIC_API_URL=https://api.towcommand.cloud
+ARG NEXT_PUBLIC_API_URL=https://api.ustowdispatch.cloud
 ARG NEXT_PUBLIC_MAPBOX_TOKEN
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_MAPBOX_TOKEN=${NEXT_PUBLIC_MAPBOX_TOKEN}

@@ -154,7 +154,7 @@ export class LienProcessingController {
       formType: p.formType,
       state: caseRow.state,
       rules,
-      tenantName: 'US Tow DISPATCH operator',
+      tenantName: 'US Tow Dispatch operator',
       caseId: caseRow.id,
       openedAt: caseRow.openedAt,
       vehicleValueTier: caseRow.vehicleValueTier,

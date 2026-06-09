@@ -16,7 +16,7 @@ import { ApiSettingsClient } from './api-settings-client';
 
 const TAB = findSettingsTab('api');
 
-export const metadata = { title: 'API & Webhooks — US Tow DISPATCH' };
+export const metadata = { title: 'API & Webhooks — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function ApiSettingsPage(): Promise<JSX.Element> {

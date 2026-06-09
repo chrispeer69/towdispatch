@@ -43,7 +43,7 @@ This was caught on the first advisor consult and the entire data layer was writt
 
 | Block | Item | Status | Notes |
 |---|---|---|---|
-| A | PIN auth screens + manifest deep link | ✅ | `PinEntryScreen`, `LockedScreen`, `SetPinScreen` (Compose). App Link intent filter for `https://app.towcommand.cloud/driver/d/{code}` wired; `DriverCodeRedeemer` persists the code as a hint. `.well-known/assetlinks.json` hosting deferred to infra session — `android:autoVerify="true"` is set so as soon as that lands, links open the app without the chooser. |
+| A | PIN auth screens + manifest deep link | ✅ | `PinEntryScreen`, `LockedScreen`, `SetPinScreen` (Compose). App Link intent filter for `https://app.ustowdispatch.cloud/driver/d/{code}` wired; `DriverCodeRedeemer` persists the code as a hint. `.well-known/assetlinks.json` hosting deferred to infra session — `android:autoVerify="true"` is set so as soon as that lands, links open the app without the chooser. |
 | B | Daily briefing gate | ✅ | `BriefingRepository` + `BriefingViewModel` + `BriefingScreen`. Gate fetches `/driver-briefings/needs-acknowledgment`, falls back to offline outbox if acknowledge POST fails. |
 | C | Pre-trip checklist | ✅ | `PretripRepository` + `PretripGateLogic` + `PretripScreen`. 11-item default checklist; auto-rolls up to `pass` / `fail_safe` / `fail_unsafe` per the safety key regex. |
 | D | Offline screen + Reachability | ✅ | `ConnectivityObserver` (NetworkCallback) drives a Compose-collectable Status flow and kicks both WorkManager pipelines on `onAvailable`. `OfflineScreen` shows pending action + pending evidence counts with manual retry. |
@@ -99,7 +99,7 @@ I wrote 8 tests covering BriefingRepository, DriverPinAuthRepository, DriverSync
 `JobStateMachineTest` covers forward path, terminal states, cancellation reachability, GOA reachability, and the unassign-branch driver UI omission. `PretripRollupTest` covers all-ok, non-safety fail, safety fail, no-shift gate, blocked-by-recent-fail gate. These are the cases most likely to regress under refactors; an exhaustive transition matrix is sometimes useful but adds noise for the reader.
 
 ### 13. App Link `autoVerify` is declared but `assetlinks.json` is not hosted yet.
-Manifest intent filter declares `android:autoVerify="true"` for `app.towcommand.cloud/driver/d/`. Until `/.well-known/assetlinks.json` is hosted on that domain with the app's SHA-256 fingerprint, Android will show the user a chooser instead of opening the app directly. Hosting the JSON is a one-line Vercel/Next.js add — falls under the infra session, not the driver app session.
+Manifest intent filter declares `android:autoVerify="true"` for `app.ustowdispatch.cloud/driver/d/`. Until `/.well-known/assetlinks.json` is hosted on that domain with the app's SHA-256 fingerprint, Android will show the user a chooser instead of opening the app directly. Hosting the JSON is a one-line Vercel/Next.js add — falls under the infra session, not the driver app session.
 
 ### 14. WorkManager unique-work names match the spec exactly.
 `"driver-upload"` for `EvidenceUploadWorker`, `"driver-sync"` for `SyncWorker`. Both use `ExistingWorkPolicy.KEEP` so concurrent enqueues collapse rather than fan out. Both require `NetworkType.CONNECTED`.
@@ -227,8 +227,8 @@ apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/
 ## Pre-merge checklist for whoever ships this
 
 1. **Run on a physical Android device** — the simulator can't exercise FCM push, real GPS, or Tap-to-Pay flows. Connect a Pixel running Android 12+ over USB and run `./gradlew installDebug`.
-2. **Sanity-test the deep link** — `adb shell am start -a android.intent.action.VIEW -d "https://app.towcommand.cloud/driver/d/123456"` should open the app at the PIN picker pre-seeded with workshop 123456.
-3. **Host `.well-known/assetlinks.json`** on `app.towcommand.cloud` to skip the Android chooser. See [https://developer.android.com/training/app-links/verify-android-applinks](https://developer.android.com/training/app-links/verify-android-applinks) for the format. SHA-256 fingerprint comes from the release keystore.
+2. **Sanity-test the deep link** — `adb shell am start -a android.intent.action.VIEW -d "https://app.ustowdispatch.cloud/driver/d/123456"` should open the app at the PIN picker pre-seeded with workshop 123456.
+3. **Host `.well-known/assetlinks.json`** on `app.ustowdispatch.cloud` to skip the Android chooser. See [https://developer.android.com/training/app-links/verify-android-applinks](https://developer.android.com/training/app-links/verify-android-applinks) for the format. SHA-256 fingerprint comes from the release keystore.
 4. **Verify PIN lockout** — fail 5 PINs in a row, confirm 423 redirect to `LockedScreen` with a live countdown.
 5. **Verify offline outbox drain** — disable network, transition a job, re-enable network, confirm the job state update flushes (logcat will show `SyncWorker` enqueue).
 6. **Verify S3 evidence upload** — capture a photo with network on, then again with network off; offline shot should drain when reconnected.

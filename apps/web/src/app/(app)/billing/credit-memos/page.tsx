@@ -2,7 +2,7 @@ import { fetchCreditMemos, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 
-export const metadata = { title: 'Credit memos — US Tow DISPATCH' };
+export const metadata = { title: 'Credit memos — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function CreditMemosPage(): Promise<JSX.Element> {

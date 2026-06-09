@@ -3,7 +3,7 @@
  * /driver/d/[code] — vanity URL for frictionless one-tap onboarding.
  *
  * The dispatcher texts or emails the driver a link like:
- *   https://app.towcommand.cloud/driver/d/482917
+ *   https://app.ustowdispatch.cloud/driver/d/482917
  *
  * The driver taps it once on their phone. We persist the code, then
  * redirect to /driver/login?code=482917&step=picker. From that point

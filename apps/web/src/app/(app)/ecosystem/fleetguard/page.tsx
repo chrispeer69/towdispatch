@@ -1,6 +1,6 @@
 import { EcosystemPlaceholder } from '../ecosystem-placeholder';
 
-export const metadata = { title: 'FleetGuard Pro — US Tow DISPATCH' };
+export const metadata = { title: 'FleetGuard Pro — US Tow Dispatch' };
 
 export default function FleetGuardPage(): JSX.Element {
   return (

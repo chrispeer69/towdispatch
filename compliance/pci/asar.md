@@ -6,7 +6,7 @@ copy is filed under `compliance/evidence/` for the assessment year.
 
 ## Part 1 — Merchant & assessment information
 
-- Company: US Tow DISPATCH
+- Company: US Tow Dispatch
 - Assessment type: Self-Assessment (SAQ A-EP, PCI DSS v4.0)
 - Assessment period: ______________ to ______________
 - Assessor: ______________ (internal: CTO / external: QSA name)

@@ -5,7 +5,7 @@ import { argv } from 'node:process';
  * live-telemetry-simulator.ts
  * 
  * Simulates real-time telemetry tracking for a driver by sending smooth,
- * successive GPS coordinate pings to the Tow Command HTTP API.
+ * successive GPS coordinate pings to the US Tow Dispatch HTTP API.
  * 
  * Since this operates purely over the HTTP API, it can be run locally,
  * on a staging environment, or in production.
@@ -88,7 +88,7 @@ async function sleep(ms: number) {
 
 async function run() {
   console.clear();
-  console.log('\x1b[32m%s\x1b[0m', '⚡ US Tow DISPATCH — Live Telemetry Simulator');
+  console.log('\x1b[32m%s\x1b[0m', '⚡ US Tow Dispatch — Live Telemetry Simulator');
   console.log('\x1b[90m%s\x1b[0m', '---------------------------------------------------');
   console.log(`📡 Target API:      ${API_URL}`);
   console.log(`👤 Operator Account:${EMAIL}`);

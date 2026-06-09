@@ -23,7 +23,7 @@ import { RateSheetClient } from './rate-sheet-client';
 import { ServiceCatalogClient } from './service-catalog-client';
 import { ServicesViewToggle } from './services-view-toggle';
 
-export const metadata = { title: 'Services & Pricing — US Tow DISPATCH' };
+export const metadata = { title: 'Services & Pricing — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const TAB = findSettingsTab('services');
