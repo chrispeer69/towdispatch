@@ -24,7 +24,7 @@ interface Props {
   jobs: JobDto[];
 }
 
-const DEFAULT_CENTER = { lng: -112.074, lat: 33.4484 }; // Phoenix, AZ
+const DEFAULT_CENTER = { lng: -82.9988, lat: 39.9612 }; // Columbus, OH
 const DEFAULT_ZOOM = 11;
 
 function isUsableToken(token: string | null): boolean {
@@ -119,7 +119,10 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
             // biome-ignore lint/suspicious/noExplicitAny: marker.setLngLat
             (existing as any).setLngLat([row.shift.lastLng, row.shift.lastLat]);
             const statusStr = row.currentJobNumber ? `Working on #${row.currentJobNumber}` : 'Idle';
-            const dateStr = row.shift?.lastPositionAt ? new Date(row.shift.lastPositionAt).toLocaleTimeString() : 'Unknown';
+            const dateStr = row.shift?.lastPositionAt
+              ? new Date(row.shift.lastPositionAt).toLocaleTimeString()
+              : 'Unknown';
+            // biome-ignore lint/suspicious/noExplicitAny: mapbox-gl marker getPopup interop
             const popupEl = (existing as any).getPopup()?.getElement();
             if (popupEl) {
               const statusEl = popupEl.querySelector('.driver-status');
@@ -136,7 +139,9 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
 
             const popupContent = document.createElement('div');
             const statusStr = row.currentJobNumber ? `Working on #${row.currentJobNumber}` : 'Idle';
-            const dateStr = row.shift?.lastPositionAt ? new Date(row.shift.lastPositionAt).toLocaleTimeString() : 'Unknown';
+            const dateStr = row.shift?.lastPositionAt
+              ? new Date(row.shift.lastPositionAt).toLocaleTimeString()
+              : 'Unknown';
             popupContent.innerHTML = `
               <div class="p-2 min-w-[120px]">
                 <p class="font-bold text-sm text-gray-900">${row.driver.firstName} ${row.driver.lastName}</p>
@@ -145,7 +150,11 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
               </div>
             `;
             // biome-ignore lint/suspicious/noExplicitAny: Popup constructor
-            const popup = new (mapboxgl as any).Popup({ offset: 15, closeButton: false, closeOnClick: false }).setDOMContent(popupContent);
+            const popup = new (mapboxgl as any).Popup({
+              offset: 15,
+              closeButton: false,
+              closeOnClick: false,
+            }).setDOMContent(popupContent);
 
             // biome-ignore lint/suspicious/noExplicitAny: marker constructor
             const marker = new Marker({ element: el })
@@ -154,6 +163,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
               // biome-ignore lint/suspicious/noExplicitAny: marker addTo
               .addTo(map as any);
 
+            // biome-ignore lint/suspicious/noExplicitAny: mapbox-gl map addTo interop
             el.addEventListener('mouseenter', () => popup.addTo(map as any));
             el.addEventListener('mouseleave', () => popup.remove());
 
@@ -183,7 +193,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
             el.dataset.testid = `map-job-${job.id}`;
             el.className =
               'flex h-7 w-7 items-center justify-center rounded-full border-2 border-brand-primary bg-brand-primary text-[10px] font-bold uppercase text-white shadow cursor-pointer';
-            
+
             if (job.serviceType === 'tow') {
               el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
             } else {
@@ -191,7 +201,9 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
             }
 
             const popupContent = document.createElement('div');
-            const vehicleDesc = job.vehicle ? `${job.vehicle.year || ''} ${job.vehicle.make || ''} ${job.vehicle.model || ''}`.trim() : 'No vehicle info';
+            const vehicleDesc = job.vehicle
+              ? `${job.vehicle.year || ''} ${job.vehicle.make || ''} ${job.vehicle.model || ''}`.trim()
+              : 'No vehicle info';
             popupContent.innerHTML = `
               <div class="p-2 min-w-[140px]">
                 <p class="font-bold text-sm text-gray-900">${job.customer?.name ?? 'Unknown Customer'}</p>
@@ -200,7 +212,11 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
               </div>
             `;
             // biome-ignore lint/suspicious/noExplicitAny: Popup constructor
-            const popup = new (mapboxgl as any).Popup({ offset: 15, closeButton: false, closeOnClick: false }).setDOMContent(popupContent);
+            const popup = new (mapboxgl as any).Popup({
+              offset: 15,
+              closeButton: false,
+              closeOnClick: false,
+            }).setDOMContent(popupContent);
 
             // biome-ignore lint/suspicious/noExplicitAny: marker constructor
             const marker = new Marker({ element: el })
@@ -208,10 +224,11 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
               .setPopup(popup)
               // biome-ignore lint/suspicious/noExplicitAny: marker addTo
               .addTo(map as any);
-            
+
+            // biome-ignore lint/suspicious/noExplicitAny: mapbox-gl map addTo interop
             el.addEventListener('mouseenter', () => popup.addTo(map as any));
             el.addEventListener('mouseleave', () => popup.remove());
-            
+
             jobMarkersRef.current.set(pickupId, marker);
           }
 
@@ -225,11 +242,13 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
               (existingDrop as any).setLngLat([job.dropoffLng, job.dropoffLat]);
             } else {
               const el = document.createElement('div');
-              el.className = 'flex h-6 w-6 items-center justify-center rounded-[6px] border-2 border-gray-600 bg-white text-[12px] shadow';
+              el.className =
+                'flex h-6 w-6 items-center justify-center rounded-[6px] border-2 border-gray-600 bg-white text-[12px] shadow';
               el.innerHTML = '🏁';
               // biome-ignore lint/suspicious/noExplicitAny: marker constructor
               const marker = new Marker({ element: el })
                 .setLngLat([job.dropoffLng, job.dropoffLat])
+                // biome-ignore lint/suspicious/noExplicitAny: mapbox-gl map addTo interop
                 .addTo(map as any);
               jobMarkersRef.current.set(dropoffId, marker);
             }
