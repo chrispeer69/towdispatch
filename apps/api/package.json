@@ -28,7 +28,7 @@
     "@nestjs/throttler": "^6.5.0",
     "@node-saml/node-saml": "^5.1.0",
     "@sendgrid/mail": "8.1.4",
-    "@sentry/node": "^8.55.2",
+    "@sentry/node": "^10.55.0",
     "@socket.io/redis-adapter": "8.3.0",
     "@ustowdispatch/db": "workspace:*",
     "@ustowdispatch/shared": "workspace:*",
