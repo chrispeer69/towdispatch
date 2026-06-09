@@ -112,7 +112,7 @@ Even on `--target=local`, the seed does not `DROP SCHEMA`. The existing `pnpm db
 
 ### 17. Reported bug ("list pages render empty") could not be reproduced
 
-Production at `https://app.towcommand.cloud` was already SSR-rendering the
+Production at `https://app.ustowdispatch.cloud` was already SSR-rendering the
 correct 7 customers / 2 accounts / 8 jobs / 7 invoices when fetched with
 `curl + chris@roadside.demo cookies`. Tested against the live deployment;
 HTML included the entity rows. The BFF route handlers (`/api/customers`,

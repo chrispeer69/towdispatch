@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">US Tow DISPATCH Conductor</string>
+    <string name="app_name">US Tow Dispatch Conductor</string>
 
     <!-- Auth -->
     <!-- TODO(i18n): native-Spanish review on PIN copy. -->

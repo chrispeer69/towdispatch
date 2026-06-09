@@ -1,7 +1,7 @@
 /**
  * Provider registry primitives.
  *
- * US Tow DISPATCH treats every external integration — QuickBooks, Stripe, Agero,
+ * US Tow Dispatch treats every external integration — QuickBooks, Stripe, Agero,
  * a future Blue Collar AI sibling product — as a peer. There is no privileged
  * vendor. Each provider category (accounting, payment, ...) defines a single
  * interface that any number of vendors can implement, and the

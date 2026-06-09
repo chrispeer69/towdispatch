@@ -8,7 +8,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { IncidentsClient } from './incidents-client';
 
-export const metadata = { title: 'Incidents — DOT Compliance — US Tow DISPATCH' };
+export const metadata = { title: 'Incidents — DOT Compliance — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function IncidentsPage(): Promise<JSX.Element> {

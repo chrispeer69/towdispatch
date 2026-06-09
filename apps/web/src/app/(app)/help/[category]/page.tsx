@@ -23,7 +23,7 @@ export async function generateMetadata({
   const { category: categorySlug } = await params;
   const category = findCategory(categorySlug);
   return {
-    title: category ? `${category.title} — Help Center — US Tow DISPATCH` : 'Help Center',
+    title: category ? `${category.title} — Help Center — US Tow Dispatch` : 'Help Center',
   };
 }
 

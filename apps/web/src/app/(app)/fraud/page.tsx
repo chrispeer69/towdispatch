@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { FraudQueueClient } from './queue-client';
 
-export const metadata = { title: 'Fraud Risk — US Tow DISPATCH' };
+export const metadata = { title: 'Fraud Risk — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const KNOWN_BANDS: FraudRiskBand[] = ['low', 'medium', 'high', 'critical'];

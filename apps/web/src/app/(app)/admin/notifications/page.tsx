@@ -15,7 +15,7 @@ import {
 } from '@/lib/api/notifications.server';
 import { AdminNotificationsView } from './admin.client';
 
-export const metadata = { title: 'Notifications admin — TowCommand' };
+export const metadata = { title: 'Notifications admin — US Tow Dispatch' };
 
 export default async function AdminNotificationsPage(): Promise<JSX.Element> {
   const [metrics, deadLetters, templates, webhooks] = await Promise.all([

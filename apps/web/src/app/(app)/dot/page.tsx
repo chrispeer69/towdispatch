@@ -12,7 +12,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { DotHubClient } from './dot-hub-client';
 
-export const metadata = { title: 'DOT Compliance — US Tow DISPATCH' };
+export const metadata = { title: 'DOT Compliance — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function DotHubPage(): Promise<JSX.Element> {

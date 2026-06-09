@@ -10,7 +10,7 @@ import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { DispatchClient } from './dispatch-client';
 
-export const metadata = { title: 'Dispatch — US Tow DISPATCH' };
+export const metadata = { title: 'Dispatch — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface BoardResponse {

@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { EnrollClient } from './enroll-client';
 
 export const metadata = {
-  title: 'Set up two-factor — US Tow DISPATCH',
+  title: 'Set up two-factor — US Tow Dispatch',
 };
 
 export const dynamic = 'force-dynamic';

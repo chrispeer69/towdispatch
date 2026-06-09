@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { ImpoundIntakeClient } from './intake-client';
 
-export const metadata = { title: 'New impound intake — US Tow DISPATCH' };
+export const metadata = { title: 'New impound intake — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function ImpoundIntakePage(): Promise<JSX.Element> {

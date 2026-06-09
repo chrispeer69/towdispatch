@@ -3,7 +3,7 @@
 ## Summary
 
 The merge succeeded. Local master (14 commits of Session 18 import-repair work)
-and origin/master (8 commits of rebrand: TowCommand → US Tow DISPATCH) were
+and origin/master (8 commits of rebrand: TowCommand → US Tow Dispatch) were
 reconciled with the resolution rule "Session 18 logic, rebrand strings on top."
 All 17 conflict files were resolved, typecheck passes, the full API test suite
 runs 323/323 green, both critical E2Es (e2e-006 Towbook import, e2e-008 driver
@@ -48,7 +48,7 @@ conflicted; the auto-merge preserved them.
 
 Per the resolution rule, when origin/master changes a domain (rebrand
 supersedes Session 18's `.com` → `.cloud` fix), take origin's version
-verbatim. `docs/runbooks/tenant-onboarding.md` already used "US Tow DISPATCH"
+verbatim. `docs/runbooks/tenant-onboarding.md` already used "US Tow Dispatch"
 in operator copy at origin/master; that came in cleanly.
 
 **Auto-merged files where Session 18 logic needed to survive (verified
@@ -75,7 +75,7 @@ post-merge, no manual edits needed):**
   rather than scripting it. The diff is small and reviewable.
 - The runbook docs already had Session 18's `.cloud` domain fix in HEAD;
   origin/master's rebrand changed that to `.ustowdispatch.com`. Per the
-  resolution rule, the rebrand domain wins. All `api.towcommand.cloud` →
+  resolution rule, the rebrand domain wins. All `api.ustowdispatch.cloud` →
   `api.ustowdispatch.com` etc.
 - `git checkout --theirs` was used for `motor-club-down.md`,
   `payment-processor-down.md`, `scaling-event.md`, `secrets-rotation.md`,
@@ -83,7 +83,7 @@ post-merge, no manual edits needed):**
   was purely string-level. The remaining 3 docs (`observability.md`,
   `database-restore.md`, `incident-response.md`) were edited by hand
   because I'd already read them — both routes produce the same result.
-- Session 18 had also corrected `api.towcommand.com` → `api.towcommand.cloud`
+- Session 18 had also corrected `api.towcommand.com` → `api.ustowdispatch.cloud`
   in those runbooks (commit `398568a`). That fix is lost as a string —
   superseded by the rebrand domain — but the Session 18 commit history
   remains in the linear log and the domain that now ships is the one the
@@ -115,7 +115,7 @@ Working tree clean. Founder is cleared to schedule production deployment.
 ## Open issues
 
 - The Session 18 commit `398568a` (`docs(runbooks): correct
-  api.towcommand.com → api.towcommand.cloud`) is now a string-level no-op
+  api.towcommand.com → api.ustowdispatch.cloud`) is now a string-level no-op
   in the codebase — the rebrand wrote those domains to
   `api.ustowdispatch.com`. The commit stays in history for the audit
   trail; nothing to do.

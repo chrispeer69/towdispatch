@@ -101,7 +101,7 @@ export function CardPaymentsArticle(): JSX.Element {
   return (
     <div className="pb-12">
       <P>
-        Cash flow is the lifeblood of a towing business. US Tow DISPATCH integrates directly with
+        Cash flow is the lifeblood of a towing business. US Tow Dispatch integrates directly with
         Stripe to process credit card payments instantly, securely, and with full PCI compliance.
       </P>
       <P>
@@ -118,7 +118,7 @@ export function CardPaymentsArticle(): JSX.Element {
       </P>
       <P>
         When a payment succeeds, two things happen instantly: the funds are routed to your Stripe
-        account for deposit to your bank, and the invoice status in US Tow DISPATCH flips to{' '}
+        account for deposit to your bank, and the invoice status in US Tow Dispatch flips to{' '}
         <Code>Paid</Code>.
       </P>
 
@@ -240,7 +240,7 @@ export function CardPaymentsArticle(): JSX.Element {
         </li>
         <li>They enter their card details and click Pay.</li>
         <li>
-          Stripe processes the charge. The US Tow DISPATCH platform receives a secure webhook from
+          Stripe processes the charge. The US Tow Dispatch platform receives a secure webhook from
           Stripe confirming the payment. The invoice status instantly flips from <Em>Sent</Em> to{' '}
           <Em>Paid</Em>.
         </li>
@@ -259,7 +259,7 @@ export function CardPaymentsArticle(): JSX.Element {
             </li>
             <li>
               <Em>Is Bluetooth enabled?</Em> The driver's phone must have Bluetooth turned on and
-              permissions granted to the US Tow DISPATCH app.
+              permissions granted to the US Tow Dispatch app.
             </li>
           </UnorderedList>
         </div>

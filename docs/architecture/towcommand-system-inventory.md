@@ -2,7 +2,7 @@
 
 **Purpose:** This is the TowCommand half of a cross-app inventory. The owner runs four apps (TowCommand, Convini, US Dispatch, US Tow AI Connect) that will eventually integrate. Manus + Sidd will map this against the other three inventories to decide system boundaries (monorepo vs separate, shared DB vs separate, sync vs async). This document describes **only** TowCommand, and only what is **grep-verifiable on `master` HEAD `0715834`** as of 2026-05-24. Features built on open PRs but not yet merged are flagged explicitly in §7 and §9, not presented as shipped.
 
-> **Naming note:** The product is branded **US Tow DISPATCH** in code and production (rebrand in Session 20). "TowCommand" is the repo/internal name. They refer to the same app.
+> **Naming note:** The product is branded **US Tow Dispatch** in code and production (rebrand in Session 20). "TowCommand" is the repo/internal name. They refer to the same app.
 
 ---
 
@@ -11,7 +11,7 @@
 | Field | Value |
 |---|---|
 | Internal name | TowCommand (repo) |
-| Product name | US Tow DISPATCH |
+| Product name | US Tow Dispatch |
 | Owner | Chris Peer (sole owner) |
 | Repo | `chrispeer69/towcommand` (monorepo, pnpm workspaces) |
 | Production domain | `ustowdispatch.com` (operator console + API) |

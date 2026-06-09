@@ -70,7 +70,7 @@ Stripe is experiencing elevated errors. For the next hour:
    retry automatically once Stripe recovers. Tell them their card will
    be charged within 24 hours.
 
-— US Tow DISPATCH operations
+— US Tow Dispatch operations
 ```
 
 ### 2b. Card-on-file customers — automatic retry

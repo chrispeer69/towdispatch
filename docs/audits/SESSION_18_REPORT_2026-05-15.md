@@ -33,7 +33,7 @@ without it the "zero failing tests" success criterion was unreachable.
 | `2213d63` | `fix(test): repair RLS-bypass red-team — was silently skipped` |
 | `af80b9e` | `fix(test): register application/zip parser in test bootstrap` |
 | `37148b0` | `fix(api): drop broken WHERE tenant_id=$1 in reconciliation SQL` |
-| `398568a` | `docs(runbooks): correct api.towcommand.com → api.towcommand.cloud` |
+| `398568a` | `docs(runbooks): correct api.towcommand.com → api.ustowdispatch.cloud` |
 | `d5b3b03` | `fix(api): repair Towbook importers — DI, schema drift, missing keys` |
 | `4e4f78d` | `fix(api): make synth bundle deterministic + per-test isolatable` |
 | `0c41ee3` | `fix(test): repair chat suite — was silently skipped (R-02)` |

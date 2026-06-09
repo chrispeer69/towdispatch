@@ -15,7 +15,7 @@ import { requireUser } from '@/lib/auth/session';
 import type { KpiLayoutEntry, KpiValueDto, KpiWidgetId } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'KPI Dashboard — TowCommand' };
+export const metadata = { title: 'KPI Dashboard — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function KpiDashboardPage(): Promise<JSX.Element> {

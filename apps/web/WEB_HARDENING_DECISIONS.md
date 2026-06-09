@@ -26,7 +26,7 @@ Scope: close 4 Phase 0 audit items in `apps/web` in one PR. No `apps/api` change
 
 7. **`script-src` keeps `'unsafe-inline'` + `'unsafe-eval'`.** Justified, not lazy: `app/layout.tsx` ships an inline anti-flash theme `<script>` and Next injects its own inline bootstrap, with no nonce hook exposed for the static `<head>` script; Mapbox GL needs `eval`. Documented inline in `csp.mjs`. Hydration verified in a real browser — zero violations.
 
-8. **`connect-src` derives the API origin (+ ws/wss) from `NEXT_PUBLIC_API_URL`.** Keeps the policy correct in every environment (local dev `http://localhost:3001` + `ws://`, prod `https://api.towcommand.cloud` + `wss://`) without hardcoding a per-env list. Static entries (Stripe, Mapbox, Sentry ingest, the live API origin) are Set-deduped.
+8. **`connect-src` derives the API origin (+ ws/wss) from `NEXT_PUBLIC_API_URL`.** Keeps the policy correct in every environment (local dev `http://localhost:3001` + `ws://`, prod `https://api.ustowdispatch.cloud` + `wss://`) without hardcoding a per-env list. Static entries (Stripe, Mapbox, Sentry ingest, the live API origin) are Set-deduped.
 
 9. **CSP + env-guard live in `.mjs` modules (`csp.mjs`, `env-guard.mjs`), imported by `next.config.mjs`.** `next.config.mjs` is ESM and Node-executed, so a `.ts` helper wouldn't import at runtime. As pure functions they are unit-tested directly (`src/config/*.spec.ts`).
 
@@ -34,7 +34,7 @@ Scope: close 4 Phase 0 audit items in `apps/web` in one PR. No `apps/api` change
 
 11. **New `web-ci.yml` workflow instead of bolting onto `e2e.yml`.** Typecheck + Vitest resolve workspace packages from TypeScript source (tsconfig paths / Vitest aliases), so the job needs no Postgres/Redis and no package builds — fast feedback on every PR, decoupled from the heavy e2e job.
 
-12. **R-14 keeps a dev-only localhost fallback.** The guard throws only outside `development`; server-side page/route handlers keep their localhost dev fallback (they are not browser-bound and the guard + `publicApiBase()` cover prod). All three browser-bound clients route through `publicApiBase()` (localhost in dev, throws in a prod bundle): `offer-client`, `track-client`, and `lib/driver/api-client.ts`. The driver client keeps its `NEXT_PUBLIC_API_URL`-first preference and the protective `app.*→api.*` hostname fallback (Railway's `NEXT_PUBLIC_*` bake quirk), but its *final* fallback is now `publicApiBase()` instead of a hardcoded `http://localhost:3001` — so a misconfigured prod build on a non-`towcommand.cloud` host fails fast instead of silently pointing at localhost.
+12. **R-14 keeps a dev-only localhost fallback.** The guard throws only outside `development`; server-side page/route handlers keep their localhost dev fallback (they are not browser-bound and the guard + `publicApiBase()` cover prod). All three browser-bound clients route through `publicApiBase()` (localhost in dev, throws in a prod bundle): `offer-client`, `track-client`, and `lib/driver/api-client.ts`. The driver client keeps its `NEXT_PUBLIC_API_URL`-first preference and the protective `app.*→api.*` hostname fallback (Railway's `NEXT_PUBLIC_*` bake quirk), but its *final* fallback is now `publicApiBase()` instead of a hardcoded `http://localhost:3001` — so a misconfigured prod build on a non-`ustowdispatch.cloud` host fails fast instead of silently pointing at localhost.
 
 ## Shipped ✅
 
@@ -89,7 +89,7 @@ Scope: close 4 Phase 0 audit items in `apps/web` in one PR. No `apps/api` change
 ```bash
 pnpm --filter @ustowdispatch/web typecheck
 pnpm --filter @ustowdispatch/web test
-NEXT_PUBLIC_API_URL=https://api.towcommand.cloud pnpm --filter @ustowdispatch/web build
+NEXT_PUBLIC_API_URL=https://api.ustowdispatch.cloud pnpm --filter @ustowdispatch/web build
 
 # Real-browser CSP check (start the prod server first on :3600)
 E2E_RUN_REQUIRES_STACK=1 WEB_E2E_BASE_URL=http://localhost:3600 \

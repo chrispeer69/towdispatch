@@ -11,7 +11,7 @@ import { ArrowUpRight, Truck } from 'lucide-react';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Active Calls — US Tow DISPATCH' };
+export const metadata = { title: 'Active Calls — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface ActiveCallsAccountBucket {

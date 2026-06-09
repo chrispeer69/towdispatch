@@ -5,7 +5,7 @@ import { getOptionalUser } from '@/lib/auth/session';
 import { type UsState, buildPrioritizedStateList } from '@ustowdispatch/shared';
 import { IntakeClient } from './intake-client';
 
-export const metadata = { title: 'Call Intake â€” US Tow DISPATCH' };
+export const metadata = { title: 'Call Intake â€” US Tow Dispatch' };
 
 /**
  * /intake â€” the call-intake screen.

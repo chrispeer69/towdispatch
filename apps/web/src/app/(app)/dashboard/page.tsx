@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export const metadata = { title: 'Dashboard — US Tow DISPATCH' };
+export const metadata = { title: 'Dashboard — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface KpiCardProps {

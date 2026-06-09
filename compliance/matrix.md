@@ -1,4 +1,4 @@
-# SOC 2 Control Matrix — US Tow DISPATCH
+# SOC 2 Control Matrix — US Tow Dispatch
 
 Maps each in-scope control to its implementation, the evidence that proves it
 operates, and the accountable owner. Type I attests that controls are **designed**

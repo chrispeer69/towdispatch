@@ -9,7 +9,7 @@
  */
 import { ArReportsClient } from './ar-reports-client';
 
-export const metadata = { title: 'A/R reports — US Tow DISPATCH' };
+export const metadata = { title: 'A/R reports — US Tow Dispatch' };
 
 export default function ArReportsPage(): JSX.Element {
   return <ArReportsClient />;

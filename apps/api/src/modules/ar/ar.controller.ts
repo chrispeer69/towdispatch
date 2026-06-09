@@ -249,7 +249,7 @@ export class ArController {
   private async loadTenantName(ctx: ReturnType<typeof this.ctx>): Promise<string> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
-      return t?.name ?? 'US Tow DISPATCH';
+      return t?.name ?? 'US Tow Dispatch';
     });
   }
 

@@ -15,7 +15,7 @@ import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
 import { AccountRateCardsClient } from './account-rate-cards-client';
 
-export const metadata = { title: 'Account Rate Cards — US Tow DISPATCH' };
+export const metadata = { title: 'Account Rate Cards — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const TAB = findSettingsTab('account-rates');

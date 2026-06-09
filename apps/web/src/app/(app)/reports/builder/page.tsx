@@ -13,7 +13,7 @@ import { requireUser } from '@/lib/auth/session';
 import type { ReportTemplateDto } from '@ustowdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'Report Builder — TowCommand' };
+export const metadata = { title: 'Report Builder — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function ReportBuilderPage(): Promise<JSX.Element> {

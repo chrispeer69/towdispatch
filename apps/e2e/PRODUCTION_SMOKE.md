@@ -1,8 +1,8 @@
 # Production Smoke Harness
 
 A single Playwright spec — `tests/production-smoke.spec.ts` — that exercises the
-critical path against a **live** deploy (`api.towcommand.cloud` +
-`app.towcommand.cloud`):
+critical path against a **live** deploy (`api.ustowdispatch.cloud` +
+`app.ustowdispatch.cloud`):
 
 ```
 signup → first invoice → Towbook import → web tier reachable
@@ -39,8 +39,8 @@ commit the filled-in file).
 
 | Var | Required | Purpose |
 | --- | --- | --- |
-| `PROD_API_URL` | ✅ | API base, e.g. `https://api.towcommand.cloud` |
-| `PROD_WEB_URL` | ✅ | Web base, e.g. `https://app.towcommand.cloud` |
+| `PROD_API_URL` | ✅ | API base, e.g. `https://api.ustowdispatch.cloud` |
+| `PROD_WEB_URL` | ✅ | Web base, e.g. `https://app.ustowdispatch.cloud` |
 | `SMOKE_TEST_EMAIL` | ✅ | Base inbox; each run plus-addresses a unique tag |
 | `SMOKE_TEST_TENANT_NAME` | ⬜ | Synthetic tenant display name (default provided) |
 | `SMOKE_TEST_PASSWORD` | ⬜ | Owner password; must meet the server policy |

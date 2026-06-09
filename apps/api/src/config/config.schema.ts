@@ -122,7 +122,7 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
-  SMTP_FROM: z.string().default('US Tow DISPATCH <no-reply@ustowdispatch.local>'),
+  SMTP_FROM: z.string().default('US Tow Dispatch <no-reply@ustowdispatch.local>'),
 
   // SendGrid HTTP API. When SENDGRID_API_KEY is non-empty the EmailService
   // sends via @sendgrid/mail. SENDGRID_FROM overrides SMTP_FROM for SendGrid
@@ -400,7 +400,7 @@ export const configSchema = z.object({
   // <slug>.portal.<PORTAL_BASE_DOMAIN>. Tenants may additionally point a
   // vanity domain (tenant_branding.custom_domain) at the portal; that is
   // resolved by exact Host match. See CUSTOM_DOMAIN_RUNBOOK.md.
-  PORTAL_BASE_DOMAIN: z.string().min(1).default('portal.towcommand.cloud'),
+  PORTAL_BASE_DOMAIN: z.string().min(1).default('portal.ustowdispatch.cloud'),
   // Auction & Remarketing Marketplace (Session 33).
   // AUCTION_LIFECYCLE_CRON_ENABLED gates the lifecycle cron (5-minute tick
   // that closes expired live listings and awards the highest bid >= reserve).
@@ -470,7 +470,7 @@ export const configSchema = z.object({
   AI_DISPATCH_RECOMMENDATION_LIMIT: z.coerce.number().int().min(1).max(20).default(3),
   // ===== Session 15 — Notifications =====
   SENDGRID_FROM_EMAIL: z.string().optional().default(''),
-  SENDGRID_FROM_NAME: z.string().optional().default('TowCommand Pro'),
+  SENDGRID_FROM_NAME: z.string().optional().default('US Tow Dispatch Pro'),
   SENDGRID_WEBHOOK_VERIFICATION_KEY: z.string().optional().default(''),
 
   // Mailgun (announcement / marketing — separate sender reputation).

@@ -10,7 +10,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { TruckCapabilitiesClient } from './trucks-client';
 
-export const metadata = { title: 'HD Truck Capabilities — US Tow DISPATCH' };
+export const metadata = { title: 'HD Truck Capabilities — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function HdTrucksPage(): Promise<JSX.Element> {

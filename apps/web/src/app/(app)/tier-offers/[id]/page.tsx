@@ -13,7 +13,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { OfferDetailClient } from './detail-client';
 
-export const metadata = { title: 'Tier offer — US Tow DISPATCH' };
+export const metadata = { title: 'Tier offer — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface Detail {

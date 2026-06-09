@@ -2,7 +2,7 @@
   "name": "ustowdispatch",
   "version": "0.1.0",
   "private": true,
-  "description": "US Tow DISPATCH — multi-tenant SaaS operating system for the towing industry",
+  "description": "US Tow Dispatch — multi-tenant SaaS operating system for the towing industry",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"

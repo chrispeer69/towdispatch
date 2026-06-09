@@ -12,7 +12,7 @@ import { AlertTriangle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'ETA Triage — US Tow DISPATCH' };
+export const metadata = { title: 'ETA Triage — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface EtaBoardItem {

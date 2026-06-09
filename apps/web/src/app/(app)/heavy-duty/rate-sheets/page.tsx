@@ -9,7 +9,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { RateSheetsClient } from './rate-sheets-client';
 
-export const metadata = { title: 'HD Rate Sheets — US Tow DISPATCH' };
+export const metadata = { title: 'HD Rate Sheets — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function HdRateSheetsPage(): Promise<JSX.Element> {

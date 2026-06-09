@@ -29,7 +29,7 @@ Full detail in [access-control.md](access-control.md). Summary:
 The platform runs entirely on **Railway** managed infrastructure; physical and
 environmental controls (data-center access, HVAC, power) are inherited from
 Railway's provider and covered by Railway's SOC 2 report (see
-[vendors.md](../vendors.md)). US Tow DISPATCH operates no physical servers.
+[vendors.md](../vendors.md)). US Tow Dispatch operates no physical servers.
 
 ## Evidence
 

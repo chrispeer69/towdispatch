@@ -23,7 +23,7 @@ import { AlertTriangle } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Audit Log — US Tow DISPATCH' };
+export const metadata = { title: 'Audit Log — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const VIEW_ROLES: readonly Role[] = [ROLES.OWNER, ROLES.ADMIN, ROLES.AUDITOR];

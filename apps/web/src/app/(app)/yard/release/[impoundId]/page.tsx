@@ -11,7 +11,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { ReleaseWizardClient } from './release-wizard-client';
 
-export const metadata = { title: 'Vehicle Release — US Tow DISPATCH' };
+export const metadata = { title: 'Vehicle Release — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function ReleasePage({

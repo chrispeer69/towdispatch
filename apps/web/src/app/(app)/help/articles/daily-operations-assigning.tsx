@@ -101,7 +101,7 @@ export function AssigningDriversArticle(): JSX.Element {
   return (
     <div className="pb-12">
       <P>
-        Assigning the right driver to the right job is the core of dispatching. US Tow DISPATCH
+        Assigning the right driver to the right job is the core of dispatching. US Tow Dispatch
         provides two ways to do this: the <Em>Live Dispatch Board</Em> for rapid, map-assisted
         assignments, and the dedicated <Em>Assign Jobs</Em> page for batching and queue management.
       </P>

@@ -12,7 +12,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { ImpoundListClient } from './list-client';
 
-export const metadata = { title: 'Impound & Storage — US Tow DISPATCH' };
+export const metadata = { title: 'Impound & Storage — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const KNOWN_STATUSES: ImpoundRecordStatus[] = [

@@ -5,7 +5,7 @@
 
 ---
 
-Onboards a new towing company onto US Tow DISPATCH. Run this top-to-bottom; total time should be < 30 minutes once integrations are pre-approved.
+Onboards a new towing company onto US Tow Dispatch. Run this top-to-bottom; total time should be < 30 minutes once integrations are pre-approved.
 
 ## 1. Provision the tenant + first OWNER user
 
@@ -130,7 +130,7 @@ QBO connection is per-tenant OAuth (Session 12).
 
 1. Send the tenant owner to `https://app.ustowdispatch.com/accounting` from the web app.
 2. They click "Connect QuickBooks" → completes Intuit OAuth → lands back on the mapping screen.
-3. Owner maps each US Tow DISPATCH category to a QBO Chart-of-Accounts entry:
+3. Owner maps each US Tow Dispatch category to a QBO Chart-of-Accounts entry:
    - **Tow revenue** → QBO income account (typically "Towing Income")
    - **Accessorial revenue** → QBO income account
    - **Cash collected** → QBO bank/clearing account

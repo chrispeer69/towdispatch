@@ -11,7 +11,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { formatCents, formatWinRate } from '../fraud-ui-helpers';
 
-export const metadata = { title: 'Dispute Reports — US Tow DISPATCH' };
+export const metadata = { title: 'Dispute Reports — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function FraudReportsPage(): Promise<JSX.Element> {

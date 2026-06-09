@@ -4,7 +4,7 @@ import { getSessionToken } from '@/lib/auth/session';
 import Link from 'next/link';
 import { AccountListClient } from './account-list-client';
 
-export const metadata = { title: 'Accounts — US Tow DISPATCH' };
+export const metadata = { title: 'Accounts — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {

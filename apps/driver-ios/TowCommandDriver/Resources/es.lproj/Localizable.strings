@@ -1,5 +1,5 @@
-/* US Tow DISPATCH Driver — Español */
-"app.name" = "US Tow DISPATCH Conductor";
+/* US Tow Dispatch Driver — Español */
+"app.name" = "US Tow Dispatch Conductor";
 "signin.title" = "Iniciar Sesión";
 "signin.email" = "Correo electrónico";
 "signin.password" = "Contraseña";

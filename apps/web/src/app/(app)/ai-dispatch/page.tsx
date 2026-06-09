@@ -18,7 +18,7 @@ import type {
 } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'AI Smart Dispatch — US Tow DISPATCH' };
+export const metadata = { title: 'AI Smart Dispatch — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const WINDOW_DAYS = 30;

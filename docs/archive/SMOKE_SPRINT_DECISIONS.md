@@ -4,7 +4,7 @@
 **Date:** 2026-05-23
 **Goal:** Production smoke test harness — one Playwright spec exercising
 signup → first invoice → Towbook import → deliberate 500 → Sentry verification
-against `api.towcommand.cloud` + `app.towcommand.cloud`. Manual-only (`pnpm
+against `api.ustowdispatch.cloud` + `app.ustowdispatch.cloud`. Manual-only (`pnpm
 smoke:prod`); no CI workflows modified.
 
 ## TL;DR

@@ -13,7 +13,7 @@ import type { JSX } from 'react';
 import { EvidenceGrid } from './evidence-grid';
 import { SmartRecommendationsPanel } from './smart-recommendations-panel';
 
-export const metadata = { title: 'Job — US Tow DISPATCH' };
+export const metadata = { title: 'Job — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const UUID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

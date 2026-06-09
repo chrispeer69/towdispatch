@@ -102,7 +102,7 @@ export function SystemRequirementsArticle(): JSX.Element {
     <div>
       <H2>1. Purpose</H2>
       <P>
-        US Tow DISPATCH is a modern, cloud-based application. Unlike legacy software that requires
+        US Tow Dispatch is a modern, cloud-based application. Unlike legacy software that requires
         installation or dedicated hardware, you can run your entire towing operation from any device
         with an internet connection. This guide outlines the recommended hardware and browser
         settings to ensure the platform runs smoothly, especially for location-dependent features
@@ -193,8 +193,8 @@ export function SystemRequirementsArticle(): JSX.Element {
         </li>
       </OrderedList>
       <P>
-        When you first log in to US Tow DISPATCH, your browser will prompt:{' '}
-        <Em>"app.towcommand.cloud wants to use your device's location."</Em> You must tap{' '}
+        When you first log in to US Tow Dispatch, your browser will prompt:{' '}
+        <Em>"app.ustowdispatch.cloud wants to use your device's location."</Em> You must tap{' '}
         <Em>Allow</Em>.
       </P>
 
@@ -240,7 +240,7 @@ export function CompanyProfileArticle(): JSX.Element {
     <div>
       <H2>1. Purpose</H2>
       <P>
-        Your Company Profile is the operating address for everything US Tow DISPATCH does on your
+        Your Company Profile is the operating address for everything US Tow Dispatch does on your
         behalf. The seventeen fields under <Em>Settings → Company</Em> control how invoices,
         statements, customer-facing tracking pages, and motor-club paperwork are branded and
         addressed. Filling this out correctly the first time prevents downstream confusion across
@@ -336,7 +336,7 @@ export function InvitingUsersArticle(): JSX.Element {
     <div>
       <H2>1. Purpose</H2>
       <P>
-        US Tow DISPATCH supports a flexible role-based permission model. The owner invites every
+        US Tow Dispatch supports a flexible role-based permission model. The owner invites every
         teammate, assigns them a role, and the platform decides what each person can see and do
         based on that role. This guide walks through inviting your first teammates and choosing the
         right role for each.
@@ -419,8 +419,9 @@ export function InvitingUsersArticle(): JSX.Element {
       <H2>4. Common Mistakes &amp; Troubleshooting</H2>
       <H3>The invitation email never arrived</H3>
       <P>
-        Ask the teammate to check spam. The email comes from <Code>no-reply@towcommand.cloud</Code>.
-        If it is still missing, you can resend the invite from the user's row in the Users table.
+        Ask the teammate to check spam. The email comes from{' '}
+        <Code>no-reply@ustowdispatch.cloud</Code>. If it is still missing, you can resend the invite
+        from the user's row in the Users table.
       </P>
       <H3>I gave someone the wrong role</H3>
       <P>
@@ -456,7 +457,7 @@ export function ConnectStripeArticle(): JSX.Element {
     <div>
       <H2>1. Purpose</H2>
       <P>
-        US Tow DISPATCH uses Stripe to process credit card payments on your behalf — both at the
+        US Tow Dispatch uses Stripe to process credit card payments on your behalf — both at the
         scene (Stripe Terminal) and back-office hosted-checkout links sent with invoices. By
         connecting your own Stripe account, payments flow directly to your bank, not through us. We
         never hold your money.
@@ -550,7 +551,7 @@ export function ConnectQuickbooksArticle(): JSX.Element {
     <div>
       <H2>1. Purpose</H2>
       <P>
-        Connecting QuickBooks Online lets US Tow DISPATCH push every closed invoice to your QBO
+        Connecting QuickBooks Online lets US Tow Dispatch push every closed invoice to your QBO
         ledger automatically. Your bookkeeper stops manually re-entering invoices, and your
         month-end close reconciles in minutes instead of hours. This is one of the highest-ROI
         integrations in the platform.
@@ -581,11 +582,11 @@ export function ConnectQuickbooksArticle(): JSX.Element {
           Review the permissions Intuit asks you to grant. Click <Em>Connect</Em>.
         </li>
         <li>
-          You are returned to US Tow DISPATCH. The Accounting card now shows a green{' '}
+          You are returned to US Tow Dispatch. The Accounting card now shows a green{' '}
           <Em>Connected</Em> badge with the name of the QBO company file you connected.
         </li>
         <li>
-          Configure your <Em>Customer Sync</Em> mapping: pick whether each US Tow DISPATCH customer
+          Configure your <Em>Customer Sync</Em> mapping: pick whether each US Tow Dispatch customer
           creates a new QBO customer (default), or maps to an existing QBO customer by email or name
           match.
         </li>

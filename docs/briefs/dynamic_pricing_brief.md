@@ -1,6 +1,6 @@
 # Dynamic Pricing Engine — Founder Brief
 
-**Project:** US Tow DISPATCH (PR #39 — Moat #1)
+**Project:** US Tow Dispatch (PR #39 — Moat #1)
 **Date:** May 17, 2026
 **Master tip after merge:** `19076df`
 **Status:** Live in production on Railway
@@ -14,7 +14,7 @@ The Dynamic Pricing Engine is now live in production. It is the largest single f
 
 The engine modulates every quote price by up to five tier categories that stack multiplicatively under a per-tenant cap (default 3.0×). Operators configure the curves visually, the system auto-activates tiers from National Weather Service (NOAA) alerts, time-of-day curves, the calendar, and a demand sampler. Every quote response carries a transparent breakdown. Every override is logged with a reason code. Every quote that is declined enters a structured 4-step save funnel. Today's revenue uplift over the standard rate is shown live on the operator's Control Panel.
 
-This is the first feature in the platform that *makes the operator measurably more money than any competing software does*, by design. Everything else US Tow DISPATCH ships is parity with Towbook / Tracker / Omadi at best. This is the moat.
+This is the first feature in the platform that *makes the operator measurably more money than any competing software does*, by design. Everything else US Tow Dispatch ships is parity with Towbook / Tracker / Omadi at best. This is the moat.
 
 ---
 
@@ -153,7 +153,7 @@ Five quick checks, in priority order. Total time: about 10 minutes.
 
 ### Check 1 — Production is healthy
 
-Open `https://app.towcommand.cloud/login` in a fresh browser. Sign in as the Roadside Towing demo owner (`chris@roadside.demo`) or as your own account (`chrispeer69@yahoo.com`).
+Open `https://app.ustowdispatch.cloud/login` in a fresh browser. Sign in as the Roadside Towing demo owner (`chris@roadside.demo`) or as your own account (`chrispeer69@yahoo.com`).
 
 ### Check 2 — The new sidebar entry exists
 
@@ -233,7 +233,7 @@ If you have time, after step 5, accept the quote in the system and hit the Pulse
 
 ### 6.1 Positioning Statement (use this verbatim)
 
-> US Tow DISPATCH is the first towing software platform that **shapes the price curve**. Five tier categories — weather, traffic, calendar, time of day, special events — stack multiplicatively to ensure every tow is priced at what it's actually worth in the moment. Operator-controlled, customer-transparent, fully audited.
+> US Tow Dispatch is the first towing software platform that **shapes the price curve**. Five tier categories — weather, traffic, calendar, time of day, special events — stack multiplicatively to ensure every tow is priced at what it's actually worth in the moment. Operator-controlled, customer-transparent, fully audited.
 
 ### 6.2 The Three Talk Tracks
 
@@ -251,7 +251,7 @@ If you have time, after step 5, accept the quote in the system and hit the Pulse
 | Channel | Asset | Hook |
 |---|---|---|
 | Florida Tow Show booth (already on the 90-day plan) | Live demo loop running on a 27" monitor: pricing curve heatmap + before/after revenue chart for a simulated 30-day period | "Watch a 5-truck shop add $52,000 in 30 days without lifting a wrench." |
-| Towing industry trade publications (Tow Times, American Towman) | A two-page case-study layout: "How Acme Towing booked 3.2× more revenue on Hurricane Sally weekend with US Tow DISPATCH dynamic pricing" | Run this *after* the first paying customer goes live with real numbers. Don't fake it. |
+| Towing industry trade publications (Tow Times, American Towman) | A two-page case-study layout: "How Acme Towing booked 3.2× more revenue on Hurricane Sally weekend with US Tow Dispatch dynamic pricing" | Run this *after* the first paying customer goes live with real numbers. Don't fake it. |
 | LinkedIn (founder personal channel) | Short video tour of the Control Panel; voiceover walking through the five tiers; close with the Storm Surge story | Title: "I built the first dispatch platform that prices like Uber, not like Yellow Pages." |
 | Email outreach to the 200 operators on the early-access list | Subject: **"Stop leaving money on the floor every snowstorm"** | Body: 3 paragraphs. Hook with the math. Demo CTA. |
 | Industry podcast circuit (Tow Industry Week, The Big Wreckers, etc.) | Interview pitch | "How surge pricing belongs in towing — and why no one's done it before now." |

@@ -110,7 +110,7 @@ export function DamageClaimArticle(): JSX.Element {
       </P>
       <P>
         This guide outlines the standard operating procedure for handling a damage claim using the
-        evidence captured in US Tow DISPATCH, and provides an email template you can use to formally
+        evidence captured in US Tow Dispatch, and provides an email template you can use to formally
         reject false claims.
       </P>
 
@@ -222,7 +222,7 @@ export function DamageClaimArticle(): JSX.Element {
           exact same text and link into their dispute resolution form.
         </li>
         <li>
-          Add a note to the <Em>Job Detail</Em> page in US Tow DISPATCH documenting that the claim
+          Add a note to the <Em>Job Detail</Em> page in US Tow Dispatch documenting that the claim
           was rejected and the date the email was sent.
         </li>
       </OrderedList>

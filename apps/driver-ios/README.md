@@ -1,6 +1,6 @@
-# US Tow DISPATCH Driver (iOS)
+# US Tow Dispatch Driver (iOS)
 
-Native iOS driver app for US Tow DISPATCH. SwiftUI + Combine + async/await, MVVM with feature-foldered modular monolith. Offline-first via a SQLite outbox (today: file-backed; GRDB swap planned — see [`SESSION_6_REPORT.md`](SESSION_6_REPORT.md)).
+Native iOS driver app for US Tow Dispatch. SwiftUI + Combine + async/await, MVVM with feature-foldered modular monolith. Offline-first via a SQLite outbox (today: file-backed; GRDB swap planned — see [`SESSION_6_REPORT.md`](SESSION_6_REPORT.md)).
 
 Min iOS: **16.4** (Stripe Tap to Pay on iPhone floor).
 Min Xcode: **15.3**, tested on **Xcode 26.4**.

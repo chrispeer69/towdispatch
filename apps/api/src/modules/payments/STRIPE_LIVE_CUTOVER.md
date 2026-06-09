@@ -1,6 +1,6 @@
 # Stripe Stub → Live Cutover Runbook
 
-Operator runbook for flipping US Tow DISPATCH payments from the in-memory stub
+Operator runbook for flipping US Tow Dispatch payments from the in-memory stub
 provider to real Stripe charges. The codebase already ships the real provider
 (`StripePaymentProvider`); cutover is a **single env flag** plus the keys it
 guards.

@@ -198,7 +198,7 @@ export const isValidVin = (raw: string | null | undefined): boolean => {
   return vin[8] === expected;
 };
 
-/** Looks up a Towbook free-text value in the value_maps and returns the canonical US Tow DISPATCH enum value or null. */
+/** Looks up a Towbook free-text value in the value_maps and returns the canonical US Tow Dispatch enum value or null. */
 export const mapValue = (
   maps: Record<string, Record<string, string>>,
   key: string,

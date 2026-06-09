@@ -10,7 +10,7 @@
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Developer Portal — US Tow DISPATCH' };
+export const metadata = { title: 'Developer Portal — US Tow Dispatch' };
 
 const ENDPOINTS: { method: string; path: string; note: string }[] = [
   { method: 'POST', path: '/developers/signup', note: 'Register (email verification required)' },
@@ -32,7 +32,7 @@ export default function DevelopersPage(): JSX.Element {
           Developer Portal
         </h1>
         <p className="text-sm text-text-secondary-on-dark">
-          Build apps on US Tow DISPATCH. Register an app, request granular OAuth2 scopes, and let
+          Build apps on US Tow Dispatch. Register an app, request granular OAuth2 scopes, and let
           operators install you from the{' '}
           <Link href="/marketplace" className="text-accent-orange">
             marketplace

@@ -18,7 +18,7 @@ The platform is much further along than the test summary alone suggests. RLS is 
 | 3 | **fix(api): repair RLS-bypass red-team test — was silently skipped for weeks** (corrected route to `/jobs/intake`, updated payload shape) | `apps/api/test/security/rls-bypass.spec.ts` |
 | 4 | **fix(test): register `application/zip` content-type parser in test bootstrap** (mirrors `main.ts:106`; without it the import suite collapsed to silent 415→500s) | `apps/api/test/integration/helpers.ts` |
 | 5 | **fix(api): drop broken `WHERE tenant_id=$1` clause in import reconciliation SQL** (RLS already scopes the rows; the explicit clause referenced `$1` with an empty parameter array → `there is no parameter $1` 500) | `apps/api/src/modules/import/reconciliation.service.ts` |
-| 6 | **docs(runbooks): correct `api.towcommand.com` → `api.towcommand.cloud` (and `app.`, `grafana.`, `status.` subdomains) across all runbooks + observability docs** (operators copy-pasting curl commands during incidents would have hit a non-existent domain) | `docs/runbooks/*.md`, `docs/observability.md` |
+| 6 | **docs(runbooks): correct `api.towcommand.com` → `api.ustowdispatch.cloud` (and `app.`, `grafana.`, `status.` subdomains) across all runbooks + observability docs** (operators copy-pasting curl commands during incidents would have hit a non-existent domain) | `docs/runbooks/*.md`, `docs/observability.md` |
 
 Net diff: 13 files changed, +89 / -37.
 
@@ -115,7 +115,7 @@ Sorted by severity. P0 first.
 **What's working:** Zod validates every env var at boot — fail-fast on missing required keys; `JWT_*_SECRET` enforced ≥32 chars; ports validated 1-65535. `.env.example` is complete (DB, Redis, JWT, mail, Stripe, QBO, Twilio, Sentry — all keys present). No `process.env` reads outside the config service in business-logic code.
 
 **What's broken:**
-- **`.cloud` vs `.com` domain inconsistency** (Manus's call-out): production infra is `towcommand.cloud` per Android `BuildConfig` and Session 17/18/19 reports. Runbooks all referenced `api.towcommand.com` — operators following them during an incident would have hit a non-existent host. **`towcommand.online` does NOT appear anywhere in the repo.** I think Manus's mention of `.online` was a misremembering — the real inconsistency was `.com` (in docs) vs `.cloud` (in code).
+- **`.cloud` vs `.com` domain inconsistency** (Manus's call-out): production infra is `ustowdispatch.cloud` per Android `BuildConfig` and Session 17/18/19 reports. Runbooks all referenced `api.towcommand.com` — operators following them during an incident would have hit a non-existent host. **`towcommand.online` does NOT appear anywhere in the repo.** I think Manus's mention of `.online` was a misremembering — the real inconsistency was `.com` (in docs) vs `.cloud` (in code).
 - Hardcoded Intuit OAuth endpoints (R-11).
 - Hardcoded `errors.towcommand.com` URN (R-10).
 - Hardcoded `localhost:3001` fallbacks in browser-bound code (R-14) — works in production today because the build sets `NEXT_PUBLIC_API_URL`, but a CI misconfig will silently ship a localhost-pointing bundle.
@@ -264,7 +264,7 @@ QBO integration is genuinely production-ready — far better than typical "we'll
 **Specific caveats:**
 1. **Do NOT promise the Towbook import feature in production.** R-01 must land before any tenant is told "you can import from Towbook." Imports currently complete with `status='failed'` even on a clean synthetic bundle.
 2. **The chat suite (R-02) is invisible.** A schema-drift bug means 12 tests have been silently skipped, possibly for weeks. Investigate and either fix the column reference or fix the schema. Either way, it's masking real coverage.
-3. **Confirm `incidents@towcommand.com` and `security@towcommand.com` actually receive mail** before the next runbook publication, or change them to `@towcommand.cloud`. I left them on `.com` as a conservative default but did not verify.
+3. **Confirm `incidents@towcommand.com` and `security@towcommand.com` actually receive mail** before the next runbook publication, or change them to `@ustowdispatch.cloud`. I left them on `.com` as a conservative default but did not verify.
 4. **Audit `R-05 (auditor role)` and decide product intent before launching to a tenant who needs read-only investor / accountant access.** Right now `auditor` is wired into 2 endpoints (after my fix); everything else 403s.
 5. **The `publicKeyConfigured` placeholder bug (R-03) will mislead operators.** Fix before any tenant is asked to verify their Stripe configuration.
 

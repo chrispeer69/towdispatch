@@ -53,7 +53,7 @@ export function buildCsp(env) {
         ...connectExtra,
         // Belt-and-suspenders: the live API origin even if the env var is unset
         // at header-build time on a misconfigured deploy.
-        'https://api.towcommand.cloud',
+        'https://api.ustowdispatch.cloud',
         'https://api.stripe.com',
         'https://api.mapbox.com',
         'https://*.mapbox.com',

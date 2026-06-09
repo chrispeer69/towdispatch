@@ -114,7 +114,7 @@ receiving automatic dispatches. Until further notice:
 
 We expect resolution within 1 hour. Next update at HH:MM ET.
 
-— US Tow DISPATCH operations
+— US Tow Dispatch operations
 ```
 
 When the gateway recovers, send an "all clear" with the same channels.

@@ -44,7 +44,7 @@ export class ArExportService {
 
   async renderXlsx(report: ArReportResponse, tenantName: string): Promise<Buffer> {
     const wb = new ExcelJS.Workbook();
-    wb.creator = 'US Tow DISPATCH';
+    wb.creator = 'US Tow Dispatch';
     wb.created = new Date();
 
     const summary = wb.addWorksheet('Summary');

@@ -272,7 +272,7 @@ export class BillingDeliveryService {
   }> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
-      if (!t) return { name: 'US Tow DISPATCH' };
+      if (!t) return { name: 'US Tow Dispatch' };
       const row = t as unknown as {
         name: string;
         billingAddress?: Record<string, unknown> | null;
@@ -296,7 +296,7 @@ export class BillingDeliveryService {
   private async loadTenantName(ctx: CallerContext): Promise<string> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
-      return t?.name ?? 'US Tow DISPATCH';
+      return t?.name ?? 'US Tow Dispatch';
     });
   }
 

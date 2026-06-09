@@ -1,6 +1,6 @@
 # Regions
 
-US Tow DISPATCH multi-region topology (Session 44 foundation).
+US Tow Dispatch multi-region topology (Session 44 foundation).
 
 > **Posture, up front:** the public goal is "active-active across two regions."
 > What ships in v1 is **primary / secondary with read replicas + region-aware

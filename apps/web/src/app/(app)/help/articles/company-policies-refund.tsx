@@ -110,7 +110,7 @@ export function RefundPolicyArticle(): JSX.Element {
       </P>
       <P>
         This document provides a standard, legally defensible Refund Policy template that you can
-        copy, paste into your own website, and link to on your US Tow DISPATCH customer tracking
+        copy, paste into your own website, and link to on your US Tow Dispatch customer tracking
         pages.
       </P>
 
@@ -193,13 +193,13 @@ export function RefundPolicyArticle(): JSX.Element {
         </p>
       </div>
 
-      <H2>How to Enforce This in US Tow DISPATCH</H2>
+      <H2>How to Enforce This in US Tow Dispatch</H2>
       <P>Having the policy is only half the battle. You must prove the customer agreed to it.</P>
 
       <H3>Digital Signatures</H3>
       <OrderedList>
         <li>
-          When your driver arrives on scene, they should use the US Tow DISPATCH mobile app to
+          When your driver arrives on scene, they should use the US Tow Dispatch mobile app to
           capture the customer's signature on the digital Bill of Lading (BOL).
         </li>
         <li>
@@ -216,7 +216,7 @@ export function RefundPolicyArticle(): JSX.Element {
       <P>If you need to charge a Dry Run fee and refund the rest:</P>
       <OrderedList>
         <li>
-          Open the <Em>Invoice</Em> in US Tow DISPATCH.
+          Open the <Em>Invoice</Em> in US Tow Dispatch.
         </li>
         <li>
           Click <Code>Issue Refund</Code>.

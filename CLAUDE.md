@@ -1,6 +1,6 @@
 # CLAUDE.md — Operating Rules for Claude Code Sessions in this Repo
 
-You are working in the **US Tow DISPATCH** monorepo. This is a **production SaaS** deployed on **Railway** serving real customers. Read this entire file at the start of every session and obey it for the entire session.
+You are working in the **US Tow Dispatch** monorepo. This is a **production SaaS** deployed on **Railway** serving real customers. Read this entire file at the start of every session and obey it for the entire session.
 
 > **OPERATOR CONTEXT:** The current operator may be a non-technical founder.
 > All guardrails below exist to prevent accidental breakage of production,

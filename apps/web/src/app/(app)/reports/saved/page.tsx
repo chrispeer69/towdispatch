@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { DeleteSavedButton } from './delete-saved-button';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Saved reports — TowCommand' };
+export const metadata = { title: 'Saved reports — US Tow Dispatch' };
 
 export default async function SavedReportsPage(): Promise<JSX.Element> {
   await requireUser();

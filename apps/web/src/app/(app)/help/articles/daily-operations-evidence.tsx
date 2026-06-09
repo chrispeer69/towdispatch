@@ -110,7 +110,7 @@ export function CapturingEvidenceArticle(): JSX.Element {
         scene.
       </P>
       <P>
-        This guide explains how US Tow DISPATCH handles field evidence—specifically the 60-second
+        This guide explains how US Tow Dispatch handles field evidence—specifically the 60-second
         walkaround video—how it uploads in the background so drivers aren't delayed, and how
         dispatchers can review it.
       </P>
@@ -205,7 +205,7 @@ export function CapturingEvidenceArticle(): JSX.Element {
       </OrderedList>
 
       <Callout tone="info" title="Direct-to-S3 Architecture">
-        To handle thousands of large video files without slowing down the platform, US Tow DISPATCH
+        To handle thousands of large video files without slowing down the platform, US Tow Dispatch
         uses "Presigned URLs." The driver's phone uploads the video directly to secure Amazon S3
         cloud storage, bypassing our API servers entirely. This means your dispatch board stays
         lightning-fast even if fifty drivers are uploading storm-damage videos at the exact same

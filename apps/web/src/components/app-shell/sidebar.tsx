@@ -14,6 +14,8 @@ import {
   type LucideIcon,
   Mail,
   Navigation,
+  PanelLeftClose,
+  PanelLeftOpen,
   PhoneCall,
   Plug,
   Radio,
@@ -45,7 +47,7 @@ import {
  */
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import type { CSSProperties } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 
 interface SidebarProps {
   tenant: AuthTenantDto;
@@ -298,7 +300,7 @@ const SECTIONS: NavSection[] = [
     // ECOSYSTEM — Blue Collar AI sibling products surfaced as branded entry
     // points. These pages are placeholders until each product ships its own
     // integration; today they explain what the product is and why it sits
-    // next to US Tow DISPATCH.
+    // next to US Tow Dispatch.
     label: 'Ecosystem',
     items: [
       {
@@ -332,46 +334,92 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   // params object during edge cases where Next returns null (initial render
   // boundary). Matchers that don't read sp ignore this entirely.
   const searchParams = useSearchParams() ?? new URLSearchParams();
+  // Auto-collapse the nav to a narrow icon rail on the Live Dispatch board so
+  // the dense dispatch tiles + map get the full board width; auto-expand on
+  // every other route. The manual toggle still works within a route until the
+  // next navigation re-applies the route default. Lazy initial state matches
+  // the route on first render so there's no expanded→collapsed flash on
+  // /dispatch. Main content is `flex-1`, so shrinking this rail widens the board.
+  const [collapsed, setCollapsed] = useState(() => pathname.startsWith('/dispatch'));
+  useEffect(() => {
+    setCollapsed(pathname.startsWith('/dispatch'));
+  }, [pathname]);
+
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
+    <aside
+      className={cn(
+        'sticky top-0 hidden h-screen shrink-0 flex-col border-r border-divider bg-bg-surface transition-[width] duration-200 md:flex',
+        collapsed ? 'w-16' : 'w-60',
+      )}
+    >
       {/*
-        Clicking the US Tow DISPATCH wordmark / logo navigates the user
-        back to the dashboard.
+        Brand mark navigates to the dashboard. The collapse toggle is a
+        separate button so it never triggers navigation.
       */}
-      <Link
-        href="/dashboard"
-        title="Dashboard"
-        aria-label="Dashboard"
-        className="flex items-center gap-3 border-b border-divider px-5 py-4 transition-colors hover:bg-bg-surface-elevated/40"
+      <div
+        className={cn(
+          'flex border-b border-divider',
+          collapsed ? 'flex-col items-center gap-2 px-2 py-3' : 'items-center gap-2 px-3 py-4',
+        )}
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary ">
-          <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
-            UTD
-          </span>
-        </div>
-        <span className="font-condensed text-base leading-none tracking-tight">
-          <span className="font-medium">
-            US <span className="text-brand-primary">Tow</span>{' '}
-          </span>
-          <span className="font-extrabold italic uppercase">Dispatch</span>
-        </span>
-      </Link>
+        <Link
+          href="/dashboard"
+          title="Dashboard"
+          aria-label="Dashboard"
+          className={cn(
+            'flex items-center gap-3 rounded-lg transition-colors hover:bg-bg-surface-elevated/40',
+            collapsed ? 'justify-center p-1' : 'min-w-0 flex-1 px-2 py-1',
+          )}
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-primary">
+            <span className="font-condensed text-xs font-extrabold tracking-tight text-white">
+              UTD
+            </span>
+          </div>
+          {!collapsed ? (
+            <span className="truncate font-condensed text-base leading-none tracking-tight">
+              <span className="font-medium">
+                US <span className="text-brand-primary">Tow</span>{' '}
+              </span>
+              <span className="font-extrabold italic uppercase">Dispatch</span>
+            </span>
+          ) : null}
+        </Link>
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!collapsed}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
+        >
+          {collapsed ? (
+            <PanelLeftOpen className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
+        </button>
+      </div>
 
       <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-5">
         {SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
-              {section.label}
-            </p>
+            {!collapsed ? (
+              <p className="px-3 pb-2 font-mono text-[10px] uppercase tracking-[0.22em] text-text-secondary-on-dark-on-dark/60">
+                {section.label}
+              </p>
+            ) : null}
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive =
                   item.href !== null &&
                   (item.match ? item.match(pathname, searchParams) : pathname === item.href);
                 const content = (
-                  <span className="flex items-center gap-3">
-                    <item.icon className="h-4 w-4" />
-                    <span className="text-sm font-medium">{item.label}</span>
+                  <span
+                    className={cn('flex items-center gap-3', collapsed && 'justify-center gap-0')}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    {!collapsed ? <span className="text-sm font-medium">{item.label}</span> : null}
                   </span>
                 );
                 if (item.href && !item.disabled) {
@@ -390,6 +438,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                         <Link
                           href={item.href}
                           style={accentVars}
+                          title={collapsed ? item.label : undefined}
                           className={cn(
                             'group relative flex items-center justify-between rounded-[8px] px-3 py-2 transition-colors',
                             isActive
@@ -404,9 +453,16 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                               className="absolute -left-3 top-1.5 h-6 w-[3px] rounded-r-full"
                             />
                           ) : null}
-                          <span className="flex items-center gap-3">
-                            <item.icon className="h-4 w-4" style={{ color: accent }} />
-                            <span className="text-sm font-medium">{item.label}</span>
+                          <span
+                            className={cn(
+                              'flex items-center gap-3',
+                              collapsed && 'justify-center gap-0',
+                            )}
+                          >
+                            <item.icon className="h-4 w-4 shrink-0" style={{ color: accent }} />
+                            {!collapsed ? (
+                              <span className="text-sm font-medium">{item.label}</span>
+                            ) : null}
                           </span>
                         </Link>
                       </li>
@@ -416,6 +472,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                     <li key={item.label}>
                       <Link
                         href={item.href}
+                        title={collapsed ? item.label : undefined}
                         className={cn(
                           'group relative flex items-center justify-between rounded-[8px] px-3 py-2 transition-colors',
                           isActive
@@ -438,12 +495,14 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                   <li
                     key={item.label}
                     className="flex cursor-not-allowed items-center justify-between rounded-[8px] px-3 py-2 text-text-secondary-on-dark-on-dark/60"
-                    title="Coming soon"
+                    title={collapsed ? `${item.label} — coming soon` : 'Coming soon'}
                   >
                     {content}
-                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
-                      Soon
-                    </span>
+                    {!collapsed ? (
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
+                        Soon
+                      </span>
+                    ) : null}
                   </li>
                 );
               })}
@@ -461,8 +520,10 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                 <Link
                   href="/settings"
                   aria-current={settingsActive ? 'page' : undefined}
+                  title={collapsed ? 'Settings' : undefined}
                   className={cn(
                     'group relative flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-colors',
+                    collapsed && 'justify-center gap-0',
                     settingsActive
                       ? 'bg-brand-primary/15 text-brand-primary'
                       : 'text-text-secondary-on-dark hover:bg-bg-surface-elevated hover:text-text-primary-on-dark',
@@ -474,8 +535,8 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
                       className="absolute -left-3 top-1.5 h-6 w-1 rounded-r-full bg-brand-primary"
                     />
                   ) : null}
-                  <Settings className="h-4 w-4" />
-                  <span className="font-medium">Settings</span>
+                  <Settings className="h-4 w-4 shrink-0" />
+                  {!collapsed ? <span className="font-medium">Settings</span> : null}
                 </Link>
               );
             })()}
@@ -483,25 +544,37 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
           <li>
             <a
               href="/logout"
-              className="flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark"
+              title={collapsed ? 'Sign out' : undefined}
+              className={cn(
+                'flex w-full items-center gap-3 rounded-[8px] px-3 py-2 text-sm text-text-secondary-on-dark transition-colors hover:bg-bg-surface-elevated hover:text-text-primary-on-dark',
+                collapsed && 'justify-center gap-0',
+              )}
             >
-              <LogOut className="h-4 w-4" />
-              <span className="font-medium">Sign out</span>
+              <LogOut className="h-4 w-4 shrink-0" />
+              {!collapsed ? <span className="font-medium">Sign out</span> : null}
             </a>
           </li>
         </ul>
-        <div className="mt-3 flex items-center gap-3 rounded-[8px] border border-divider bg-bg-surface-elevated/40 px-3 py-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md  text-xs font-extrabold text-brand-primary">
+        <div
+          className={cn(
+            'mt-3 flex items-center gap-3 rounded-[8px] border border-divider bg-bg-surface-elevated/40 px-3 py-2',
+            collapsed && 'justify-center px-0',
+          )}
+          title={collapsed ? `${tenant.name} — ${user.role}` : undefined}
+        >
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-extrabold text-brand-primary">
             {tenant.name.charAt(0).toUpperCase()}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-text-primary-on-dark">
-              {tenant.name}
-            </p>
-            <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
-              {user.role}
-            </p>
-          </div>
+          {!collapsed ? (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-text-primary-on-dark">
+                {tenant.name}
+              </p>
+              <p className="truncate font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
+                {user.role}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </aside>

@@ -1,7 +1,7 @@
-# US Tow DISPATCH — Build Status Report
+# US Tow Dispatch — Build Status Report
 *Audit date: May 17, 2026 · Master tip: `127f7c7` (post-PR-#36)*
 
-This document audits the implementation of US Tow DISPATCH against the
+This document audits the implementation of US Tow Dispatch against the
 57-page **TowCommand Pro Comprehensive Build-Out Report** (`_reference/`).
 Every row is grounded in concrete evidence — a file path, a database
 migration, an API route, a passing test — not aspirational language.
@@ -138,7 +138,7 @@ All Phase 4 items: ❌ Not started. (AI smart dispatch, photo damage analysis, N
 |---|---|
 | Founder agreement + vesting | (out of scope) |
 | Delaware C-Corp, EIN, bank, payroll | (out of scope) |
-| Trademark + domain | ✅ `towcommand.cloud` + `ustowdispatch.cloud` both live |
+| Trademark + domain | ✅ `ustowdispatch.cloud` + `ustowdispatch.cloud` both live |
 | Hire VP Industry Relations by Day 30 | (business) |
 | AWS account + org structure | ❌ Running on Railway |
 | GitHub org + branch protection + CI scaffold | ✅ Built (`.github/workflows/e2e.yml` runs Playwright chromium on every PR) |
@@ -206,7 +206,7 @@ If the goal is to convert this from "demo-ready" to "first-paying-customer-ready
 ### Immediate (1–2 weeks)
 1. **Wire the real Stripe production credentials.** Move off stub-provider. Confirm SAQ-A scope holds. Test end-to-end card-on-file collection on the demo tenant. *Highest-ROI single change for "is this real?"*
 2. **Wire the real QuickBooks Online sandbox.** Move off qbo-stub-provider. Run one real bidirectional sync.
-3. **Wire SendGrid sender domain authentication** (already accepts our messages but Yahoo isn't delivering — diagnosed today). Verify a sending domain (e.g. `mail.towcommand.cloud`) so deliverability is reliable.
+3. **Wire SendGrid sender domain authentication** (already accepts our messages but Yahoo isn't delivering — diagnosed today). Verify a sending domain (e.g. `mail.ustowdispatch.cloud`) so deliverability is reliable.
 4. **Build the customer-facing tracking page UI**. Backend is done; the public `/track/:token` route + branded UI is the missing piece.
 
 ### Short-term (3–6 weeks)

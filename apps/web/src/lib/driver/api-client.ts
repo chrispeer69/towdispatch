@@ -66,8 +66,8 @@ export function driverApiBase(): string {
   if (env.NEXT_PUBLIC_API_URL) return env.NEXT_PUBLIC_API_URL;
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host === 'app.towcommand.cloud') return 'https://api.towcommand.cloud';
-    if (host.endsWith('.towcommand.cloud')) {
+    if (host === 'app.ustowdispatch.cloud') return 'https://api.ustowdispatch.cloud';
+    if (host.endsWith('.ustowdispatch.cloud')) {
       // Future-proofs preview / staging subdomains by mirroring the API
       // subdomain (app.foo → api.foo).
       return `https://api.${host.split('.').slice(1).join('.')}`;

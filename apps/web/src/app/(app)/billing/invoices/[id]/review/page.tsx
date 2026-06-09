@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { InvoiceReviewClient } from './invoice-review-client';
 
-export const metadata = { title: 'Invoice review — US Tow DISPATCH' };
+export const metadata = { title: 'Invoice review — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function InvoiceReviewPage({

@@ -1,5 +1,5 @@
-/* US Tow DISPATCH Driver — English */
-"app.name" = "US Tow DISPATCH Driver";
+/* US Tow Dispatch Driver — English */
+"app.name" = "US Tow Dispatch Driver";
 "signin.title" = "Sign In";
 "signin.email" = "Email";
 "signin.password" = "Password";

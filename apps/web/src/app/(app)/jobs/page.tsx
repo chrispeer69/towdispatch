@@ -9,7 +9,7 @@ import type {
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Tow Jobs â€” US Tow DISPATCH' };
+export const metadata = { title: 'Tow Jobs â€” US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_LABEL: Record<JobStatus, string> = {

@@ -121,7 +121,7 @@ export function StatementGenerationArticle(): JSX.Element {
         balance.
       </P>
       <P>
-        In US Tow DISPATCH, statements are generated on demand. You can generate a statement for any
+        In US Tow Dispatch, statements are generated on demand. You can generate a statement for any
         date range, but the most common workflow is to generate them on the 1st of the month for the
         previous month's activity.
       </P>
@@ -226,7 +226,7 @@ export function StatementGenerationArticle(): JSX.Element {
               <Em>Did you forget to record a payment?</Em> The starting balance is calculated by
               taking all historical invoices for the account and subtracting all historical payments
               prior to the statement start date. If a motor club mailed a check last month and your
-              team deposited it but forgot to record it in US Tow DISPATCH, the system still thinks
+              team deposited it but forgot to record it in US Tow Dispatch, the system still thinks
               they owe the money, and it will carry forward into the starting balance. Record the
               payment with the correct historical date, and regenerate the statement.
             </li>

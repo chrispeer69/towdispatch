@@ -11,7 +11,7 @@ import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { LienCaseDetailClient } from './detail-client';
 
-export const metadata = { title: 'Lien Case — US Tow DISPATCH' };
+export const metadata = { title: 'Lien Case — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function LienCaseDetailPage({

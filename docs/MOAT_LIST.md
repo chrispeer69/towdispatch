@@ -1,8 +1,8 @@
 # The Moat List
 
-**US Tow DISPATCH Differentiators**
+**US Tow Dispatch Differentiators**
 
-This document is the running catalog of structural advantages built into the US Tow DISPATCH platform. A "moat" is not just a feature; it is a capability that is either technologically, operationally, or socially impossible for legacy competitors (Towbook, Tracker) to replicate without rebuilding their core architecture or destroying their existing business model.
+This document is the running catalog of structural advantages built into the US Tow Dispatch platform. A "moat" is not just a feature; it is a capability that is either technologically, operationally, or socially impossible for legacy competitors (Towbook, Tracker) to replicate without rebuilding their core architecture or destroying their existing business model.
 
 When preparing for a public launch, trade show, or investor pitch, pull the headlines from this list.
 
@@ -15,7 +15,7 @@ When preparing for a public launch, trade show, or investor pitch, pull the head
 An automated cron job runs every Monday at 6:00 a.m. local time. It scans the tenant's ledger, identifies every past-due invoice across all accounts, rolls them up by customer, and emails a high-priority digest directly to the towing company owner and accounting admins.
 
 **The Moat:**
-Competitors offer a "past due report" that the operator must remember to generate, download, and review. US Tow DISPATCH proactively pushes the exact dollar amount of leaked revenue into the owner's inbox while they are drinking their morning coffee. It transforms the software from a passive database into an active financial coworker.
+Competitors offer a "past due report" that the operator must remember to generate, download, and review. US Tow Dispatch proactively pushes the exact dollar amount of leaked revenue into the owner's inbox while they are drinking their morning coffee. It transforms the software from a passive database into an active financial coworker.
 
 **Launch Headline:**
 > "The only towing platform that texts your accounts receivable right at you."
@@ -43,7 +43,7 @@ Legacy platforms use flat rate sheets that require manual, error-prone overrides
 An extension of the Dynamic Pricing Engine. Before a major event (e.g., a hurricane or holiday weekend), the operator composes a tier offer specifying a pricing premium, a capacity commitment (e.g., "8 trucks for the duration"), and a time window. The system emails this offer to the operator's motor-club account managers. Accepting clubs lock in the capacity at the premium rate; declining clubs are flagged in the system, allowing the operator to cleanly decline their dispatches during the event.
 
 **The Moat:**
-This feature turns the US Tow Alliance from a software user base into a collective bargaining infrastructure. Individually, operators must accept the flat rates dictated by motor clubs. Through the Tier Offer Composer, operators proactively send *their* prices to the clubs. It replaces the chaos of ghosted calls during storms with a transparent, contractually sound capacity market. Towbook cannot build this without alienating their motor-club partners; US Tow DISPATCH builds it as a feature.
+This feature turns the US Tow Alliance from a software user base into a collective bargaining infrastructure. Individually, operators must accept the flat rates dictated by motor clubs. Through the Tier Offer Composer, operators proactively send *their* prices to the clubs. It replaces the chaos of ghosted calls during storms with a transparent, contractually sound capacity market. Towbook cannot build this without alienating their motor-club partners; US Tow Dispatch builds it as a feature.
 
 **Launch Headline:**
 > "For the first time in towing history, operators stop accepting prices the motor clubs hand them. They send their own."
@@ -71,7 +71,7 @@ While competitors have basic impound tracking, none offer a seamless pipeline fr
 An offline-first driver application featuring direct-to-S3 damage video capture, digital BOL signature collection, and Stripe Terminal field payments.
 
 **The Moat:**
-Competitors proxy media uploads through their API servers, leading to crashes during peak loads, and rely on driver-submitted photos that often lack chain-of-custody. US Tow DISPATCH uses presigned URLs for direct, background video uploads, providing unassailable evidence for damage disputes without consuming server bandwidth.
+Competitors proxy media uploads through their API servers, leading to crashes during peak loads, and rely on driver-submitted photos that often lack chain-of-custody. US Tow Dispatch uses presigned URLs for direct, background video uploads, providing unassailable evidence for damage disputes without consuming server bandwidth.
 
 **Launch Headline:**
 > "End damage disputes forever. 60-second walk-around video capture that uploads in the background, proving exactly what the car looked like before you hooked it."
@@ -83,7 +83,7 @@ Competitors proxy media uploads through their API servers, leading to crashes du
 **Status:** ❌ Planned (Architecture Build Report drafted May 2026)
 
 **The Capability:**
-A full-lifecycle damage claim management module that captures every motor-club damage allegation as a first-class object in US Tow DISPATCH. Each claim file aggregates the operator's evidence (driver photos, walkaround video, BOL, GPS timestamps), imports the motor club's documents and photos for permanent record, captures driver and customer statements, walks the operator through a guided defense-building workflow, and provides a structured settlement-offer and payment-structure negotiation tracker. Every alliance member gets a one-click consultation request to founder Chris Peer (a 30-year motor club damage-claim expert) for guidance on contested or 50/50 claims.
+A full-lifecycle damage claim management module that captures every motor-club damage allegation as a first-class object in US Tow Dispatch. Each claim file aggregates the operator's evidence (driver photos, walkaround video, BOL, GPS timestamps), imports the motor club's documents and photos for permanent record, captures driver and customer statements, walks the operator through a guided defense-building workflow, and provides a structured settlement-offer and payment-structure negotiation tracker. Every alliance member gets a one-click consultation request to founder Chris Peer (a 30-year motor club damage-claim expert) for guidance on contested or 50/50 claims.
 
 **The Moat:**
 Damage claims silently bleed an estimated $5,000 to $30,000 per year from a typical mid-size operator's margin. Motor clubs deduct money from operator accounts without authorization, force settlements without due process, and offer no transparency. Towbook and Tracker provide no defense-building tools. Most operators have no leverage and no expertise. ClaimShield gives every alliance member access to **expert-grade claim defense**, **structured negotiation**, and **collective audit power** that no competitor can ship — because the expert layer (Chris Peer's decades of motor club negotiation experience) is human knowledge that legacy platforms cannot replicate without hiring an industry veteran. Over time, the expert decisions feed an AI-assisted adjudication layer that gets smarter with every claim across the alliance.

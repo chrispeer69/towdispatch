@@ -7,7 +7,7 @@
 import type { JSX } from 'react';
 import { ReportsClient } from './reports-client';
 
-export const metadata = { title: 'Dynamic Pricing Reports — US Tow DISPATCH' };
+export const metadata = { title: 'Dynamic Pricing Reports — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default function DynamicPricingReportsPage(): JSX.Element {

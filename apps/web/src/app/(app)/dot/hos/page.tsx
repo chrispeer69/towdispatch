@@ -8,7 +8,7 @@ import Link from 'next/link';
 import type { JSX } from 'react';
 import { HosClient } from './hos-client';
 
-export const metadata = { title: 'Hours of Service — DOT Compliance — US Tow DISPATCH' };
+export const metadata = { title: 'Hours of Service — DOT Compliance — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function HosPage(): Promise<JSX.Element> {

@@ -1,6 +1,6 @@
 # Vendor / Subprocessor Inventory
 
-Third parties that process, store, or transmit US Tow DISPATCH data, or that are
+Third parties that process, store, or transmit US Tow Dispatch data, or that are
 critical to availability. Reviewed annually (CC9.2) and on onboarding of any new
 subprocessor. Each vendor's own SOC 2 / ISO report is collected and filed.
 

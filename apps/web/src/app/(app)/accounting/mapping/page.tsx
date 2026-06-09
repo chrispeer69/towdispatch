@@ -1,5 +1,5 @@
 /**
- * /accounting/mapping — Map US Tow DISPATCH's internal billing categories onto the
+ * /accounting/mapping — Map US Tow Dispatch's internal billing categories onto the
  * tenant's QuickBooks chart of accounts. Server-renders the current chart and
  * existing mappings, then the client component handles save.
  */

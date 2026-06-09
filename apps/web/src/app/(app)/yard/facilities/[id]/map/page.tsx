@@ -11,7 +11,7 @@ import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { StallMapClient } from './map-client';
 
-export const metadata = { title: 'Stall Map — US Tow DISPATCH' };
+export const metadata = { title: 'Stall Map — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function StallMapPage({

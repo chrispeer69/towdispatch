@@ -10,7 +10,7 @@ import { marketplaceAppCategoryValues } from '@ustowdispatch/shared';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'App Marketplace — US Tow DISPATCH' };
+export const metadata = { title: 'App Marketplace — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {
@@ -47,7 +47,7 @@ export default async function MarketplacePage({
           App Marketplace
         </h1>
         <p className="text-sm text-text-secondary-on-dark">
-          Third-party apps that connect to your US Tow DISPATCH account.
+          Third-party apps that connect to your US Tow Dispatch account.
         </p>
       </header>
 

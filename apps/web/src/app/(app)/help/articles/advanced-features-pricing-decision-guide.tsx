@@ -26,7 +26,7 @@ export function PricingDecisionGuideArticle(): JSX.Element {
   return (
     <div className="pb-12">
       <P>
-        US Tow DISPATCH gives you two pricing tools that look related, sit next to each other in the
+        US Tow Dispatch gives you two pricing tools that look related, sit next to each other in the
         sidebar, and both use the word <Em>tier</Em>. They are not the same thing. Owners and
         managers consistently confuse them in the first week, then get tangled up about which one to
         reach for when a storm rolls in or when a motor club calls to negotiate. This article is the

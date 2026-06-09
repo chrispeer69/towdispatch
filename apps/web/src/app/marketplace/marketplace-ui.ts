@@ -2,7 +2,7 @@
  * Shared presentation helpers for the public bidder marketplace (Session 33).
  *
  * Tenant branding: Session 32 (white-label / tenant_branding) is not merged
- * on this branch, so the marketplace renders with US Tow DISPATCH fallback
+ * on this branch, so the marketplace renders with US Tow Dispatch fallback
  * defaults. When S32 lands, read tenant.settings.branding here. Documented
  * in SESSION_33_DECISIONS.md.
  */

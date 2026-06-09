@@ -80,13 +80,13 @@ export function ReconcileClient({ tenantId }: { tenantId: string }): JSX.Element
               </div>
               {d.missing.length > 0 && (
                 <Bucket
-                  title="Missing (in Towbook, not in US Tow DISPATCH)"
+                  title="Missing (in Towbook, not in US Tow Dispatch)"
                   items={d.missing.map((m) => `${m.identifier} (${m.externalId})`)}
                 />
               )}
               {d.orphaned.length > 0 && (
                 <Bucket
-                  title="Orphaned (in US Tow DISPATCH, not in this export)"
+                  title="Orphaned (in US Tow Dispatch, not in this export)"
                   items={d.orphaned.map((m) => `${m.identifier} (${m.externalId})`)}
                 />
               )}

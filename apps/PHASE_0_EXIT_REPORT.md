@@ -4,7 +4,7 @@
 **Branch:** `master`
 **Author:** Session 17C — operational readiness pass
 
-This is the final gate before the founder cancels his Towbook subscription and runs Roadside Towing & Recovery, Inc. (tenant #001) and Auto Lyft (tenant #002) on US Tow DISPATCH. Every verification step below is documented with the actual command, the actual result, and any caveats.
+This is the final gate before the founder cancels his Towbook subscription and runs Roadside Towing & Recovery, Inc. (tenant #001) and Auto Lyft (tenant #002) on US Tow Dispatch. Every verification step below is documented with the actual command, the actual result, and any caveats.
 
 ---
 

@@ -7,7 +7,7 @@
 import { fetchMyPreferences } from '@/lib/api/notifications.server';
 import { NotificationsSettings } from './settings.client';
 
-export const metadata = { title: 'Notification settings — TowCommand' };
+export const metadata = { title: 'Notification settings — US Tow Dispatch' };
 
 export default async function NotificationSettingsPage(): Promise<JSX.Element> {
   const prefs = await fetchMyPreferences();

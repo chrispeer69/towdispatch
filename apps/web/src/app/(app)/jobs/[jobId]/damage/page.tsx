@@ -11,7 +11,7 @@ import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { DamageClient } from './damage-client';
 
-export const metadata = { title: 'Damage analysis — US Tow DISPATCH' };
+export const metadata = { title: 'Damage analysis — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const UUID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -18,7 +18,7 @@ import { BrandingForm } from './branding-form';
 
 const TAB = findSettingsTab('branding');
 
-export const metadata = { title: 'White-Label Portal — US Tow DISPATCH' };
+export const metadata = { title: 'White-Label Portal — US Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const VIEW_ROLES: readonly Role[] = [ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTING];

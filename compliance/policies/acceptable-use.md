@@ -5,7 +5,7 @@
 
 ## Purpose
 
-Define acceptable use of US Tow DISPATCH systems, data, and credentials by
+Define acceptable use of US Tow Dispatch systems, data, and credentials by
 personnel and contractors.
 
 ## Rules

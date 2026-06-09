@@ -14,7 +14,7 @@ import type { JSX } from 'react';
  */
 import { HELP_CENTER_CATEGORIES, getHelpCenterStats } from './registry';
 
-export const metadata = { title: 'Help Center — US Tow DISPATCH' };
+export const metadata = { title: 'Help Center — US Tow Dispatch' };
 
 const TONE_ACCENT: Record<string, string> = {
   orange: 'text-brand-primary bg-brand-primary/15 border-brand-primary/20',
@@ -34,7 +34,7 @@ export default function HelpCenterPage(): JSX.Element {
           Help center
         </h1>
         <p className="max-w-prose text-sm text-text-secondary-on-dark">
-          Step-by-step training documents for everyone who uses US Tow DISPATCH. Choose a category
+          Step-by-step training documents for everyone who uses US Tow Dispatch. Choose a category
           below to see the guides available for your role. Documents marked "Coming soon" are on the
           roadmap and will be filled in over the coming weeks.
         </p>
@@ -77,8 +77,8 @@ export default function HelpCenterPage(): JSX.Element {
 
       <p className="text-xs text-text-secondary-on-dark">
         Need urgent help in the meantime? Email{' '}
-        <a className="text-brand-primary hover:underline" href="mailto:support@towcommand.cloud">
-          support@towcommand.cloud
+        <a className="text-brand-primary hover:underline" href="mailto:support@ustowdispatch.cloud">
+          support@ustowdispatch.cloud
         </a>
         .
       </p>

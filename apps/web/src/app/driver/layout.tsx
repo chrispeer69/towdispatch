@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Driver — US Tow DISPATCH',
+  title: 'Driver — US Tow Dispatch',
   description: 'In-truck driver workspace',
 };
 

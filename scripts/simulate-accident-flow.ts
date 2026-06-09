@@ -65,7 +65,7 @@ const DUMMY_BASE64_PHOTO = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIB
 
 async function run() {
   console.clear();
-  console.log('\x1b[35m%s\x1b[0m', '🚨 US Tow DISPATCH — Full Accident Flow Live Simulator');
+  console.log('\x1b[35m%s\x1b[0m', '🚨 US Tow Dispatch — Full Accident Flow Live Simulator');
   console.log('\x1b[90m%s\x1b[0m', '=======================================================');
   console.log(`📡 API endpoint:   ${API_URL}`);
   console.log(`👤 Seed Account:   ${EMAIL}`);

@@ -174,12 +174,12 @@ Triggers depend on what was accessed:
 Drafted with placeholder fields; legal review required before sending in any real incident.
 
 ```
-SUBJECT: Important security notice from US Tow DISPATCH
+SUBJECT: Important security notice from US Tow Dispatch
 
 [Tenant Owner Name],
 
 We are writing to inform you of a security incident that affected
-US Tow DISPATCH on [DATE]. We discovered [SCOPE] and contained it within
+US Tow Dispatch on [DATE]. We discovered [SCOPE] and contained it within
 [DURATION].
 
 What happened:
@@ -192,9 +192,9 @@ What we did:
 [specific containment steps — revoked sessions, rotated secrets, etc.]
 
 What you should do:
-- Review your US Tow DISPATCH activity log for the past 30 days.
+- Review your US Tow Dispatch activity log for the past 30 days.
 - If you re-use passwords across services (you shouldn't!), change them.
-- Watch for phishing attempts using your US Tow DISPATCH-associated email.
+- Watch for phishing attempts using your US Tow Dispatch-associated email.
 
 What we are doing going forward:
 [concrete improvements; do not promise anything you won't actually do]

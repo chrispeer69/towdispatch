@@ -8,7 +8,7 @@ not SAQ A or SAQ D).
 
 ## Core assertion
 
-> US Tow DISPATCH **never** stores, processes, or transmits a Primary Account
+> US Tow Dispatch **never** stores, processes, or transmits a Primary Account
 > Number (PAN), CVV, or full track data on its own systems. All cardholder data
 > is captured directly by Stripe Elements / Stripe.js into a Stripe-hosted iframe
 > and exchanged for an opaque token. Our servers and database see only Stripe

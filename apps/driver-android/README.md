@@ -1,4 +1,4 @@
-# US Tow DISPATCH — Android Driver App
+# US Tow Dispatch — Android Driver App
 
 Native Android driver client. Built with Jetpack Compose, Hilt, Room, Retrofit + kotlinx-serialization, WorkManager, FusedLocationProvider, and CameraX.
 
@@ -109,7 +109,7 @@ Both use `ExistingWorkPolicy.KEEP` so concurrent enqueues collapse.
 
 ## App Links
 
-The manifest declares an `<intent-filter android:autoVerify="true">` for `https://app.towcommand.cloud/driver/d/{code}`. Once `.well-known/assetlinks.json` is hosted on the domain with the release-keystore SHA-256 fingerprint, this opens the app directly without a chooser. `DriverCodeRedeemer` persists the code so the PIN entry screen pre-seeds the picker.
+The manifest declares an `<intent-filter android:autoVerify="true">` for `https://app.ustowdispatch.cloud/driver/d/{code}`. Once `.well-known/assetlinks.json` is hosted on the domain with the release-keystore SHA-256 fingerprint, this opens the app directly without a chooser. `DriverCodeRedeemer` persists the code so the PIN entry screen pre-seeds the picker.
 
 ## Localization
 
