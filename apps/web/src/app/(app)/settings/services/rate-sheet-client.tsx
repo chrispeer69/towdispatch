@@ -31,7 +31,7 @@ import {
   type ServiceRateDto,
   type VehicleClass,
   serviceCategoryValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 

@@ -8,7 +8,7 @@
  * Soft-delete shaped, RLS-bound via TenantAwareDb.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { drivers, uuidv7 } from '@ustowdispatch/db';
+import { drivers, uuidv7 } from '@towdispatch/db';
 import {
   type CreateDriverPayload,
   type DriverDto,
@@ -16,7 +16,7 @@ import {
   ERROR_CODES,
   type PaginatedDrivers,
   type UpdateDriverPayload,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

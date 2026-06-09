@@ -28,7 +28,7 @@ export const rateSheets = pgTable(
     name: text('name').notNull(),
 
     /**
-     * Full pricing definition. Shape lives in @ustowdispatch/shared
+     * Full pricing definition. Shape lives in @towdispatch/shared
      * (rateSheetDefinitionSchema). Stored as jsonb so additive changes — new
      * service types, new surcharge windows — don't require migrations.
      */

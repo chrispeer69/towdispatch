@@ -1,6 +1,6 @@
 import Foundation
 
-/// Mirrors `apps/driver-android/.../UsTowDispatchApi.kt`. Source of truth: the
+/// Mirrors `apps/driver-android/.../TowDispatchApi.kt`. Source of truth: the
 /// Android client. If the backend grows new endpoints, they're added here.
 public enum Endpoints {
     public static let login = "/auth/login"

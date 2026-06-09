@@ -7,7 +7,7 @@
  */
 import { ApiError, apiServer } from '@/lib/api/client';
 import { clearMfaCookies, readMfaSetupCookie, setSessionCookies } from '@/lib/auth/cookies';
-import type { AuthenticatedResponse } from '@ustowdispatch/shared';
+import type { AuthenticatedResponse } from '@towdispatch/shared';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

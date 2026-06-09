@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ERROR_CODES, type Role } from '@ustowdispatch/shared';
+import { ERROR_CODES, type Role } from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { ROLES_KEY } from '../decorators/roles.decorator.js';
 

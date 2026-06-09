@@ -3,10 +3,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 /**
  * ReconciliationService — diffs a Towbook export bundle against what's
- * currently in US Tow DISPATCH for a given tenant. Returns three buckets:
+ * currently in Tow Dispatch for a given tenant. Returns three buckets:
  *
- *   missing  — rows in the bundle, NOT in US Tow DISPATCH
- *   orphaned — rows in US Tow DISPATCH with external_source='towbook' that are
+ *   missing  — rows in the bundle, NOT in Tow Dispatch
+ *   orphaned — rows in Tow Dispatch with external_source='towbook' that are
  *              NOT in the current bundle (deleted-in-Towbook candidates)
  *   drift    — rows present in both with field mismatches (we name the
  *              columns that differ)
@@ -24,10 +24,10 @@ import type { TowbookMapping } from './types.js';
 export interface ReconciliationDiff {
   recordType: 'customer' | 'vehicle' | 'job' | 'invoice' | 'payment' | 'driver' | 'truck';
   missing: { externalId: string; identifier: string }[];
-  orphaned: { externalId: string; towcommandId: string; identifier: string }[];
+  orphaned: { externalId: string; towdispatchId: string; identifier: string }[];
   drift: {
     externalId: string;
-    towcommandId: string;
+    towdispatchId: string;
     fields: { field: string; bundle: string | null; db: string | null }[];
   }[];
 }
@@ -228,7 +228,7 @@ export class ReconciliationService {
           }
         }
         if (fieldDiffs.length > 0) {
-          drift.push({ externalId: ext, towcommandId: dbRow.id, fields: fieldDiffs });
+          drift.push({ externalId: ext, towdispatchId: dbRow.id, fields: fieldDiffs });
         }
       }
     }
@@ -238,7 +238,7 @@ export class ReconciliationService {
       if (!bundleByExternal.has(ext)) {
         orphaned.push({
           externalId: ext,
-          towcommandId: dbRow.id,
+          towdispatchId: dbRow.id,
           identifier: dbRow[opts.identifier] ?? ext,
         });
       }

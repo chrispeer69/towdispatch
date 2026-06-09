@@ -1,10 +1,10 @@
 import { fetchInvoices, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
-import { invoiceStatusLabel, invoiceStatusValues } from '@ustowdispatch/shared';
+import { invoiceStatusLabel, invoiceStatusValues } from '@towdispatch/shared';
 import Link from 'next/link';
 
-export const metadata = { title: 'Invoices — US Tow DISPATCH' };
+export const metadata = { title: 'Invoices — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {

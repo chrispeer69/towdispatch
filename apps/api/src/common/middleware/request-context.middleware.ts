@@ -1,4 +1,4 @@
-import type { RequestContext } from '@ustowdispatch/shared';
+import type { RequestContext } from '@towdispatch/shared';
 /**
  * Per-request context attached to every Fastify request.
  *

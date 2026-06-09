@@ -8,7 +8,7 @@
  * balancers default to.
  */
 import { Controller, Get, Header, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { ERROR_CODES } from '@ustowdispatch/shared';
+import { ERROR_CODES } from '@towdispatch/shared';
 import type { Redis } from 'ioredis';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { REDIS_CLIENT } from '../../modules/redis/redis.tokens.js';

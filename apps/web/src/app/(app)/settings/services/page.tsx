@@ -12,18 +12,14 @@
  */
 import { fetchServiceCatalog, fetchServiceRates } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/session';
-import type {
-  ServiceCatalogEntryDto,
-  ServiceCategory,
-  ServiceRateDto,
-} from '@ustowdispatch/shared';
+import type { ServiceCatalogEntryDto, ServiceCategory, ServiceRateDto } from '@towdispatch/shared';
 import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
 import { RateSheetClient } from './rate-sheet-client';
 import { ServiceCatalogClient } from './service-catalog-client';
 import { ServicesViewToggle } from './services-view-toggle';
 
-export const metadata = { title: 'Services & Pricing — US Tow DISPATCH' };
+export const metadata = { title: 'Services & Pricing — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const TAB = findSettingsTab('services');

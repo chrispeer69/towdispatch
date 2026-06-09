@@ -14,7 +14,7 @@
  *   5) attempts to update B's row from A's context — rowcount = 0
  *   6) without any GUC set, SELECT returns zero rows (fail-closed)
  */
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

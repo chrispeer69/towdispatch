@@ -44,7 +44,7 @@ import {
   resetPasswordSchema,
   signupSchema,
   verifyEmailSchema,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';

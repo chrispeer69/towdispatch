@@ -6,10 +6,10 @@ import { useCallback, useState } from 'react';
 interface Diff {
   recordType: string;
   missing: { externalId: string; identifier: string }[];
-  orphaned: { externalId: string; towcommandId: string; identifier: string }[];
+  orphaned: { externalId: string; towdispatchId: string; identifier: string }[];
   drift: {
     externalId: string;
-    towcommandId: string;
+    towdispatchId: string;
     fields: { field: string; bundle: string | null; db: string | null }[];
   }[];
 }
@@ -80,13 +80,13 @@ export function ReconcileClient({ tenantId }: { tenantId: string }): JSX.Element
               </div>
               {d.missing.length > 0 && (
                 <Bucket
-                  title="Missing (in Towbook, not in US Tow DISPATCH)"
+                  title="Missing (in Towbook, not in Tow Dispatch)"
                   items={d.missing.map((m) => `${m.identifier} (${m.externalId})`)}
                 />
               )}
               {d.orphaned.length > 0 && (
                 <Bucket
-                  title="Orphaned (in US Tow DISPATCH, not in this export)"
+                  title="Orphaned (in Tow Dispatch, not in this export)"
                   items={d.orphaned.map((m) => `${m.identifier} (${m.externalId})`)}
                 />
               )}

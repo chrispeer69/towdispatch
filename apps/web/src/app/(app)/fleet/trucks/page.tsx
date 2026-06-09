@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { fetchTrucks } from '@/lib/api/fleet';
 import { getSessionToken } from '@/lib/auth/session';
-import type { PaginatedTrucks } from '@ustowdispatch/shared';
+import type { PaginatedTrucks } from '@towdispatch/shared';
 import Link from 'next/link';
 import { TruckListClient } from './truck-list-client';
 
@@ -24,13 +24,16 @@ export default async function TrucksPage({
   const params = await searchParams;
   // Combine Session 9.7 cached layout read with Session 9.8 token threading.
   const token = await getSessionToken();
-  const result = await fetchTrucks({
-    q: params.q,
-    status: params.status,
-    capacityClass: params.capacityClass,
-    equipment: params.equipment,
-    perPage: '50',
-  }, token);
+  const result = await fetchTrucks(
+    {
+      q: params.q,
+      status: params.status,
+      capacityClass: params.capacityClass,
+      equipment: params.equipment,
+      perPage: '50',
+    },
+    token,
+  );
   const initial = result ?? EMPTY_TRUCKS;
   return (
     <div className="space-y-4">

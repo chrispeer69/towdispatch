@@ -16,7 +16,7 @@ import { UsersClient } from './users-client';
 
 const TAB = findSettingsTab('users');
 
-export const metadata = { title: 'Users & Permissions — US Tow DISPATCH' };
+export const metadata = { title: 'Users & Permissions — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function UsersPermissionsPage(): Promise<JSX.Element> {

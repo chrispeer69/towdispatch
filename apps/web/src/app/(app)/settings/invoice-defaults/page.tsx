@@ -14,7 +14,7 @@ import { InvoiceDefaultsForm } from './invoice-defaults-form';
 
 const TAB = findSettingsTab('invoice-defaults');
 
-export const metadata = { title: 'Invoice Defaults — US Tow DISPATCH' };
+export const metadata = { title: 'Invoice Defaults — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function InvoiceDefaultsPage(): Promise<JSX.Element> {

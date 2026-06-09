@@ -1,6 +1,6 @@
 import { ApiError, apiServer } from '@/lib/api/client';
 import { setSessionCookies } from '@/lib/auth/cookies';
-import type { AuthenticatedResponse } from '@ustowdispatch/shared';
+import type { AuthenticatedResponse } from '@towdispatch/shared';
 /**
  * BFF for /auth/signup. Forwards to the API and, on success, sets the
  * httpOnly access + refresh cookies before returning the user/tenant payload.

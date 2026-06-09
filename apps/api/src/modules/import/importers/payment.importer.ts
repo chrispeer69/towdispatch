@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import {
   dollarsToCents,
@@ -54,7 +54,7 @@ export class PaymentImporter extends BaseImporter {
       [ctx.tenantId, externalId],
     );
     if (byExternal.rowCount && byExternal.rowCount > 0) {
-      return { action: 'skip_dedup', externalId, towcommandId: byExternal.rows[0]?.id ?? null };
+      return { action: 'skip_dedup', externalId, towdispatchId: byExternal.rows[0]?.id ?? null };
     }
 
     const id = uuidv7();
@@ -87,6 +87,6 @@ export class PaymentImporter extends BaseImporter {
       [invoiceId, amountCents],
     );
 
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 }

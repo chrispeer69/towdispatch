@@ -10,7 +10,7 @@ public final class Reachability: @unchecked Sendable {
     }
 
     private let monitor = NWPathMonitor()
-    private let queue = DispatchQueue(label: "com.ustowdispatch.driver.Reachability")
+    private let queue = DispatchQueue(label: "com.towdispatch.driver.Reachability")
     private var continuation: AsyncStream<Status>.Continuation?
 
     public init() {}

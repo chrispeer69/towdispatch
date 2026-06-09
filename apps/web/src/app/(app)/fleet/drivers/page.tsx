@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { fetchDrivers } from '@/lib/api/fleet';
 import { getSessionToken } from '@/lib/auth/session';
-import type { PaginatedDrivers } from '@ustowdispatch/shared';
+import type { PaginatedDrivers } from '@towdispatch/shared';
 import Link from 'next/link';
 import { DriverListClient } from './driver-list-client';
 
@@ -23,12 +23,15 @@ export default async function DriversPage({
   const params = await searchParams;
   // Combine Session 9.7 cached layout read with Session 9.8 token threading.
   const token = await getSessionToken();
-  const result = await fetchDrivers({
-    q: params.q,
-    employmentStatus: params.employmentStatus,
-    cdlClass: params.cdlClass,
-    perPage: '50',
-  }, token);
+  const result = await fetchDrivers(
+    {
+      q: params.q,
+      employmentStatus: params.employmentStatus,
+      cdlClass: params.cdlClass,
+      perPage: '50',
+    },
+    token,
+  );
   const initial = result ?? EMPTY_DRIVERS;
   return (
     <div className="space-y-4">

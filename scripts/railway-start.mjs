@@ -19,9 +19,9 @@ import { spawn, spawnSync } from 'node:child_process';
 const svc = (process.env.RAILWAY_SERVICE_NAME ?? '').toLowerCase();
 
 const TARGETS = {
-  web: { filter: '@ustowdispatch/web', script: 'start:prod', migrate: false },
-  backend: { filter: '@ustowdispatch/api', script: 'start:prod', migrate: true },
-  api: { filter: '@ustowdispatch/api', script: 'start:prod', migrate: true },
+  web: { filter: '@towdispatch/web', script: 'start:prod', migrate: false },
+  backend: { filter: '@towdispatch/api', script: 'start:prod', migrate: true },
+  api: { filter: '@towdispatch/api', script: 'start:prod', migrate: true },
 };
 
 const target = TARGETS[svc];
@@ -42,7 +42,7 @@ if (migrate) {
     process.exit(1);
   }
   process.stdout.write('[railway-start] running migrations before api boot…\n');
-  const m = spawnSync('pnpm', ['--filter', '@ustowdispatch/db', 'run', 'migrate'], {
+  const m = spawnSync('pnpm', ['--filter', '@towdispatch/db', 'run', 'migrate'], {
     stdio: 'inherit',
     shell: process.platform === 'win32',
   });

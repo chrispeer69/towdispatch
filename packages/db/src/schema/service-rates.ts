@@ -28,7 +28,7 @@ export const serviceRates = pgTable(
       .notNull()
       .references(() => serviceCatalog.id, { onDelete: 'cascade' }),
     /**
-     * One of the @ustowdispatch/shared VehicleClass values, or the literal
+     * One of the @towdispatch/shared VehicleClass values, or the literal
      * 'any' sentinel for class-independent services (Admin Fee, Storage by
      * day, etc.). Validated app-side; CHECK in 0023 enforces the same list.
      */

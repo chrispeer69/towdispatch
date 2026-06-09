@@ -45,7 +45,7 @@ SQL
 ### 1d. Outbound stub outbox (dev/staging only)
 
 ```bash
-curl -sf https://api.ustowdispatch.com/motor-club/agero/_test/outbox | jq 'length, .[-5:]'
+curl -sf https://api.towdispatch.com/motor-club/agero/_test/outbox | jq 'length, .[-5:]'
 ```
 
 Production runs the real Agero provider, not the stub; this endpoint is BadRequest in `NODE_ENV=production` (see `apps/api/src/integrations/motor-club/motor-club.controller.ts`).
@@ -58,7 +58,7 @@ Before paging Agero ops:
 
 ```bash
 # 1. Our process is healthy?
-curl -sf https://api.ustowdispatch.com/ready
+curl -sf https://api.towdispatch.com/ready
 
 # 2. Our worker queue is draining?
 psql "$DATABASE_ADMIN_URL" -c "
@@ -114,7 +114,7 @@ receiving automatic dispatches. Until further notice:
 
 We expect resolution within 1 hour. Next update at HH:MM ET.
 
-— US Tow DISPATCH operations
+— Tow Dispatch operations
 ```
 
 When the gateway recovers, send an "all clear" with the same channels.
@@ -145,7 +145,7 @@ Phase 1 will ship a `POST /motor-club/agero/replay` endpoint that walks `motor_c
 # Per-row: re-trigger the dispatch handler with the same payload
 psql "$DATABASE_ADMIN_URL" -t -A -F'|' <<'SQL' | \
   while IFS='|' read -r tenant_id external_id payload; do
-    curl -sf -X POST https://api.ustowdispatch.com/motor-club/agero/dispatch \
+    curl -sf -X POST https://api.towdispatch.com/motor-club/agero/dispatch \
       -H 'content-type: application/json' \
       -d "$payload"
   done

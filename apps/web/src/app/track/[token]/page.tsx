@@ -1,4 +1,4 @@
-import type { TrackingPublicView } from '@ustowdispatch/shared';
+import type { TrackingPublicView } from '@towdispatch/shared';
 import type { Metadata } from 'next';
 /**
  * Public customer tracking page — /track/[token].

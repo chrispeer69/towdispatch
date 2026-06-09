@@ -15,11 +15,11 @@ The 17A metrics emit on `/metrics`:
 
 ```
 # CPU per process
-ustowdispatch_api_process_cpu_user_seconds_total
-ustowdispatch_api_process_cpu_system_seconds_total
+towdispatch_api_process_cpu_user_seconds_total
+towdispatch_api_process_cpu_system_seconds_total
 
 # Resident memory
-ustowdispatch_api_process_resident_memory_bytes
+towdispatch_api_process_resident_memory_bytes
 
 # Request rate by route
 http_requests_total
@@ -31,17 +31,17 @@ http_request_duration_seconds
 db_query_duration_seconds
 ```
 
-Scrape interval: 15s (default Prometheus). Dashboard lives at `https://grafana.ustowdispatch.com/d/api-overview` (Phase 1 prerequisite — see `docs/observability.md`).
+Scrape interval: 15s (default Prometheus). Dashboard lives at `https://grafana.towdispatch.com/d/api-overview` (Phase 1 prerequisite — see `docs/observability.md`).
 
 ### 1b. Quick CLI signals
 
 ```bash
 # Live request rate (last 60s, per route) — pull from prom-client directly
-curl -sf https://api.ustowdispatch.com/metrics | \
+curl -sf https://api.towdispatch.com/metrics | \
   awk '/^http_requests_total/ && /200/ {print}' | head -20
 
 # Process resident memory
-curl -sf https://api.ustowdispatch.com/metrics | grep ustowdispatch_api_process_resident_memory_bytes
+curl -sf https://api.towdispatch.com/metrics | grep towdispatch_api_process_resident_memory_bytes
 
 # DB connection pool (run from a host with admin DB access)
 psql "$DATABASE_ADMIN_URL" -c "
@@ -115,7 +115,7 @@ Scale commands (when this lands):
 ```bash
 # Update the ECS service desired count
 aws ecs update-service \
-  --cluster ustowdispatch-prod \
+  --cluster towdispatch-prod \
   --service api \
   --desired-count 6
 

@@ -20,7 +20,7 @@ import {
   type ServiceCatalogEntryDto,
   type ServiceCategory,
   serviceCategoryValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ServiceCatalogForm } from './service-catalog-form';

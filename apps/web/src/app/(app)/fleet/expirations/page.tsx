@@ -1,7 +1,7 @@
 import { tryFetch } from '@/lib/api/client';
 import { fetchExpirations } from '@/lib/api/fleet';
 import { cn } from '@/lib/utils';
-import type { ExpirationRow, ExpirationsResponse } from '@ustowdispatch/shared';
+import type { ExpirationRow, ExpirationsResponse } from '@towdispatch/shared';
 
 interface SearchParams {
   windowDays?: string;

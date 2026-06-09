@@ -18,8 +18,8 @@ import {
   drivers as driversTable,
   jobs,
   vehicles as vehiclesTable,
-} from '@ustowdispatch/db';
-import { ERROR_CODES, type JobDto, type JobStatus, type Role } from '@ustowdispatch/shared';
+} from '@towdispatch/db';
+import { ERROR_CODES, type JobDto, type JobStatus, type Role } from '@towdispatch/shared';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { DocumentsService } from '../fleet/documents.service.js';

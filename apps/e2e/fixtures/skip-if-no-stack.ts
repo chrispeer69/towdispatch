@@ -1,7 +1,7 @@
 /**
  * Skip the entire test file when the live web + api stack isn't available.
  *
- * Without this guard, `pnpm --filter @ustowdispatch/e2e test` would fail
+ * Without this guard, `pnpm --filter @towdispatch/e2e test` would fail
  * immediately on a developer machine that hasn't booted docker. The CI
  * workflow sets E2E_RUN_REQUIRES_STACK=1 explicitly to opt in.
  *

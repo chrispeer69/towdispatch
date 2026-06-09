@@ -1,5 +1,5 @@
 import { Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
-import { ROLES, type TenantDto } from '@ustowdispatch/shared';
+import { ROLES, type TenantDto } from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';

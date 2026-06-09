@@ -16,7 +16,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { driverShifts, drivers, jobs, trucks, uuidv7 } from '@ustowdispatch/db';
+import { driverShifts, drivers, jobs, trucks, uuidv7 } from '@towdispatch/db';
 import {
   DISPATCH_EVENTS,
   type DriverDto,
@@ -26,7 +26,7 @@ import {
   ROLES,
   type Role,
   type TruckDto,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { DispatchEventsService } from './dispatch-events.service.js';

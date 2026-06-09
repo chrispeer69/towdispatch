@@ -124,13 +124,13 @@ To close items 3 / 4 / 6, the following landed in `apps/api/`:
 ## Verification log
 
 ```
-$ pnpm --filter @ustowdispatch/api build       ✓ zero errors
-$ pnpm --filter @ustowdispatch/api typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/api test        ✓ 138 passed, 18 DB-gated skips
-$ pnpm --filter @ustowdispatch/web build       ✓ green
-$ pnpm --filter @ustowdispatch/web typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/e2e typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/e2e test        ✓ 13 register, all stack-gated
+$ pnpm --filter @towdispatch/api build       ✓ zero errors
+$ pnpm --filter @towdispatch/api typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api test        ✓ 138 passed, 18 DB-gated skips
+$ pnpm --filter @towdispatch/web build       ✓ green
+$ pnpm --filter @towdispatch/web typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/e2e typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/e2e test        ✓ 13 register, all stack-gated
 ```
 
 The 13 E2E tests are: E2E-001…010 (10) + perf-lighthouse.spec.ts (the dashboard Lighthouse) + auto-discovered LCP smoke inside e2e-010 + the Agero auth-flow split into 3 sub-tests inside E2E-005. The CI workflow at `.github/workflows/e2e.yml` flips `E2E_RUN_REQUIRES_STACK=1` so the real assertions run in CI on every PR.
@@ -248,7 +248,7 @@ Checklist applied to every mutating form: `aria-busy` on the `<form>`, submit di
 
 `.github/workflows/e2e.yml` updated:
 
-- New steps: build the api, build the web, install Playwright Chromium, start API as background process on port 3601, start web (`next start`) on port 3000, poll `/health` and `/login` until both respond, then run `pnpm --filter @ustowdispatch/e2e test` which now includes Lighthouse by default.
+- New steps: build the api, build the web, install Playwright Chromium, start API as background process on port 3601, start web (`next start`) on port 3000, poll `/health` and `/login` until both respond, then run `pnpm --filter @towdispatch/e2e test` which now includes Lighthouse by default.
 - `E2E_RUN_REQUIRES_STACK=1` set unconditionally for the job.
 - New artifact `server-logs` uploads `apps/api/api.log` + `web.log` on failure.
 
@@ -282,12 +282,12 @@ Both fixes pushed the /login score from 91 / 94 / 96 to 94 / 98 / 96 — a real,
 ## Verification
 
 ```
-$ pnpm --filter @ustowdispatch/api build       ✓ zero errors
-$ pnpm --filter @ustowdispatch/api typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/api test        ✓ 138 passed, 18 DB-gated skips
-$ pnpm --filter @ustowdispatch/web build       ✓ green
-$ pnpm --filter @ustowdispatch/web typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/e2e typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api build       ✓ zero errors
+$ pnpm --filter @towdispatch/api typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api test        ✓ 138 passed, 18 DB-gated skips
+$ pnpm --filter @towdispatch/web build       ✓ green
+$ pnpm --filter @towdispatch/web typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/e2e typecheck   ✓ zero errors
 $ node apps/e2e/scripts/lighthouse-runner.mjs http://localhost:3000/login
   ✓ performance: 94, accessibility: 98, best-practices: 96
 ```

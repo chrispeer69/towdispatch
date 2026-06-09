@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
  * with ROLLBACK and marks the row 'cancelled'.
  */
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import type { Pool } from 'pg';
 import { APP_POOL } from '../../database/database.tokens.js';
 import { BundleService } from './bundle.service.js';
@@ -273,7 +273,7 @@ export class ImportRunService {
   ): Promise<void> {
     await client.query(
       `INSERT INTO import_run_events
-         (id, tenant_id, run_id, record_type, action, external_id, towcommand_id, error_message)
+         (id, tenant_id, run_id, record_type, action, external_id, towdispatch_id, error_message)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         uuidv7(),
@@ -282,7 +282,7 @@ export class ImportRunService {
         event.recordType,
         event.action,
         event.externalId ?? null,
-        event.towcommandId ?? null,
+        event.towdispatchId ?? null,
         event.errorMessage ?? null,
       ],
     );

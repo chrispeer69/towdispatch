@@ -126,7 +126,7 @@ async function bootstrap(): Promise<void> {
   const io = dispatchGateway.getServer();
   if (io) trackingGateway.attachNamespace(io);
 
-  config.logger.info({ port, host, env: config.nodeEnv }, 'US Tow DISPATCH API listening');
+  config.logger.info({ port, host, env: config.nodeEnv }, 'Tow Dispatch API listening');
 }
 
 bootstrap().catch((err) => {

@@ -31,7 +31,7 @@ import {
   NotFoundException,
   Optional,
 } from '@nestjs/common';
-import { customers, invoices, payments, tenants, uuidv7 } from '@ustowdispatch/db';
+import { customers, invoices, payments, tenants, uuidv7 } from '@towdispatch/db';
 import {
   type CardOnFileDto,
   ERROR_CODES,
@@ -41,7 +41,7 @@ import {
   type RefundPaymentPayload,
   type StripeAccountStatus,
   type StripeConnectStatusDto,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { Logger } from 'pino';
 import { ConfigService } from '../../config/config.service.js';

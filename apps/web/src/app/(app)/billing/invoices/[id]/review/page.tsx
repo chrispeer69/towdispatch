@@ -2,12 +2,12 @@ import { fetchInvoiceReview } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { fetchDrivers } from '@/lib/api/fleet';
 import { getSessionToken } from '@/lib/auth/session';
-import { invoiceStatusLabel } from '@ustowdispatch/shared';
+import { invoiceStatusLabel } from '@towdispatch/shared';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { InvoiceReviewClient } from './invoice-review-client';
 
-export const metadata = { title: 'Invoice review — US Tow DISPATCH' };
+export const metadata = { title: 'Invoice review — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function InvoiceReviewPage({

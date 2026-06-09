@@ -14,13 +14,13 @@ export async function GET(
     // If the caller passes ?format=csv, render the events as CSV for the
     // "Download errors" link. Otherwise return JSON.
     if (req.nextUrl.searchParams.get('format') === 'csv') {
-      const header = 'record_type,action,external_id,towcommand_id,error_message,occurred_at\n';
+      const header = 'record_type,action,external_id,towdispatch_id,error_message,occurred_at\n';
       const lines = data.events.map((e) =>
         [
           e.record_type ?? '',
           e.action ?? '',
           e.external_id ?? '',
-          e.towcommand_id ?? '',
+          e.towdispatch_id ?? '',
           (e.error_message ?? '').toString().replace(/"/g, '""'),
           e.occurred_at ?? '',
         ]

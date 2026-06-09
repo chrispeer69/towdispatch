@@ -5,14 +5,14 @@
  *   → logout → login (mfa_required) → challenge with TOTP (authenticated)
  *   → logout → login (mfa_required) → challenge with recovery code (authenticated)
  *
- * Talks to https://app.ustowdispatch.cloud (the Next BFF), which in turn calls
+ * Talks to https://app.towdispatch.cloud (the Next BFF), which in turn calls
  * the api. That tests the cookie bridge + proxy layer too, not just the api.
  *
  * Run: node scripts/mfa-e2e.mjs
  */
 import { authenticator } from 'otplib';
 
-const WEB = process.env.MFA_E2E_WEB ?? 'https://app.ustowdispatch.cloud';
+const WEB = process.env.MFA_E2E_WEB ?? 'https://app.towdispatch.cloud';
 
 const slug = `e2e-${Math.random().toString(36).slice(2, 8)}`;
 const email = `e2e-${Math.random().toString(36).slice(2, 8)}@example.test`;

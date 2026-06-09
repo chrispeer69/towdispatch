@@ -2,7 +2,7 @@
  * RLS isolation for account_service_availability (Admin Settings build 6
  * of 7). Mirrors account-rate-overrides-rls.spec.ts.
  */
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

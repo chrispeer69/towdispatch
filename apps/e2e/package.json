@@ -1,5 +1,5 @@
 {
-  "name": "@ustowdispatch/e2e",
+  "name": "@towdispatch/e2e",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "playwright-lighthouse": "4.0.0",
     "lighthouse": "12.2.1",
     "chrome-launcher": "1.1.2",
-    "@ustowdispatch/shared": "workspace:*",
+    "@towdispatch/shared": "workspace:*",
     "@types/node": "22.9.3",
     "typescript": "5.6.3"
   }

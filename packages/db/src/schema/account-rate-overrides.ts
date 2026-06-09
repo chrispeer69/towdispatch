@@ -52,7 +52,7 @@ export const accountRateOverrides = pgTable(
       .notNull()
       .references(() => serviceCatalog.id, { onDelete: 'restrict' }),
     /**
-     * Matches the VehicleClass enum in @ustowdispatch/shared, or 'any' for
+     * Matches the VehicleClass enum in @towdispatch/shared, or 'any' for
      * class-independent services. NULL = "no class scoping" (also class-
      * independent). Both forms are accepted at the API; the rate engine
      * treats null and 'any' identically.

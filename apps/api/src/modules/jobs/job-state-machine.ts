@@ -19,7 +19,7 @@
  * is more legible than a library, and it lets us cover every move with a
  * trivial unit test.
  */
-import type { JobStatus } from '@ustowdispatch/shared';
+import type { JobStatus } from '@towdispatch/shared';
 
 const TRANSITION_MAP: Readonly<Record<JobStatus, ReadonlyArray<JobStatus>>> = {
   new: ['dispatched', 'cancelled'],

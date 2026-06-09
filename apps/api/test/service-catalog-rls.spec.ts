@@ -19,7 +19,7 @@
  * Requires: DATABASE_URL (app_user) and DATABASE_ADMIN_URL (app_admin) at a
  * database with the migrations applied.
  */
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

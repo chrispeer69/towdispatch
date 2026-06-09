@@ -17,7 +17,7 @@ import {
   type UpdateAccountContractTermsPayload,
   bulkUpdateAccountRateCardSchema,
   updateAccountContractTermsSchema,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';

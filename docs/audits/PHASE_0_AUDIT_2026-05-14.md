@@ -1,4 +1,4 @@
-# TowCommand Pro — Phase 0 Senior Engineer Audit
+# TowDispatch Pro — Phase 0 Senior Engineer Audit
 **Date:** 2026-05-14
 **Auditor:** Claude Code (Senior Engineer mode)
 **Sessions reviewed:** 1–17
@@ -18,7 +18,7 @@ The platform is much further along than the test summary alone suggests. RLS is 
 | 3 | **fix(api): repair RLS-bypass red-team test — was silently skipped for weeks** (corrected route to `/jobs/intake`, updated payload shape) | `apps/api/test/security/rls-bypass.spec.ts` |
 | 4 | **fix(test): register `application/zip` content-type parser in test bootstrap** (mirrors `main.ts:106`; without it the import suite collapsed to silent 415→500s) | `apps/api/test/integration/helpers.ts` |
 | 5 | **fix(api): drop broken `WHERE tenant_id=$1` clause in import reconciliation SQL** (RLS already scopes the rows; the explicit clause referenced `$1` with an empty parameter array → `there is no parameter $1` 500) | `apps/api/src/modules/import/reconciliation.service.ts` |
-| 6 | **docs(runbooks): correct `api.towcommand.com` → `api.towcommand.cloud` (and `app.`, `grafana.`, `status.` subdomains) across all runbooks + observability docs** (operators copy-pasting curl commands during incidents would have hit a non-existent domain) | `docs/runbooks/*.md`, `docs/observability.md` |
+| 6 | **docs(runbooks): correct `api.towdispatch.com` → `api.towdispatch.cloud` (and `app.`, `grafana.`, `status.` subdomains) across all runbooks + observability docs** (operators copy-pasting curl commands during incidents would have hit a non-existent domain) | `docs/runbooks/*.md`, `docs/observability.md` |
 
 Net diff: 13 files changed, +89 / -37.
 
@@ -38,7 +38,7 @@ Sorted by severity. P0 first.
 | R-07 | **P1** | S | Android | `DriverFcmService.onNewToken()` is a stub: comment says "Phase 1: POST this token to /push/register endpoint." Until it's wired, no driver receives a push notification, so the dispatch flow degrades to in-app polling. | Add `POST /push/register` on the API (idempotent upsert by device id); wire the Android override to call it. Add E2E `e2e-008-driver-push-roundtrip.spec.ts` to the green list. |
 | R-08 | **P1** | S | Docs | `docs/runbooks/backup-strategy.md` does not state RTO/RPO targets. During an incident, ops cannot answer "how long until we're back" or "how much data will we lose." | Add header section: e.g. "**RTO 1h** (Postgres PITR + warm standby), **RPO 15min** (WAL streaming)." Confirm with the actual Railway tier configuration before committing the numbers. |
 | R-09 | **P1** | S | Docs | No rollback procedure documented for failed deploys. Railway's `preDeployCommand` halts on migration failure (good), but if a migration succeeds and the app then crashes, README does not explain how to roll back. | Add a "Rollback" section to README pointing at `scripts/deploy.sh` and the Railway dashboard's redeploy-previous-version action. Explicitly note: irreversible migrations (column drops, type changes) require a forward fix. |
-| R-10 | **P2** | S | Config | Hardcoded `https://errors.towcommand.com` URN in `apps/api/src/common/filters/global-exception.filter.ts:36,46,65`. RFC 9457 problem-type URIs do not have to resolve, but the domain is `.com` while production infra is `.cloud` — a future debugging session will burn time on this. | Either confirm `errors.towcommand.com` is a stable URN (and add a comment explaining), or move it to a config var (`PROBLEM_TYPE_BASE`) so prod and dev can differ. |
+| R-10 | **P2** | S | Config | Hardcoded `https://errors.towdispatch.com` URN in `apps/api/src/common/filters/global-exception.filter.ts:36,46,65`. RFC 9457 problem-type URIs do not have to resolve, but the domain is `.com` while production infra is `.cloud` — a future debugging session will burn time on this. | Either confirm `errors.towdispatch.com` is a stable URN (and add a comment explaining), or move it to a config var (`PROBLEM_TYPE_BASE`) so prod and dev can differ. |
 | R-11 | **P2** | S | Config | Intuit OAuth endpoints hardcoded in `apps/api/src/modules/accounting/qbo.provider.ts` (`appcenter.intuit.com`, `oauth.platform.intuit.com`, `quickbooks.api.intuit.com`). Cannot point at sandbox without recompile. | Add `QBO_APPCENTER_BASE`, `QBO_OAUTH_BASE`, `QBO_API_BASE` to `config.schema.ts` with sensible defaults; thread through `QboProvider`. |
 | R-12 | **P2** | M | Web | No CSP header on the web frontend (`next.config.mjs` sets X-Frame-Options, X-Content-Type-Options, Referrer-Policy but no `Content-Security-Policy`). API has CSP via Helmet; web does not. | Mirror API CSP rules in `next.config.mjs.headers()`: `default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; connect-src 'self' wss: https://api.stripe.com; frame-src https://js.stripe.com; frame-ancestors 'none'`. Test in browser before merging — Next.js needs `'unsafe-inline'` on script for hydration scripts. |
 | R-13 | **P2** | M | Tests | No web unit tests (`apps/web/src/**/*.test.ts` — none found). E2E covers happy paths but bug regressions in form components or BFF route handlers will land in production. | Add Vitest or Jest to `apps/web`; cover `lib/api/client.ts`, `lib/auth/cookies.ts`, and the most-touched form components. |
@@ -103,7 +103,7 @@ Sorted by severity. P0 first.
 
 **What's working:** Every route uses `@ZodBody`, `@ZodQuery`, `@ZodParam` decorators. The global filter (`global-exception.filter.ts`) emits RFC 9457 problem+json; stack traces are routed to Sentry, never to the response. Error responses include a `requestId` for support correlation. Throttling is global (Redis-backed) with stricter per-route overrides on auth.
 
-**What's broken:** Hardcoded `https://errors.towcommand.com` URN (R-10 — `.com` while production is `.cloud`).
+**What's broken:** Hardcoded `https://errors.towdispatch.com` URN (R-10 — `.com` while production is `.cloud`).
 
 **What I fixed:** Nothing in this domain.
 
@@ -115,19 +115,19 @@ Sorted by severity. P0 first.
 **What's working:** Zod validates every env var at boot — fail-fast on missing required keys; `JWT_*_SECRET` enforced ≥32 chars; ports validated 1-65535. `.env.example` is complete (DB, Redis, JWT, mail, Stripe, QBO, Twilio, Sentry — all keys present). No `process.env` reads outside the config service in business-logic code.
 
 **What's broken:**
-- **`.cloud` vs `.com` domain inconsistency** (Manus's call-out): production infra is `towcommand.cloud` per Android `BuildConfig` and Session 17/18/19 reports. Runbooks all referenced `api.towcommand.com` — operators following them during an incident would have hit a non-existent host. **`towcommand.online` does NOT appear anywhere in the repo.** I think Manus's mention of `.online` was a misremembering — the real inconsistency was `.com` (in docs) vs `.cloud` (in code).
+- **`.cloud` vs `.com` domain inconsistency** (Manus's call-out): production infra is `towdispatch.cloud` per Android `BuildConfig` and Session 17/18/19 reports. Runbooks all referenced `api.towdispatch.com` — operators following them during an incident would have hit a non-existent host. **`towdispatch.online` does NOT appear anywhere in the repo.** I think Manus's mention of `.online` was a misremembering — the real inconsistency was `.com` (in docs) vs `.cloud` (in code).
 - Hardcoded Intuit OAuth endpoints (R-11).
-- Hardcoded `errors.towcommand.com` URN (R-10).
+- Hardcoded `errors.towdispatch.com` URN (R-10).
 - Hardcoded `localhost:3001` fallbacks in browser-bound code (R-14) — works in production today because the build sets `NEXT_PUBLIC_API_URL`, but a CI misconfig will silently ship a localhost-pointing bundle.
 
-**What I fixed:** Updated all `api.towcommand.com` / `app.towcommand.com` / `grafana.towcommand.com` / `status.towcommand.com` in `docs/runbooks/*.md` and `docs/observability.md` to `.cloud`. Email addresses (`incidents@towcommand.com`, `security@towcommand.com`) intentionally left on `.com` — those mailboxes may be configured separately and should be confirmed before changing.
+**What I fixed:** Updated all `api.towdispatch.com` / `app.towdispatch.com` / `grafana.towdispatch.com` / `status.towdispatch.com` in `docs/runbooks/*.md` and `docs/observability.md` to `.cloud`. Email addresses (`incidents@towdispatch.com`, `security@towdispatch.com`) intentionally left on `.com` — those mailboxes may be configured separately and should be confirmed before changing.
 
 ---
 
 ### 7 — Deployment readiness
 **Reviewed:** `apps/api/railway.toml`, `apps/api/Dockerfile`, `apps/api/src/main.ts` bootstrap, `apps/api/src/modules/health/health.controller.ts`.
 
-**What's working:** Railway `preDeployCommand = "pnpm --filter @towcommand/db run migrate"` runs Drizzle + raw SQL migrations before the app binds to a port; failure halts the deploy with the previous version still serving. Healthcheck path `/health` (and `/healthz`, `/ready`, `/readyz` aliases). `/ready` validates DB connectivity (returns 503 if Postgres is unreachable). Dockerfile is single-stage on `node:20-bookworm-slim`; pnpm-lock + package.json are copied before source for cache friendliness. Should fit comfortably on a 1GB Railway instance — the API image does not include the web build. `app.enableShutdownHooks()` is wired and multiple modules implement `onModuleDestroy()` (dispatch gateway, tracking gateway, accounting sync, job-completion listener). Logging is structured JSON via Pino with sensitive-field redaction (`authorization`, `cookie`, `password`, `totp_secret`).
+**What's working:** Railway `preDeployCommand = "pnpm --filter @towdispatch/db run migrate"` runs Drizzle + raw SQL migrations before the app binds to a port; failure halts the deploy with the previous version still serving. Healthcheck path `/health` (and `/healthz`, `/ready`, `/readyz` aliases). `/ready` validates DB connectivity (returns 503 if Postgres is unreachable). Dockerfile is single-stage on `node:20-bookworm-slim`; pnpm-lock + package.json are copied before source for cache friendliness. Should fit comfortably on a 1GB Railway instance — the API image does not include the web build. `app.enableShutdownHooks()` is wired and multiple modules implement `onModuleDestroy()` (dispatch gateway, tracking gateway, accounting sync, job-completion listener). Logging is structured JSON via Pino with sensitive-field redaction (`authorization`, `cookie`, `password`, `totp_secret`).
 
 **What's broken:** Redis health is not checked in `/ready` (acceptable — Redis is used for throttling/queues which can degrade gracefully, but worth documenting).
 
@@ -136,7 +136,7 @@ Sorted by severity. P0 first.
 ---
 
 ### 8 — Frontend stability (Next.js web)
-**Reviewed:** `pnpm --filter @towcommand/web build` (PASS, no warnings); grep for `console.log` (zero in `apps/web/src`); grep for hardcoded URLs; loading/error UI in dispatch board, intake, billing/invoices/new, accounting/settings, accounting/mapping.
+**Reviewed:** `pnpm --filter @towdispatch/web build` (PASS, no warnings); grep for `console.log` (zero in `apps/web/src`); grep for hardcoded URLs; loading/error UI in dispatch board, intake, billing/invoices/new, accounting/settings, accounting/mapping.
 
 **What's working:** Build completes cleanly with 75+ routes. **Zero `console.log` in production source.** BFF pattern with `apiServer*` helpers attaches httpOnly cookies; refresh-on-401 retry implemented; recent commits (#5–#13) hardened the redirect/auth path so server-component renders no longer race the cookie write. Loading/error states are present on the audited pages.
 
@@ -234,9 +234,9 @@ QBO integration is genuinely production-ready — far better than typical "we'll
 
 | Suite | Result | Detail |
 |---|---|---|
-| Web build (`pnpm --filter @towcommand/web build`) | **PASS** | 75+ routes built, no warnings |
-| API typecheck (`pnpm --filter @towcommand/api typecheck`) | **PASS** | exit 0 |
-| API test suite (`pnpm --filter @towcommand/api test`) — before fixes | **FAIL** | 9 of 323 failed, 13 skipped, 6 of 33 files failed |
+| Web build (`pnpm --filter @towdispatch/web build`) | **PASS** | 75+ routes built, no warnings |
+| API typecheck (`pnpm --filter @towdispatch/api typecheck`) | **PASS** | exit 0 |
+| API test suite (`pnpm --filter @towdispatch/api test`) — before fixes | **FAIL** | 9 of 323 failed, 13 skipped, 6 of 33 files failed |
 | API test suite — after fixes (this session) | **FAIL** | 6 of 323 failed, 12 skipped, 4 of 33 files failed |
 | **RLS unit tests** (`apps/api/test/rls.spec.ts`) | **PASS** | 7/7 — DB-level tenant isolation confirmed |
 | **RLS bypass red-team** (`apps/api/test/security/rls-bypass.spec.ts`) | **PASS** (now actually runs) | 1/1 — every cross-tenant ID returns 404, never 200 |
@@ -264,7 +264,7 @@ QBO integration is genuinely production-ready — far better than typical "we'll
 **Specific caveats:**
 1. **Do NOT promise the Towbook import feature in production.** R-01 must land before any tenant is told "you can import from Towbook." Imports currently complete with `status='failed'` even on a clean synthetic bundle.
 2. **The chat suite (R-02) is invisible.** A schema-drift bug means 12 tests have been silently skipped, possibly for weeks. Investigate and either fix the column reference or fix the schema. Either way, it's masking real coverage.
-3. **Confirm `incidents@towcommand.com` and `security@towcommand.com` actually receive mail** before the next runbook publication, or change them to `@towcommand.cloud`. I left them on `.com` as a conservative default but did not verify.
+3. **Confirm `incidents@towdispatch.com` and `security@towdispatch.com` actually receive mail** before the next runbook publication, or change them to `@towdispatch.cloud`. I left them on `.com` as a conservative default but did not verify.
 4. **Audit `R-05 (auditor role)` and decide product intent before launching to a tenant who needs read-only investor / accountant access.** Right now `auditor` is wired into 2 endpoints (after my fix); everything else 403s.
 5. **The `publicKeyConfigured` placeholder bug (R-03) will mislead operators.** Fix before any tenant is asked to verify their Stripe configuration.
 

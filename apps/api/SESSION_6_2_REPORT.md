@@ -76,7 +76,7 @@ but unscoped; this closes that hole at the same time.
 
 The drizzle migration runner reads from `packages/db/drizzle/` and the raw
 SQL pass from `packages/db/sql/` (see `packages/db/src/migrate.ts`). The
-journal entry's `idx`/`when` are increasing, so `pnpm --filter @ustowdispatch/db
+journal entry's `idx`/`when` are increasing, so `pnpm --filter @towdispatch/db
 migrate` applies cleanly against a database at the prior head.
 
 > Note on path: the brief mentioned `apps/api/db/migrations/`. The repo
@@ -110,7 +110,7 @@ that "at least manager" is encoded as `ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER`)
 | Total tests collected | 250 | 275 (+25; 12 chat integration tests skip without Postgres) |
 | New test files | — | `src/modules/chat/chat-units.spec.ts`, `test/integration/chat.spec.ts` |
 
-Existing tests: **no regressions** — `pnpm --filter @ustowdispatch/api test`
+Existing tests: **no regressions** — `pnpm --filter @towdispatch/api test`
 remains 100% green on the unit suite. Integration tests are skipped on this
 host (no `DATABASE_ADMIN_URL`/`REDIS_URL`); they auto-run on the docker-
 compose stack via `skipIfNoDb`.
@@ -191,7 +191,7 @@ Zero. Every change is additive:
 
 - **Env vars added**: none.
 - **Migrations to run on next deploy**:
-  1. `pnpm --filter @ustowdispatch/db migrate` — applies
+  1. `pnpm --filter @towdispatch/db migrate` — applies
      `packages/db/drizzle/0011_chat.sql` (tables + FKs + indexes) and
      `packages/db/sql/0016_chat.sql` (RLS, CHECK constraints, audit
      trigger, partial unique index). Both files are idempotent

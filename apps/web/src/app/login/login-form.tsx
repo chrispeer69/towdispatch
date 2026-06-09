@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
  * MFA_LOGIN_GATE_ENABLED on the API to re-wire them.
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { type LoginPayload, type TenantSelectionDto, loginSchema } from '@ustowdispatch/shared';
+import { type LoginPayload, type TenantSelectionDto, loginSchema } from '@towdispatch/shared';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';

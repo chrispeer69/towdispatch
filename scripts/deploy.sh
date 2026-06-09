@@ -30,7 +30,7 @@ run() {
 }
 
 echo "==============================================="
-echo "US Tow DISPATCH deploy"
+echo "Tow Dispatch deploy"
 echo "  Environment: $ENV_TARGET"
 echo "  Git SHA:     $GIT_SHA"
 echo "  Release tag: $RELEASE_TAG"
@@ -61,26 +61,26 @@ echo "[deploy] installing dependencies"
 run pnpm install --frozen-lockfile
 
 echo "[deploy] building api"
-run pnpm --filter @ustowdispatch/api build
+run pnpm --filter @towdispatch/api build
 
 echo "[deploy] building web"
-run pnpm --filter @ustowdispatch/web build
+run pnpm --filter @towdispatch/web build
 
 # ---------- 4. Tests gate ----------
 # Skip if SKIP_TESTS=1 — only for hotfix paths under §incident-response.
 if [[ "${SKIP_TESTS:-0}" != "1" ]]; then
   echo "[deploy] running unit + integration tests (DB-gated specs are skipped)"
-  run pnpm --filter @ustowdispatch/api test
-  run pnpm --filter @ustowdispatch/api typecheck
-  run pnpm --filter @ustowdispatch/web typecheck
-  run pnpm --filter @ustowdispatch/e2e typecheck
+  run pnpm --filter @towdispatch/api test
+  run pnpm --filter @towdispatch/api typecheck
+  run pnpm --filter @towdispatch/web typecheck
+  run pnpm --filter @towdispatch/e2e typecheck
 fi
 
 # ---------- 5. Migrations ----------
 # Migrations are forward-only. The runner is idempotent — `migrate` against
 # a DB at the latest version is a no-op.
 echo "[deploy] applying migrations"
-run pnpm --filter @ustowdispatch/db migrate
+run pnpm --filter @towdispatch/db migrate
 
 # ---------- 6. Deploy services ----------
 case "$DEPLOY_PLATFORM" in
@@ -101,8 +101,8 @@ case "$DEPLOY_PLATFORM" in
     fi
     echo "[deploy] deploying to AWS (Phase 1 — see runbook)"
     echo "::warning::AWS deploy path is documented but not yet wired; defaulting to dry-run" >&2
-    echo "DRY-RUN aws ecs update-service --cluster ustowdispatch-$ENV_TARGET --service api --force-new-deployment"
-    echo "DRY-RUN aws ecs update-service --cluster ustowdispatch-$ENV_TARGET --service web --force-new-deployment"
+    echo "DRY-RUN aws ecs update-service --cluster towdispatch-$ENV_TARGET --service api --force-new-deployment"
+    echo "DRY-RUN aws ecs update-service --cluster towdispatch-$ENV_TARGET --service web --force-new-deployment"
     ;;
   *)
     echo "::error::unknown DEPLOY_PLATFORM: $DEPLOY_PLATFORM" >&2
@@ -113,9 +113,9 @@ esac
 # ---------- 7. Post-deploy verification ----------
 echo "[deploy] verifying deploy"
 case "$ENV_TARGET" in
-  production) BASE='https://api.ustowdispatch.com' ;;
-  staging)    BASE='https://api-staging.ustowdispatch.com' ;;
-  *)          BASE='https://api-dev.ustowdispatch.com' ;;
+  production) BASE='https://api.towdispatch.com' ;;
+  staging)    BASE='https://api-staging.towdispatch.com' ;;
+  *)          BASE='https://api-dev.towdispatch.com' ;;
 esac
 
 # Probe /health (liveness) then /ready (db + redis)

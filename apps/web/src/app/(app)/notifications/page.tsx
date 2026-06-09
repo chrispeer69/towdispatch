@@ -14,7 +14,7 @@ import { Bell, Settings } from 'lucide-react';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Notifications — US Tow DISPATCH' };
+export const metadata = { title: 'Notifications — Tow Dispatch' };
 
 export default function NotificationsPage(): JSX.Element {
   return (

@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-12
 **Branch:** `master`
-**Status:** Shipped. The importer migrates 5+ years of historical Towbook data into US Tow DISPATCH for Roadside Towing and Recovery, Inc. (tenant #001) and Auto Lyft (tenant #002) once the founder produces an export bundle.
+**Status:** Shipped. The importer migrates 5+ years of historical Towbook data into Tow Dispatch for Roadside Towing and Recovery, Inc. (tenant #001) and Auto Lyft (tenant #002) once the founder produces an export bundle.
 
 ## TL;DR
 
@@ -141,7 +141,7 @@ None. The importer uses existing infrastructure:
 
 ### Migrations to run
 ```bash
-pnpm --filter @ustowdispatch/db migrate
+pnpm --filter @towdispatch/db migrate
 # applies packages/db/sql/0017_import.sql
 ```
 
@@ -164,7 +164,7 @@ The `application/zip` Fastify parser is registered with a 2 GiB body limit in `a
 2. Choose **Full Historical Export** (all dates).
 3. Tick every category: Customers, Vehicles, Calls, Impounds, Drivers, Trucks, Invoices, Payments, Motor Club History, Attachments/Media.
 4. **Submit**. Towbook will email a download link within 1–48 hours depending on volume.
-5. Download the `.zip`. Do **not** unzip it — US Tow DISPATCH consumes the ZIP directly.
+5. Download the `.zip`. Do **not** unzip it — Tow Dispatch consumes the ZIP directly.
 
 ### Step 2 — Validate the bundle locally
 
@@ -178,7 +178,7 @@ The `application/zip` Fastify parser is registered with a 2 GiB body limit in `a
 
 ### Step 3 — Dry-run
 
-1. Log in to US Tow DISPATCH as the **owner** of the target tenant.
+1. Log in to Tow Dispatch as the **owner** of the target tenant.
 2. Navigate to **Settings → Towbook Import** (`/import`).
 3. Drag the Towbook ZIP onto the drop zone.
 4. Click **Dry-run**.
@@ -204,8 +204,8 @@ Skip this step if dry-run errored counts are all zero. Otherwise:
 2. Drop the **same** Towbook ZIP you imported.
 3. Click **Run reconciliation**.
 4. Look at each card:
-   - **Missing** = `0` → every row in the bundle made it into US Tow DISPATCH.
-   - **Orphaned** = `0` → no US Tow DISPATCH rows are stamped with `external_source='towbook'` that aren't in the bundle (would suggest you imported, then someone deleted things in Towbook).
+   - **Missing** = `0` → every row in the bundle made it into Tow Dispatch.
+   - **Orphaned** = `0` → no Tow Dispatch rows are stamped with `external_source='towbook'` that aren't in the bundle (would suggest you imported, then someone deleted things in Towbook).
    - **Drift** = `0` → every imported row's data still matches the Towbook export.
 5. **Cancel Towbook when all three are zero for every record type.**
 
@@ -230,10 +230,10 @@ Same process. Log in as Auto Lyft's owner — the tenant scoping means there's n
 ## Verification log
 
 ```
-$ pnpm --filter @ustowdispatch/api typecheck
+$ pnpm --filter @towdispatch/api typecheck
 # Errors: 4 (all pre-existing in billing/stripe). Zero in import/.
 
-$ pnpm --filter @ustowdispatch/api test
+$ pnpm --filter @towdispatch/api test
 Test Files  13 passed | 15 skipped (28)
      Tests  132 passed | 174 skipped (306)
   Duration  3.32s
@@ -246,7 +246,7 @@ Test Files  13 passed | 15 skipped (28)
 # reconciliation, cross-tenant rejection, RLS).
 
 $ pnpm exec tsx scripts/synth-towbook-bundle.ts
-Wrote /Users/chrispeer69/dev/ustowdispatch/apps/api/towbook-synth.zip (286.9 KiB)
+Wrote /Users/chrispeer69/dev/towdispatch/apps/api/towbook-synth.zip (286.9 KiB)
 # 100 customers, 200 vehicles, 500 jobs, 50 impounds, 20 drivers,
 # 25 trucks, 400 invoices, 350 payments, 300 motor-club rows, 50 attachments.
 

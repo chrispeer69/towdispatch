@@ -1,6 +1,6 @@
-# US Tow DISPATCH Driver (iOS)
+# Tow Dispatch Driver (iOS)
 
-Native iOS driver app for US Tow DISPATCH. SwiftUI + Combine + async/await, MVVM with feature-foldered modular monolith. Offline-first via a SQLite outbox (today: file-backed; GRDB swap planned — see [`SESSION_6_REPORT.md`](SESSION_6_REPORT.md)).
+Native iOS driver app for Tow Dispatch. SwiftUI + Combine + async/await, MVVM with feature-foldered modular monolith. Offline-first via a SQLite outbox (today: file-backed; GRDB swap planned — see [`SESSION_6_REPORT.md`](SESSION_6_REPORT.md)).
 
 Min iOS: **16.4** (Stripe Tap to Pay on iPhone floor).
 Min Xcode: **15.3**, tested on **Xcode 26.4**.
@@ -9,7 +9,7 @@ Min Xcode: **15.3**, tested on **Xcode 26.4**.
 
 ```
 apps/driver-ios/
-├── TowCommandDriver/          # App target (SwiftUI views, view models)
+├── TowDispatchDriver/          # App target (SwiftUI views, view models)
 │   ├── App/                   # Composition root, root view, settings store
 │   ├── Features/              # Feature-foldered code
 │   │   ├── Auth/              # Login + biometric
@@ -25,9 +25,9 @@ apps/driver-ios/
 ├── Packages/
 │   ├── Core/                  # SPM: models, networking, persistence, sync engine, state machine
 │   └── DesignSystem/          # SPM: colors, typography, components, glove-mode modifier
-├── TowCommandDriverTests/     # App-target unit tests (smoke + VIN validator)
-├── TowCommandDriverUITests/   # UI tests (status flow harness)
-├── TowCommandDriver.xcodeproj # Generated from scripts/generate-xcodeproj.py
+├── TowDispatchDriverTests/     # App-target unit tests (smoke + VIN validator)
+├── TowDispatchDriverUITests/   # UI tests (status flow harness)
+├── TowDispatchDriver.xcodeproj # Generated from scripts/generate-xcodeproj.py
 ├── scripts/
 │   └── generate-xcodeproj.py  # Re-run after adding/removing app source files
 ├── fastlane/
@@ -50,12 +50,12 @@ python3 scripts/generate-xcodeproj.py
 swift test --package-path Packages/Core
 
 # Open in Xcode
-open TowCommandDriver.xcodeproj
+open TowDispatchDriver.xcodeproj
 ```
 
 ## Configuration
 
-App config lives in `TowCommandDriver/Resources/Info.plist` under the `TCConfig`
+App config lives in `TowDispatchDriver/Resources/Info.plist` under the `TCConfig`
 dict. The defaults point at `http://localhost:3001` for the local backend.
 Override for staging/prod by editing the plist or providing a `.local.xcconfig`
 that sets `TCConfig` keys.
@@ -79,8 +79,8 @@ excludes `*.local.xcconfig`.
 
 ```bash
 xcodebuild build \
-  -project TowCommandDriver.xcodeproj \
-  -scheme TowCommandDriver \
+  -project TowDispatchDriver.xcodeproj \
+  -scheme TowDispatchDriver \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
 
@@ -92,8 +92,8 @@ swift test --package-path Packages/Core
 
 # Full suite — runs in iPhone 15 simulator
 xcodebuild test \
-  -project TowCommandDriver.xcodeproj \
-  -scheme TowCommandDriver \
+  -project TowDispatchDriver.xcodeproj \
+  -scheme TowDispatchDriver \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
 
@@ -119,7 +119,7 @@ Then pull-to-refresh the **Queue** tab in the running app.
 ## Backend contract
 
 The iOS app mirrors the Android client's API surface
-([`apps/driver-android/.../UsTowDispatchApi.kt`](../driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/data/api/UsTowDispatchApi.kt))
+([`apps/driver-android/.../TowDispatchApi.kt`](../driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/data/api/TowDispatchApi.kt))
 — that's the source of truth. The endpoints in use are:
 
 ```
@@ -136,7 +136,7 @@ POST /dispatch/jobs/{id}/photos
 
 If the backend grows new routes for payments / DVIR / earnings / chat, add
 them in `Packages/Core/Sources/Core/Networking/Endpoints.swift` and the
-matching client method in `USTowDispatchAPI.swift`.
+matching client method in `TowDispatchAPI.swift`.
 
 ## What ships in Session 6
 

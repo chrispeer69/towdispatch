@@ -25,7 +25,7 @@ import {
   serviceCalculationUnitValues,
   serviceCategoryValues,
   vehicleClassValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 

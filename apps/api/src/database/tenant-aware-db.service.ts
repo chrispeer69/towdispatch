@@ -20,7 +20,7 @@
  * zero rows for any tenant table, which is the desired behavior.
  */
 import { Inject, Injectable } from '@nestjs/common';
-import * as schema from '@ustowdispatch/db/schema';
+import * as schema from '@towdispatch/db/schema';
 import { sql } from 'drizzle-orm';
 import { type NodePgDatabase, drizzle } from 'drizzle-orm/node-postgres';
 import type { Pool, PoolClient } from 'pg';

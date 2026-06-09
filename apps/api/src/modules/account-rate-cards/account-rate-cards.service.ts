@@ -28,7 +28,7 @@ import {
   serviceCatalog,
   serviceRates,
   uuidv7,
-} from '@ustowdispatch/db';
+} from '@towdispatch/db';
 import {
   type AccountRateCardDto,
   type AccountRateOverrideDto,
@@ -39,7 +39,7 @@ import {
   SERVICE_RATE_ANY_CLASS,
   type UpdateAccountContractTermsPayload,
   resolveAccountOverridePriceCents,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 

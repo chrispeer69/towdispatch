@@ -7,7 +7,7 @@
  * needed.
  */
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
-import { ERROR_CODES } from '@ustowdispatch/shared';
+import { ERROR_CODES } from '@towdispatch/shared';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

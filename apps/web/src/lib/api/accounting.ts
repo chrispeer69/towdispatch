@@ -12,7 +12,7 @@ import type {
   RetrySyncResponse,
   SyncStatusResponse,
   UpdateAccountMappingPayload,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { apiServer } from './client';
 
 export async function fetchAccountingStatus(): Promise<AccountingConnectStatusDto> {

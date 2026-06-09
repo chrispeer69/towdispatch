@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
-import type { StorageProvider } from '@ustowdispatch/shared';
+import { uuidv7 } from '@towdispatch/db';
+import type { StorageProvider } from '@towdispatch/shared';
 import { STORAGE_PROVIDER } from '../../storage/storage.module.js';
 import { BundleService } from '../bundle.service.js';
 import { normalizeString } from '../normalizers.js';
@@ -92,13 +92,13 @@ export class AttachmentImporter extends BaseImporter {
       return {
         action: 'skip_dedup',
         externalId: filename,
-        towcommandId: existing.rows[0]?.id ?? null,
+        towdispatchId: existing.rows[0]?.id ?? null,
       };
     }
 
     if (ctx.mode === 'dry_run') {
       // Skip the actual storage write in dry-run, but record the intent.
-      return { action: 'create', externalId: filename, towcommandId: null };
+      return { action: 'create', externalId: filename, towdispatchId: null };
     }
 
     const stored = await this.storage.put({
@@ -128,7 +128,7 @@ export class AttachmentImporter extends BaseImporter {
         bytes.byteLength,
       ],
     );
-    return { action: 'create', externalId: filename, towcommandId: id };
+    return { action: 'create', externalId: filename, towdispatchId: id };
   }
 }
 

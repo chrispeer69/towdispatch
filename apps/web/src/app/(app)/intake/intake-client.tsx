@@ -39,7 +39,7 @@ import {
   type RateQuote,
   jobAuthorizedByValues,
   jobServiceTypeValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { CheckCircle2, MapPin, PhoneCall, Truck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';

@@ -11,7 +11,7 @@ import { fetchAccountingStatus, fetchSyncStatus } from '@/lib/api/accounting';
  * here would crash every page render in production.
  */
 import { ApiError } from '@/lib/api/client';
-import type { AccountingConnectStatusDto, SyncStatusResponse } from '@ustowdispatch/shared';
+import type { AccountingConnectStatusDto, SyncStatusResponse } from '@towdispatch/shared';
 import type { JSX } from 'react';
 import { AccountingSettingsClient } from './settings-client';
 

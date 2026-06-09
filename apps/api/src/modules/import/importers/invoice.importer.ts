@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import { dollarsToCents, normalizeString, parseTowbookTimestamp } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
@@ -78,7 +78,7 @@ export class InvoiceImporter extends BaseImporter {
          WHERE id=$1`,
         [id, status, totalCents, balanceCents, issuedAt, dueAt],
       );
-      return { action: 'update', externalId, towcommandId: id };
+      return { action: 'update', externalId, towdispatchId: id };
     }
 
     const id = uuidv7();
@@ -110,6 +110,6 @@ export class InvoiceImporter extends BaseImporter {
         externalId,
       ],
     );
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 }

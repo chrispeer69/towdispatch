@@ -51,7 +51,7 @@ Every row inserted by this script has a deterministic UUID derived from `sha1("r
 
 ## Production checklist
 
-1. `pnpm --filter @ustowdispatch/db build` (TS → JS for migrations).
+1. `pnpm --filter @towdispatch/db build` (TS → JS for migrations).
 2. (one-time) `pnpm db:migrate` — applies `sql/0021_customers_referral_source.sql`.
 3. `SEED_DEMO_CONFIRM=YES_I_AM_SURE pnpm db:seed:demo --target=production --reset`.
 4. Verify counts in `POST_SEED_REPORT.md` (written at repo root on every successful run).

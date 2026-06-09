@@ -15,7 +15,7 @@
  * raw enum.
  */
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { trackingLinks } from '@ustowdispatch/db';
+import { trackingLinks } from '@towdispatch/db';
 import {
   DISPATCH_EVENTS,
   type DriverLocationChangedEvent,
@@ -24,7 +24,7 @@ import {
   type TrackingLanguage,
   type TrackingMessageReceivedEvent,
   trackingStatusLabel,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { eq } from 'drizzle-orm';
 import type { Namespace, Server } from 'socket.io';
 import { TransactionRunner } from '../../database/transaction-runner.service.js';

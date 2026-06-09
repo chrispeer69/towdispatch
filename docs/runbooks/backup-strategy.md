@@ -38,7 +38,7 @@ Sample crontab the script should install:
 ### Bucket layout
 
 ```
-s3://ustowdispatch-backups/postgres/
+s3://towdispatch-backups/postgres/
 ├── hourly/   YYYY/MM/DD/HH-pg_dump.sql.gz       (14-day TTL via S3 lifecycle rule)
 ├── daily/    YYYY/MM/DD-pg_dump.sql.gz          (90-day TTL)
 └── monthly/  YYYY/MM-pg_dump.sql.gz             (390-day TTL; "monthly:" prefix preserved manually for the 13th)
@@ -58,7 +58,7 @@ A backup that's never been restored isn't a backup.
 
 ### What's in the bucket
 
-`s3://ustowdispatch-tenants/<tenant-id>/`:
+`s3://towdispatch-tenants/<tenant-id>/`:
 - `logo.png` and `brand-mark.png` (the per-tenant branding)
 - `job/<job-id>/photos/<uuid>.jpg|png|heic` (Session 6 driver photos)
 - `job/<job-id>/signatures/<uuid>.png` (Session 6 customer signatures)
@@ -82,12 +82,12 @@ A backup that's never been restored isn't a backup.
 S3 bucket should have:
 - **Versioning enabled** (recover deleted objects)
 - **Default encryption: SSE-S3** (Phase 1: SSE-KMS with a customer-managed key)
-- **Object lock: not set** on tenant uploads (would prevent legit deletes); **on** for `s3://ustowdispatch-incidents/` (forensic captures, 7-year object lock)
+- **Object lock: not set** on tenant uploads (would prevent legit deletes); **on** for `s3://towdispatch-incidents/` (forensic captures, 7-year object lock)
 - **Lifecycle rules** to enforce retentions above
 
 ### Backup of S3
 
-S3 itself is 11-nines durable; no separate backup. **Cross-region replication is Phase 1** (`ustowdispatch-tenants` → `ustowdispatch-tenants-dr` in `us-west-2`) for disaster recovery on the bucket level. RPO for tenant uploads is "what S3 says it is" plus the replication lag.
+S3 itself is 11-nines durable; no separate backup. **Cross-region replication is Phase 1** (`towdispatch-tenants` → `towdispatch-tenants-dr` in `us-west-2`) for disaster recovery on the bucket level. RPO for tenant uploads is "what S3 says it is" plus the replication lag.
 
 ---
 
@@ -125,8 +125,8 @@ The `audit_log` table is the long-term source of truth for "who did what when". 
 The strategy above assumes infrastructure that doesn't fully exist yet in this codebase:
 
 1. `scripts/backup-postgres.sh` — the cron script. Today, backups are whatever Railway provides automatically (daily snapshot, 30-day retention per Railway).
-2. `s3://ustowdispatch-backups` bucket with the lifecycle rules.
-3. Cross-region replication for `s3://ustowdispatch-tenants`.
+2. `s3://towdispatch-backups` bucket with the lifecycle rules.
+3. Cross-region replication for `s3://towdispatch-tenants`.
 4. WAL archiving for PITR (`archive_mode = on`, S3-backed `archive_command`).
 5. Monthly restore-test cron — schedule + alerting if it fails.
 6. SSE-KMS with a customer-managed key for tenant uploads.

@@ -1,9 +1,9 @@
 import { type PaymentListResponse, fetchPayments, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
-import { paymentMethodLabel } from '@ustowdispatch/shared';
+import { paymentMethodLabel } from '@towdispatch/shared';
 
-export const metadata = { title: 'Payments — US Tow DISPATCH' };
+export const metadata = { title: 'Payments — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const EMPTY_PAYMENTS: PaymentListResponse = { data: [], total: 0 };

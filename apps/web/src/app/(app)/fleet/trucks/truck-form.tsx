@@ -13,7 +13,7 @@ import {
   truckFuelTypeValues,
   truckStatusValues,
   truckTypeValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useState } from 'react';

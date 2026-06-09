@@ -1,0 +1,564 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 60;
+	objects = {
+/* Begin PBXBuildFile section */
+		0F832D8112EBA29EB56E9B19 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960240B90C2D2D217CFD48CF /* AppContainer.swift */; };
+		8BD24E0FD9508BA94099E942 /* PermissionsWizard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16355EC43213EC5A2C99FBCD /* PermissionsWizard.swift */; };
+		53872A16C2810E31613AA208 /* PushRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF40B92617371FD761129C77 /* PushRegistrar.swift */; };
+		CCBCED974EA796FA2EC956D2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6636DCCB10CFE1F8EE35310E /* RootView.swift */; };
+		E5DC4F6A71F17399A0B2709C /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66FADFFD960EDC0B0ADA2A69 /* SettingsStore.swift */; };
+		602E77F4BD31C1E76B71FF6E /* TowDispatchDriverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8463DDE9FAB6EB976F6EDF5E /* TowDispatchDriverApp.swift */; };
+		3E080B11FD405EF04453A97B /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53D0E2F3BC51D01047CCC42D /* LoginView.swift */; };
+		F7F701D15FE3A8B22FEE7F7B /* ChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608120AB41FF8B3A47247DF1 /* ChatScreen.swift */; };
+		84C32D4892F10D8C7EE86EE1 /* DVIRScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310DECA485CBC78E0A529B2A /* DVIRScreen.swift */; };
+		F080A6562BB08DEE2D478C85 /* DocumentVaultScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 995F5C97735B4CF488FD73AD /* DocumentVaultScreen.swift */; };
+		80EE996660C580D46CAAD5D6 /* EarningsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20507555760311A91854A08E /* EarningsScreen.swift */; };
+		0EDAC9E8D27F01B8ABE5C1BE /* JobDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 587459F384E3BEAA2317571A /* JobDetailScreen.swift */; };
+		016859F5E5A7D3A48BABF6F8 /* JobListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2AE566BDC5EA6E3AAE7262 /* JobListScreen.swift */; };
+		063ADB982D942A9262DA2C2B /* NavigationHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B54A86D0226294637965E13 /* NavigationHandoff.swift */; };
+		7C053444F7E21A405B9C91C9 /* PaymentsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B65FACFE159E1FF227F7D8 /* PaymentsService.swift */; };
+		F22D5BD910363080FB5561BB /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670C68F0D78BF91D5E5209C1 /* CameraCaptureView.swift */; };
+		E98178325F1D529C36B12A65 /* PhotoCaptureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C50B123E181E1A13D8CDDC /* PhotoCaptureScreen.swift */; };
+		4998151932D07614BC588F21 /* ProfileScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488DFDD6A7B260DF4C050274 /* ProfileScreen.swift */; };
+		6BD76A4E48C9832FFA1E786A /* PanicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F01551F2FC9BDB4D5D17C9A3 /* PanicButton.swift */; };
+		978AE0E2B883813307F72708 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161D6128DF224BE391A36443 /* SettingsScreen.swift */; };
+		22D53E64500F41AEC8EBF190 /* SignatureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BB76140635258B4AC6BE7F /* SignatureScreen.swift */; };
+		018B12F9F12D077FEE3723F9 /* TimeClockScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B78E22404087F1358B090C /* TimeClockScreen.swift */; };
+		5E7DFC597AADE11BB2C2C6B7 /* VINScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8F4D4885389EE240D4F2BC8 /* VINScanner.swift */; };
+		BD1C5029E3A89D7C05BEDDDA /* AppContainerSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8788BD3A663AC9E00989A51F /* AppContainerSmokeTests.swift */; };
+		A6F8F2C718D34A45D75C4B0F /* VINValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00B6401AE682D6B98302F6BA /* VINValidatorTests.swift */; };
+		9241368E7A9ECFB0DCAA849F /* StatusFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0D9B9EF86FF28DE53D0517D /* StatusFlowUITests.swift */; };
+		2DD9DC7618C3EBAF9F8D987D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8F860F726BCEED75D7D3791E /* Localizable.strings */; };
+		A94482B8CE44EF2FDB82D970 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = 0CB4985433B35CF382759002 /* Core */; };
+		B01B085214C6550E36ACDF49 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = 506C644C1D1DA0B7DD9DA1F3 /* DesignSystem */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		960240B90C2D2D217CFD48CF /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/App/AppContainer.swift"; sourceTree = "<group>"; };
+		16355EC43213EC5A2C99FBCD /* PermissionsWizard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/App/PermissionsWizard.swift"; sourceTree = "<group>"; };
+		CF40B92617371FD761129C77 /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/App/PushRegistrar.swift"; sourceTree = "<group>"; };
+		6636DCCB10CFE1F8EE35310E /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/App/RootView.swift"; sourceTree = "<group>"; };
+		66FADFFD960EDC0B0ADA2A69 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/App/SettingsStore.swift"; sourceTree = "<group>"; };
+		8463DDE9FAB6EB976F6EDF5E /* TowDispatchDriverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/App/TowDispatchDriverApp.swift"; sourceTree = "<group>"; };
+		53D0E2F3BC51D01047CCC42D /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Auth/LoginView.swift"; sourceTree = "<group>"; };
+		608120AB41FF8B3A47247DF1 /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Chat/ChatScreen.swift"; sourceTree = "<group>"; };
+		310DECA485CBC78E0A529B2A /* DVIRScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/DVIR/DVIRScreen.swift"; sourceTree = "<group>"; };
+		995F5C97735B4CF488FD73AD /* DocumentVaultScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/DocumentVault/DocumentVaultScreen.swift"; sourceTree = "<group>"; };
+		20507555760311A91854A08E /* EarningsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Earnings/EarningsScreen.swift"; sourceTree = "<group>"; };
+		587459F384E3BEAA2317571A /* JobDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Jobs/JobDetailScreen.swift"; sourceTree = "<group>"; };
+		5D2AE566BDC5EA6E3AAE7262 /* JobListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Jobs/JobListScreen.swift"; sourceTree = "<group>"; };
+		9B54A86D0226294637965E13 /* NavigationHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Navigation/NavigationHandoff.swift"; sourceTree = "<group>"; };
+		A3B65FACFE159E1FF227F7D8 /* PaymentsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Payments/PaymentsService.swift"; sourceTree = "<group>"; };
+		670C68F0D78BF91D5E5209C1 /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Photos/CameraCaptureView.swift"; sourceTree = "<group>"; };
+		75C50B123E181E1A13D8CDDC /* PhotoCaptureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Photos/PhotoCaptureScreen.swift"; sourceTree = "<group>"; };
+		488DFDD6A7B260DF4C050274 /* ProfileScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Profile/ProfileScreen.swift"; sourceTree = "<group>"; };
+		F01551F2FC9BDB4D5D17C9A3 /* PanicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Safety/PanicButton.swift"; sourceTree = "<group>"; };
+		161D6128DF224BE391A36443 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Settings/SettingsScreen.swift"; sourceTree = "<group>"; };
+		67BB76140635258B4AC6BE7F /* SignatureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/Signature/SignatureScreen.swift"; sourceTree = "<group>"; };
+		50B78E22404087F1358B090C /* TimeClockScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/TimeClock/TimeClockScreen.swift"; sourceTree = "<group>"; };
+		F8F4D4885389EE240D4F2BC8 /* VINScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriver/Features/VIN/VINScanner.swift"; sourceTree = "<group>"; };
+		8788BD3A663AC9E00989A51F /* AppContainerSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriverTests/AppContainerSmokeTests.swift"; sourceTree = "<group>"; };
+		00B6401AE682D6B98302F6BA /* VINValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriverTests/VINValidatorTests.swift"; sourceTree = "<group>"; };
+		D0D9B9EF86FF28DE53D0517D /* StatusFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TowDispatchDriverUITests/StatusFlowUITests.swift"; sourceTree = "<group>"; };
+		EF61687EE07F521749F45DFA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TowDispatchDriver/Resources/Info.plist"; sourceTree = "<group>"; };
+		EEB8D2129CF6E076F7455CB0 /* TowDispatchDriver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "TowDispatchDriver/Resources/TowDispatchDriver.entitlements"; sourceTree = "<group>"; };
+		F830B064E833FD426237B0FB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = "TowDispatchDriver/Resources/Localizable.strings"; sourceTree = "<group>"; };
+		465F446ECCB21E1F1E79497C /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = "TowDispatchDriver/Resources/es.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		4E783A9E10D2A8ABA38CD11C /* TowDispatchDriver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TowDispatchDriver.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C7CCDEB3609F1FAA874E941 /* TowDispatchDriverTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TowDispatchDriverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E635C1267B14E15F71F5D1A /* TowDispatchDriverUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TowDispatchDriverUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXVariantGroup section */
+		8F860F726BCEED75D7D3791E /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F830B064E833FD426237B0FB /* en */,
+				465F446ECCB21E1F1E79497C /* es */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin PBXGroup section */
+		870B3294C0CBD48AF6BBCC1B /* TowDispatchDriver */ = {
+			isa = PBXGroup;
+			children = (
+				3C3B0F03DC089F93B8457928 /* TowDispatchDriver */,
+				E717C295FF9827DFF805D88B /* TowDispatchDriverTests */,
+				DD3429FC8319BB3A23E9614F /* TowDispatchDriverUITests */,
+				615B463D1028E4E24B674CF7 /* Products */,
+			);
+			name = TowDispatchDriver;
+			sourceTree = "<group>";
+		};
+		3C3B0F03DC089F93B8457928 /* TowDispatchDriver */ = {
+			isa = PBXGroup;
+			children = (
+				960240B90C2D2D217CFD48CF /* AppContainer.swift */,
+				16355EC43213EC5A2C99FBCD /* PermissionsWizard.swift */,
+				CF40B92617371FD761129C77 /* PushRegistrar.swift */,
+				6636DCCB10CFE1F8EE35310E /* RootView.swift */,
+				66FADFFD960EDC0B0ADA2A69 /* SettingsStore.swift */,
+				8463DDE9FAB6EB976F6EDF5E /* TowDispatchDriverApp.swift */,
+				53D0E2F3BC51D01047CCC42D /* LoginView.swift */,
+				608120AB41FF8B3A47247DF1 /* ChatScreen.swift */,
+				310DECA485CBC78E0A529B2A /* DVIRScreen.swift */,
+				995F5C97735B4CF488FD73AD /* DocumentVaultScreen.swift */,
+				20507555760311A91854A08E /* EarningsScreen.swift */,
+				587459F384E3BEAA2317571A /* JobDetailScreen.swift */,
+				5D2AE566BDC5EA6E3AAE7262 /* JobListScreen.swift */,
+				9B54A86D0226294637965E13 /* NavigationHandoff.swift */,
+				A3B65FACFE159E1FF227F7D8 /* PaymentsService.swift */,
+				670C68F0D78BF91D5E5209C1 /* CameraCaptureView.swift */,
+				75C50B123E181E1A13D8CDDC /* PhotoCaptureScreen.swift */,
+				488DFDD6A7B260DF4C050274 /* ProfileScreen.swift */,
+				F01551F2FC9BDB4D5D17C9A3 /* PanicButton.swift */,
+				161D6128DF224BE391A36443 /* SettingsScreen.swift */,
+				67BB76140635258B4AC6BE7F /* SignatureScreen.swift */,
+				50B78E22404087F1358B090C /* TimeClockScreen.swift */,
+				F8F4D4885389EE240D4F2BC8 /* VINScanner.swift */,
+				EF61687EE07F521749F45DFA /* Info.plist */,
+				EEB8D2129CF6E076F7455CB0 /* TowDispatchDriver.entitlements */,
+				8F860F726BCEED75D7D3791E /* Localizable.strings */,
+			);
+			name = TowDispatchDriver;
+			sourceTree = "<group>";
+		};
+		E717C295FF9827DFF805D88B /* TowDispatchDriverTests */ = {
+			isa = PBXGroup;
+			children = (
+				8788BD3A663AC9E00989A51F /* AppContainerSmokeTests.swift */,
+				00B6401AE682D6B98302F6BA /* VINValidatorTests.swift */,
+			);
+			name = TowDispatchDriverTests;
+			sourceTree = "<group>";
+		};
+		DD3429FC8319BB3A23E9614F /* TowDispatchDriverUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D0D9B9EF86FF28DE53D0517D /* StatusFlowUITests.swift */,
+			);
+			name = TowDispatchDriverUITests;
+			sourceTree = "<group>";
+		};
+		615B463D1028E4E24B674CF7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4E783A9E10D2A8ABA38CD11C /* TowDispatchDriver.app */,
+				6C7CCDEB3609F1FAA874E941 /* TowDispatchDriverTests.xctest */,
+				2E635C1267B14E15F71F5D1A /* TowDispatchDriverUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CE6F732915415528288BBD76 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F832D8112EBA29EB56E9B19 /* AppContainer.swift in Sources */,
+				8BD24E0FD9508BA94099E942 /* PermissionsWizard.swift in Sources */,
+				53872A16C2810E31613AA208 /* PushRegistrar.swift in Sources */,
+				CCBCED974EA796FA2EC956D2 /* RootView.swift in Sources */,
+				E5DC4F6A71F17399A0B2709C /* SettingsStore.swift in Sources */,
+				602E77F4BD31C1E76B71FF6E /* TowDispatchDriverApp.swift in Sources */,
+				3E080B11FD405EF04453A97B /* LoginView.swift in Sources */,
+				F7F701D15FE3A8B22FEE7F7B /* ChatScreen.swift in Sources */,
+				84C32D4892F10D8C7EE86EE1 /* DVIRScreen.swift in Sources */,
+				F080A6562BB08DEE2D478C85 /* DocumentVaultScreen.swift in Sources */,
+				80EE996660C580D46CAAD5D6 /* EarningsScreen.swift in Sources */,
+				0EDAC9E8D27F01B8ABE5C1BE /* JobDetailScreen.swift in Sources */,
+				016859F5E5A7D3A48BABF6F8 /* JobListScreen.swift in Sources */,
+				063ADB982D942A9262DA2C2B /* NavigationHandoff.swift in Sources */,
+				7C053444F7E21A405B9C91C9 /* PaymentsService.swift in Sources */,
+				F22D5BD910363080FB5561BB /* CameraCaptureView.swift in Sources */,
+				E98178325F1D529C36B12A65 /* PhotoCaptureScreen.swift in Sources */,
+				4998151932D07614BC588F21 /* ProfileScreen.swift in Sources */,
+				6BD76A4E48C9832FFA1E786A /* PanicButton.swift in Sources */,
+				978AE0E2B883813307F72708 /* SettingsScreen.swift in Sources */,
+				22D53E64500F41AEC8EBF190 /* SignatureScreen.swift in Sources */,
+				018B12F9F12D077FEE3723F9 /* TimeClockScreen.swift in Sources */,
+				5E7DFC597AADE11BB2C2C6B7 /* VINScanner.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E7218F3454A11A425E876D8D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD1C5029E3A89D7C05BEDDDA /* AppContainerSmokeTests.swift in Sources */,
+				A6F8F2C718D34A45D75C4B0F /* VINValidatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8E4B6E093B79283EB6927F1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9241368E7A9ECFB0DCAA849F /* StatusFlowUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A1BE90F212D813EE17901F5F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DD9DC7618C3EBAF9F8D987D /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		65C579F5E9F9858C77139572 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A94482B8CE44EF2FDB82D970 /* Core in Frameworks */,
+				B01B085214C6550E36ACDF49 /* DesignSystem in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8A9DA1328747E8A58EC5C81 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3292E24481A71C31478F1B3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		F75109BEB4DD8800DA6B45F8 /* TowDispatchDriver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0E1742D64F9D2A0A2521601 /* Build configuration list for app */;
+			buildPhases = (
+				CE6F732915415528288BBD76 /* Sources */,
+				A1BE90F212D813EE17901F5F /* Resources */,
+				65C579F5E9F9858C77139572 /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = TowDispatchDriver;
+			packageProductDependencies = (
+				0CB4985433B35CF382759002 /* Core */,
+				506C644C1D1DA0B7DD9DA1F3 /* DesignSystem */,
+			);
+			productName = TowDispatchDriver;
+			productReference = 4E783A9E10D2A8ABA38CD11C /* TowDispatchDriver.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C062A5A4A7F4F37DD90F54CB /* TowDispatchDriverTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A6C6817865E7AF9BCEBE3959 /* Build configuration list for tests */;
+			buildPhases = (
+				E7218F3454A11A425E876D8D /* Sources */,
+				E8A9DA1328747E8A58EC5C81 /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = TowDispatchDriverTests;
+			productName = TowDispatchDriverTests;
+			productReference = 6C7CCDEB3609F1FAA874E941 /* TowDispatchDriverTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		95F9FC6E252E44B94B26FF0C /* TowDispatchDriverUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9521FAB9831DE53EADE6B98F /* Build configuration list for uitests */;
+			buildPhases = (
+				E8E4B6E093B79283EB6927F1 /* Sources */,
+				C3292E24481A71C31478F1B3 /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = TowDispatchDriverUITests;
+			productName = TowDispatchDriverUITests;
+			productReference = 2E635C1267B14E15F71F5D1A /* TowDispatchDriverUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					F75109BEB4DD8800DA6B45F8 = { CreatedOnToolsVersion = 15.3; };
+					C062A5A4A7F4F37DD90F54CB = { CreatedOnToolsVersion = 15.3; TestTargetID = F75109BEB4DD8800DA6B45F8; };
+					95F9FC6E252E44B94B26FF0C = { CreatedOnToolsVersion = 15.3; TestTargetID = F75109BEB4DD8800DA6B45F8; };
+				};
+			};
+			buildConfigurationList = 1721BF9BEBA2AF5DB521269B /* Build configuration list for project */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				es,
+				Base,
+			);
+			mainGroup = 870B3294C0CBD48AF6BBCC1B;
+			packageReferences = (
+				E3ADC1C5B5053D81838A37C4 /* XCLocalSwiftPackageReference "Packages/Core" */,
+				FA8C503FFC29DB1639C9E8CB /* XCLocalSwiftPackageReference "Packages/DesignSystem" */,
+			);
+			productRefGroup = 615B463D1028E4E24B674CF7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F75109BEB4DD8800DA6B45F8 /* TowDispatchDriver */,
+				C062A5A4A7F4F37DD90F54CB /* TowDispatchDriverTests */,
+				95F9FC6E252E44B94B26FF0C /* TowDispatchDriverUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E3ADC1C5B5053D81838A37C4 /* XCLocalSwiftPackageReference "Packages/Core" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Core;
+		};
+		FA8C503FFC29DB1639C9E8CB /* XCLocalSwiftPackageReference "Packages/DesignSystem" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DesignSystem;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0CB4985433B35CF382759002 /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E3ADC1C5B5053D81838A37C4 /* XCLocalSwiftPackageReference "Packages/Core" */;
+			productName = Core;
+		};
+		506C644C1D1DA0B7DD9DA1F3 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA8C503FFC29DB1639C9E8CB /* XCLocalSwiftPackageReference "Packages/DesignSystem" */;
+			productName = DesignSystem;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1F55468CE337F002677611C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = "NO";
+				CLANG_ANALYZER_NONNULL = "YES";
+				CLANG_ENABLE_MODULES = "YES";
+				CLANG_ENABLE_OBJC_ARC = "YES";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = "YES";
+				COPY_PHASE_STRIP = "NO";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				ENABLE_NS_ASSERTIONS = "YES";
+				ENABLE_STRICT_OBJC_MSGSEND = "YES";
+				GCC_C_LANGUAGE_STANDARD = "gnu17";
+				GCC_DYNAMIC_NO_PIC = "NO";
+				GCC_OPTIMIZATION_LEVEL = "0";
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				GCC_WARN_64_TO_32_BIT_CONVERSION = "YES";
+				GCC_WARN_ABOUT_RETURN_TYPE = "YES_ERROR";
+				GCC_WARN_UNDECLARED_SELECTOR = "YES";
+				GCC_WARN_UNINITIALIZED_AUTOS = "YES_AGGRESSIVE";
+				GCC_WARN_UNUSED_FUNCTION = "YES";
+				GCC_WARN_UNUSED_VARIABLE = "YES";
+				IPHONEOS_DEPLOYMENT_TARGET = "16.4";
+				MTL_ENABLE_DEBUG_INFO = "NO";
+				MTL_FAST_MATH = "YES";
+				ONLY_ACTIVE_ARCH = "YES";
+				SDKROOT = "iphoneos";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = "5.9";
+			};
+			name = Debug;
+		};
+		CAAFFB899842043594D52520 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = "NO";
+				CLANG_ANALYZER_NONNULL = "YES";
+				CLANG_ENABLE_MODULES = "YES";
+				CLANG_ENABLE_OBJC_ARC = "YES";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = "YES";
+				COPY_PHASE_STRIP = "NO";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = "NO";
+				ENABLE_STRICT_OBJC_MSGSEND = "YES";
+				GCC_C_LANGUAGE_STANDARD = "gnu17";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = "YES";
+				GCC_WARN_ABOUT_RETURN_TYPE = "YES_ERROR";
+				GCC_WARN_UNDECLARED_SELECTOR = "YES";
+				GCC_WARN_UNINITIALIZED_AUTOS = "YES_AGGRESSIVE";
+				GCC_WARN_UNUSED_FUNCTION = "YES";
+				GCC_WARN_UNUSED_VARIABLE = "YES";
+				IPHONEOS_DEPLOYMENT_TARGET = "16.4";
+				MTL_ENABLE_DEBUG_INFO = "NO";
+				MTL_FAST_MATH = "YES";
+				SDKROOT = "iphoneos";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = "5.9";
+				VALIDATE_PRODUCT = "YES";
+			};
+			name = Release;
+		};
+		67448E191B7369DA6E6E1DAA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
+				CODE_SIGN_ENTITLEMENTS = "TowDispatchDriver/Resources/TowDispatchDriver.entitlements";
+				CODE_SIGN_STYLE = "Automatic";
+				CURRENT_PROJECT_VERSION = "1";
+				ENABLE_PREVIEWS = "YES";
+				GENERATE_INFOPLIST_FILE = "NO";
+				INFOPLIST_FILE = "TowDispatchDriver/Resources/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Tow Dispatch";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = "0.1.0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.towdispatch.driver";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = "YES";
+				TARGETED_DEVICE_FAMILY = "1";
+			};
+			name = Debug;
+		};
+		17705AA15D319C6DC9C2B78D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon";
+				CODE_SIGN_ENTITLEMENTS = "TowDispatchDriver/Resources/TowDispatchDriver.entitlements";
+				CODE_SIGN_STYLE = "Automatic";
+				CURRENT_PROJECT_VERSION = "1";
+				ENABLE_PREVIEWS = "YES";
+				GENERATE_INFOPLIST_FILE = "NO";
+				INFOPLIST_FILE = "TowDispatchDriver/Resources/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Tow Dispatch";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = "0.1.0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.towdispatch.driver";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = "YES";
+				TARGETED_DEVICE_FAMILY = "1";
+			};
+			name = Release;
+		};
+		BCAE8E419DE22867168D61C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = "Automatic";
+				CURRENT_PROJECT_VERSION = "1";
+				GENERATE_INFOPLIST_FILE = "YES";
+				MARKETING_VERSION = "0.1.0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.towdispatch.driver.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TowDispatchDriver.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TowDispatchDriver";
+			};
+			name = Debug;
+		};
+		C1C48DFFF60266BBA13CC06F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = "Automatic";
+				CURRENT_PROJECT_VERSION = "1";
+				GENERATE_INFOPLIST_FILE = "YES";
+				MARKETING_VERSION = "0.1.0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.towdispatch.driver.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TowDispatchDriver.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TowDispatchDriver";
+			};
+			name = Release;
+		};
+		8B6C46A4753273F70552F0FD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = "Automatic";
+				CURRENT_PROJECT_VERSION = "1";
+				GENERATE_INFOPLIST_FILE = "YES";
+				MARKETING_VERSION = "0.1.0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.towdispatch.driver.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1";
+				TEST_TARGET_NAME = "TowDispatchDriver";
+			};
+			name = Debug;
+		};
+		B00B53DC6CAD12BE12125A6D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = "Automatic";
+				CURRENT_PROJECT_VERSION = "1";
+				GENERATE_INFOPLIST_FILE = "YES";
+				MARKETING_VERSION = "0.1.0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.towdispatch.driver.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1";
+				TEST_TARGET_NAME = "TowDispatchDriver";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1721BF9BEBA2AF5DB521269B /* Project */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F55468CE337F002677611C7 /* Debug */,
+				CAAFFB899842043594D52520 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0E1742D64F9D2A0A2521601 /* App */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				67448E191B7369DA6E6E1DAA /* Debug */,
+				17705AA15D319C6DC9C2B78D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A6C6817865E7AF9BCEBE3959 /* Tests */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BCAE8E419DE22867168D61C5 /* Debug */,
+				C1C48DFFF60266BBA13CC06F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9521FAB9831DE53EADE6B98F /* UITests */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B6C46A4753273F70552F0FD /* Debug */,
+				B00B53DC6CAD12BE12125A6D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

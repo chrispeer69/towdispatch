@@ -6,7 +6,7 @@ import {
   type ChartOfAccountDto,
   type ChartOfAccountsResponse,
   accountMappingInternalCategoryDtoValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { type JSX, useMemo, useState, useTransition } from 'react';
 
 interface Props {

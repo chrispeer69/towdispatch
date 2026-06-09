@@ -6,7 +6,7 @@ import {
   type ServiceRatesBulkUpsertPayload,
   type ServiceRatesBulkUpsertResponse,
   serviceRatesBulkUpsertSchema,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { ZodBody } from '../../common/decorators/zod.decorator.js';

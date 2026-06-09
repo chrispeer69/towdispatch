@@ -6,9 +6,9 @@ Append-only log of non-obvious calls made by Claude during Session 9.5+ work. Ea
 
 ## Session 9.5 — demo tenant seed (`feature/seed-demo`)
 
-### 1. Package name in scripts: `@ustowdispatch/db`, not `@towcommand/db`
+### 1. Package name in scripts: `@towdispatch/db`, not `@towdispatch/db`
 
-The session prompt referred to `pnpm --filter @towcommand/db build`. The actual workspace package is `@ustowdispatch/db` (see `packages/db/package.json`). Used the real name throughout the new scripts and README.
+The session prompt referred to `pnpm --filter @towdispatch/db build`. The actual workspace package is `@towdispatch/db` (see `packages/db/package.json`). Used the real name throughout the new scripts and README.
 
 ### 2. Slug = subdomain
 
@@ -112,7 +112,7 @@ Even on `--target=local`, the seed does not `DROP SCHEMA`. The existing `pnpm db
 
 ### 17. Reported bug ("list pages render empty") could not be reproduced
 
-Production at `https://app.towcommand.cloud` was already SSR-rendering the
+Production at `https://app.towdispatch.cloud` was already SSR-rendering the
 correct 7 customers / 2 accounts / 8 jobs / 7 invoices when fetched with
 `curl + chris@roadside.demo cookies`. Tested against the live deployment;
 HTML included the entity rows. The BFF route handlers (`/api/customers`,
@@ -166,7 +166,7 @@ on the request (the browser sent it, the layout saw it), but Next 15's
 dynamic-API request scope does not propagate to the page module in
 optimized production builds. Earlier sessions misdiagnosed this as a
 fetcher-boundary problem (Session 9.6 #19/#20) and as a cookie-domain
-problem (`fix/web-cookie-domain-towcommand-cloud`) — both were real but
+problem (`fix/web-cookie-domain-towdispatch-cloud`) — both were real but
 neither was the actual cause of the empty list pages.
 
 ### 22. Fix: read the cookie from the raw request header via `headers()`

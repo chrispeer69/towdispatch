@@ -4,7 +4,7 @@ import { getSessionToken } from '@/lib/auth/session';
 import Link from 'next/link';
 import { AccountListClient } from './account-list-client';
 
-export const metadata = { title: 'Accounts — US Tow DISPATCH' };
+export const metadata = { title: 'Accounts — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface SearchParams {
@@ -29,13 +29,16 @@ export default async function AccountsPage({
 
   // Combine Session 9.7 cached layout read with Session 9.8 token threading.
   const token = await getSessionToken();
-  const initial = await fetchAccounts({
-    q: params.q,
-    active: params.active,
-    isMotorClub,
-    page: params.page,
-    perPage: '50',
-  }, token);
+  const initial = await fetchAccounts(
+    {
+      q: params.q,
+      active: params.active,
+      isMotorClub,
+      page: params.page,
+      perPage: '50',
+    },
+    token,
+  );
 
   return (
     <div className="space-y-6">

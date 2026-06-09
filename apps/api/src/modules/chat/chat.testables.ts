@@ -6,8 +6,8 @@
  * Behavioral tests for the service (idempotency, participant gating, RLS
  * isolation) live in test/integration/chat.spec.ts.
  */
-import type { ChatAttachmentType, ChatAuthorRole } from '@ustowdispatch/db';
-import type { ChatDeliveryState, ChatMessageKind, ChatMessageSender } from '@ustowdispatch/shared';
+import type { ChatAttachmentType, ChatAuthorRole } from '@towdispatch/db';
+import type { ChatDeliveryState, ChatMessageKind, ChatMessageSender } from '@towdispatch/shared';
 
 export const ChatServiceTestables = {
   kindFromAttachment(attachmentType: ChatAttachmentType): ChatMessageKind {

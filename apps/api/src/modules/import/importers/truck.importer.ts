@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import { mapValue, normalizeString } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
@@ -67,7 +67,7 @@ export class TruckImporter extends BaseImporter {
           equipmentType,
         ],
       );
-      return { action: 'update', externalId, towcommandId: id };
+      return { action: 'update', externalId, towdispatchId: id };
     }
 
     if (vin) {
@@ -82,7 +82,7 @@ export class TruckImporter extends BaseImporter {
           `UPDATE trucks SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],
         );
-        return { action: 'update', externalId, towcommandId: id };
+        return { action: 'update', externalId, towdispatchId: id };
       }
     }
     if (unitNumber) {
@@ -97,7 +97,7 @@ export class TruckImporter extends BaseImporter {
           `UPDATE trucks SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],
         );
-        return { action: 'update', externalId, towcommandId: id };
+        return { action: 'update', externalId, towdispatchId: id };
       }
     }
 
@@ -124,7 +124,7 @@ export class TruckImporter extends BaseImporter {
         externalId,
       ],
     );
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 }
 

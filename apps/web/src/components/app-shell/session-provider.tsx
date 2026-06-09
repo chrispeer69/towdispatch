@@ -1,6 +1,6 @@
 'use client';
 
-import type { MeResponse } from '@ustowdispatch/shared';
+import type { MeResponse } from '@towdispatch/shared';
 /**
  * Hands the user/tenant DTO returned by /auth/me from the server layout to
  * any client component that needs it. We deliberately avoid SWR / TanStack

@@ -1,11 +1,11 @@
 import { fetchInvoice, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
-import { invoiceStatusLabel, invoiceTypeLabel, paymentMethodLabel } from '@ustowdispatch/shared';
+import { invoiceStatusLabel, invoiceTypeLabel, paymentMethodLabel } from '@towdispatch/shared';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { InvoiceActionsClient } from './invoice-actions-client';
 
-export const metadata = { title: 'Invoice — US Tow DISPATCH' };
+export const metadata = { title: 'Invoice — Tow Dispatch' };
 
 export default async function InvoiceDetailPage({
   params,

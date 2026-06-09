@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { LoginForm } from './login-form';
 
 export const metadata = {
-  title: 'Sign in to US Tow Dispatch',
+  title: 'Sign in to Tow Dispatch',
 };
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export default function LoginPage(): JSX.Element {
   return (
     <AuthShell
       title="Welcome back."
-      subtitle="Sign in to your US Tow Dispatch workspace."
+      subtitle="Sign in to your Tow Dispatch workspace."
       footer={
         <>
           Don&rsquo;t have an account?{' '}

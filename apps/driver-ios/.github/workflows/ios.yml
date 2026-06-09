@@ -60,16 +60,16 @@ jobs:
       - name: Build
         run: |
           xcodebuild build \
-            -project TowCommandDriver.xcodeproj \
-            -scheme TowCommandDriver \
+            -project TowDispatchDriver.xcodeproj \
+            -scheme TowDispatchDriver \
             -destination "platform=iOS Simulator,name=iPhone 15" \
             -configuration Debug | xcpretty || exit 1
 
       - name: Test
         run: |
           xcodebuild test \
-            -project TowCommandDriver.xcodeproj \
-            -scheme TowCommandDriver \
+            -project TowDispatchDriver.xcodeproj \
+            -scheme TowDispatchDriver \
             -destination "platform=iOS Simulator,name=iPhone 15" \
             -configuration Debug | xcpretty || exit 1
 
@@ -87,9 +87,9 @@ jobs:
       - name: Archive (unsigned smoke)
         run: |
           xcodebuild archive \
-            -project TowCommandDriver.xcodeproj \
-            -scheme TowCommandDriver \
+            -project TowDispatchDriver.xcodeproj \
+            -scheme TowDispatchDriver \
             -configuration Release \
-            -archivePath build/TowCommandDriver.xcarchive \
+            -archivePath build/TowDispatchDriver.xcarchive \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO | xcpretty || exit 1

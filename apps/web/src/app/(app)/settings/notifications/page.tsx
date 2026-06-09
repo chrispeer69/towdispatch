@@ -90,7 +90,7 @@ export default function NotificationsPage(): JSX.Element {
           {TAB.label}
         </h1>
         <p className="max-w-prose text-sm text-text-secondary-on-dark">
-          Read-only view of the transactional emails US Tow DISPATCH sends today and how delivery is
+          Read-only view of the transactional emails Tow Dispatch sends today and how delivery is
           currently configured. Per-tenant overrides (custom From address, template editing,
           per-email suppressions, in-app alert preferences) are not yet modelled — see the panel at
           the bottom of this page.

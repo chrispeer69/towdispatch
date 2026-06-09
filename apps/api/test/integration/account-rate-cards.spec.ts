@@ -14,7 +14,7 @@
  *   - DELETE single override falls the account back to the master rate
  */
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import type { AccountDto } from '@ustowdispatch/shared';
+import type { AccountDto } from '@towdispatch/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   type AuthedResp,

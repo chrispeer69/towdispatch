@@ -28,7 +28,7 @@ export const createAppPool = (overrides: Partial<PoolConfig> = {}): pg.Pool => {
     max: Number.parseInt(process.env.DATABASE_POOL_MAX ?? '20', 10),
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
-    application_name: 'ustowdispatch-api',
+    application_name: 'towdispatch-api',
     ...overrides,
   });
 };
@@ -43,7 +43,7 @@ export const createAdminPool = (overrides: Partial<PoolConfig> = {}): pg.Pool =>
     max: Number.parseInt(process.env.DATABASE_ADMIN_POOL_MAX ?? '4', 10),
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 5_000,
-    application_name: 'ustowdispatch-admin',
+    application_name: 'towdispatch-admin',
     ...overrides,
   });
 };

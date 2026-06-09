@@ -11,7 +11,7 @@ public protocol Telemetry: Sendable {
 }
 
 public struct OSLogTelemetry: Telemetry {
-    private let log = Logger(subsystem: "com.ustowdispatch.driver", category: "app")
+    private let log = Logger(subsystem: "com.towdispatch.driver", category: "app")
     public init() {}
 
     public func event(_ name: String, attributes: [String: String] = [:]) {

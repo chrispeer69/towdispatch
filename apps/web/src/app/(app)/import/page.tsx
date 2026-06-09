@@ -15,11 +15,11 @@
  * renders an empty fallback that the layout's redirect supersedes.
  */
 import { getOptionalUser } from '@/lib/auth/session';
-import { ROLES } from '@ustowdispatch/shared';
+import { ROLES } from '@towdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ImportWizardClient } from './import-wizard-client';
 
-export const metadata = { title: 'Towbook Import â€” US Tow DISPATCH' };
+export const metadata = { title: 'Towbook Import â€” Tow Dispatch' };
 
 export default async function ImportPage(): Promise<JSX.Element> {
   const me = await getOptionalUser();
@@ -34,7 +34,7 @@ export default async function ImportPage(): Promise<JSX.Element> {
           Towbook Import
         </h1>
         <p className="mt-1 text-sm text-text-secondary-on-dark">
-          Migrate your historical Towbook data into US Tow DISPATCH for{' '}
+          Migrate your historical Towbook data into Tow Dispatch for{' '}
           <strong>{me.tenant.name}</strong>. Dry-run first, then commit.
         </p>
       </header>

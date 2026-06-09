@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import { dollarsToCents, mapValue, normalizeString } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
@@ -52,7 +52,7 @@ export class MotorClubHistoryImporter extends BaseImporter {
       return {
         action: 'skip_dedup',
         externalId: caseId ?? jobExt,
-        towcommandId: dedup.rows[0]?.id ?? null,
+        towdispatchId: dedup.rows[0]?.id ?? null,
       };
     }
 
@@ -69,6 +69,6 @@ export class MotorClubHistoryImporter extends BaseImporter {
        )`,
       [id, ctx.tenantId, jobId, network, caseId, partialFee, partialReason, `${jobExt}:${network}`],
     );
-    return { action: 'create', externalId: caseId ?? jobExt, towcommandId: id };
+    return { action: 'create', externalId: caseId ?? jobExt, towdispatchId: id };
   }
 }

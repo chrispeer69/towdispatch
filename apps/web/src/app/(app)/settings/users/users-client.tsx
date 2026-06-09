@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { ROLE_VALUES, type Role, type UserDto } from '@ustowdispatch/shared';
+import { ROLE_VALUES, type Role, type UserDto } from '@towdispatch/shared';
 import { Loader2, Lock, Trash2, UserPlus, X } from 'lucide-react';
 import { type FormEvent, type JSX, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';

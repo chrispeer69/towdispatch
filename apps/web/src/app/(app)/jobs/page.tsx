@@ -1,14 +1,9 @@
 import { apiServer, tryFetch } from '@/lib/api/client';
-import type {
-  JobListItemDto,
-  JobServiceType,
-  JobStatus,
-  PaginatedJobs,
-} from '@ustowdispatch/shared';
+import type { JobListItemDto, JobServiceType, JobStatus, PaginatedJobs } from '@towdispatch/shared';
 import Link from 'next/link';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Tow Jobs â€” US Tow DISPATCH' };
+export const metadata = { title: 'Tow Jobs â€” Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const STATUS_LABEL: Record<JobStatus, string> = {

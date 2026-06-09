@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'US Tow DISPATCH — The operating system owned by you, built by you',
+  title: 'Tow Dispatch — The operating system owned by you, built by you',
   description:
     'Owned and built by the operators, for the operators. The AI-powered operating system for every US Tow Alliance member.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'),

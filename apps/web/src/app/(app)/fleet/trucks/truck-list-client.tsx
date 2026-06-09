@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { type PaginatedTrucks, type TruckStatus, truckStatusValues } from '@ustowdispatch/shared';
+import { type PaginatedTrucks, type TruckStatus, truckStatusValues } from '@towdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 

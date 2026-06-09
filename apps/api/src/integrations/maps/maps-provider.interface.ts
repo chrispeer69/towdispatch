@@ -2,7 +2,7 @@
  * MapsProvider — geocoding, reverse geocoding, routing/ETA, distance matrix.
  *
  * Candidates: Google Maps Platform, Mapbox, HERE. Tenants will pay their own
- * usage costs; US Tow DISPATCH stays out of metering by routing requests through
+ * usage costs; Tow Dispatch stays out of metering by routing requests through
  * the chosen provider with the tenant's credentials.
  */
 import type { IntegrationProvider } from '../types.js';

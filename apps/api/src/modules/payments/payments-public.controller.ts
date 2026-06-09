@@ -11,7 +11,7 @@
  * wire; card data never touches our servers. PCI scope: SAQ A.
  */
 import { Controller, Get, Req } from '@nestjs/common';
-import type { PublicPaymentView } from '@ustowdispatch/shared';
+import type { PublicPaymentView } from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Public } from '../../common/decorators/public.decorator.js';

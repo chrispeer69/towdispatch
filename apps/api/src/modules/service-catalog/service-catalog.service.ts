@@ -19,7 +19,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { serviceCatalog, uuidv7 } from '@ustowdispatch/db';
+import { serviceCatalog, uuidv7 } from '@towdispatch/db';
 import {
   type CreateServiceCatalogPayload,
   ERROR_CODES,
@@ -27,7 +27,7 @@ import {
   type ServiceCatalogEntryDto,
   type ServiceCatalogFilters,
   type UpdateServiceCatalogPayload,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

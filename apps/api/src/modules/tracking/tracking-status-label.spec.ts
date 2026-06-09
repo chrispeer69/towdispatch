@@ -1,4 +1,4 @@
-import { trackingStatusLabel } from '@ustowdispatch/shared';
+import { trackingStatusLabel } from '@towdispatch/shared';
 /**
  * Status label translation contract — the customer page never sees raw enums.
  */

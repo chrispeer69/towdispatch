@@ -33,7 +33,7 @@ import {
   serviceCatalog,
   serviceRates,
   tenantDefaultRateSheets,
-} from '@ustowdispatch/db';
+} from '@towdispatch/db';
 import {
   type AccountRateOverrideType,
   type AccountServiceAvailabilityValue,
@@ -46,7 +46,7 @@ import {
   type VehicleClass,
   rateSheetDefinitionSchema,
   resolveAccountOverridePriceCents,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull, or } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 
@@ -300,7 +300,7 @@ export class RateEngineService {
         // override row for (service, vehicle_class), apply it. Three
         // patterns: flat_price replaces master outright; flat_dollar_discount
         // subtracts cents; percent_discount applies a % off. The
-        // resolveAccountOverridePriceCents helper in @ustowdispatch/shared
+        // resolveAccountOverridePriceCents helper in @towdispatch/shared
         // is the single source of truth for the math so the UI mirrors it.
         let basePriceCents: number | null = masterPriceCents;
         if (input.accountId) {

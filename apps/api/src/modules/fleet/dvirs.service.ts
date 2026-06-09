@@ -14,7 +14,7 @@
  *     ahead of the truck's currentOdometer.
  */
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { drivers, dvirs, trucks, uuidv7 } from '@ustowdispatch/db';
+import { drivers, dvirs, trucks, uuidv7 } from '@towdispatch/db';
 import {
   type CreateDvirPayload,
   type DvirDto,
@@ -22,7 +22,7 @@ import {
   type DvirStatus,
   ERROR_CODES,
   type Role,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, gte, isNull, lte } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { isDriverRole, resolveDriverIdForUser } from './driver-scope.js';

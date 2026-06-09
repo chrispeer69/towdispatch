@@ -1,6 +1,6 @@
 import { tryFetch } from '@/lib/api/client';
 import { fetchAccount, fetchCustomers } from '@/lib/api/resources';
-import type { PaginatedCustomers } from '@ustowdispatch/shared';
+import type { PaginatedCustomers } from '@towdispatch/shared';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AccountForm } from '../account-form';
@@ -9,7 +9,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export const metadata = { title: 'Account — US Tow DISPATCH' };
+export const metadata = { title: 'Account — Tow Dispatch' };
 
 const EMPTY_CUSTOMERS: PaginatedCustomers = { data: [], total: 0, page: 1, perPage: 100 };
 

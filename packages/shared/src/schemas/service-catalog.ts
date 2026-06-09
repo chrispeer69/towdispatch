@@ -8,7 +8,7 @@
  *
  * Shared by the NestJS service-catalog controller (ZodBody / ZodQuery) and
  * the web settings UI (react-hook-form via the Zod resolver), same pattern
- * as the rest of @ustowdispatch/shared. Decimals are exchanged as strings
+ * as the rest of @towdispatch/shared. Decimals are exchanged as strings
  * end-to-end so the 53-bit Number mantissa can't silently lose precision.
  */
 import { z } from 'zod';

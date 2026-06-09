@@ -32,11 +32,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@ustowdispatch/shared': new URL('../../packages/shared/src/index.ts', import.meta.url)
+      '@towdispatch/shared': new URL('../../packages/shared/src/index.ts', import.meta.url)
         .pathname,
-      '@ustowdispatch/db/schema': new URL('../../packages/db/src/schema/index.ts', import.meta.url)
+      '@towdispatch/db/schema': new URL('../../packages/db/src/schema/index.ts', import.meta.url)
         .pathname,
-      '@ustowdispatch/db': new URL('../../packages/db/src/index.ts', import.meta.url).pathname,
+      '@towdispatch/db': new URL('../../packages/db/src/index.ts', import.meta.url).pathname,
     },
   },
 });

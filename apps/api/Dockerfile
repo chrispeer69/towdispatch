@@ -5,7 +5,7 @@
 # apps/api/Dockerfile, and "Watch Paths" to apps/api/**, packages/**.
 #
 # Single-stage build: pnpm install once with the full workspace, build the
-# api filter (which transitively builds @ustowdispatch/db and @ustowdispatch/shared
+# api filter (which transitively builds @towdispatch/db and @towdispatch/shared
 # if they have build steps), then run start:prod. Image size is not optimal
 # but reliability beats optimization for a first deploy.
 
@@ -28,12 +28,12 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the API and its transitive workspace dependencies.
-RUN pnpm --filter @ustowdispatch/api... build
+RUN pnpm --filter @towdispatch/api... build
 
 ENV NODE_ENV=production
 # Railway sets PORT — config.service honors it when API_PORT is not set.
 EXPOSE 3001
 
-# Run from the workspace root so pnpm resolves the @ustowdispatch/api start:prod
+# Run from the workspace root so pnpm resolves the @towdispatch/api start:prod
 # script and the workspace node_modules layout is intact.
-CMD ["pnpm", "--filter", "@ustowdispatch/api", "run", "start:prod"]
+CMD ["pnpm", "--filter", "@towdispatch/api", "run", "start:prod"]

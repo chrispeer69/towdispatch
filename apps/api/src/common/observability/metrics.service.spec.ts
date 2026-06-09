@@ -10,7 +10,7 @@ describe('MetricsService', () => {
   it('exposes a Prometheus registry with default node metrics', async () => {
     const m = new MetricsService();
     const snapshot = await m.snapshot();
-    expect(snapshot).toContain('ustowdispatch_api_process_cpu_user_seconds_total');
+    expect(snapshot).toContain('towdispatch_api_process_cpu_user_seconds_total');
     expect(snapshot).toContain('http_requests_total');
     expect(snapshot).toContain('http_request_duration_seconds');
     expect(snapshot).toContain('db_query_duration_seconds');

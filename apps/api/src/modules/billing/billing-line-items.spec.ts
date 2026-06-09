@@ -1,4 +1,4 @@
-import type { RateQuote } from '@ustowdispatch/shared';
+import type { RateQuote } from '@towdispatch/shared';
 import { describe, expect, it } from 'vitest';
 import { mapRateCodeToLineType, rateQuoteToInvoiceLineItems } from './billing-line-items.js';
 

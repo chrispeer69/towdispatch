@@ -18,7 +18,7 @@ import type {
   UserDto,
   VehicleDto,
   VehicleWithCustomersDto,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { apiServer } from './client';
 
 export async function fetchCustomers(

@@ -26,7 +26,7 @@
 --   * default_commission_pct_override is 0..100 inclusive (or NULL =
 --     "use the driver's default commission").
 --   * applicable_vehicle_classes is validated application-side against
---     the VehicleClass enum in @ustowdispatch/shared. The DB column is
+--     the VehicleClass enum in @towdispatch/shared. The DB column is
 --     plain text[] because postgres can't reference a TS enum.
 -- =====================================================================
 

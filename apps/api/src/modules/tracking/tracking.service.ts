@@ -39,7 +39,7 @@ import {
   trucks,
   uuidv7,
   vehicles,
-} from '@ustowdispatch/db';
+} from '@towdispatch/db';
 import {
   DISPATCH_EVENTS,
   ERROR_CODES,
@@ -48,7 +48,7 @@ import {
   type TrackingMessageDto,
   type TrackingPublicView,
   trackingStatusLabel,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { ConfigService } from '../../config/config.service.js';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
@@ -808,7 +808,7 @@ export class TrackingService implements OnModuleInit, OnModuleDestroy {
     const trackingUrl = `${this.config.webPublicUrl.replace(/\/$/, '')}/track/${link.token}`;
     const body = template
       .replace(/\{\{tracking_url\}\}/g, trackingUrl)
-      .replace(/\{\{tenant_name\}\}/g, tenant?.name ?? 'US Tow DISPATCH');
+      .replace(/\{\{tenant_name\}\}/g, tenant?.name ?? 'Tow Dispatch');
 
     const result = await this.notifications.sendSms({
       tenantId: link.tenantId,

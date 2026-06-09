@@ -6,7 +6,7 @@ import {
   type DriverEmploymentStatus,
   type PaginatedDrivers,
   driverEmploymentStatusValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 

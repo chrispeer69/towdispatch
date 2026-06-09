@@ -1,9 +1,9 @@
 import { tryFetch } from '@/lib/api/client';
 import { fetchAccounts } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/session';
-import type { PaginatedAccounts } from '@ustowdispatch/shared';
+import type { PaginatedAccounts } from '@towdispatch/shared';
 
-export const metadata = { title: 'Statements — US Tow DISPATCH' };
+export const metadata = { title: 'Statements — Tow Dispatch' };
 
 const EMPTY_ACCOUNTS: PaginatedAccounts = { data: [], total: 0, page: 1, perPage: 100 };
 

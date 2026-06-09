@@ -13,7 +13,7 @@
  *   3. renderStatementPdf() — A/R aging snapshot PDF for one account.
  */
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { accounts, invoices, tenants } from '@ustowdispatch/db';
+import { accounts, invoices, tenants } from '@towdispatch/db';
 import {
   type CreditMemoDto,
   ERROR_CODES,
@@ -22,7 +22,7 @@ import {
   type StorageProvider,
   invoiceStatusLabel,
   paymentMethodLabel,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import { ConfigService } from '../../config/config.service.js';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
@@ -272,7 +272,7 @@ export class BillingDeliveryService {
   }> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
-      if (!t) return { name: 'US Tow DISPATCH' };
+      if (!t) return { name: 'Tow Dispatch' };
       const row = t as unknown as {
         name: string;
         billingAddress?: Record<string, unknown> | null;
@@ -296,7 +296,7 @@ export class BillingDeliveryService {
   private async loadTenantName(ctx: CallerContext): Promise<string> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       const t = await tx.query.tenants.findFirst({ where: eq(tenants.id, ctx.tenantId) });
-      return t?.name ?? 'US Tow DISPATCH';
+      return t?.name ?? 'Tow Dispatch';
     });
   }
 

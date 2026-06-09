@@ -15,11 +15,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import {
-  type AccessTokenClaims,
-  ERROR_CODES,
-  accessTokenClaimsSchema,
-} from '@ustowdispatch/shared';
+import { type AccessTokenClaims, ERROR_CODES, accessTokenClaimsSchema } from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { ConfigService } from '../../config/config.service.js';
 import { JwtService } from '../../modules/auth/jwt.service.js';

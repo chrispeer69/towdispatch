@@ -13,9 +13,9 @@ opt_in_rules:
   - vertical_whitespace_closing_braces
 
 included:
-  - TowCommandDriver
-  - TowCommandDriverTests
-  - TowCommandDriverUITests
+  - TowDispatchDriver
+  - TowDispatchDriverTests
+  - TowDispatchDriverUITests
   - Packages/Core/Sources
   - Packages/DesignSystem/Sources
 

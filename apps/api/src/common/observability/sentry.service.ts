@@ -63,7 +63,7 @@ export class SentryService implements OnModuleInit {
         return event;
       },
     });
-    Sentry.setTag('service', 'ustowdispatch-api');
+    Sentry.setTag('service', 'towdispatch-api');
     this.enabled = true;
     this.logger.info({ environment: this.config.nodeEnv }, 'Sentry enabled');
   }

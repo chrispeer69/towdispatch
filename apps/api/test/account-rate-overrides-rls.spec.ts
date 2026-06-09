@@ -18,7 +18,7 @@
  *   7) without any GUC set, SELECT returns zero rows (fail-closed)
  *   8) INSERT with tenant_id = B from tenant A is rejected
  */
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

@@ -48,7 +48,7 @@ The spec lists `Assigned → En Route → On Scene → Loaded → In Transit →
 Spec called for GRDB. I shipped a `LocalStore` protocol with `FileLocalStore` (one JSON file per table) and an `Outbox` protocol with `FileOutbox` (append-only). Swapping GRDB in is a one-file change — every call site already goes through the protocol. Rationale: pulling GRDB during the Xcode-project bootstrap would require an SPM dependency resolve cycle during CI which complicates the reproducible-from-checkout property of this project. The file-backed implementations are fully functional, atomic-write safe, and survive process restarts (covered by a dedicated unit test).
 
 ### 3. **Xcode project is generated, not hand-edited.**
-`scripts/generate-xcodeproj.py` deterministically produces `TowCommandDriver.xcodeproj/project.pbxproj` from the source tree. Re-run after adding/removing files. SPM packages discover their own sources. Hand-edited pbxproj files are notoriously fragile and merge poorly; the generator gives us a reviewable diff when the project structure changes. Until the team adopts XcodeGen or Tuist (neither is installed in this environment), this script is the substitute.
+`scripts/generate-xcodeproj.py` deterministically produces `TowDispatchDriver.xcodeproj/project.pbxproj` from the source tree. Re-run after adding/removing files. SPM packages discover their own sources. Hand-edited pbxproj files are notoriously fragile and merge poorly; the generator gives us a reviewable diff when the project structure changes. Until the team adopts XcodeGen or Tuist (neither is installed in this environment), this script is the substitute.
 
 ### 4. **No external SPM dependencies pulled (Mapbox, Stripe, Sentry, Datadog, GRDB).**
 All of these require either paid accounts, Apple Developer enrollment, or vendor onboarding I can't complete from this environment. Pulling unused SDK binaries into the build for completeness would burn CI minutes and complicate the SBOM. Each one will be added in a follow-up commit once its prerequisites are in place. Protocol boundaries are already in `Core` (`Telemetry`, `TokenStore`, `LocalStore`, `Outbox`, `PaymentsService`).
@@ -60,7 +60,7 @@ All of these require either paid accounts, Apple Developer enrollment, or vendor
 Implementing background uploads requires running on a real iPhone (the simulator can't trigger background URLSession completions reliably) and an App Group + URLSessionConfiguration.background identifier negotiated with the backend's S3-presigned-URL flow. The current iOS app uses inline base64 POST to `/dispatch/jobs/{id}/photos` because that's the contract Android ships against. Switch to S3 presigned + background session is a Session 7 deliverable once the backend exposes the presigned-URL endpoint.
 
 ### 7. **Tests live in two places.**
-The deep correctness tests for Core (16 of them) are inside `Packages/Core/Tests/CoreTests/` and run via `swift test` — no Xcode needed, fast feedback. The app-target tests (`TowCommandDriverTests/`) only carry tests that need `@testable import TowCommandDriver`, namely the smoke test of the composition root and the VIN validator. UI tests are in `TowCommandDriverUITests/` with a single stubbed status-flow test that needs a seeded backend to run.
+The deep correctness tests for Core (16 of them) are inside `Packages/Core/Tests/CoreTests/` and run via `swift test` — no Xcode needed, fast feedback. The app-target tests (`TowDispatchDriverTests/`) only carry tests that need `@testable import TowDispatchDriver`, namely the smoke test of the composition root and the VIN validator. UI tests are in `TowDispatchDriverUITests/` with a single stubbed status-flow test that needs a seeded backend to run.
 
 ### 8. **In-Memory token store on simulator.**
 Keychain on iOS Simulator persists across runs in surprising ways and silently breaks between iOS versions. The composition root (`AppContainer`) uses `InMemoryTokenStore` on simulator by default; set `TC_USE_KEYCHAIN=1` in the scheme env to force Keychain. On device the Keychain store is always used. See `AppContainer.swift`.
@@ -95,7 +95,7 @@ Every deferred feature has a clean protocol surface in `Packages/Core/` ready to
 
 ## Known issues & follow-ups
 
-1. **xcodebuild scheme builds require an iOS Simulator runtime.** Xcode 26.4 in this environment doesn't have iOS Simulator runtimes installed, so `xcodebuild build -scheme TowCommandDriver` returns `iOS 26.4 is not installed`. The fix on a developer machine is `xcodebuild -downloadPlatform iOS` or installing via Xcode → Settings → Components. CI (`macos-14` runner with Xcode 15) has these pre-installed. Locally I verified correctness by:
+1. **xcodebuild scheme builds require an iOS Simulator runtime.** Xcode 26.4 in this environment doesn't have iOS Simulator runtimes installed, so `xcodebuild build -scheme TowDispatchDriver` returns `iOS 26.4 is not installed`. The fix on a developer machine is `xcodebuild -downloadPlatform iOS` or installing via Xcode → Settings → Components. CI (`macos-14` runner with Xcode 15) has these pre-installed. Locally I verified correctness by:
    - `swift test --package-path Packages/Core` → **16/16 passing**.
    - `swift build` for both SPM packages → clean.
    - `swiftc -typecheck` of every app source against the iOS 16.4 SDK with the SPM-built modules → **zero errors, zero warnings**.
@@ -108,7 +108,7 @@ Every deferred feature has a clean protocol surface in `Packages/Core/` ready to
 
 ## Critical Alerts entitlement status
 
-**Not yet submitted.** The entitlement key `com.apple.developer.usernotifications.critical-alerts` is already wired into `TowCommandDriver/Resources/TowCommandDriver.entitlements`. The submission to Apple needs:
+**Not yet submitted.** The entitlement key `com.apple.developer.usernotifications.critical-alerts` is already wired into `TowDispatchDriver/Resources/TowDispatchDriver.entitlements`. The submission to Apple needs:
 
 1. Apple Developer Program enrollment (Chris's action).
 2. App ID created in Developer Portal with the Critical Alerts capability **requested** (capability needs Apple's manual approval — typically 2–4 weeks).
@@ -124,7 +124,7 @@ Until approval, the app behaves as follows:
 
 ## Mapbox token & Stripe key placement
 
-Both live in `TowCommandDriver/Resources/Info.plist` under the `TCConfig` dict, currently empty placeholders. Rotation:
+Both live in `TowDispatchDriver/Resources/Info.plist` under the `TCConfig` dict, currently empty placeholders. Rotation:
 
 1. Generate a new key with the vendor.
 2. Replace the value in `Info.plist` (for the active build configuration) — or, preferred for prod, drop a `Release.local.xcconfig` outside source control with `INFOPLIST_PREPROCESS=YES` and the key as a build setting that the Info.plist references via `$(...)`.
@@ -168,7 +168,7 @@ I did **not** measure cold start, photo capture latency, or signature capture la
 - Photo capture: `AVCaptureSession.startRunning()` runs on a `userInitiated` queue; the shutter→`fileDataRepresentation()` path is single-shot with no chained re-encoding. JPEG export at 85% happens before the queue (so the upload queue write is the dominant cost). Should be well under 3s.
 - Signature: PencilKit is native and renders at 60+fps with no measurable input lag in any past project. The `drawing.image(from:scale:)` call is the only blocking work and runs in well under 100ms for a 1024x320 bitmap.
 
-**Action item for Session 7:** add `Telemetry.event("app.cold_start_ms", attributes: ["duration": ...])` instrumentation in `UsTowDispatchDriverApp.body` and `Telemetry.event("photo.capture_ms", ...)` in `CameraCaptureViewController.photoOutput`. The protocol's already in place.
+**Action item for Session 7:** add `Telemetry.event("app.cold_start_ms", attributes: ["duration": ...])` instrumentation in `TowDispatchDriverApp.body` and `Telemetry.event("photo.capture_ms", ...)` in `CameraCaptureViewController.photoOutput`. The protocol's already in place.
 
 ---
 
@@ -179,8 +179,8 @@ I did **not** measure cold start, photo capture latency, or signature capture la
 cd apps/driver-ios
 python3 scripts/generate-xcodeproj.py
 xcodebuild build \
-  -project TowCommandDriver.xcodeproj \
-  -scheme TowCommandDriver \
+  -project TowDispatchDriver.xcodeproj \
+  -scheme TowDispatchDriver \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
 
@@ -191,8 +191,8 @@ swift test --package-path apps/driver-ios/Packages/Core
 
 # Full suite via Xcode
 xcodebuild test \
-  -project apps/driver-ios/TowCommandDriver.xcodeproj \
-  -scheme TowCommandDriver \
+  -project apps/driver-ios/TowDispatchDriver.xcodeproj \
+  -scheme TowDispatchDriver \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
 
@@ -214,10 +214,10 @@ Requires `APP_STORE_CONNECT_API_KEY_PATH`, `APP_STORE_CONNECT_API_KEY_ID`, `APP_
 ```bash
 # 1. Start the backend
 docker compose up -d
-pnpm --filter @ustowdispatch/api dev
+pnpm --filter @towdispatch/api dev
 
 # 2. Launch the app
-open apps/driver-ios/TowCommandDriver.xcodeproj
+open apps/driver-ios/TowDispatchDriver.xcodeproj
 # … then Cmd-R in Xcode
 
 # 3. Seed a job from another terminal
@@ -245,9 +245,9 @@ DRIVER_EMAIL=driver@demo.test DRIVER_PASSWORD=password \
 
 4. **App Store Connect API key** — for unattended Fastlane uploads from CI. Generate at https://appstoreconnect.apple.com/access/api . Download the .p8, store its path + Issuer ID + Key ID in CI secrets (`APP_STORE_CONNECT_API_KEY_*`).
 
-5. **Mapbox account** — sign up, generate a downloads token and a public access token. Drop both into `TowCommandDriver/Resources/Info.plist` `TCConfig` and `MAPBOX_DOWNLOADS_TOKEN` in CI for SPM resolve.
+5. **Mapbox account** — sign up, generate a downloads token and a public access token. Drop both into `TowDispatchDriver/Resources/Info.plist` `TCConfig` and `MAPBOX_DOWNLOADS_TOKEN` in CI for SPM resolve.
 
-6. **Stripe account in payments mode** — Stripe Tap to Pay live key, plus configure the Connect / Direct flow with the US Tow DISPATCH backend.
+6. **Stripe account in payments mode** — Stripe Tap to Pay live key, plus configure the Connect / Direct flow with the Tow Dispatch backend.
 
 7. **Sentry account / project** — DSN goes into `TCConfig.SentryDSN`.
 
@@ -279,7 +279,7 @@ apps/driver-ios/
 │   ├── Networking/APIClient.swift           # URLSession actor with 401 refresh
 │   ├── Networking/APIError.swift
 │   ├── Networking/Endpoints.swift           # 9 endpoints mirroring Android
-│   ├── Networking/USTowDispatchAPI.swift       # High-level wrapper
+│   ├── Networking/TowDispatchAPI.swift       # High-level wrapper
 │   ├── Observability/Telemetry.swift        # Protocol + OSLog default
 │   ├── Persistence/LocalStore.swift         # JSON-file backed, GRDB-swap-ready
 │   ├── Persistence/PhotoArchive.swift       # Full-res local retention
@@ -295,14 +295,14 @@ apps/driver-ios/
 │   ├── Modifiers/GloveTapTarget.swift       # tcTapTarget() modifier
 │   ├── Components/TCCard.swift              # TCCard, TCStatusBadge
 │   └── Components/TCPrimaryButton.swift     # TCPrimaryButton, TCSecondaryButton
-├── TowCommandDriver/App/
-│   ├── UsTowDispatchDriverApp.swift            # @main
+├── TowDispatchDriver/App/
+│   ├── TowDispatchDriverApp.swift            # @main
 │   ├── AppContainer.swift                   # Composition root, @StateObject
 │   ├── RootView.swift                       # Splash / SignIn / TabView routing
 │   ├── SettingsStore.swift                  # @AppStorage-backed user prefs
 │   ├── PushRegistrar.swift                  # APNs registration
 │   └── PermissionsWizard.swift              # First-run permissions
-├── TowCommandDriver/Features/
+├── TowDispatchDriver/Features/
 │   ├── Auth/LoginView.swift                 # Email/password + biometric
 │   ├── Jobs/JobListScreen.swift             # Queue tab
 │   ├── Jobs/JobDetailScreen.swift           # State workflow + actions
@@ -316,16 +316,16 @@ apps/driver-ios/
 │   ├── Payments/PaymentsService.swift       # Stripe protocol + stub
 │   ├── VIN/VINScanner.swift                 # VisionKit + VIN check-digit
 │   └── Safety/PanicButton.swift             # Panic service protocol + local impl
-└── TowCommandDriver/Resources/
+└── TowDispatchDriver/Resources/
     ├── Info.plist                           # TCConfig, usage descriptions, modes
-    ├── TowCommandDriver.entitlements        # Critical Alerts, Tap to Pay
+    ├── TowDispatchDriver.entitlements        # Critical Alerts, Tap to Pay
     ├── Localizable.strings                  # English
     └── es.lproj/Localizable.strings         # Spanish
 ```
 
 Generated:
-- `TowCommandDriver.xcodeproj/project.pbxproj` — produced by `scripts/generate-xcodeproj.py`.
-- `TowCommandDriver.xcodeproj/xcshareddata/xcschemes/TowCommandDriver.xcscheme` — shared scheme.
+- `TowDispatchDriver.xcodeproj/project.pbxproj` — produced by `scripts/generate-xcodeproj.py`.
+- `TowDispatchDriver.xcodeproj/xcshareddata/xcschemes/TowDispatchDriver.xcscheme` — shared scheme.
 
 ---
 
@@ -345,7 +345,7 @@ The non-negotiable bars I stayed on:
 
 The bars I'm honest about not having hit in this environment:
 
-- ❌ **`xcodebuild build -scheme TowCommandDriver`** in this sandbox (iOS Simulator runtime missing — works on standard developer setup and on `macos-14` CI runners).
+- ❌ **`xcodebuild build -scheme TowDispatchDriver`** in this sandbox (iOS Simulator runtime missing — works on standard developer setup and on `macos-14` CI runners).
 - ❌ **Cold-start / photo-capture / signature performance numbers** on iPhone 12 — needs physical device; instrumentation hooks are in place.
 - ❌ **60%+ Core test coverage measured via `swift test --enable-code-coverage`** — not measured this session; 16 tests exist and pass.
 
@@ -424,7 +424,7 @@ Each fix is a one-line `@Roles` addition + a service-level tenant/driver-scoping
 ### Gap 4 — Twilio masked-number call lacks an endpoint
 **Files:** `apps/api/src/integrations/notification/twilio.notification-provider.ts` exists as a server-side sender. No HTTP route exposes "give me a masked Twilio number for this customer to call".
 **Affects:** `TwilioMaskedCall.dial(_:)` in iOS, which today dials the raw customer number.
-**Fix:** Add `POST /comms/masked-call` taking `{ customerId, jobId }` and returning `{ proxyNumber, ttlSeconds }`. iOS already has the protocol slot — see `apps/driver-ios/TowCommandDriver/Features/Navigation/NavigationHandoff.swift`.
+**Fix:** Add `POST /comms/masked-call` taking `{ customerId, jobId }` and returning `{ proxyNumber, ttlSeconds }`. iOS already has the protocol slot — see `apps/driver-ios/TowDispatchDriver/Features/Navigation/NavigationHandoff.swift`.
 
 ### Gap 5 — DVIR submission has no signature attachment field
 **File:** `packages/shared/src/schemas/fleet.ts` → `createDvirSchema`
@@ -469,7 +469,7 @@ apps/driver-ios/
 │       ├── DocumentsRepository.swift             # upload-queue, list, expirations
 │       ├── ShiftRepository.swift                 # start/end/status/location through outbox
 │       └── ChatRepository.swift                  # send, refresh, ack
-├── TowCommandDriver/Features/
+├── TowDispatchDriver/Features/
 │   ├── DVIR/DVIRScreen.swift                     # Component checklist + signature + history
 │   ├── TimeClock/TimeClockScreen.swift           # Clock in/out, status picker, HOS warnings, pre-shift check
 │   ├── DocumentVault/DocumentVaultScreen.swift   # Expirations card, renewal upload, tap-to-email
@@ -483,13 +483,13 @@ apps/driver-ios/
 
 Modified:
 - `Packages/Core/.../Networking/Endpoints.swift` — 8 new endpoint constants
-- `Packages/Core/.../Networking/USTowDispatchAPI.swift` — 11 new methods on protocol + impl
+- `Packages/Core/.../Networking/TowDispatchAPI.swift` — 11 new methods on protocol + impl
 - `Packages/Core/.../Persistence/LocalStore.swift` — DVIR/Document/Shift/Chat persistence
 - `Packages/Core/.../Sync/Outbox.swift` — 7 new action variants
 - `Packages/Core/.../Sync/SyncEngine.swift` — drain handlers for new actions
-- `TowCommandDriver/App/AppContainer.swift` — sessionSnapshot, four new repos
-- `TowCommandDriver/App/RootView.swift` — 5-tab `TabView`, new `ToolsScreen`
-- `TowCommandDriver/Features/Jobs/JobDetailScreen.swift` — "Chat with Dispatcher" button
+- `TowDispatchDriver/App/AppContainer.swift` — sessionSnapshot, four new repos
+- `TowDispatchDriver/App/RootView.swift` — 5-tab `TabView`, new `ToolsScreen`
+- `TowDispatchDriver/Features/Jobs/JobDetailScreen.swift` — "Chat with Dispatcher" button
 
 ## Updated remaining-deferred list
 
@@ -518,8 +518,8 @@ cd apps/driver-ios && python3 scripts/generate-xcodeproj.py
 
 # Build (requires iOS Simulator runtime; see Session 6 report Known Issues #1)
 xcodebuild build \
-  -project apps/driver-ios/TowCommandDriver.xcodeproj \
-  -scheme TowCommandDriver \
+  -project apps/driver-ios/TowDispatchDriver.xcodeproj \
+  -scheme TowDispatchDriver \
   -destination 'platform=iOS Simulator,name=iPhone 15'
 ```
 

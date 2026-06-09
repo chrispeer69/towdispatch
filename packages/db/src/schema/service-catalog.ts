@@ -22,7 +22,7 @@
  * per_quarter_hour.
  *
  * `applicable_vehicle_classes` is a subset of the VehicleClass enum in
- * @ustowdispatch/shared. An empty array means "class-independent" (Admin Fee,
+ * @towdispatch/shared. An empty array means "class-independent" (Admin Fee,
  * Storage by day, etc.). The check is enforced application-side because
  * postgres CHECK can't reference TS enums and we don't want to maintain a
  * parallel DB-side list.
@@ -92,7 +92,7 @@ export const serviceCatalog = pgTable(
     calculationUnit: text('calculation_unit', { enum: serviceCalculationUnitValues }).notNull(),
 
     /**
-     * Subset of @ustowdispatch/shared VehicleClass values. Empty array = the
+     * Subset of @towdispatch/shared VehicleClass values. Empty array = the
      * service is class-independent (Admin Fee, Storage, etc.). Validated
      * application-side; the DB column is just text[].
      */

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
  * user manually edits the slug, we stop syncing to avoid clobbering it.
  */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signupSchema } from '@ustowdispatch/shared';
+import { signupSchema } from '@towdispatch/shared';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
@@ -110,7 +110,7 @@ export function SignupForm(): JSX.Element {
       >
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
-            ustowdispatch.app/
+            towdispatch.app/
           </span>
           <Input
             className="flex-1"

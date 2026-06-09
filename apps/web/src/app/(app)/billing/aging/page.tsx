@@ -1,10 +1,10 @@
 import { fetchAging, formatMoneyCents } from '@/lib/api/billing';
 import { tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
-import type { AgingResponse } from '@ustowdispatch/shared';
+import type { AgingResponse } from '@towdispatch/shared';
 import { AlertTriangle, Lock } from 'lucide-react';
 
-export const metadata = { title: 'A/R aging — US Tow DISPATCH' };
+export const metadata = { title: 'A/R aging — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const EMPTY_TOTALS: AgingResponse['totals'] = {

@@ -1,4 +1,4 @@
-# Railway service config for the US Tow DISPATCH API.
+# Railway service config for the Tow Dispatch API.
 #
 # In the Railway dashboard for this service:
 #   Root Directory  = / (repo root, so the workspace builds correctly)
@@ -14,8 +14,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/api/Dockerfile"
 
 [deploy]
-startCommand = "pnpm --filter @ustowdispatch/api run start:prod"
-preDeployCommand = "pnpm --filter @ustowdispatch/db run migrate"
+startCommand = "pnpm --filter @towdispatch/api run start:prod"
+preDeployCommand = "pnpm --filter @towdispatch/db run migrate"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"

@@ -11,13 +11,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { driverTruckAssignments, drivers, trucks, uuidv7 } from '@ustowdispatch/db';
+import { driverTruckAssignments, drivers, trucks, uuidv7 } from '@towdispatch/db';
 import {
   type CreateDriverTruckAssignmentPayload,
   type DriverTruckAssignmentDto,
   ERROR_CODES,
   type Role,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { isDriverRole, resolveDriverIdForUser } from './driver-scope.js';

@@ -11,7 +11,7 @@
 import type { JSX, ReactNode } from 'react';
 import { SettingsSidebar } from './settings-sidebar';
 
-export const metadata = { title: 'Settings — US Tow DISPATCH' };
+export const metadata = { title: 'Settings — Tow Dispatch' };
 
 export default function SettingsLayout({ children }: { children: ReactNode }): JSX.Element {
   return (

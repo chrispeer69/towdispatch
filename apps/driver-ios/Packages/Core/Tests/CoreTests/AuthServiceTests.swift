@@ -36,7 +36,7 @@ final class AuthServiceTests: XCTestCase {
     }
 }
 
-private actor FakeAPI: USTowDispatchAPI {
+private actor FakeAPI: TowDispatchAPI {
     func login(_ body: LoginRequest) async throws -> LoginResponse {
         LoginResponse(
             status: "ok",

@@ -17,7 +17,7 @@ import {
   type JobDto,
   type JobServiceType,
   type JobStatusChangedEvent,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { Inbox, MapPin, Truck, Users } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { type Socket, io as ioClient } from 'socket.io-client';

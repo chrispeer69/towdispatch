@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_USER: ustowdispatch
-          POSTGRES_PASSWORD: ustowdispatch_dev_pw
-          POSTGRES_DB: ustowdispatch
+          POSTGRES_USER: towdispatch
+          POSTGRES_PASSWORD: towdispatch_dev_pw
+          POSTGRES_DB: towdispatch
         ports:
           - 5432:5432
         options: >-
@@ -36,8 +36,8 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgres://ustowdispatch:ustowdispatch_dev_pw@localhost:5432/ustowdispatch
-      DATABASE_ADMIN_URL: postgres://ustowdispatch:ustowdispatch_dev_pw@localhost:5432/ustowdispatch
+      DATABASE_URL: postgres://towdispatch:towdispatch_dev_pw@localhost:5432/towdispatch
+      DATABASE_ADMIN_URL: postgres://towdispatch:towdispatch_dev_pw@localhost:5432/towdispatch
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: ci-jwt-secret-with-at-least-32-characters-long
       JWT_ACCESS_SECRET: ci-access-secret-with-at-least-32-chars-long
@@ -63,22 +63,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply migrations
-        run: pnpm --filter @ustowdispatch/db migrate
+        run: pnpm --filter @towdispatch/db migrate
 
       - name: Build shared
-        run: pnpm --filter @ustowdispatch/shared build
+        run: pnpm --filter @towdispatch/shared build
 
       - name: Build db
-        run: pnpm --filter @ustowdispatch/db build
+        run: pnpm --filter @towdispatch/db build
 
       - name: Build api
-        run: pnpm --filter @ustowdispatch/api build
+        run: pnpm --filter @towdispatch/api build
 
       - name: Build web
-        run: pnpm --filter @ustowdispatch/web build
+        run: pnpm --filter @towdispatch/web build
 
       - name: Install Playwright browsers
-        run: pnpm --filter @ustowdispatch/e2e exec playwright install --with-deps chromium
+        run: pnpm --filter @towdispatch/e2e exec playwright install --with-deps chromium
 
       - name: Start API
         env:
@@ -106,7 +106,7 @@ jobs:
           echo "Web failed to start"; cat ../../web.log; exit 1
 
       - name: Run E2E suite (including Lighthouse)
-        run: pnpm --filter @ustowdispatch/e2e test
+        run: pnpm --filter @towdispatch/e2e test
         env:
           NODE_ENV: test
 

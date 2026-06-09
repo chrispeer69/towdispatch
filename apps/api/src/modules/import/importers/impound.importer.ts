@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import { dollarsToCents, normalizeString, parseTowbookTimestamp } from '../normalizers.js';
 import type { ImportContext, ImportRecordType } from '../types.js';
@@ -57,7 +57,7 @@ export class ImpoundImporter extends BaseImporter {
       [ctx.tenantId, `impound:${externalId}`],
     );
     if (dedup.rowCount && dedup.rowCount > 0) {
-      return { action: 'skip_dedup', externalId, towcommandId: dedup.rows[0]?.id ?? null };
+      return { action: 'skip_dedup', externalId, towdispatchId: dedup.rows[0]?.id ?? null };
     }
 
     const id = uuidv7();
@@ -101,7 +101,7 @@ export class ImpoundImporter extends BaseImporter {
         `impound:${externalId}`,
       ],
     );
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 
   private async allocateJobNumber(

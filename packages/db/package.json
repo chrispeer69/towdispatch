@@ -1,5 +1,5 @@
 {
-  "name": "@ustowdispatch/db",
+  "name": "@towdispatch/db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -31,7 +31,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ustowdispatch/shared": "workspace:*",
+    "@towdispatch/shared": "workspace:*",
     "argon2": "0.41.1",
     "dotenv": "16.4.5",
     "drizzle-orm": "0.36.4",

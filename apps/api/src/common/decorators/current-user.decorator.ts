@@ -1,5 +1,5 @@
 import { type ExecutionContext, createParamDecorator } from '@nestjs/common';
-import type { RequestContext } from '@ustowdispatch/shared';
+import type { RequestContext } from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 
 export const CurrentRequestContext = createParamDecorator(

@@ -1,6 +1,6 @@
 'use client';
 
-import type { AccountingConnectStatusDto, SyncStatusResponse } from '@ustowdispatch/shared';
+import type { AccountingConnectStatusDto, SyncStatusResponse } from '@towdispatch/shared';
 import { type JSX, useState, useTransition } from 'react';
 
 interface Props {

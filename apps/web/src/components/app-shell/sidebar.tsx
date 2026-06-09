@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { AuthTenantDto, AuthUserDto } from '@ustowdispatch/shared';
+import type { AuthTenantDto, AuthUserDto } from '@towdispatch/shared';
 import {
   Building2,
   Calculator,
@@ -166,7 +166,7 @@ const SECTIONS: NavSection[] = [
     // ECOSYSTEM — Blue Collar AI sibling products surfaced as branded entry
     // points. These pages are placeholders until each product ships its own
     // integration; today they explain what the product is and why it sits
-    // next to US Tow DISPATCH.
+    // next to Tow Dispatch.
     label: 'Ecosystem',
     items: [
       {
@@ -203,7 +203,7 @@ export function AppSidebar({ tenant, user }: SidebarProps): JSX.Element {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-divider bg-bg-surface md:flex">
       {/*
-        Clicking the US Tow DISPATCH wordmark / logo signs the user
+        Clicking the Tow Dispatch wordmark / logo signs the user
         out and bounces them to the landing page. This is the user's
         explicit ask — not the conventional "logo = home" gesture.
         The /logout route handler clears session cookies server-side

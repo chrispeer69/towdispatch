@@ -1,9 +1,9 @@
 import { getOptionalUser } from '@/lib/auth/session';
-import { ROLES } from '@ustowdispatch/shared';
+import { ROLES } from '@towdispatch/shared';
 import { redirect } from 'next/navigation';
 import { ReconcileClient } from './reconcile-client';
 
-export const metadata = { title: 'Reconcile â€” US Tow DISPATCH' };
+export const metadata = { title: 'Reconcile â€” Tow Dispatch' };
 
 export default async function ReconcilePage(): Promise<JSX.Element> {
   // Auth gating is owned by (app)/layout.tsx â€” see /import/page.tsx for the

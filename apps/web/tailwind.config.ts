@@ -1,5 +1,5 @@
 /**
- * US Tow DISPATCH design tokens v1.
+ * Tow Dispatch design tokens v1.
  *
  * NEW role-named groups (`brand`, `bg`, `text.*-on-*`, `status`) are the
  * canonical surface for the v1 design system. Values live as HSL channels

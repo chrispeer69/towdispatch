@@ -19,7 +19,7 @@ import type {
   AccountDto,
   AccountRateCardDto,
   AccountServiceAvailabilityDto,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { AccountRateCardTabs } from './account-rate-card-tabs';

@@ -4,8 +4,8 @@ platform :ios do
   desc "Run all unit and UI tests"
   lane :test do
     run_tests(
-      project: "TowCommandDriver.xcodeproj",
-      scheme: "TowCommandDriver",
+      project: "TowDispatchDriver.xcodeproj",
+      scheme: "TowDispatchDriver",
       devices: ["iPhone 15"]
     )
   end
@@ -13,10 +13,10 @@ platform :ios do
   desc "Push a build to TestFlight"
   lane :beta do
     setup_ci if ENV['CI']
-    increment_build_number(xcodeproj: "TowCommandDriver.xcodeproj")
+    increment_build_number(xcodeproj: "TowDispatchDriver.xcodeproj")
     build_app(
-      project: "TowCommandDriver.xcodeproj",
-      scheme: "TowCommandDriver",
+      project: "TowDispatchDriver.xcodeproj",
+      scheme: "TowDispatchDriver",
       configuration: "Release",
       export_method: "app-store",
       output_directory: "build/fastlane"
@@ -30,10 +30,10 @@ platform :ios do
   desc "Ship to App Store"
   lane :release do
     setup_ci if ENV['CI']
-    increment_build_number(xcodeproj: "TowCommandDriver.xcodeproj")
+    increment_build_number(xcodeproj: "TowDispatchDriver.xcodeproj")
     build_app(
-      project: "TowCommandDriver.xcodeproj",
-      scheme: "TowCommandDriver",
+      project: "TowDispatchDriver.xcodeproj",
+      scheme: "TowDispatchDriver",
       configuration: "Release",
       export_method: "app-store"
     )

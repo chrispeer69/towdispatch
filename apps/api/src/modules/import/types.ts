@@ -40,7 +40,7 @@ export interface ImportEventInput {
   recordType: ImportRecordType;
   action: ImportAction;
   externalId?: string | null;
-  towcommandId?: string | null;
+  towdispatchId?: string | null;
   errorMessage?: string | null;
 }
 

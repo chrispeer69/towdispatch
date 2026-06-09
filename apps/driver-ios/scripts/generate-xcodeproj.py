@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generator for apps/driver-ios/TowCommandDriver.xcodeproj/project.pbxproj.
+Generator for apps/driver-ios/TowDispatchDriver.xcodeproj/project.pbxproj.
 
 We hand-write the xcodeproj rather than pull in an external project generator
 (XcodeGen / Tuist) because the host environment doesn't have them and we want
@@ -17,10 +17,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
-APP_DIR = ROOT / "TowCommandDriver"
-TESTS_DIR = ROOT / "TowCommandDriverTests"
-UITESTS_DIR = ROOT / "TowCommandDriverUITests"
-PBXPROJ = ROOT / "TowCommandDriver.xcodeproj" / "project.pbxproj"
+APP_DIR = ROOT / "TowDispatchDriver"
+TESTS_DIR = ROOT / "TowDispatchDriverTests"
+UITESTS_DIR = ROOT / "TowDispatchDriverUITests"
+PBXPROJ = ROOT / "TowDispatchDriver.xcodeproj" / "project.pbxproj"
 
 # Deterministic 24-char hex IDs derived from a stable key.
 def gid(key: str) -> str:
@@ -37,7 +37,7 @@ uitest_sources = sorted(UITESTS_DIR.rglob("*.swift")) if UITESTS_DIR.exists() el
 # Resource files for the app target.
 resource_files = []
 info_plist = APP_DIR / "Resources" / "Info.plist"
-entitlements = APP_DIR / "Resources" / "TowCommandDriver.entitlements"
+entitlements = APP_DIR / "Resources" / "TowDispatchDriver.entitlements"
 loc_en = APP_DIR / "Resources" / "Localizable.strings"
 loc_es = APP_DIR / "Resources" / "es.lproj" / "Localizable.strings"
 for p in [loc_en, loc_es]:
@@ -147,14 +147,14 @@ for src in app_sources + test_sources + uitest_sources:
     w(f"\t\t{fr} /* {src.name} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = \"{path}\"; sourceTree = \"<group>\"; }};")
 # Info.plist
 w(f"\t\t{INFO_PLIST_REF} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = \"{rel(info_plist)}\"; sourceTree = \"<group>\"; }};")
-w(f"\t\t{ENTITLEMENTS_REF} /* TowCommandDriver.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = \"{rel(entitlements)}\"; sourceTree = \"<group>\"; }};")
+w(f"\t\t{ENTITLEMENTS_REF} /* TowDispatchDriver.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = \"{rel(entitlements)}\"; sourceTree = \"<group>\"; }};")
 # Localizable variants
 w(f"\t\t{LOC_EN_REF} /* en */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = \"{rel(loc_en)}\"; sourceTree = \"<group>\"; }};")
 w(f"\t\t{LOC_ES_REF} /* es */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = \"{rel(loc_es)}\"; sourceTree = \"<group>\"; }};")
 # Products
-w(f"\t\t{APP_PRODUCT_ID} /* TowCommandDriver.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TowCommandDriver.app; sourceTree = BUILT_PRODUCTS_DIR; }};")
-w(f"\t\t{TEST_PRODUCT_ID} /* TowCommandDriverTests.xctest */ = {{isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TowCommandDriverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; }};")
-w(f"\t\t{UITEST_PRODUCT_ID} /* TowCommandDriverUITests.xctest */ = {{isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TowCommandDriverUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; }};")
+w(f"\t\t{APP_PRODUCT_ID} /* TowDispatchDriver.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TowDispatchDriver.app; sourceTree = BUILT_PRODUCTS_DIR; }};")
+w(f"\t\t{TEST_PRODUCT_ID} /* TowDispatchDriverTests.xctest */ = {{isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TowDispatchDriverTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; }};")
+w(f"\t\t{UITEST_PRODUCT_ID} /* TowDispatchDriverUITests.xctest */ = {{isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TowDispatchDriverUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; }};")
 w("/* End PBXFileReference section */")
 w("")
 
@@ -192,32 +192,32 @@ w("/* Begin PBXGroup section */")
 
 # Main group
 main_children = [
-    f"{APP_GROUP} /* TowCommandDriver */",
-    f"{TEST_GROUP} /* TowCommandDriverTests */",
-    f"{UITEST_GROUP} /* TowCommandDriverUITests */",
+    f"{APP_GROUP} /* TowDispatchDriver */",
+    f"{TEST_GROUP} /* TowDispatchDriverTests */",
+    f"{UITEST_GROUP} /* TowDispatchDriverUITests */",
     f"{PRODUCTS_GROUP} /* Products */",
 ]
-out.extend(group_block(MAIN_GROUP, "TowCommandDriver", main_children))
+out.extend(group_block(MAIN_GROUP, "TowDispatchDriver", main_children))
 
 # App group — flat list of all sources/resources
 app_children = [f"{make_file_ref(s)} /* {s.name} */" for s in app_sources]
 app_children.append(f"{INFO_PLIST_REF} /* Info.plist */")
-app_children.append(f"{ENTITLEMENTS_REF} /* TowCommandDriver.entitlements */")
+app_children.append(f"{ENTITLEMENTS_REF} /* TowDispatchDriver.entitlements */")
 app_children.append(f"{LOC_VARIANT_REF} /* Localizable.strings */")
-out.extend(group_block(APP_GROUP, "TowCommandDriver", app_children))
+out.extend(group_block(APP_GROUP, "TowDispatchDriver", app_children))
 
 # Tests group
 test_children = [f"{make_file_ref(s)} /* {s.name} */" for s in test_sources]
-out.extend(group_block(TEST_GROUP, "TowCommandDriverTests", test_children))
+out.extend(group_block(TEST_GROUP, "TowDispatchDriverTests", test_children))
 
 uitest_children = [f"{make_file_ref(s)} /* {s.name} */" for s in uitest_sources]
-out.extend(group_block(UITEST_GROUP, "TowCommandDriverUITests", uitest_children))
+out.extend(group_block(UITEST_GROUP, "TowDispatchDriverUITests", uitest_children))
 
 # Products group
 prod_children = [
-    f"{APP_PRODUCT_ID} /* TowCommandDriver.app */",
-    f"{TEST_PRODUCT_ID} /* TowCommandDriverTests.xctest */",
-    f"{UITEST_PRODUCT_ID} /* TowCommandDriverUITests.xctest */",
+    f"{APP_PRODUCT_ID} /* TowDispatchDriver.app */",
+    f"{TEST_PRODUCT_ID} /* TowDispatchDriverTests.xctest */",
+    f"{UITEST_PRODUCT_ID} /* TowDispatchDriverUITests.xctest */",
 ]
 out.extend(group_block(PRODUCTS_GROUP, "Products", prod_children))
 
@@ -280,7 +280,7 @@ w("")
 # ---------- PBXNativeTarget ----------
 w("/* Begin PBXNativeTarget section */")
 # App target
-w(f"\t\t{APP_TARGET_ID} /* TowCommandDriver */ = {{")
+w(f"\t\t{APP_TARGET_ID} /* TowDispatchDriver */ = {{")
 w("\t\t\tisa = PBXNativeTarget;")
 w(f"\t\t\tbuildConfigurationList = {APP_CFG_LIST_ID} /* Build configuration list for app */;")
 w("\t\t\tbuildPhases = (")
@@ -290,17 +290,17 @@ w(f"\t\t\t\t{APP_FRAMEWORKS_PHASE} /* Frameworks */,")
 w("\t\t\t);")
 w("\t\t\tbuildRules = ();")
 w("\t\t\tdependencies = ();")
-w("\t\t\tname = TowCommandDriver;")
+w("\t\t\tname = TowDispatchDriver;")
 w("\t\t\tpackageProductDependencies = (")
 w(f"\t\t\t\t{CORE_PKG_PROD} /* Core */,")
 w(f"\t\t\t\t{DS_PKG_PROD} /* DesignSystem */,")
 w("\t\t\t);")
-w("\t\t\tproductName = TowCommandDriver;")
-w(f"\t\t\tproductReference = {APP_PRODUCT_ID} /* TowCommandDriver.app */;")
+w("\t\t\tproductName = TowDispatchDriver;")
+w(f"\t\t\tproductReference = {APP_PRODUCT_ID} /* TowDispatchDriver.app */;")
 w("\t\t\tproductType = \"com.apple.product-type.application\";")
 w("\t\t};")
 # Test target
-w(f"\t\t{TEST_TARGET_ID} /* TowCommandDriverTests */ = {{")
+w(f"\t\t{TEST_TARGET_ID} /* TowDispatchDriverTests */ = {{")
 w("\t\t\tisa = PBXNativeTarget;")
 w(f"\t\t\tbuildConfigurationList = {TEST_CFG_LIST_ID} /* Build configuration list for tests */;")
 w("\t\t\tbuildPhases = (")
@@ -309,13 +309,13 @@ w(f"\t\t\t\t{TEST_FRAMEWORKS_PHASE} /* Frameworks */,")
 w("\t\t\t);")
 w("\t\t\tbuildRules = ();")
 w("\t\t\tdependencies = ();")
-w("\t\t\tname = TowCommandDriverTests;")
-w("\t\t\tproductName = TowCommandDriverTests;")
-w(f"\t\t\tproductReference = {TEST_PRODUCT_ID} /* TowCommandDriverTests.xctest */;")
+w("\t\t\tname = TowDispatchDriverTests;")
+w("\t\t\tproductName = TowDispatchDriverTests;")
+w(f"\t\t\tproductReference = {TEST_PRODUCT_ID} /* TowDispatchDriverTests.xctest */;")
 w("\t\t\tproductType = \"com.apple.product-type.bundle.unit-test\";")
 w("\t\t};")
 # UI Test target
-w(f"\t\t{UITEST_TARGET_ID} /* TowCommandDriverUITests */ = {{")
+w(f"\t\t{UITEST_TARGET_ID} /* TowDispatchDriverUITests */ = {{")
 w("\t\t\tisa = PBXNativeTarget;")
 w(f"\t\t\tbuildConfigurationList = {UITEST_CFG_LIST_ID} /* Build configuration list for uitests */;")
 w("\t\t\tbuildPhases = (")
@@ -324,9 +324,9 @@ w(f"\t\t\t\t{UITEST_FRAMEWORKS_PHASE} /* Frameworks */,")
 w("\t\t\t);")
 w("\t\t\tbuildRules = ();")
 w("\t\t\tdependencies = ();")
-w("\t\t\tname = TowCommandDriverUITests;")
-w("\t\t\tproductName = TowCommandDriverUITests;")
-w(f"\t\t\tproductReference = {UITEST_PRODUCT_ID} /* TowCommandDriverUITests.xctest */;")
+w("\t\t\tname = TowDispatchDriverUITests;")
+w("\t\t\tproductName = TowDispatchDriverUITests;")
+w(f"\t\t\tproductReference = {UITEST_PRODUCT_ID} /* TowDispatchDriverUITests.xctest */;")
 w("\t\t\tproductType = \"com.apple.product-type.bundle.ui-testing\";")
 w("\t\t};")
 w("/* End PBXNativeTarget section */")
@@ -364,9 +364,9 @@ w(f"\t\t\tproductRefGroup = {PRODUCTS_GROUP} /* Products */;")
 w("\t\t\tprojectDirPath = \"\";")
 w("\t\t\tprojectRoot = \"\";")
 w("\t\t\ttargets = (")
-w(f"\t\t\t\t{APP_TARGET_ID} /* TowCommandDriver */,")
-w(f"\t\t\t\t{TEST_TARGET_ID} /* TowCommandDriverTests */,")
-w(f"\t\t\t\t{UITEST_TARGET_ID} /* TowCommandDriverUITests */,")
+w(f"\t\t\t\t{APP_TARGET_ID} /* TowDispatchDriver */,")
+w(f"\t\t\t\t{TEST_TARGET_ID} /* TowDispatchDriverTests */,")
+w(f"\t\t\t\t{UITEST_TARGET_ID} /* TowDispatchDriverUITests */,")
 w("\t\t\t);")
 w("\t\t};")
 w("/* End PBXProject section */")
@@ -466,10 +466,10 @@ app_common = {
     "GENERATE_INFOPLIST_FILE": "NO",
     "INFOPLIST_FILE": f"{rel(info_plist)}",
     "CODE_SIGN_ENTITLEMENTS": f"{rel(entitlements)}",
-    "INFOPLIST_KEY_CFBundleDisplayName": "US Tow DISPATCH",
+    "INFOPLIST_KEY_CFBundleDisplayName": "Tow Dispatch",
     "LD_RUNPATH_SEARCH_PATHS": "(\"$(inherited)\", \"@executable_path/Frameworks\")",
     "MARKETING_VERSION": "0.1.0",
-    "PRODUCT_BUNDLE_IDENTIFIER": "com.ustowdispatch.driver",
+    "PRODUCT_BUNDLE_IDENTIFIER": "com.towdispatch.driver",
     "PRODUCT_NAME": "$(TARGET_NAME)",
     "SWIFT_EMIT_LOC_STRINGS": "YES",
     "TARGETED_DEVICE_FAMILY": "1",
@@ -483,10 +483,10 @@ test_common = {
     "CURRENT_PROJECT_VERSION": "1",
     "GENERATE_INFOPLIST_FILE": "YES",
     "MARKETING_VERSION": "0.1.0",
-    "PRODUCT_BUNDLE_IDENTIFIER": "com.ustowdispatch.driver.tests",
+    "PRODUCT_BUNDLE_IDENTIFIER": "com.towdispatch.driver.tests",
     "PRODUCT_NAME": "$(TARGET_NAME)",
     "TARGETED_DEVICE_FAMILY": "1",
-    "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/TowCommandDriver.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TowCommandDriver",
+    "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/TowDispatchDriver.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TowDispatchDriver",
 }
 write_xc_cfg(DEBUG_TEST_CFG_ID, "Debug", test_common)
 write_xc_cfg(RELEASE_TEST_CFG_ID, "Release", test_common)
@@ -496,10 +496,10 @@ uitest_common = {
     "CURRENT_PROJECT_VERSION": "1",
     "GENERATE_INFOPLIST_FILE": "YES",
     "MARKETING_VERSION": "0.1.0",
-    "PRODUCT_BUNDLE_IDENTIFIER": "com.ustowdispatch.driver.uitests",
+    "PRODUCT_BUNDLE_IDENTIFIER": "com.towdispatch.driver.uitests",
     "PRODUCT_NAME": "$(TARGET_NAME)",
     "TARGETED_DEVICE_FAMILY": "1",
-    "TEST_TARGET_NAME": "TowCommandDriver",
+    "TEST_TARGET_NAME": "TowDispatchDriver",
 }
 write_xc_cfg(DEBUG_UITEST_CFG_ID, "Debug", uitest_common)
 write_xc_cfg(RELEASE_UITEST_CFG_ID, "Release", uitest_common)

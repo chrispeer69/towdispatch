@@ -15,14 +15,14 @@
  *     = null so the UI can render "not set" without inventing a $0 default.
  */
 import { Injectable } from '@nestjs/common';
-import { type ServiceRateRow, serviceCatalog, serviceRates, uuidv7 } from '@ustowdispatch/db';
+import { type ServiceRateRow, serviceCatalog, serviceRates, uuidv7 } from '@towdispatch/db';
 import {
   type RateVehicleClass,
   SERVICE_RATE_ANY_CLASS,
   type ServiceRateDto,
   type ServiceRatesBulkUpsertPayload,
   type ServiceRatesBulkUpsertResponse,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, inArray, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

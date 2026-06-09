@@ -77,10 +77,10 @@ importers:
       '@socket.io/redis-adapter':
         specifier: 8.3.0
         version: 8.3.0(socket.io-adapter@2.5.6)
-      '@ustowdispatch/db':
+      '@towdispatch/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@ustowdispatch/shared':
+      '@towdispatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       argon2:
@@ -216,7 +216,7 @@ importers:
       '@types/node':
         specifier: 22.9.3
         version: 22.9.3
-      '@ustowdispatch/shared':
+      '@towdispatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       chrome-launcher:
@@ -249,10 +249,10 @@ importers:
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.16
         version: 2.1.16(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@ustowdispatch/shared':
+      '@towdispatch/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@ustowdispatch/ui':
+      '@towdispatch/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       class-variance-authority:
@@ -331,7 +331,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@ustowdispatch/shared':
+      '@towdispatch/shared':
         specifier: workspace:*
         version: link:../shared
       argon2:

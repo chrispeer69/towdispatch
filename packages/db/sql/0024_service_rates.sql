@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS service_rates (
   id              uuid PRIMARY KEY,
   tenant_id       uuid NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
   service_id      uuid NOT NULL REFERENCES service_catalog(id) ON DELETE CASCADE,
-  -- vehicle_class is the @ustowdispatch/shared VehicleClass value, or 'any'
+  -- vehicle_class is the @towdispatch/shared VehicleClass value, or 'any'
   -- as the sentinel for class-independent services. Validated app-side.
   vehicle_class   text NOT NULL,
   price_cents     bigint NOT NULL,

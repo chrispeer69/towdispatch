@@ -7,7 +7,7 @@ What's emitted, where to look, when to page. Reference companion to the runbooks
 All API logs are JSON via pino (`apps/api/src/config/config.service.ts`). Every log line includes:
 
 ```
-timestamp, level, service="ustowdispatch-api", env, request_id, tenant_id, user_id,
+timestamp, level, service="towdispatch-api", env, request_id, tenant_id, user_id,
 method, path, status, duration_ms, ip, user_agent, error (when level >= error)
 ```
 
@@ -20,7 +20,7 @@ Log storage today: Railway retains 7 days of stdout. The audit_log Postgres tabl
 The 17A observability layer exposes a Prometheus endpoint:
 
 ```
-GET https://api.ustowdispatch.com/metrics
+GET https://api.towdispatch.com/metrics
 ```
 
 Default Node metrics (event-loop lag, GC, memory, FDs) plus the application counters:
@@ -34,7 +34,7 @@ Default Node metrics (event-loop lag, GC, memory, FDs) plus the application coun
 | `auth_lockouts_total` | counter | — |
 | `import_runs_total` | counter | mode, status |
 
-Scrape interval: 15s (default Prometheus / Grafana cloud). Dashboard at `https://grafana.ustowdispatch.com/d/api-overview` (Phase 1 prerequisite).
+Scrape interval: 15s (default Prometheus / Grafana cloud). Dashboard at `https://grafana.towdispatch.com/d/api-overview` (Phase 1 prerequisite).
 
 ## Traces
 

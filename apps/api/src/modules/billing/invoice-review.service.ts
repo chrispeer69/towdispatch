@@ -46,7 +46,7 @@ import {
   jobDriverAssignments,
   jobs,
   uuidv7,
-} from '@ustowdispatch/db';
+} from '@towdispatch/db';
 import {
   type AccountSummaryDto,
   type CustomerSummaryDto,
@@ -57,7 +57,7 @@ import {
   type PostInvoiceResponse,
   type ReviewJobSummaryDto,
   type UpdateInvoiceReviewPayload,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
 import { InvoicesService } from './invoices.service.js';

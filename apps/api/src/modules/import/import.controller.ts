@@ -26,7 +26,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ROLES } from '@ustowdispatch/shared';
+import { ROLES } from '@towdispatch/shared';
 import type { FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';
@@ -167,7 +167,7 @@ export class ImportController {
         where.push(`action = $${params.length}`);
       }
       const r = await client.query(
-        `SELECT record_type, action, external_id, towcommand_id, error_message, occurred_at
+        `SELECT record_type, action, external_id, towdispatch_id, error_message, occurred_at
          FROM import_run_events
          WHERE ${where.join(' AND ')}
          ORDER BY occurred_at ASC

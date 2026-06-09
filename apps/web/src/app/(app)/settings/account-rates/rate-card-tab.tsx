@@ -29,7 +29,7 @@ import {
   type ServiceCategory,
   resolveAccountOverridePriceCents,
   serviceCategoryValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { type JSX, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 

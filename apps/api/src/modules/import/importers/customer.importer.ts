@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import {
   mapValue,
@@ -89,7 +89,7 @@ export class CustomerImporter extends BaseImporter {
           type,
         ],
       );
-      return { action: 'update', externalId, towcommandId: id };
+      return { action: 'update', externalId, towdispatchId: id };
     }
 
     if (phone) {
@@ -118,7 +118,7 @@ export class CustomerImporter extends BaseImporter {
            WHERE id = $1`,
           [row0.id, externalId, name, email ?? ''],
         );
-        return { action: 'update', externalId, towcommandId: row0.id };
+        return { action: 'update', externalId, towdispatchId: row0.id };
       }
     }
 
@@ -141,7 +141,7 @@ export class CustomerImporter extends BaseImporter {
            WHERE id = $1`,
           [row0.id, externalId, name, phone ?? ''],
         );
-        return { action: 'update', externalId, towcommandId: row0.id };
+        return { action: 'update', externalId, towdispatchId: row0.id };
       }
     }
 
@@ -168,6 +168,6 @@ export class CustomerImporter extends BaseImporter {
         createdAt,
       ],
     );
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 }

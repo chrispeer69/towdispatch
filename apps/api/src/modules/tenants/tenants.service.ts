@@ -6,8 +6,8 @@
  * creation by a customer is intentionally not exposed.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { tenants } from '@ustowdispatch/db';
-import { ERROR_CODES, type TenantDto } from '@ustowdispatch/shared';
+import { tenants } from '@towdispatch/db';
+import { ERROR_CODES, type TenantDto } from '@towdispatch/shared';
 import { eq } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

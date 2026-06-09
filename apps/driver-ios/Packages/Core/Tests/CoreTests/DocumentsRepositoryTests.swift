@@ -44,7 +44,7 @@ final class DocumentsRepositoryTests: XCTestCase {
     }
 }
 
-private actor NoopAPIForDocs: USTowDispatchAPI {
+private actor NoopAPIForDocs: TowDispatchAPI {
     func login(_ body: LoginRequest) async throws -> LoginResponse { fatalError() }
     func refresh(_ body: RefreshRequest) async throws -> RefreshResponse { fatalError() }
     func logout(_ body: LogoutRequest) async throws {}

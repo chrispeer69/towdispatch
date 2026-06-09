@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import {
   normalizeEmail,
@@ -80,7 +80,7 @@ export class DriverImporter extends BaseImporter {
           status,
         ],
       );
-      return { action: 'update', externalId, towcommandId: id };
+      return { action: 'update', externalId, towdispatchId: id };
     }
 
     if (phone) {
@@ -95,7 +95,7 @@ export class DriverImporter extends BaseImporter {
           `UPDATE drivers SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],
         );
-        return { action: 'update', externalId, towcommandId: id };
+        return { action: 'update', externalId, towdispatchId: id };
       }
     }
     if (email) {
@@ -110,7 +110,7 @@ export class DriverImporter extends BaseImporter {
           `UPDATE drivers SET external_source='towbook', external_id=$2, updated_at=now() WHERE id=$1`,
           [id, externalId],
         );
-        return { action: 'update', externalId, towcommandId: id };
+        return { action: 'update', externalId, towdispatchId: id };
       }
     }
 
@@ -141,7 +141,7 @@ export class DriverImporter extends BaseImporter {
         externalId,
       ],
     );
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 }
 

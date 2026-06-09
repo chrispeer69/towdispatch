@@ -4,7 +4,7 @@ import type {
   DriverSummaryDto,
   InvoiceReviewDto,
   UpdateInvoiceReviewPayload,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 

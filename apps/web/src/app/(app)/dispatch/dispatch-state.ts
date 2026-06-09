@@ -8,7 +8,7 @@
  * This module is pure (no React, no DOM) so the reducer can be exercised
  * directly under vitest in apps/api or future apps/web tests.
  */
-import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
+import type { DriverRosterRow, JobDto } from '@towdispatch/shared';
 
 export interface DispatchSnapshot {
   queue: JobDto[];

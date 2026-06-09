@@ -13,7 +13,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { type InvoiceTerms, type TenantDto, invoiceTermsValues } from '@ustowdispatch/shared';
+import { type InvoiceTerms, type TenantDto, invoiceTermsValues } from '@towdispatch/shared';
 import { Lock } from 'lucide-react';
 import { type FormEvent, type JSX, useState } from 'react';
 import { toast } from 'sonner';

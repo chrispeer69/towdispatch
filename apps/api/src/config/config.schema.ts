@@ -39,8 +39,8 @@ export const configSchema = z.object({
   JWT_MFA_SECRET: z.string().optional(),
   JWT_ACCESS_TTL: z.string().default('15m'),
   JWT_REFRESH_TTL: z.string().default('30d'),
-  JWT_ISSUER: z.string().default('ustowdispatch'),
-  JWT_AUDIENCE: z.string().default('ustowdispatch-api'),
+  JWT_ISSUER: z.string().default('towdispatch'),
+  JWT_AUDIENCE: z.string().default('towdispatch-api'),
 
   // 32-byte hex/base64; used to AES-256-GCM-encrypt user TOTP secrets at rest.
   // Kept even when MFA_LOGIN_GATE_ENABLED is false — the column on `users` is
@@ -70,7 +70,7 @@ export const configSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
-  SMTP_FROM: z.string().default('US Tow DISPATCH <no-reply@ustowdispatch.local>'),
+  SMTP_FROM: z.string().default('Tow Dispatch <no-reply@towdispatch.local>'),
 
   // SendGrid HTTP API. When SENDGRID_API_KEY is non-empty the EmailService
   // sends via @sendgrid/mail. SENDGRID_FROM overrides SMTP_FROM for SendGrid
@@ -123,7 +123,7 @@ export const configSchema = z.object({
   // up if DD_API_KEY is non-empty. Default off.
   DD_API_KEY: z.string().optional().default(''),
   DD_ENV: z.string().default('development'),
-  DD_SERVICE: z.string().default('ustowdispatch-api'),
+  DD_SERVICE: z.string().default('towdispatch-api'),
 
   // Notification provider — Twilio if creds are set, stub otherwise. The
   // config service derives `notification.activeProviderId` from these.

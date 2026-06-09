@@ -1,0 +1,20 @@
+/* Tow Dispatch Driver — English */
+"app.name" = "Tow Dispatch Driver";
+"signin.title" = "Sign In";
+"signin.email" = "Email";
+"signin.password" = "Password";
+"signin.biometric" = "Use Face ID / Touch ID";
+"queue.title" = "Queue";
+"queue.empty" = "No jobs assigned";
+"queue.pull_to_refresh" = "Pull down to refresh.";
+"active.title" = "Active Job";
+"active.none" = "No active job";
+"action.advance" = "Advance status";
+"action.cancel" = "Cancel Job";
+"action.capture_photos" = "Capture Photos";
+"action.capture_signature" = "Capture Signature";
+"settings.title" = "Settings";
+"settings.glove" = "Glove mode (72pt taps)";
+"settings.data_saver" = "Data saver (Wi-Fi photo upload only)";
+"settings.quiet_hours" = "Quiet hours";
+"profile.signout" = "Sign Out";

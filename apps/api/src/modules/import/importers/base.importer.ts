@@ -3,7 +3,7 @@ import type { Buffer } from 'node:buffer';
  * BaseImporter — common per-record loop with savepoint-every-1000 logic,
  * error capture, and dedup-aware upsert semantics. Subclasses implement
  * `importRow(ctx, getter, row)` and return one of:
- *   - { action: 'create' | 'update', externalId, towcommandId }
+ *   - { action: 'create' | 'update', externalId, towdispatchId }
  *   - { action: 'skip_dedup', externalId }
  *   - { action: 'error', externalId, errorMessage }
  *
@@ -24,8 +24,8 @@ export interface ImporterBundle {
 }
 
 export type ImportRowOutcome =
-  | { action: 'create' | 'update'; externalId: string | null; towcommandId: string | null }
-  | { action: 'skip_dedup'; externalId: string | null; towcommandId: string | null }
+  | { action: 'create' | 'update'; externalId: string | null; towdispatchId: string | null }
+  | { action: 'skip_dedup'; externalId: string | null; towdispatchId: string | null }
   | { action: 'error'; externalId: string | null; errorMessage: string };
 
 const SAVEPOINT_INTERVAL = 1000;
@@ -105,7 +105,7 @@ export abstract class BaseImporter {
         recordType: this.recordType,
         action: outcome.action,
         externalId: outcome.action === 'error' ? outcome.externalId : (outcome.externalId ?? null),
-        towcommandId: outcome.action === 'error' ? null : outcome.towcommandId,
+        towdispatchId: outcome.action === 'error' ? null : outcome.towdispatchId,
         errorMessage: outcome.action === 'error' ? outcome.errorMessage : null,
       });
 

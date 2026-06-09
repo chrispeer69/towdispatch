@@ -12,7 +12,7 @@
  * the operator switches accounts.
  */
 import { cn } from '@/lib/utils';
-import type { AccountRateCardDto } from '@ustowdispatch/shared';
+import type { AccountRateCardDto } from '@towdispatch/shared';
 import { type JSX, useState } from 'react';
 import { ContractTermsTab } from './contract-terms-tab';
 import { RateCardTab } from './rate-card-tab';

@@ -1,29 +1,29 @@
 # =====================================================================
-# Local development stack for US Tow DISPATCH.
+# Local development stack for Tow Dispatch.
 # Postgres uses postgis/postgis:16-3.4 because PostGIS is required for
 # service-zone geometry, driver-position geography, and route-matching.
 # Restart policy is unless-stopped so a Docker Desktop restart brings
 # everything back without manual intervention.
 # =====================================================================
 
-name: ustowdispatch
+name: towdispatch
 
 services:
   postgres:
     image: postgis/postgis:16-3.4
-    container_name: ustowdispatch-postgres
+    container_name: towdispatch-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-ustowdispatch}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ustowdispatch_dev_pw}
-      POSTGRES_DB: ${POSTGRES_DB:-ustowdispatch}
+      POSTGRES_USER: ${POSTGRES_USER:-towdispatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-towdispatch_dev_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-towdispatch}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - ustowdispatch
+      - towdispatch
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -33,7 +33,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: ustowdispatch-redis
+    container_name: towdispatch-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
@@ -41,7 +41,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - ustowdispatch
+      - towdispatch
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -50,13 +50,13 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
-    container_name: ustowdispatch-mailhog
+    container_name: towdispatch-mailhog
     restart: unless-stopped
     ports:
       - "1025:1025"
       - "8025:8025"
     networks:
-      - ustowdispatch
+      - towdispatch
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8025/ || exit 1"]
       interval: 10s
@@ -65,11 +65,11 @@ services:
 
 volumes:
   postgres-data:
-    name: ustowdispatch-postgres-data
+    name: towdispatch-postgres-data
   redis-data:
-    name: ustowdispatch-redis-data
+    name: towdispatch-redis-data
 
 networks:
-  ustowdispatch:
-    name: ustowdispatch
+  towdispatch:
+    name: towdispatch
     driver: bridge

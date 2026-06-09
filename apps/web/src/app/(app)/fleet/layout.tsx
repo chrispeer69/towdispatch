@@ -1,6 +1,6 @@
 import { FleetTabs } from './fleet-tabs';
 
-export const metadata = { title: 'Fleet â€” US Tow DISPATCH' };
+export const metadata = { title: 'Fleet â€” Tow Dispatch' };
 
 export default function FleetLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (

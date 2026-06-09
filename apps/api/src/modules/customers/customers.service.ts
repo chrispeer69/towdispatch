@@ -9,7 +9,7 @@
  * map it to a friendly 409.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { customerVehicles, customers, uuidv7, vehicles } from '@ustowdispatch/db';
+import { customerVehicles, customers, uuidv7, vehicles } from '@towdispatch/db';
 import {
   type CreateCustomerPayload,
   type CustomerDto,
@@ -24,7 +24,7 @@ import {
   type LinkCustomerVehiclePayload,
   type PaginatedCustomers,
   type UpdateCustomerPayload,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

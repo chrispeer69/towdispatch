@@ -21,8 +21,8 @@ import type {
   JobUnassignedEvent,
   TrackingLinkSummaryEvent,
   TrackingMessageReceivedEvent,
-} from '@ustowdispatch/shared';
-import { DISPATCH_EVENTS } from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
+import { DISPATCH_EVENTS } from '@towdispatch/shared';
 
 export type DispatchEventPayload =
   | { name: typeof DISPATCH_EVENTS.JOB_CREATED; payload: JobCreatedEvent }

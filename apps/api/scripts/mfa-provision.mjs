@@ -10,7 +10,7 @@ import { authenticator } from 'otplib';
 
 const WEB = process.env.MFA_E2E_WEB ?? 'https://web-production-7e5b.up.railway.app';
 const slug = `dev-${Math.random().toString(36).slice(2, 8)}`;
-const email = `dev-${Math.random().toString(36).slice(2, 8)}@ustowdispatch.dev`;
+const email = `dev-${Math.random().toString(36).slice(2, 8)}@towdispatch.dev`;
 const password = 'DriverDev1!Long-Enough';
 
 const jar = new Map();

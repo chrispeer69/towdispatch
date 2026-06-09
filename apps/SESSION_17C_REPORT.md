@@ -141,12 +141,12 @@ Phase 1 prerequisites are documented in `apps/PHASE_0_EXIT_REPORT.md` § "Phase 
 ## Verification
 
 ```
-$ pnpm --filter @ustowdispatch/api build       ✓ zero errors
-$ pnpm --filter @ustowdispatch/api typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/api test        ✓ 138 passed, 18 DB-gated skips
-$ pnpm --filter @ustowdispatch/web build       ✓ green
-$ pnpm --filter @ustowdispatch/web typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/e2e typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api build       ✓ zero errors
+$ pnpm --filter @towdispatch/api typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api test        ✓ 138 passed, 18 DB-gated skips
+$ pnpm --filter @towdispatch/web build       ✓ green
+$ pnpm --filter @towdispatch/web typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/e2e typecheck   ✓ zero errors
 $ bash scripts/check-migrations.sh          ✓ 19 SQL migrations OK
 $ bash scripts/check-env.sh                 ✓ 0 warnings, 0 errors
 ```

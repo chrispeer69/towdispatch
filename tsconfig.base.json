@@ -33,12 +33,12 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@ustowdispatch/db": ["packages/db/src/index.ts"],
-      "@ustowdispatch/db/*": ["packages/db/src/*"],
-      "@ustowdispatch/shared": ["packages/shared/src/index.ts"],
-      "@ustowdispatch/shared/*": ["packages/shared/src/*"],
-      "@ustowdispatch/ui": ["packages/ui/src/index.ts"],
-      "@ustowdispatch/ui/*": ["packages/ui/src/*"]
+      "@towdispatch/db": ["packages/db/src/index.ts"],
+      "@towdispatch/db/*": ["packages/db/src/*"],
+      "@towdispatch/shared": ["packages/shared/src/index.ts"],
+      "@towdispatch/shared/*": ["packages/shared/src/*"],
+      "@towdispatch/ui": ["packages/ui/src/index.ts"],
+      "@towdispatch/ui/*": ["packages/ui/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", ".next", "coverage"]

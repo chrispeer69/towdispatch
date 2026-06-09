@@ -16,7 +16,7 @@ export class ConfigService {
     this.config = loadConfig();
     this.logger = pino({
       level: this.config.LOG_LEVEL,
-      base: { service: 'ustowdispatch-api', env: this.config.NODE_ENV },
+      base: { service: 'towdispatch-api', env: this.config.NODE_ENV },
       ...(this.config.NODE_ENV === 'development'
         ? {
             transport: {

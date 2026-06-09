@@ -5,7 +5,7 @@ import {
   setMfaSetupCookie,
   setSessionCookies,
 } from '@/lib/auth/cookies';
-import type { LoginResponse } from '@ustowdispatch/shared';
+import type { LoginResponse } from '@towdispatch/shared';
 /**
  * BFF for /auth/login. Three branches:
  *   - authenticated:        set session cookies, strip tokens

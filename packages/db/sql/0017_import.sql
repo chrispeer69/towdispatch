@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS import_run_events (
   record_type text NOT NULL,
   action text NOT NULL,
   external_id text,
-  towcommand_id uuid,
+  towdispatch_id uuid,
   error_message text,
   occurred_at timestamptz NOT NULL DEFAULT now(),
 

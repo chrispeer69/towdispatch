@@ -141,7 +141,7 @@ Plus `style-src 'unsafe-inline'` and `font-src data:` are pragmatic concessions 
 | `CSP_FRAME_SRC` | `…stripe` | CSP allow-list |
 | `DD_API_KEY` | `''` | Datadog APM (off when empty) |
 | `DD_ENV` | `development` | Datadog environment tag |
-| `DD_SERVICE` | `ustowdispatch-api` | Datadog service tag |
+| `DD_SERVICE` | `towdispatch-api` | Datadog service tag |
 
 All documented in `.env.example`.
 
@@ -162,22 +162,22 @@ All documented in `.env.example`.
 ## Verification log
 
 ```
-$ pnpm --filter @ustowdispatch/api build
+$ pnpm --filter @towdispatch/api build
 ✓ zero errors
 
-$ pnpm --filter @ustowdispatch/api typecheck
+$ pnpm --filter @towdispatch/api typecheck
 ✓ zero errors    ← first clean typecheck since Session 11
 
-$ pnpm --filter @ustowdispatch/api test
+$ pnpm --filter @towdispatch/api test
  Test Files  15 passed | 18 skipped (33)
       Tests  138 passed | 185 skipped (323)
  (the 18 skipped are integration / RLS-bypass / role-matrix suites that
   require Postgres + Redis up; they run in CI)
 
-$ pnpm --filter @ustowdispatch/web build
+$ pnpm --filter @towdispatch/web build
 ✓ Compiled successfully, all 58 pages generated
 
-$ pnpm --filter @ustowdispatch/web typecheck
+$ pnpm --filter @towdispatch/web typecheck
 ✓ zero errors
 ```
 
@@ -191,8 +191,8 @@ $ curl -s http://localhost:3001/ready
 {"status":"ok","checks":{"db":"ok","redis":"ok"}}
 
 $ curl -s http://localhost:3001/metrics | head -20
-# HELP ustowdispatch_api_process_cpu_user_seconds_total Total user CPU time spent in seconds.
-# TYPE ustowdispatch_api_process_cpu_user_seconds_total counter
+# HELP towdispatch_api_process_cpu_user_seconds_total Total user CPU time spent in seconds.
+# TYPE towdispatch_api_process_cpu_user_seconds_total counter
 …
 http_requests_total{method="GET",route="/health",status="200"} 1
 

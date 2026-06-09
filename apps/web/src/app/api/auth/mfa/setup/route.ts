@@ -8,7 +8,7 @@
  */
 import { ApiError, apiServer } from '@/lib/api/client';
 import { readMfaSetupCookie } from '@/lib/auth/cookies';
-import type { MfaSetupResponse } from '@ustowdispatch/shared';
+import type { MfaSetupResponse } from '@towdispatch/shared';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(_req: NextRequest): Promise<NextResponse> {

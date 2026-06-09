@@ -13,7 +13,7 @@
  * Plus the per-line sum-check trigger (specific to this table):
  *   7) inserting a second commission that would push line total > 100 → reject
  */
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

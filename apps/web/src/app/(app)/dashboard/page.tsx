@@ -2,11 +2,11 @@ import { buttonVariants } from '@/components/ui/button';
 import { apiServer, tryFetch } from '@/lib/api/client';
 import { getOptionalUser } from '@/lib/auth/session';
 import { cn } from '@/lib/utils';
-import type { JobServiceType, JobStatus } from '@ustowdispatch/shared';
+import type { JobServiceType, JobStatus } from '@towdispatch/shared';
 import { ArrowUpRight, Clock, type LucideIcon, Plus, Truck, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
-export const metadata = { title: 'Dashboard â€” US Tow DISPATCH' };
+export const metadata = { title: 'Dashboard â€” Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 interface KpiCardProps {

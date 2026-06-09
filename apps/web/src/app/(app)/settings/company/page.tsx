@@ -16,7 +16,7 @@ import { CompanyProfileForm } from './company-profile-form';
 
 const TAB = findSettingsTab('company');
 
-export const metadata = { title: 'Company Profile — US Tow DISPATCH' };
+export const metadata = { title: 'Company Profile — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 export default async function CompanyProfilePage(): Promise<JSX.Element> {

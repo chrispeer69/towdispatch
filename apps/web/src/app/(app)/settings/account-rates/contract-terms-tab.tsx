@@ -15,7 +15,7 @@ import {
   type AccountDto,
   type AccountPaymentTermValue,
   accountPaymentTermsValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { type JSX, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 

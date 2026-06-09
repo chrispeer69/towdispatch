@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "000000000000",
-    "project_id": "ustowdispatch-driver-placeholder",
-    "storage_bucket": "ustowdispatch-driver-placeholder.appspot.com"
+    "project_id": "towdispatch-driver-placeholder",
+    "storage_bucket": "towdispatch-driver-placeholder.appspot.com"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
         "android_client_info": {
-          "package_name": "ai.bluecollar.ustowdispatch.driver"
+          "package_name": "ai.bluecollar.towdispatch.driver"
         }
       },
       "oauth_client": [],

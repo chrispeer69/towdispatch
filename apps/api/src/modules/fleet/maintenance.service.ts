@@ -14,7 +14,7 @@
  * push the schedule into the future.
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { maintenanceRecords, maintenanceSchedules, trucks, uuidv7 } from '@ustowdispatch/db';
+import { maintenanceRecords, maintenanceSchedules, trucks, uuidv7 } from '@towdispatch/db';
 import {
   type CreateMaintenanceRecordPayload,
   type CreateMaintenanceSchedulePayload,
@@ -22,7 +22,7 @@ import {
   type MaintenanceRecordDto,
   type MaintenanceScheduleDto,
   type MaintenanceScheduleStatus,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { and, eq, isNull, lte, or } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 

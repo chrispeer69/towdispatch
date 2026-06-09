@@ -4,11 +4,11 @@ import Foundation
 /// (offline-first); writes go through the outbox and are reflected
 /// optimistically in the local store before sync.
 public actor JobsRepository {
-    private let api: USTowDispatchAPI
+    private let api: TowDispatchAPI
     private let localStore: LocalStore
     private let outbox: Outbox
 
-    public init(api: USTowDispatchAPI, localStore: LocalStore, outbox: Outbox) {
+    public init(api: TowDispatchAPI, localStore: LocalStore, outbox: Outbox) {
         self.api = api
         self.localStore = localStore
         self.outbox = outbox

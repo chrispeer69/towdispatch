@@ -9,8 +9,8 @@ what is in the tree today.
 
 `apps/driver-android/`
 
-This is the *driver* app (Gradle namespace `ai.bluecollar.ustowdispatch.driver`,
-applicationId `ai.bluecollar.ustowdispatch.driver`). It is the only Android module
+This is the *driver* app (Gradle namespace `ai.bluecollar.towdispatch.driver`,
+applicationId `ai.bluecollar.towdispatch.driver`). It is the only Android module
 in the repo — there is no `apps/admin-android` or similar. iOS lives at
 `apps/driver-ios` and is out of scope here.
 
@@ -24,11 +24,11 @@ Module under inspection: `apps/driver-android/app/`.
 
 | Layer | Path |
 | --- | --- |
-| Login screen (Compose) | `apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/ui/login/LoginScreen.kt` |
-| Login view-model | `apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/ui/login/LoginViewModel.kt` |
-| Repository (calls API, returns sealed `LoginResult`) | `apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/data/repo/AuthRepository.kt` |
-| Retrofit interface | `apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/data/api/UsTowDispatchApi.kt` |
-| Login response DTOs | `apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/data/api/dto/AuthDtos.kt` |
+| Login screen (Compose) | `apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/ui/login/LoginScreen.kt` |
+| Login view-model | `apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/ui/login/LoginViewModel.kt` |
+| Repository (calls API, returns sealed `LoginResult`) | `apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/data/repo/AuthRepository.kt` |
+| Retrofit interface | `apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/data/api/TowDispatchApi.kt` |
+| Login response DTOs | `apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/data/api/dto/AuthDtos.kt` |
 
 ### Login response data class
 
@@ -118,7 +118,7 @@ real-device login on Samsung S23+.
 
 **Jetpack Compose Navigation, single-activity.**
 
-- Nav graph: `apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/ui/nav/DriverNavGraph.kt`
+- Nav graph: `apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/ui/nav/DriverNavGraph.kt`
 - `MainActivity.kt` mounts `DriverNavGraph()` once; everything else is a
   composable destination.
 - String-keyed routes via an `object Routes { const val LOGIN = "login" … }`
@@ -162,7 +162,7 @@ target 17, compileSdk 35, minSdk 26.
 
 ### Base URL
 
-`BuildConfig.API_BASE_URL` is hardcoded to `"https://api.ustowdispatch.cloud"` for
+`BuildConfig.API_BASE_URL` is hardcoded to `"https://api.towdispatch.cloud"` for
 both `debug` and `release` buildTypes (`build.gradle.kts:28, 32`). No staging
 or local-dev override switch lives in this file. Retrofit is constructed in
 `NetworkModule.provideRetrofit()` (`NetworkModule.kt:51-59`) with that base URL
@@ -182,11 +182,11 @@ Two-layer pattern on the OkHttp client built in `NetworkModule.kt:32-49`:
   replays the original request with the new token. One retry max. If refresh
   fails, the token store is cleared (the next `isLoggedIn` flow tick drops
   the app back to `LOGIN`). Source: `data/api/TokenAuthenticator.kt`. Uses
-  `Provider<UsTowDispatchApi>` to break the OkHttp ↔ Retrofit construction cycle.
+  `Provider<TowDispatchApi>` to break the OkHttp ↔ Retrofit construction cycle.
 
 ### How the JWT is stored
 
-`apps/driver-android/app/src/main/java/ai/bluecollar/ustowdispatch/driver/data/prefs/AuthTokenStore.kt`.
+`apps/driver-android/app/src/main/java/ai/bluecollar/towdispatch/driver/data/prefs/AuthTokenStore.kt`.
 
 **Jetpack DataStore (Preferences)**, file `auth_prefs`. **Plain DataStore — NOT
 EncryptedSharedPreferences** and not the encrypted variant of DataStore.
@@ -237,7 +237,7 @@ Concretely, for the driver app to handle `mfa_required` on the live backend:
 
 ### Retrofit interface
 
-- `UsTowDispatchApi.kt` has no `@POST("/auth/mfa/challenge")` method. Needs to
+- `TowDispatchApi.kt` has no `@POST("/auth/mfa/challenge")` method. Needs to
   be added.
 
 ### Repository (`AuthRepository.kt`)

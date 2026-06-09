@@ -21,7 +21,7 @@ export class MetricsService {
 
   constructor() {
     this.registry = new Registry();
-    collectDefaultMetrics({ register: this.registry, prefix: 'ustowdispatch_api_' });
+    collectDefaultMetrics({ register: this.registry, prefix: 'towdispatch_api_' });
 
     this.httpRequestsTotal = new Counter({
       name: 'http_requests_total',

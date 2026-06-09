@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { fetchCustomers } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/session';
-import type { CustomerType } from '@ustowdispatch/shared';
+import type { CustomerType } from '@towdispatch/shared';
 import Link from 'next/link';
 import { CustomerListClient } from './customer-list-client';
 
-export const metadata = { title: 'Customers — US Tow DISPATCH' };
+export const metadata = { title: 'Customers — Tow Dispatch' };
 // Same posture as /jobs and /dashboard — never prerender, never cache. async
 // searchParams already opts this page into dynamic, but stating it explicitly
 // keeps the entire (app)/ list-page surface uniform and rules out any future

@@ -13,7 +13,7 @@
 import { BookOpen, MessageSquare } from 'lucide-react';
 import type { JSX } from 'react';
 
-export const metadata = { title: 'Help center — US Tow DISPATCH' };
+export const metadata = { title: 'Help center — Tow Dispatch' };
 
 export default function HelpCenterPage(): JSX.Element {
   return (
@@ -62,7 +62,7 @@ export default function HelpCenterPage(): JSX.Element {
               </span>
             </div>
             <p className="mt-1 text-sm text-text-secondary-on-dark">
-              Open a chat request to the US Tow DISPATCH support team. Replies on business days,
+              Open a chat request to the Tow Dispatch support team. Replies on business days,
               priority for production-blocking issues.
             </p>
           </div>
@@ -71,8 +71,8 @@ export default function HelpCenterPage(): JSX.Element {
 
       <p className="text-xs text-text-secondary-on-dark">
         Need urgent help in the meantime? Email{' '}
-        <a className="text-brand-primary hover:underline" href="mailto:support@towcommand.cloud">
-          support@towcommand.cloud
+        <a className="text-brand-primary hover:underline" href="mailto:support@towdispatch.cloud">
+          support@towdispatch.cloud
         </a>
         .
       </p>

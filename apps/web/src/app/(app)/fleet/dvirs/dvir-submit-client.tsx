@@ -10,7 +10,7 @@ import {
   type TruckDto,
   dvirDefectSeverityValues,
   dvirTypeValues,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { useState } from 'react';
 
 interface Props {

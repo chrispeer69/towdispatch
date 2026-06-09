@@ -10,12 +10,12 @@
  */
 import { fetchAccounts } from '@/lib/api/resources';
 import { getSessionToken } from '@/lib/auth/session';
-import type { AccountDto } from '@ustowdispatch/shared';
+import type { AccountDto } from '@towdispatch/shared';
 import type { JSX } from 'react';
 import { findSettingsTab } from '../tabs';
 import { AccountRateCardsClient } from './account-rate-cards-client';
 
-export const metadata = { title: 'Account Rate Cards — US Tow DISPATCH' };
+export const metadata = { title: 'Account Rate Cards — Tow Dispatch' };
 export const dynamic = 'force-dynamic';
 
 const TAB = findSettingsTab('account-rates');

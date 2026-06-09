@@ -61,7 +61,7 @@ import {
   truckFiltersSchema,
   updateDriverSchema,
   updateTruckSchema,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { Roles } from '../../common/decorators/roles.decorator.js';

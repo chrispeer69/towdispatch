@@ -20,7 +20,7 @@ export default function BillingSubscriptionPage(): JSX.Element {
   return (
     <ComingSoonCard
       title={TAB.label}
-      description="SaaS subscription billing (the plan you pay for US Tow DISPATCH) will live here when it ships. The Stripe Connect setup that lets you accept payments from your customers is already wired and lives at the link below."
+      description="SaaS subscription billing (the plan you pay for Tow Dispatch) will live here when it ships. The Stripe Connect setup that lets you accept payments from your customers is already wired and lives at the link below."
     >
       <section className="rounded-[14px] border border-divider bg-bg-surface p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

@@ -1,7 +1,7 @@
 /**
  * account_mappings — Session 12.
  *
- * Operator-defined mapping from US Tow DISPATCH's internal billing categories
+ * Operator-defined mapping from Tow Dispatch's internal billing categories
  * (e.g. "service_revenue", "fuel_surcharge", "storage", "tax_payable") onto
  * the corresponding external account ids in the provider's chart of accounts.
  *

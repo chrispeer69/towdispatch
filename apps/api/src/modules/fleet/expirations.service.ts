@@ -16,7 +16,7 @@
  * and a reusable `bucketize` helper for the test.
  */
 import { Injectable } from '@nestjs/common';
-import { documents, drivers, trucks } from '@ustowdispatch/db';
+import { documents, drivers, trucks } from '@towdispatch/db';
 import {
   type ExpirationKind,
   type ExpirationRow,
@@ -24,7 +24,7 @@ import {
   type ExpirationsFilters,
   type ExpirationsResponse,
   type Role,
-} from '@ustowdispatch/shared';
+} from '@towdispatch/shared';
 import { type SQL, and, eq, inArray, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
 import { isDriverRole, resolveDriverIdForUser, resolveTruckIdsForDriver } from './driver-scope.js';

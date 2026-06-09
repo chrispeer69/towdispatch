@@ -3,7 +3,7 @@
 ## Summary
 
 The merge succeeded. Local master (14 commits of Session 18 import-repair work)
-and origin/master (8 commits of rebrand: TowCommand → US Tow DISPATCH) were
+and origin/master (8 commits of rebrand: TowDispatch → Tow Dispatch) were
 reconciled with the resolution rule "Session 18 logic, rebrand strings on top."
 All 17 conflict files were resolved, typecheck passes, the full API test suite
 runs 323/323 green, both critical E2Es (e2e-006 Towbook import, e2e-008 driver
@@ -13,8 +13,8 @@ to origin/master at `72b59ad`.
 ## Files resolved
 
 All 17 conflicts followed two clean patterns. The 9 importers had a single
-header conflict each — the package was renamed `@towcommand/db` →
-`@ustowdispatch/db`, and HEAD also added a `BundleService` import that
+header conflict each — the package was renamed `@towdispatch/db` →
+`@towdispatch/db`, and HEAD also added a `BundleService` import that
 origin/master lacked. The docs had string-only domain/brand changes.
 
 **Importers — hybrid (rebrand string + Session 18 import line):**
@@ -29,15 +29,15 @@ origin/master lacked. The docs had string-only domain/brand changes.
 - `apps/api/src/modules/import/importers/truck.importer.ts`
 - `apps/api/src/modules/import/importers/vehicle.importer.ts`
 
-Each: kept the rebrand `import { uuidv7 } from '@ustowdispatch/db';` and
+Each: kept the rebrand `import { uuidv7 } from '@towdispatch/db';` and
 kept Session 18's `import { BundleService } from '../bundle.service.js';`.
 The explicit DI constructors below the imports were already in HEAD and not
 conflicted; the auto-merge preserved them.
 
 **Docs — strings kept (origin/master version verbatim):**
 
-- `docs/observability.md` (2 conflicts: `api.*.cloud` → `api.ustowdispatch.com`,
-  `grafana.*.cloud` → `grafana.ustowdispatch.com`)
+- `docs/observability.md` (2 conflicts: `api.*.cloud` → `api.towdispatch.com`,
+  `grafana.*.cloud` → `grafana.towdispatch.com`)
 - `docs/runbooks/database-restore.md` (1 conflict, api domain)
 - `docs/runbooks/incident-response.md` (3 conflicts, api + status domain)
 - `docs/runbooks/motor-club-down.md` (2 conflicts, api domain)
@@ -48,7 +48,7 @@ conflicted; the auto-merge preserved them.
 
 Per the resolution rule, when origin/master changes a domain (rebrand
 supersedes Session 18's `.com` → `.cloud` fix), take origin's version
-verbatim. `docs/runbooks/tenant-onboarding.md` already used "US Tow DISPATCH"
+verbatim. `docs/runbooks/tenant-onboarding.md` already used "Tow Dispatch"
 in operator copy at origin/master; that came in cleanly.
 
 **Auto-merged files where Session 18 logic needed to survive (verified
@@ -74,28 +74,28 @@ post-merge, no manual edits needed):**
 - All 9 importer conflicts had the same shape, applied the same fix nine times
   rather than scripting it. The diff is small and reviewable.
 - The runbook docs already had Session 18's `.cloud` domain fix in HEAD;
-  origin/master's rebrand changed that to `.ustowdispatch.com`. Per the
-  resolution rule, the rebrand domain wins. All `api.towcommand.cloud` →
-  `api.ustowdispatch.com` etc.
+  origin/master's rebrand changed that to `.towdispatch.com`. Per the
+  resolution rule, the rebrand domain wins. All `api.towdispatch.cloud` →
+  `api.towdispatch.com` etc.
 - `git checkout --theirs` was used for `motor-club-down.md`,
   `payment-processor-down.md`, `scaling-event.md`, `secrets-rotation.md`,
   `tenant-onboarding.md` once it was clear every conflict in those files
   was purely string-level. The remaining 3 docs (`observability.md`,
   `database-restore.md`, `incident-response.md`) were edited by hand
   because I'd already read them — both routes produce the same result.
-- Session 18 had also corrected `api.towcommand.com` → `api.towcommand.cloud`
+- Session 18 had also corrected `api.towdispatch.com` → `api.towdispatch.cloud`
   in those runbooks (commit `398568a`). That fix is lost as a string —
   superseded by the rebrand domain — but the Session 18 commit history
   remains in the linear log and the domain that now ships is the one the
   rebrand chose. Documented here so the trail is clear.
-- After the merge, `node_modules` was stale (no `@ustowdispatch/*` symlinks
+- After the merge, `node_modules` was stale (no `@towdispatch/*` symlinks
   yet). Ran `pnpm install --frozen-lockfile` to refresh the workspace
   link graph before the API would start for the E2Es. Lockfile was
   unchanged; only the symlink tree was rebuilt.
 
 ## Test results
 
-- **Typecheck:** PASS (`tsc --noEmit` clean for `@ustowdispatch/api`)
+- **Typecheck:** PASS (`tsc --noEmit` clean for `@towdispatch/api`)
 - **API tests:** 323 passing, 0 failing, 0 skipped (33 test files,
   9.41s wall-clock — matches Session 18's count exactly)
 - **E2E `e2e-006-towbook-import.spec.ts`:** PASS (chromium, 1/1, 606ms)
@@ -115,9 +115,9 @@ Working tree clean. Founder is cleared to schedule production deployment.
 ## Open issues
 
 - The Session 18 commit `398568a` (`docs(runbooks): correct
-  api.towcommand.com → api.towcommand.cloud`) is now a string-level no-op
+  api.towdispatch.com → api.towdispatch.cloud`) is now a string-level no-op
   in the codebase — the rebrand wrote those domains to
-  `api.ustowdispatch.com`. The commit stays in history for the audit
+  `api.towdispatch.com`. The commit stays in history for the audit
   trail; nothing to do.
 - Web `pnpm start` script in `apps/web/package.json` hard-codes
   `next start -p 3000` and ignores the `PORT` env var. CI's `Start Web`

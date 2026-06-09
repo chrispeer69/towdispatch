@@ -4,7 +4,7 @@
 **Branch:** `master`
 **Author:** Session 17C — operational readiness pass
 
-This is the final gate before the founder cancels his Towbook subscription and runs Roadside Towing & Recovery, Inc. (tenant #001) and Auto Lyft (tenant #002) on US Tow DISPATCH. Every verification step below is documented with the actual command, the actual result, and any caveats.
+This is the final gate before the founder cancels his Towbook subscription and runs Roadside Towing & Recovery, Inc. (tenant #001) and Auto Lyft (tenant #002) on Tow Dispatch. Every verification step below is documented with the actual command, the actual result, and any caveats.
 
 ---
 
@@ -40,7 +40,7 @@ The platform code is ready. The remaining gates are operational (real export + s
 **Run locally:**
 
 ```bash
-$ pnpm --filter @ustowdispatch/api test test/security/rls-bypass.spec.ts
+$ pnpm --filter @towdispatch/api test test/security/rls-bypass.spec.ts
  ↓ test/security/rls-bypass.spec.ts (1 test | 1 skipped)
  # Skipped because skipIfNoDb=true — no Postgres in this sandbox.
 ```
@@ -66,7 +66,7 @@ The test is correctly DB-gated (the `skipIfNoDb` helper). CI runs it as part of 
 **Run locally:**
 
 ```bash
-$ pnpm --filter @ustowdispatch/e2e test
+$ pnpm --filter @towdispatch/e2e test
   -  1 [chromium] › e2e-005-auth-flows.spec.ts ›  …
   -  2 [chromium] › e2e-001-driver-job-lifecycle.spec.ts › …
   …
@@ -86,7 +86,7 @@ $ pnpm --filter @ustowdispatch/e2e test
 
 ```bash
 $ cd apps/api && pnpm exec tsx scripts/synth-towbook-bundle.ts
-Wrote /Users/chrispeer69/dev/ustowdispatch/apps/api/towbook-synth.zip (286.9 KiB)
+Wrote /Users/chrispeer69/dev/towdispatch/apps/api/towbook-synth.zip (286.9 KiB)
 # 10 CSVs + 50 media files at the spec'd 100/200/500/50/20/25/400/350/300/50 distribution
 ```
 
@@ -160,12 +160,12 @@ E2E-002 asserts the dispatch lands, the outbox records the ingest, and the tenan
 ## Verification environment
 
 ```
-$ pnpm --filter @ustowdispatch/api build       ✓ zero errors
-$ pnpm --filter @ustowdispatch/api typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/api test        ✓ 138 passed, 18 DB-gated skips
-$ pnpm --filter @ustowdispatch/web build       ✓ green (60 routes)
-$ pnpm --filter @ustowdispatch/web typecheck   ✓ zero errors
-$ pnpm --filter @ustowdispatch/e2e typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api build       ✓ zero errors
+$ pnpm --filter @towdispatch/api typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/api test        ✓ 138 passed, 18 DB-gated skips
+$ pnpm --filter @towdispatch/web build       ✓ green (60 routes)
+$ pnpm --filter @towdispatch/web typecheck   ✓ zero errors
+$ pnpm --filter @towdispatch/e2e typecheck   ✓ zero errors
 $ bash scripts/check-migrations.sh          ✓ 19 SQL migrations OK
 $ bash scripts/check-env.sh                 ✓ 0 warnings, 0 errors
 ```

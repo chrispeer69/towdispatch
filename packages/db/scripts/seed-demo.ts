@@ -528,7 +528,7 @@ const DRIVERS: DriverSeed[] = [
 ];
 
 // ────────────────────────────────────────────────────────────────────────────
-// Rate sheet definitions (shape per @ustowdispatch/shared rateSheetDefinitionSchema)
+// Rate sheet definitions (shape per @towdispatch/shared rateSheetDefinitionSchema)
 // ────────────────────────────────────────────────────────────────────────────
 
 const FULL_VEHICLE_CLASS_RATES = {
@@ -2449,7 +2449,7 @@ Tenant slug: \`${TENANT_SLUG}\`
 
 ## Login
 
-- URL: https://app.towcommand.cloud
+- URL: https://app.towdispatch.cloud
 - Email: \`chris@roadside.demo\`
 - Password: \`${DEMO_PASSWORD}\`  (force rotation on first login — lastLoginAt is NULL on every seeded user)
 
@@ -2480,15 +2480,15 @@ All non-owner users seeded with the same password and the same null lastLoginAt;
 
 Open the following in order to show every dataset state:
 
-- Open jobs: <https://app.towcommand.cloud/jobs?status=open>
-- Completed jobs awaiting invoice: <https://app.towcommand.cloud/jobs?status=completed&invoice=none>
-- Draft invoices: <https://app.towcommand.cloud/billing/invoices?status=draft>
-- Sent / aged invoices: <https://app.towcommand.cloud/billing/invoices?status=sent>
-- Partially paid invoices: <https://app.towcommand.cloud/billing/invoices?status=partially_paid>
-- Paid invoices: <https://app.towcommand.cloud/billing/invoices?status=paid>
-- Write-offs: <https://app.towcommand.cloud/billing/adjustments?kind=write_off>
-- A/R aging: <https://app.towcommand.cloud/billing/aging>
-- Rate sheets: <https://app.towcommand.cloud/billing/rate-sheets>
+- Open jobs: <https://app.towdispatch.cloud/jobs?status=open>
+- Completed jobs awaiting invoice: <https://app.towdispatch.cloud/jobs?status=completed&invoice=none>
+- Draft invoices: <https://app.towdispatch.cloud/billing/invoices?status=draft>
+- Sent / aged invoices: <https://app.towdispatch.cloud/billing/invoices?status=sent>
+- Partially paid invoices: <https://app.towdispatch.cloud/billing/invoices?status=partially_paid>
+- Paid invoices: <https://app.towdispatch.cloud/billing/invoices?status=paid>
+- Write-offs: <https://app.towdispatch.cloud/billing/adjustments?kind=write_off>
+- A/R aging: <https://app.towdispatch.cloud/billing/aging>
+- Rate sheets: <https://app.towdispatch.cloud/billing/rate-sheets>
 
 Several of these routes do not exist yet in the web app (no \`/billing/adjustments\`, no \`/billing/aging\`, no \`/billing/rate-sheets\`, and the \`?invoice=none\` filter on \`/jobs\` is not implemented). **Needed in Session 10.**
 

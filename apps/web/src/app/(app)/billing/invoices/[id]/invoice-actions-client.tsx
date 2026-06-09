@@ -1,6 +1,6 @@
 'use client';
 
-import { type InvoiceWithDetailsDto, paymentMethodValues } from '@ustowdispatch/shared';
+import { type InvoiceWithDetailsDto, paymentMethodValues } from '@towdispatch/shared';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 

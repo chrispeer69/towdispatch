@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { uuidv7 } from '@ustowdispatch/db';
+import { uuidv7 } from '@towdispatch/db';
 import { BundleService } from '../bundle.service.js';
 import {
   dollarsToCents,
@@ -112,7 +112,7 @@ export class JobImporter extends BaseImporter {
           notes ?? '',
         ],
       );
-      return { action: 'update', externalId, towcommandId: id };
+      return { action: 'update', externalId, towdispatchId: id };
     }
 
     const id = uuidv7();
@@ -170,7 +170,7 @@ export class JobImporter extends BaseImporter {
         externalId,
       ],
     );
-    return { action: 'create', externalId, towcommandId: id };
+    return { action: 'create', externalId, towdispatchId: id };
   }
 
   private async resolveExternal(

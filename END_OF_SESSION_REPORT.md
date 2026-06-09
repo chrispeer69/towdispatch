@@ -2,7 +2,7 @@
 
 Date: 2026-05-15
 Branch: `feature/fix-list-page-fetches` (off `master`)
-Live URL tested: `https://app.towcommand.cloud` against `https://api.towcommand.cloud`
+Live URL tested: `https://app.towdispatch.cloud` against `https://api.towdispatch.cloud`
 Seed report: `packages/db/POST_SEED_REPORT.md` (Session 9.5 demo tenant `roadside`)
 
 ---
@@ -19,7 +19,7 @@ Diagnose and fix the reported bug:
 ## Root cause — read this carefully
 
 **I could not reproduce the bug from a direct HTTP request against
-`https://app.towcommand.cloud` using the founder credentials.**
+`https://app.towdispatch.cloud` using the founder credentials.**
 
 Every list page renders the seeded data in its initial SSR HTML:
 
@@ -35,7 +35,7 @@ Every list page renders the seeded data in its initial SSR HTML:
 
 The BFF route `/api/customers?perPage=50` (and siblings) also returns the
 correct JSON when called with the auth cookie. The backend API works
-directly (confirmed `curl -H "Authorization: Bearer …" https://api.towcommand.cloud/customers`
+directly (confirmed `curl -H "Authorization: Bearer …" https://api.towdispatch.cloud/customers`
 returns the seven seeded customers).
 
 **So the deployed web app is currently serving the data correctly in its
@@ -122,7 +122,7 @@ this brings the customer/account clients up to the same level.
 
 ## Manual smoke-test results
 
-Tested against `https://app.towcommand.cloud` with cookies issued by a
+Tested against `https://app.towdispatch.cloud` with cookies issued by a
 fresh `POST /api/auth/login` as `chris@roadside.demo`. SSR HTML inspected
 with `curl + python3 grep` for entity-link anchors.
 
@@ -141,8 +141,8 @@ rendering correctly. After this PR's changes, the local `pnpm build` ran
 clean and every list route is marked `ƒ (Dynamic)` in the Next.js build
 manifest, confirming the `force-dynamic` flag is wired through.
 
-`pnpm --filter @ustowdispatch/web typecheck` — clean.
-`pnpm --filter @ustowdispatch/web build`         — clean.
+`pnpm --filter @towdispatch/web typecheck` — clean.
+`pnpm --filter @towdispatch/web build`         — clean.
 
 ---
 
@@ -154,13 +154,13 @@ No changes required. The web service's resolution order
 service and return live data. If the founder ever wants to disable
 private-networking for debugging, unsetting `API_INTERNAL_URL` on the web
 service is the single lever; `NEXT_PUBLIC_API_URL` must remain pointing at
-`https://api.towcommand.cloud` for the Socket.IO browser handshake.
+`https://api.towdispatch.cloud` for the Socket.IO browser handshake.
 
 ---
 
 ## How to verify the founder's reported symptom is gone
 
-1. Open Safari → `https://app.towcommand.cloud/customers` in a private
+1. Open Safari → `https://app.towdispatch.cloud/customers` in a private
    window (no service worker / no cached RSC payloads).
 2. Sign in as `chris@roadside.demo` / `TempPass#001`.
 3. Expect: page renders with 7 customers immediately (server-rendered).
