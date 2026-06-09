@@ -1,5 +1,12 @@
 ## Changes Log
 
+### 2026-06-09 — Dispatch board: collapsible sidebar + taller map
+- Live Dispatch readability: the left nav now auto-collapses to a narrow icon rail when on `/dispatch` (and auto-expands elsewhere), giving the dense dispatch tiles + map the full board width. Manual toggle button added (PanelLeftClose/Open); main content is `flex-1`, so the rail shrinking widens the board.
+- Dispatch map panel height increased 420px → 640px (placeholder min-height matched) for a more usable map.
+- Files modified: `apps/web/src/components/app-shell/sidebar.tsx`, `apps/web/src/app/(app)/dispatch/dispatch-map.tsx`.
+- Verified: `pnpm --filter @ustowdispatch/web typecheck` passes.
+- Status: ✅ Done
+
 ### 2026-06-09 — Normalize brand to "US Tow Dispatch"
 - Standardized all user-facing brand text to **US Tow Dispatch** across the web app, API, and docs.
 - Replacements applied: `US Tow DISPATCH`/`US TOW DISPATCH` → `US Tow Dispatch`; `Tow Command` → `US Tow Dispatch`; `towcommand.cloud` → `ustowdispatch.cloud`; display strings (page titles, email sender/footer, push titles) `TowCommand`/`TowCommand Pro` → `US Tow Dispatch`/`US Tow Dispatch Pro`.

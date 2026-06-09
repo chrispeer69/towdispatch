@@ -271,7 +271,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
     return (
       <div
         data-testid="dispatch-map-placeholder"
-        className="flex min-h-[320px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-divider bg-bg-base/40 p-6 text-center"
+        className="flex min-h-[640px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-divider bg-bg-base/40 p-6 text-center"
       >
         <AlertTriangle className="h-6 w-6 text-warn" />
         <p className="font-condensed text-sm font-bold uppercase tracking-wide text-text-primary-on-dark">
@@ -290,7 +290,7 @@ export function DispatchMap({ token, roster, jobs }: Props): JSX.Element {
     <div
       ref={containerRef}
       data-testid="dispatch-map-container"
-      className="h-[420px] w-full overflow-hidden rounded-md border border-divider"
+      className="h-[640px] w-full overflow-hidden rounded-md border border-divider"
     />
   );
 }
