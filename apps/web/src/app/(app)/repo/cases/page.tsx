@@ -2,15 +2,16 @@
  * /repo/cases — list page for the repossession workflow.
  *
  * Server-fetches the case roster (optionally filtered by status + lienholder)
- * and hands it to the client list. Roles the API gates out get a 403 explainer
- * (same RBAC posture as lien processing).
+ * and hands it to the client list. The repo module ships dark behind the API's
+ * REPO_MODULE_ENABLED flag (503 repo_module_disabled when off); roles the API
+ * gates out get 403. Both render a calm explainer instead of crashing the route.
  */
-import { apiServer, tryFetch } from '@/lib/api/client';
+import { ApiError, apiServer } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 import type { RepoCaseDto, RepoCaseStatus } from '@ustowdispatch/shared';
 import { repoCaseStatusValues } from '@ustowdispatch/shared';
-import Link from 'next/link';
 import type { JSX } from 'react';
+import { RepoUnavailable } from '../repo-unavailable';
 import { RepoCaseListClient } from './list-client';
 
 export const metadata = { title: 'Repo Cases — US Tow Dispatch' };
@@ -37,32 +38,20 @@ export default async function RepoCasesPage({
   if (lienholderId) qs.set('lienholderId', lienholderId);
   const suffix = qs.toString() ? `?${qs.toString()}` : '';
 
-  const result = await tryFetch(() =>
-    apiServer<RepoCaseDto[]>(`/repo-cases${suffix}`, { accessToken: token ?? null }),
-  );
-
-  if (result.error?.status === 403) {
-    return (
-      <section className="rounded-md border border-border-on-dark bg-bg-surface-elevated p-8">
-        <h1 className="text-2xl font-bold mb-2">Repo Cases</h1>
-        <p className="text-text-secondary-on-dark">
-          Your role does not have access to the repossession workflow. Ask an owner or admin to
-          extend your permissions.
-        </p>
-        <p className="mt-3">
-          <Link href="/dashboard" className="text-accent-orange">
-            ← Back to dashboard
-          </Link>
-        </p>
-      </section>
-    );
+  let cases: RepoCaseDto[];
+  try {
+    cases = await apiServer<RepoCaseDto[]>(`/repo-cases${suffix}`, { accessToken: token ?? null });
+  } catch (err) {
+    if (err instanceof ApiError) {
+      if (err.code === 'repo_module_disabled' || err.status === 503) {
+        return <RepoUnavailable kind="disabled" />;
+      }
+      if (err.status === 403) {
+        return <RepoUnavailable kind="forbidden" />;
+      }
+    }
+    throw err;
   }
 
-  return (
-    <RepoCaseListClient
-      cases={result.data ?? []}
-      status={statusFilter}
-      lienholderId={lienholderId}
-    />
-  );
+  return <RepoCaseListClient cases={cases} status={statusFilter} lienholderId={lienholderId} />;
 }
