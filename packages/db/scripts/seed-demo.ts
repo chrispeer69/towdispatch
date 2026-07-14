@@ -1553,6 +1553,9 @@ async function main(): Promise<void> {
         unitNumber: t.unit,
         truckType: t.type,
         capacityClass: t.capacity,
+        // CADS duty bucket — HD collapses into heavy (Session 58).
+        dutyClass: t.capacity === 'HD' || t.capacity === 'heavy' ? 'heavy' : t.capacity,
+        isRotator: t.equipment.includes('sliding_rotator'),
         year: t.year,
         make: t.make,
         model: t.model,

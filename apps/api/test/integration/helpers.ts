@@ -228,6 +228,24 @@ export async function tearDown(ctx: TestContext): Promise<void> {
             tenantIds,
           ]);
           await c.query('DELETE FROM job_evidence WHERE tenant_id = ANY($1::uuid[])', [tenantIds]);
+          // Session 58 CADS tables — capacity_broadcasts references
+          // capacity_partners (RESTRICT); every table carries tenant_id
+          // ON DELETE RESTRICT, so all five clear before the tenant DELETE.
+          await c.query('DELETE FROM capacity_broadcasts WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM capacity_overrides WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM capacity_snapshots WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM capacity_partners WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
+          await c.query('DELETE FROM capacity_settings WHERE tenant_id = ANY($1::uuid[])', [
+            tenantIds,
+          ]);
           // Session 5 dispatch leaves: job_status_transitions and
           // driver_shifts both reference jobs/drivers/trucks.
           await c.query('DELETE FROM job_status_transitions WHERE tenant_id = ANY($1::uuid[])', [

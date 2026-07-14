@@ -63,9 +63,17 @@ export function isPrivateIpv6(ip: string, allowLoopback: boolean): boolean {
   ) {
     return true;
   }
-  // IPv4-mapped (::ffff:a.b.c.d) — recheck the embedded v4.
-  const v4 = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (v4?.[1]) return isPrivateIpv4(v4[1], allowLoopback);
+  // IPv4-mapped (::ffff:a.b.c.d, or the canonical hex form ::ffff:a00:1
+  // the URL parser produces) — recheck the embedded v4.
+  const dotted = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (dotted?.[1]) return isPrivateIpv4(dotted[1], allowLoopback);
+  const hex = lower.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (hex?.[1] && hex[2]) {
+    const hi = Number.parseInt(hex[1], 16);
+    const lo = Number.parseInt(hex[2], 16);
+    const v4 = `${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`;
+    return isPrivateIpv4(v4, allowLoopback);
+  }
   return false;
 }
 

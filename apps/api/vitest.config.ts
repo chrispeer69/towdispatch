@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 
@@ -31,12 +32,19 @@ export default defineConfig({
     }),
   ],
   resolve: {
+    // fileURLToPath (not URL.pathname) — pathname percent-encodes spaces and
+    // yields /C:/… on Windows, which breaks alias resolution for any checkout
+    // whose absolute path contains a space.
     alias: {
-      '@ustowdispatch/shared': new URL('../../packages/shared/src/index.ts', import.meta.url)
-        .pathname,
-      '@ustowdispatch/db/schema': new URL('../../packages/db/src/schema/index.ts', import.meta.url)
-        .pathname,
-      '@ustowdispatch/db': new URL('../../packages/db/src/index.ts', import.meta.url).pathname,
+      '@ustowdispatch/shared': fileURLToPath(
+        new URL('../../packages/shared/src/index.ts', import.meta.url),
+      ),
+      '@ustowdispatch/db/schema': fileURLToPath(
+        new URL('../../packages/db/src/schema/index.ts', import.meta.url),
+      ),
+      '@ustowdispatch/db': fileURLToPath(
+        new URL('../../packages/db/src/index.ts', import.meta.url),
+      ),
     },
   },
 });
