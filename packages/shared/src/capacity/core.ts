@@ -49,8 +49,10 @@ export const CAPACITY_DELIVERY_MODES = ['webhook', 'pull_only'] as const;
 export type CapacityDeliveryMode = (typeof CAPACITY_DELIVERY_MODES)[number];
 export const capacityDeliveryModeSchema = z.enum(CAPACITY_DELIVERY_MODES);
 
+/** 'delivering' = leased by the worker while the POST is in flight. */
 export const CAPACITY_BROADCAST_STATUSES = [
   'pending',
+  'delivering',
   'delivered',
   'failed',
   'dead_letter',

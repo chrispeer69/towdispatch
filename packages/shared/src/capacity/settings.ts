@@ -9,10 +9,13 @@ import { CAPACITY_DEFAULTS } from './core';
 export const capacityJobWeightsSchema = z.record(z.string(), z.number().min(0).max(10));
 export type CapacityJobWeights = z.infer<typeof capacityJobWeightsSchema>;
 
+/** Columns are numeric(6,3): anything >= 1000 would overflow Postgres. */
+const RATIO_MAX = 999.999;
+
 export const capacitySettingsSchema = z.object({
-  availableMaxRatio: z.number().positive(),
-  limitedMaxRatio: z.number().positive(),
-  constrainedMaxRatio: z.number().positive(),
+  availableMaxRatio: z.number().positive().max(RATIO_MAX),
+  limitedMaxRatio: z.number().positive().max(RATIO_MAX),
+  constrainedMaxRatio: z.number().positive().max(RATIO_MAX),
   jobWeights: capacityJobWeightsSchema,
   hysteresisBuffer: z.number().min(0).max(1),
   hysteresisDwellSeconds: z.number().int().min(0).max(3600),

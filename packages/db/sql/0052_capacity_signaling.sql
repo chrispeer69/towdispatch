@@ -160,6 +160,25 @@ ALTER TABLE jobs DROP CONSTRAINT IF EXISTS jobs_duty_class_chk;
 ALTER TABLE jobs ADD CONSTRAINT jobs_duty_class_chk
   CHECK (duty_class IN ('light', 'medium', 'heavy'));
 
+-- Backfill once: mirror deriveJobDutyClass (vehicle class wins; recovery/
+-- winch with no usable vehicle class run medium; everything else light) so
+-- in-flight pre-CADS jobs land in the right capacity bucket at deploy.
+-- Idempotent like the trucks backfill above.
+UPDATE jobs j SET duty_class = d.duty_class
+FROM (
+  SELECT j2.id,
+    CASE
+      WHEN v.vehicle_class = 'heavy_duty' THEN 'heavy'
+      WHEN v.vehicle_class IN ('medium_duty', 'commercial', 'rv') THEN 'medium'
+      WHEN v.vehicle_class IN ('light_duty', 'motorcycle') THEN 'light'
+      WHEN j2.service_type IN ('recovery', 'winch') THEN 'medium'
+      ELSE 'light'
+    END AS duty_class
+  FROM jobs j2
+  LEFT JOIN vehicles v ON v.id = j2.vehicle_id
+) d
+WHERE d.id = j.id AND j.duty_class <> d.duty_class;
+
 -- Partial index for the CADS hot path: active jobs per (tenant, class).
 CREATE INDEX IF NOT EXISTS jobs_tenant_duty_class_active_idx
   ON jobs (tenant_id, duty_class, status)
@@ -505,9 +524,12 @@ CREATE TABLE IF NOT EXISTS capacity_broadcasts (
   deleted_at     timestamptz
 );
 
+-- 'delivering' marks a row leased by the worker while its POST is in
+-- flight, so payload coalescing (which only touches 'pending' rows) can
+-- never overwrite a payload that is mid-delivery.
 ALTER TABLE capacity_broadcasts DROP CONSTRAINT IF EXISTS capacity_broadcasts_status_chk;
 ALTER TABLE capacity_broadcasts ADD CONSTRAINT capacity_broadcasts_status_chk
-  CHECK (status IN ('pending', 'delivered', 'failed', 'dead_letter'));
+  CHECK (status IN ('pending', 'delivering', 'delivered', 'failed', 'dead_letter'));
 
 ALTER TABLE capacity_broadcasts DROP CONSTRAINT IF EXISTS capacity_broadcasts_retry_nonneg;
 ALTER TABLE capacity_broadcasts ADD CONSTRAINT capacity_broadcasts_retry_nonneg
@@ -521,9 +543,12 @@ CREATE INDEX IF NOT EXISTS capacity_broadcasts_tenant_partner_idx
   ON capacity_broadcasts (tenant_id, partner_id, created_at)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS capacity_broadcasts_pending_retry_idx
-  ON capacity_broadcasts (tenant_id, next_retry_at)
-  WHERE status = 'failed' AND deleted_at IS NULL;
+-- Serves the every-minute delivery sweep: due rows regardless of tenant
+-- ('delivering' included so crashed leases are re-claimed after expiry).
+DROP INDEX IF EXISTS capacity_broadcasts_pending_retry_idx;
+CREATE INDEX capacity_broadcasts_pending_retry_idx
+  ON capacity_broadcasts (next_retry_at)
+  WHERE status IN ('pending', 'delivering') AND deleted_at IS NULL;
 
 ALTER TABLE capacity_broadcasts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE capacity_broadcasts FORCE ROW LEVEL SECURITY;

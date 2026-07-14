@@ -9,9 +9,12 @@
  *
  * A 250ms per-tenant debounce coalesces bursts (assigning a job emits
  * job.assigned AND job.status_changed in one request) into one recompute.
- * After each recompute, effective-band changes fan out to partners.
+ * Partner fan-out runs inside recompute via the broadcast hook this
+ * listener registers at init — the published-bands map only advances after
+ * a successful fan-out, so a failed enqueue is retried on the next
+ * recompute instead of being lost.
  */
-import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { DISPATCH_EVENTS } from '@ustowdispatch/shared';
 import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 import { CapacityBroadcastService } from './capacity-broadcast.service.js';
@@ -33,7 +36,6 @@ const DEBOUNCE_MS = 250;
 
 @Injectable()
 export class CapacityEventsListener implements OnModuleInit, OnModuleDestroy {
-  private readonly log = new Logger(CapacityEventsListener.name);
   private unsubscribe: (() => void) | null = null;
   private readonly timers = new Map<string, NodeJS.Timeout>();
   private readonly pendingTriggers = new Map<string, string>();
@@ -45,6 +47,11 @@ export class CapacityEventsListener implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit(): void {
+    // Registered here rather than injected in the compute service — a
+    // direct injection would be a DI cycle (broadcast service → compute).
+    this.compute.setBroadcastHook((tenantId, status) =>
+      this.broadcasts.onCapacityChanged(tenantId, status),
+    );
     this.unsubscribe = this.dispatchEvents.subscribe((tenantId, event) => {
       if (!RECOMPUTE_TRIGGERS.has(event.name)) return;
       this.schedule(tenantId, event.name);
@@ -74,14 +81,9 @@ export class CapacityEventsListener implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  /** Recompute + fan out. Public so integration tests can drive it synchronously. */
+  /** Recompute (fan-out runs inside via the registered hook). Public so
+   *  integration tests can drive it synchronously. */
   async run(tenantId: string, trigger: string): Promise<void> {
-    const result = await this.compute.recomputeSafe(tenantId, trigger);
-    if (!result || result.changedScopes.length === 0) return;
-    try {
-      await this.broadcasts.onCapacityChanged(tenantId, result.status);
-    } catch (err) {
-      this.log.error({ msg: 'capacity broadcast fan-out failed', tenantId, err: String(err) });
-    }
+    await this.compute.recomputeSafe(tenantId, trigger);
   }
 }

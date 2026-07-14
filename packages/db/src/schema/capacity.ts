@@ -61,8 +61,10 @@ export type CapacityBand = (typeof capacityBandValues)[number];
 export const capacityDeliveryModeValues = ['webhook', 'pull_only'] as const;
 export type CapacityDeliveryMode = (typeof capacityDeliveryModeValues)[number];
 
+/** 'delivering' = leased by the worker while the POST is in flight. */
 export const capacityBroadcastStatusValues = [
   'pending',
+  'delivering',
   'delivered',
   'failed',
   'dead_letter',
@@ -261,6 +263,9 @@ export const capacityBroadcasts = pgTable(
       t.partnerId,
       t.createdAt,
     ),
+    // Partial (WHERE status IN ('pending','delivering') AND deleted_at IS
+    // NULL) in SQL 0052; Drizzle mirrors the keyed column for the sweep.
+    pendingRetryIdx: index('capacity_broadcasts_pending_retry_idx').on(t.nextRetryAt),
   }),
 );
 

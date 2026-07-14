@@ -29,6 +29,7 @@ const PER_PAGE = 25;
 
 const STATUS_LABEL: Record<CapacityBroadcastStatus, string> = {
   pending: 'Pending',
+  delivering: 'Delivering',
   delivered: 'Delivered',
   failed: 'Failed',
   dead_letter: 'Dead letter',
@@ -36,6 +37,7 @@ const STATUS_LABEL: Record<CapacityBroadcastStatus, string> = {
 
 const STATUS_TONE: Record<CapacityBroadcastStatus, string> = {
   pending: 'bg-warn/15 text-warn',
+  delivering: 'bg-warn/15 text-warn',
   delivered: 'bg-ok/15 text-ok',
   failed: 'bg-danger/15 text-danger',
   dead_letter: 'bg-bg-surface-elevated text-text-secondary-on-dark',

@@ -73,6 +73,10 @@ export interface RecomputeResult {
   changedScopes: CapacityClassScope[];
 }
 
+/** Partner fan-out, registered by CapacityEventsListener at module init
+ *  (a direct injection would be a DI cycle: broadcast → compute). */
+export type CapacityBroadcastHook = (tenantId: string, status: CapacityStatusDto) => Promise<void>;
+
 @Injectable()
 export class CapacityComputeService {
   private readonly log = new Logger(CapacityComputeService.name);
@@ -82,6 +86,14 @@ export class CapacityComputeService {
     private readonly events: DispatchEventsService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
+
+  private broadcastHook: CapacityBroadcastHook | null = null;
+
+  /** Wire the partner fan-out. Every recompute path (events, settings and
+   *  override writes, cache-miss getStatus) then broadcasts transitions. */
+  setBroadcastHook(hook: CapacityBroadcastHook): void {
+    this.broadcastHook = hook;
+  }
 
   /** Serve the cached status; recompute lazily when the cache is cold. */
   async getStatus(tenantId: string): Promise<CapacityStatusDto> {
@@ -199,7 +211,6 @@ export class CapacityComputeService {
       .multi()
       .set(statusKey(tenantId), JSON.stringify(status), 'EX', CACHE_TTL_SECONDS)
       .set(hysKey(tenantId), JSON.stringify(hysState), 'EX', CACHE_TTL_SECONDS)
-      .set(publishedKey(tenantId), JSON.stringify(published), 'EX', CACHE_TTL_SECONDS)
       .exec();
 
     if (persistRows.length > 0) {
@@ -217,6 +228,33 @@ export class CapacityComputeService {
         changedScopes,
         bands: Object.fromEntries(scopes.map((s) => [s.dutyClass, s.band])),
       });
+    }
+
+    // Fan out BEFORE marking the bands published. If the broadcast enqueue
+    // fails, the published map stays stale so the NEXT recompute re-detects
+    // the same transition and retries the fan-out — a transition can be
+    // delivered late, but never silently dropped.
+    let fanOutOk = true;
+    if (changedScopes.length > 0 && this.broadcastHook) {
+      try {
+        await this.broadcastHook(tenantId, status);
+      } catch (err) {
+        fanOutOk = false;
+        this.log.error({
+          msg: 'capacity broadcast fan-out failed; will retry on next recompute',
+          tenantId,
+          trigger,
+          err: String(err),
+        });
+      }
+    }
+    if (fanOutOk) {
+      await this.redis.set(
+        publishedKey(tenantId),
+        JSON.stringify(published),
+        'EX',
+        CACHE_TTL_SECONDS,
+      );
     }
     return { status, changedScopes };
   }

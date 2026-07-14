@@ -22,6 +22,9 @@ import { clientClearCapacityOverride, clientGetCapacityStatus } from '@/lib/api/
  * The widget opens its own Socket.IO connection via the same
  * /api/socket/token handshake the board uses, so the existing
  * useDispatchBoard hook (shared with /assign-jobs) stays untouched.
+ *
+ * TODO(i18n): CADS strings are English-only today, matching the settings
+ * and dispatch surfaces; add es parity when those migrate to next-intl.
  */
 import {
   type CapacityDutyClass,

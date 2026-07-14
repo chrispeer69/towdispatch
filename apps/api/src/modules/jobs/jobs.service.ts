@@ -576,21 +576,24 @@ export class JobsService {
     jobId: string,
     dutyClass: 'light' | 'medium' | 'heavy',
   ): Promise<JobDto> {
-    return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
-      const [row] = await tx
+    const row = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const [updated] = await tx
         .update(jobs)
         .set({ dutyClass, updatedAt: new Date() })
         .where(and(eq(jobs.id, jobId), isNull(jobs.deletedAt)))
         .returning();
-      if (!row) throw notFound();
-      this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_DUTY_CLASS_CHANGED, {
-        jobId: row.id,
-        jobNumber: row.jobNumber,
-        dutyClass,
-        actorUserId: ctx.userId,
-      });
-      return rowToDto(row);
+      if (!updated) throw notFound();
+      return updated;
     });
+    // Emit after commit so the capacity recompute reads the new class and a
+    // rolled-back write never broadcasts.
+    this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_DUTY_CLASS_CHANGED, {
+      jobId: row.id,
+      jobNumber: row.jobNumber,
+      dutyClass,
+      actorUserId: ctx.userId,
+    });
+    return rowToDto(row);
   }
 
   /**
@@ -1227,6 +1230,7 @@ function rowToDto(j: typeof jobs.$inferSelect, joined?: JobJoinedRefs): JobDto {
     jobNumber: j.jobNumber,
     status: j.status,
     serviceType: j.serviceType,
+    dutyClass: j.dutyClass,
     customerId: j.customerId,
     vehicleId: j.vehicleId,
     accountId: j.accountId,

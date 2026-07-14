@@ -247,7 +247,10 @@ export const createTruckSchema = z.object({
     .regex(/^[A-HJ-NPR-Z0-9]{17}$/, 'VIN must be 17 chars (no I/O/Q)')
     .optional(),
   capacityClass: z.enum(truckCapacityClassValues).optional(),
-  dutyClass: z.enum(truckDutyClassValues).default('light'),
+  // No default: clients that predate CADS omit this, and the API derives it
+  // from capacityClass/truckType (deriveTruckDutyClass) — a hard 'light'
+  // default here would misclass every heavy wrecker those clients create.
+  dutyClass: z.enum(truckDutyClassValues).optional(),
   isRotator: z.boolean().default(false),
   gvwrLbs: z.number().int().positive().optional(),
   fuelType: z.enum(truckFuelTypeValues).optional(),

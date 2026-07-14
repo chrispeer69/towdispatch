@@ -177,6 +177,9 @@ export class CapacityService {
     const dto = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
       // One active override per scope: replace, don't stack. The replaced
       // row is cleared (kept for history/audit), the new one becomes live.
+      // No expires_at condition: an expired row the cron hasn't swept yet
+      // still occupies the partial unique index (cleared_at IS NULL), so it
+      // must be cleared here too or the insert below hits 23505.
       await tx
         .update(capacityOverrides)
         .set({ clearedAt: now, clearedBy: ctx.userId, updatedAt: now })
@@ -185,7 +188,6 @@ export class CapacityService {
             eq(capacityOverrides.dutyClass, input.dutyClass),
             isNull(capacityOverrides.clearedAt),
             isNull(capacityOverrides.deletedAt),
-            gt(capacityOverrides.expiresAt, now),
           ),
         );
       const [row] = await tx

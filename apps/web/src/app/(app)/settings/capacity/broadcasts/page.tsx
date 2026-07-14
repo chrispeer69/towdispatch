@@ -6,6 +6,9 @@
  *
  * Nested under /settings/capacity so the Capacity Signaling tab stays
  * highlighted (the settings sidebar matches on href prefix).
+ *
+ * TODO(i18n): CADS strings are English-only today, matching the settings
+ * and dispatch surfaces; add es parity when those migrate to next-intl.
  */
 import { fetchCapacityBroadcasts, fetchCapacityPartners } from '@/lib/api/capacity';
 import { tryFetch } from '@/lib/api/client';

@@ -115,6 +115,34 @@ export class CapacityPartnersService {
     if (input.webhookUrl) await this.assertUrlAllowed(input.webhookUrl);
 
     const row = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const existing = await tx.query.capacityPartners.findFirst({
+        where: and(eq(capacityPartners.id, partnerId), isNull(capacityPartners.deletedAt)),
+      });
+      if (!existing) return null;
+
+      // Webhook mode requires a URL AND a signing secret (DB CHECK
+      // capacity_partners_webhook_complete) — surface a 400 here instead
+      // of letting the constraint bubble up as a 500. Converting a
+      // pull-only partner: rotate a secret first (that endpoint returns
+      // the new secret; this one has nowhere to show it), then PATCH.
+      const effectiveMode = input.deliveryMode ?? existing.deliveryMode;
+      const effectiveUrl = input.webhookUrl === undefined ? existing.webhookUrl : input.webhookUrl;
+      if (effectiveMode === 'webhook') {
+        if (!effectiveUrl) {
+          throw new BadRequestException({
+            code: ERROR_CODES.VALIDATION_FAILED,
+            message: 'A webhook URL is required for webhook delivery',
+          });
+        }
+        if (!existing.webhookSecretEncrypted) {
+          throw new BadRequestException({
+            code: ERROR_CODES.VALIDATION_FAILED,
+            message:
+              'Rotate a webhook signing secret for this partner before switching to webhook delivery',
+          });
+        }
+      }
+
       const patch: Partial<typeof capacityPartners.$inferInsert> & { updatedAt: Date } = {
         updatedAt: new Date(),
       };

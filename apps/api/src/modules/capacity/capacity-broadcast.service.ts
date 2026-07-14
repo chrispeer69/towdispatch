@@ -57,10 +57,22 @@ export class CapacityBroadcastService {
       for (const partner of partnerRows) {
         const payload = buildCapacityPayload(tenantId, tenantName, status, partner.classVisibility);
 
+        // Min-interval floor: schedule inside the window, deliver now otherwise.
+        const earliest = partner.lastBroadcastAt
+          ? new Date(
+              partner.lastBroadcastAt.getTime() + settings.minBroadcastIntervalSeconds * 1000,
+            )
+          : now;
+        const nextRetryAt = earliest > now ? earliest : now;
+
         // Coalesce: replace any still-pending broadcast for this partner.
+        // The schedule and retry budget reset too — this row now carries a
+        // brand-new state, not the old attempt's backoff. Rows the worker
+        // has leased are 'delivering', never matched here, so an in-flight
+        // payload can't be overwritten.
         const [pending] = await db
           .update(capacityBroadcasts)
-          .set({ payload, updatedAt: now })
+          .set({ payload, nextRetryAt, retryCount: 0, updatedAt: now })
           .where(
             and(
               eq(capacityBroadcasts.tenantId, tenantId),
@@ -70,14 +82,11 @@ export class CapacityBroadcastService {
             ),
           )
           .returning({ id: capacityBroadcasts.id });
-        if (pending) continue;
+        if (pending) {
+          if (earliest <= now) ids.push(pending.id);
+          continue;
+        }
 
-        // Min-interval floor: schedule inside the window, deliver now otherwise.
-        const earliest = partner.lastBroadcastAt
-          ? new Date(
-              partner.lastBroadcastAt.getTime() + settings.minBroadcastIntervalSeconds * 1000,
-            )
-          : now;
         const id = uuidv7();
         await db.insert(capacityBroadcasts).values({
           id,
@@ -86,7 +95,7 @@ export class CapacityBroadcastService {
           payload,
           status: 'pending',
           retryCount: 0,
-          nextRetryAt: earliest > now ? earliest : now,
+          nextRetryAt,
         });
         if (earliest <= now) ids.push(id);
       }

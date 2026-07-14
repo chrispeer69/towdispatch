@@ -37,3 +37,21 @@ export function deriveJobDutyClass(
   if (serviceType === 'recovery' || serviceType === 'winch') return 'medium';
   return 'light';
 }
+
+/**
+ * Truck duty-class derivation for clients that don't send dutyClass
+ * explicitly. Mirrors the 0052 migration backfill exactly: capacity_class
+ * wins (HD collapses into heavy), then truck_type, then light.
+ */
+export function deriveTruckDutyClass(
+  capacityClass: string | null | undefined,
+  truckType: string | null | undefined,
+): CapacityDutyClass {
+  if (capacityClass === 'light' || capacityClass === 'medium' || capacityClass === 'heavy') {
+    return capacityClass;
+  }
+  if (capacityClass === 'HD') return 'heavy';
+  if (truckType === 'heavy_duty') return 'heavy';
+  if (truckType === 'medium_duty') return 'medium';
+  return 'light';
+}

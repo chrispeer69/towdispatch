@@ -8,7 +8,7 @@
 import { fetchCapacityStatus } from '@/lib/api/capacity';
 import { apiServer, tryFetch } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
-import type { CapacityStatusDto, DriverRosterRow, JobDto } from '@ustowdispatch/shared';
+import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { DispatchClient } from './dispatch-client';
 
@@ -40,10 +40,16 @@ export default async function DispatchPage({
 
   // Auth is enforced by (app)/layout.tsx. tryFetch surfaces a per-feature
   // 401/403 as data so this page never races the layout's redirect.
+  // The capacity fetch additionally swallows 5xx/network errors: the panel
+  // is optional and self-heals over its socket — a capacity outage must
+  // never take the whole dispatch board down with it.
   const token = await getSessionToken();
-  const [result, capacityResult] = await Promise.all([
+  const [result, capacityStatus] = await Promise.all([
     tryFetch(() => apiServer<BoardResponse>('/dispatch/board')),
-    tryFetch(() => fetchCapacityStatus(token)),
+    tryFetch(() => fetchCapacityStatus(token)).then(
+      (r) => r.data,
+      () => null,
+    ),
   ]);
   const snapshot: BoardResponse = result.data ?? {
     queue: [],
@@ -51,7 +57,6 @@ export default async function DispatchPage({
     recentlyCompleted: [],
     roster: [],
   };
-  const capacityStatus: CapacityStatusDto | null = capacityResult.data;
 
   const tokenRaw = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null;
   const mapboxToken =

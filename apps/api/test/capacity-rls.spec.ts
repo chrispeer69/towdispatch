@@ -8,7 +8,8 @@
  *   2) tenant A insert visible only to A
  *   3) tenant A cannot see B's rows
  *   4) UPDATE B's row from A context affects zero rows
- *   5) DELETE B's row from A context affects zero rows
+ *   5) DELETE is denied outright for the app role (0002_roles grants
+ *      app_user SELECT/INSERT/UPDATE only — the soft-delete-only invariant)
  *   6) INSERT with foreign tenant_id rejected by RLS WITH CHECK
  */
 import { uuidv7 } from '@ustowdispatch/db';
@@ -232,14 +233,15 @@ describeIfDb('RLS tenant isolation — CADS capacity tables', () => {
         }
       });
 
-      it("DELETE B's row from tenant A context affects zero rows", async () => {
+      it('DELETE is denied outright for the app role (soft-delete-only)', async () => {
         const c = await app.connect();
         try {
           await c.query('BEGIN');
           await c.query("SELECT set_config('app.current_tenant_id', $1, true)", [tenantA]);
-          const res = await c.query(`DELETE FROM ${tc.table} WHERE tenant_id = $1`, [tenantB]);
-          expect(res.rowCount).toBe(0);
-          await c.query('COMMIT');
+          await expect(
+            c.query(`DELETE FROM ${tc.table} WHERE tenant_id = $1`, [tenantB]),
+          ).rejects.toThrow(/permission denied/);
+          await c.query('ROLLBACK');
         } finally {
           c.release();
         }
