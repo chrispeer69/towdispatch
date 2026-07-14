@@ -176,3 +176,7 @@ export * from './customer-portal-sessions';
 export * from './customer-portal-id-verifications';
 export * from './customer-portal-release-intents';
 export * from './customer-portal-payments';
+// Capacity-Aware Dispatch Signaling (CADS) — live load ratio per duty class,
+// tenant-configurable bands, partner broadcast receipts. Tables in
+// packages/db/sql/0052_capacity_signaling.sql.
+export * from './capacity';

@@ -72,6 +72,10 @@ export const jobServiceTypeValues = [
 ] as const;
 export type JobServiceType = (typeof jobServiceTypeValues)[number];
 
+/** CADS duty bucket for a job — mirrors trucks.duty_class values. */
+export const jobDutyClassValues = ['light', 'medium', 'heavy'] as const;
+export type JobDutyClass = (typeof jobDutyClassValues)[number];
+
 export const jobAuthorizedByValues = [
   'customer',
   'account_contact',
@@ -93,6 +97,13 @@ export const jobs = pgTable(
 
     status: text('status', { enum: jobStatusValues }).notNull().default('new'),
     serviceType: text('service_type', { enum: jobServiceTypeValues }).notNull(),
+
+    /**
+     * CADS duty bucket (light|medium|heavy). Derived from service type +
+     * vehicle data at creation; settable by dispatch so a misclassed job
+     * can be corrected. Added in 0052.
+     */
+    dutyClass: text('duty_class', { enum: jobDutyClassValues }).notNull().default('light'),
 
     customerId: uuid('customer_id').references(() => customers.id, { onDelete: 'set null' }),
     vehicleId: uuid('vehicle_id').references(() => vehicles.id, { onDelete: 'set null' }),

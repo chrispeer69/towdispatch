@@ -25,6 +25,11 @@ export const DISPATCH_EVENTS = {
   // API webhook publisher can fan them out to subscribed endpoints.
   IMPOUND_OPENED: 'impound.opened',
   IMPOUND_RELEASED: 'impound.released',
+  // Session 58 — CADS. truck.service_changed fires when a truck goes in/out
+  // of service (capacity recompute trigger + fleet UIs); capacity.status_changed
+  // carries the full recomputed per-class status for the dispatch widget.
+  TRUCK_SERVICE_CHANGED: 'truck.service_changed',
+  CAPACITY_STATUS_CHANGED: 'capacity.status_changed',
 } as const;
 export type DispatchEventName = (typeof DISPATCH_EVENTS)[keyof typeof DISPATCH_EVENTS];
 

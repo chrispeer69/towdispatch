@@ -10,6 +10,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import type {
+  CapacityStatusChangedEvent,
   DispatchEventName,
   DriverLocationChangedEvent,
   DriverShiftEndedEvent,
@@ -23,6 +24,7 @@ import type {
   JobUnassignedEvent,
   TrackingLinkSummaryEvent,
   TrackingMessageReceivedEvent,
+  TruckServiceChangedEvent,
 } from '@ustowdispatch/shared';
 import { DISPATCH_EVENTS } from '@ustowdispatch/shared';
 
@@ -43,7 +45,9 @@ export type DispatchEventPayload =
       payload: TrackingMessageReceivedEvent;
     }
   | { name: typeof DISPATCH_EVENTS.IMPOUND_OPENED; payload: ImpoundOpenedEvent }
-  | { name: typeof DISPATCH_EVENTS.IMPOUND_RELEASED; payload: ImpoundReleasedEvent };
+  | { name: typeof DISPATCH_EVENTS.IMPOUND_RELEASED; payload: ImpoundReleasedEvent }
+  | { name: typeof DISPATCH_EVENTS.TRUCK_SERVICE_CHANGED; payload: TruckServiceChangedEvent }
+  | { name: typeof DISPATCH_EVENTS.CAPACITY_STATUS_CHANGED; payload: CapacityStatusChangedEvent };
 
 export type DispatchSubscriber = (
   tenantId: string,
