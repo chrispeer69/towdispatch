@@ -83,7 +83,13 @@ test.describe('E2E-013 capacity signaling', () => {
     const guideline = page.locator('#cap-guideline');
     await expect(guideline).toHaveValue('60');
     await guideline.fill('45');
+    // Wait for the PATCH to land before reloading — clicking and reloading
+    // immediately races the save request.
+    const saved = page.waitForResponse(
+      (r) => r.url().includes('/api/capacity/settings') && r.request().method() === 'PATCH',
+    );
     await page.getByRole('button', { name: /save thresholds/i }).click();
+    expect((await saved).ok()).toBe(true);
     // Persisted server-side: a full reload comes back with 45.
     await page.reload();
     await expect(page.locator('#cap-guideline')).toHaveValue('45');
