@@ -26,6 +26,7 @@ import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { JobsService } from './jobs.service.js';
 
 const idSchema = z.object({ id: z.string().uuid() });
+const dutyClassSchema = z.object({ dutyClass: z.enum(['light', 'medium', 'heavy']) });
 
 @UseGuards(RolesGuard)
 @Controller('jobs')
@@ -118,6 +119,21 @@ export class JobsController {
     @Req() req: FastifyRequest,
   ): Promise<JobDto> {
     return this.jobs.addDriver(this.callerCtx(req), params.id, body.driverId, body.role ?? null);
+  }
+
+  /**
+   * Reclass a job's CADS duty bucket. Intake derives it from service type
+   * + vehicle class; dispatch corrects it here when the heuristic is wrong.
+   */
+  @Post(':id/duty-class')
+  @HttpCode(HttpStatus.OK)
+  @Roles(ROLES.OWNER, ROLES.ADMIN, ROLES.MANAGER, ROLES.DISPATCHER)
+  async setDutyClass(
+    @ZodParam(idSchema) params: { id: string },
+    @ZodBody(dutyClassSchema) body: { dutyClass: 'light' | 'medium' | 'heavy' },
+    @Req() req: FastifyRequest,
+  ): Promise<JobDto> {
+    return this.jobs.setDutyClass(this.callerCtx(req), params.id, body.dutyClass);
   }
 
   private callerCtx(req: FastifyRequest): {

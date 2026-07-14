@@ -19,6 +19,7 @@ import { ArModule } from './modules/ar/ar.module.js';
 import { AuctionModule } from './modules/auction/auction.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
+import { CapacityModule } from './modules/capacity/capacity.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { CustomerPortalModule } from './modules/customer-portal/customer-portal.module.js';
 import { CustomersModule } from './modules/customers/customers.module.js';
@@ -93,6 +94,7 @@ import { YardModule } from './modules/yard/yard.module.js';
     DispatchEventsModule,
     JobsModule,
     DispatchModule,
+    CapacityModule,
     TierOffersModule,
     OnboardingModule,
     DriverExperienceModule,

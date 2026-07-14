@@ -10,3 +10,4 @@ export * from './overrides';
 export * from './partners';
 export * from './broadcasts';
 export * from './webhook';
+export * from './duty-class';

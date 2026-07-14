@@ -433,6 +433,8 @@ function truckRowToDto(t: typeof trucks.$inferSelect): TruckDto {
     plateState: t.plateState,
     vin: t.vin,
     capacityClass: t.capacityClass,
+    dutyClass: t.dutyClass,
+    isRotator: t.isRotator,
     gvwrLbs: t.gvwrLbs,
     fuelType: t.fuelType,
     equipment: (t.equipment as TruckDto['equipment']) ?? null,

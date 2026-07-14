@@ -10,6 +10,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { trucks, uuidv7 } from '@ustowdispatch/db';
 import {
   type CreateTruckPayload,
+  DISPATCH_EVENTS,
   ERROR_CODES,
   type PaginatedTrucks,
   type TruckDto,
@@ -18,6 +19,7 @@ import {
 } from '@ustowdispatch/shared';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 
 interface CallerContext {
   tenantId: string;
@@ -37,7 +39,20 @@ const isUniqueViolation = (err: unknown): err is PgError =>
 
 @Injectable()
 export class TrucksService {
-  constructor(private readonly db: TenantAwareDb) {}
+  constructor(
+    private readonly db: TenantAwareDb,
+    private readonly events: DispatchEventsService,
+  ) {}
+
+  /** CADS recompute trigger — fires whenever in_service flips. */
+  private emitServiceChanged(tenantId: string, t: typeof trucks.$inferSelect): void {
+    this.events.emit(tenantId, DISPATCH_EVENTS.TRUCK_SERVICE_CHANGED, {
+      truckId: t.id,
+      unitNumber: t.unitNumber,
+      inService: t.inService,
+      dutyClass: t.dutyClass,
+    });
+  }
 
   async list(ctx: CallerContext, filters: TruckFilters): Promise<PaginatedTrucks> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
@@ -122,6 +137,8 @@ export class TrucksService {
             heavyDutyCapable: input.heavyDutyCapable ?? false,
             currentOdometer: input.currentOdometer ?? null,
             odometerUpdatedAt: input.currentOdometer !== undefined ? new Date() : null,
+            dutyClass: input.dutyClass,
+            isRotator: input.isRotator,
             status: input.status,
             inService: input.status === 'active',
             notes: input.notes ?? null,
@@ -131,6 +148,7 @@ export class TrucksService {
         if (!r) throw new Error('insert trucks .. returning() yielded no row');
         return r;
       });
+      if (row.inService) this.emitServiceChanged(ctx.tenantId, row);
       return toTruckDto(row);
     } catch (err) {
       if (isUniqueViolation(err)) throw conflict();
@@ -161,6 +179,9 @@ export class TrucksService {
           patch.inService = input.status === 'active';
         }
         const [row] = await tx.update(trucks).set(patch).where(eq(trucks.id, id)).returning();
+        if (row && row.inService !== existing.inService) {
+          this.emitServiceChanged(ctx.tenantId, row);
+        }
         return row;
       });
       if (!updated) throw notFound();
@@ -177,7 +198,8 @@ export class TrucksService {
         .update(trucks)
         .set({ deletedAt: new Date(), updatedAt: new Date(), inService: false, status: 'retired' })
         .where(and(eq(trucks.id, id), isNull(trucks.deletedAt)))
-        .returning({ id: trucks.id });
+        .returning();
+      if (row?.inService === false) this.emitServiceChanged(ctx.tenantId, row);
       return Boolean(row);
     });
     if (!ok) throw notFound();
@@ -190,7 +212,7 @@ export class TrucksService {
    */
   async markInMaintenance(ctx: CallerContext, truckId: string, reason: string): Promise<void> {
     await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
-      await tx
+      const [row] = await tx
         .update(trucks)
         .set({
           status: 'in_maintenance',
@@ -198,7 +220,9 @@ export class TrucksService {
           updatedAt: new Date(),
           notes: sql`coalesce(${trucks.notes} || E'\n', '') || ${`[auto] ${reason}`}`,
         })
-        .where(and(eq(trucks.id, truckId), isNull(trucks.deletedAt)));
+        .where(and(eq(trucks.id, truckId), isNull(trucks.deletedAt)))
+        .returning();
+      if (row) this.emitServiceChanged(ctx.tenantId, row);
     });
   }
 
@@ -240,6 +264,8 @@ export function toTruckDto(t: typeof trucks.$inferSelect): TruckDto {
     plateState: t.plateState,
     vin: t.vin,
     capacityClass: t.capacityClass,
+    dutyClass: t.dutyClass,
+    isRotator: t.isRotator,
     gvwrLbs: t.gvwrLbs,
     fuelType: t.fuelType,
     equipment: (t.equipment as TruckDto['equipment']) ?? null,

@@ -20,6 +20,7 @@ import type {
   ImpoundReleasedEvent,
   JobAssignedEvent,
   JobCreatedEvent,
+  JobDutyClassChangedEvent,
   JobStatusChangedEvent,
   JobUnassignedEvent,
   TrackingLinkSummaryEvent,
@@ -47,7 +48,8 @@ export type DispatchEventPayload =
   | { name: typeof DISPATCH_EVENTS.IMPOUND_OPENED; payload: ImpoundOpenedEvent }
   | { name: typeof DISPATCH_EVENTS.IMPOUND_RELEASED; payload: ImpoundReleasedEvent }
   | { name: typeof DISPATCH_EVENTS.TRUCK_SERVICE_CHANGED; payload: TruckServiceChangedEvent }
-  | { name: typeof DISPATCH_EVENTS.CAPACITY_STATUS_CHANGED; payload: CapacityStatusChangedEvent };
+  | { name: typeof DISPATCH_EVENTS.CAPACITY_STATUS_CHANGED; payload: CapacityStatusChangedEvent }
+  | { name: typeof DISPATCH_EVENTS.JOB_DUTY_CLASS_CHANGED; payload: JobDutyClassChangedEvent };
 
 export type DispatchSubscriber = (
   tenantId: string,

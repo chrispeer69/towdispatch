@@ -191,6 +191,11 @@ export const truckEquipmentValues = [
 ] as const;
 export type TruckEquipment = (typeof truckEquipmentValues)[number];
 
+/** CADS duty bucket (Session 58) — collapses capacity_class into the three
+ *  buckets the capacity engine loads; is_rotator is heavy-only kit. */
+export const truckDutyClassValues = ['light', 'medium', 'heavy'] as const;
+export type TruckDutyClass = (typeof truckDutyClassValues)[number];
+
 export const truckSchema = z.object({
   id: z.string().uuid(),
   tenantId: z.string().uuid(),
@@ -203,6 +208,8 @@ export const truckSchema = z.object({
   plateState: z.string().nullable(),
   vin: z.string().nullable(),
   capacityClass: z.enum(truckCapacityClassValues).nullable(),
+  dutyClass: z.enum(truckDutyClassValues),
+  isRotator: z.boolean(),
   gvwrLbs: z.number().int().nullable(),
   fuelType: z.enum(truckFuelTypeValues).nullable(),
   equipment: z.array(z.enum(truckEquipmentValues)).nullable(),
@@ -240,6 +247,8 @@ export const createTruckSchema = z.object({
     .regex(/^[A-HJ-NPR-Z0-9]{17}$/, 'VIN must be 17 chars (no I/O/Q)')
     .optional(),
   capacityClass: z.enum(truckCapacityClassValues).optional(),
+  dutyClass: z.enum(truckDutyClassValues).default('light'),
+  isRotator: z.boolean().default(false),
   gvwrLbs: z.number().int().positive().optional(),
   fuelType: z.enum(truckFuelTypeValues).optional(),
   equipment: z.array(z.enum(truckEquipmentValues)).optional(),
@@ -275,6 +284,8 @@ export const updateTruckSchema = z
       .nullable()
       .optional(),
     capacityClass: z.enum(truckCapacityClassValues).nullable().optional(),
+    dutyClass: z.enum(truckDutyClassValues).optional(),
+    isRotator: z.boolean().optional(),
     gvwrLbs: z.number().int().positive().nullable().optional(),
     fuelType: z.enum(truckFuelTypeValues).nullable().optional(),
     equipment: z.array(z.enum(truckEquipmentValues)).nullable().optional(),
