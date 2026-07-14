@@ -1,16 +1,21 @@
 'use client';
 
+import type { CapacityStatusDto } from '@ustowdispatch/shared';
 import { useState } from 'react';
+import { CapacitySignalPanel } from './capacity-signal';
 import { ActivePane, ConnectionPill, MapPane, useDispatchBoard } from './dispatch-shared';
 /**
- * Live Dispatch — read-only operations view: Active jobs on the far left,
- * Map filling the rest. The New queue / Driver roster / Recently closed
- * panes moved to /assign-jobs (which owns the drag-to-assign workflow).
+ * Live Dispatch — read-only operations view: Capacity Signal strip up top,
+ * Active jobs on the far left, Map filling the rest. The New queue / Driver
+ * roster / Recently closed panes moved to /assign-jobs (which owns the
+ * drag-to-assign workflow).
  */
 import type { DispatchSnapshot } from './dispatch-state';
 
 interface Props {
   initialSnapshot: DispatchSnapshot;
+  /** CADS snapshot; null when the capacity fetch failed (panel self-heals). */
+  initialCapacityStatus: CapacityStatusDto | null;
   mapboxToken: string | null;
   /** Set when the dispatcher just landed here from /intake?created=... */
   createdJobNumber?: string | null;
@@ -20,6 +25,7 @@ interface Props {
 
 export function DispatchClient({
   initialSnapshot,
+  initialCapacityStatus,
   mapboxToken,
   createdJobNumber = null,
   smsHint = null,
@@ -77,6 +83,8 @@ export function DispatchClient({
           {state.toast.message}
         </div>
       ) : null}
+
+      <CapacitySignalPanel initialStatus={initialCapacityStatus} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <ActivePane

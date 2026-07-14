@@ -25,6 +25,12 @@ export const DISPATCH_EVENTS = {
   // API webhook publisher can fan them out to subscribed endpoints.
   IMPOUND_OPENED: 'impound.opened',
   IMPOUND_RELEASED: 'impound.released',
+  // Session 58 — CADS. truck.service_changed fires when a truck goes in/out
+  // of service (capacity recompute trigger + fleet UIs); capacity.status_changed
+  // carries the full recomputed per-class status for the dispatch widget.
+  TRUCK_SERVICE_CHANGED: 'truck.service_changed',
+  CAPACITY_STATUS_CHANGED: 'capacity.status_changed',
+  JOB_DUTY_CLASS_CHANGED: 'job.duty_class_changed',
 } as const;
 export type DispatchEventName = (typeof DISPATCH_EVENTS)[keyof typeof DISPATCH_EVENTS];
 
@@ -77,6 +83,15 @@ export const jobUnassignedEventSchema = z.object({
   unassignedByUserId: z.string().uuid(),
 });
 export type JobUnassignedEvent = z.infer<typeof jobUnassignedEventSchema>;
+
+/** Session 58 — dispatch reclassed a job's CADS duty bucket. */
+export const jobDutyClassChangedEventSchema = z.object({
+  jobId: z.string().uuid(),
+  jobNumber: z.string(),
+  dutyClass: z.enum(['light', 'medium', 'heavy']),
+  actorUserId: z.string().uuid().nullable(),
+});
+export type JobDutyClassChangedEvent = z.infer<typeof jobDutyClassChangedEventSchema>;
 
 export const jobStatusChangedEventSchema = z.object({
   jobId: z.string().uuid(),

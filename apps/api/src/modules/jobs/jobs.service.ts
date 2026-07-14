@@ -52,6 +52,7 @@ import {
   type PaginatedJobs,
   type QuotePreviewPayload,
   type RateQuote,
+  deriveJobDutyClass,
 } from '@ustowdispatch/shared';
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { TenantAwareDb, type Tx } from '../../database/tenant-aware-db.service.js';
@@ -345,6 +346,8 @@ export class JobsService {
           jobNumber,
           status: 'new',
           serviceType: input.serviceType,
+          // CADS duty bucket — derived at intake, reclassable by dispatch.
+          dutyClass: deriveJobDutyClass(input.serviceType, input.vehicle.vehicleClass),
           customerId: customerRow.id,
           vehicleId: vehicleResolution.id,
           accountId: input.accountId ?? null,
@@ -465,6 +468,8 @@ export class JobsService {
           jobNumber,
           status: 'new',
           serviceType: input.serviceType,
+          // CADS duty bucket — derived at intake, reclassable by dispatch.
+          dutyClass: deriveJobDutyClass(input.serviceType, vehicleRow.vehicleClass),
           customerId: input.customerId,
           vehicleId: input.vehicleId,
           accountId: input.accountId ?? null,
@@ -559,6 +564,36 @@ export class JobsService {
       }
       return rowToDto(job);
     });
+  }
+
+  /**
+   * Reclass a job's CADS duty bucket (light|medium|heavy). The intake
+   * derivation is a heuristic; dispatch is the authority. Emits
+   * job.duty_class_changed so the capacity engine recomputes.
+   */
+  async setDutyClass(
+    ctx: CallerContext,
+    jobId: string,
+    dutyClass: 'light' | 'medium' | 'heavy',
+  ): Promise<JobDto> {
+    const row = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const [updated] = await tx
+        .update(jobs)
+        .set({ dutyClass, updatedAt: new Date() })
+        .where(and(eq(jobs.id, jobId), isNull(jobs.deletedAt)))
+        .returning();
+      if (!updated) throw notFound();
+      return updated;
+    });
+    // Emit after commit so the capacity recompute reads the new class and a
+    // rolled-back write never broadcasts.
+    this.events.emit(ctx.tenantId, DISPATCH_EVENTS.JOB_DUTY_CLASS_CHANGED, {
+      jobId: row.id,
+      jobNumber: row.jobNumber,
+      dutyClass,
+      actorUserId: ctx.userId,
+    });
+    return rowToDto(row);
   }
 
   /**
@@ -1195,6 +1230,7 @@ function rowToDto(j: typeof jobs.$inferSelect, joined?: JobJoinedRefs): JobDto {
     jobNumber: j.jobNumber,
     status: j.status,
     serviceType: j.serviceType,
+    dutyClass: j.dutyClass,
     customerId: j.customerId,
     vehicleId: j.vehicleId,
     accountId: j.accountId,

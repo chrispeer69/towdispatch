@@ -262,6 +262,9 @@ export const jobSchema = z.object({
   jobNumber: z.string(),
   status: z.enum(jobStatusValues),
   serviceType: z.enum(jobServiceTypeValues),
+  /** CADS capacity bucket — optional so pre-CADS payload producers
+   *  (mocks, cached snapshots) stay valid. The API always sets it. */
+  dutyClass: z.enum(['light', 'medium', 'heavy']).optional(),
   customerId: z.string().uuid().nullable(),
   vehicleId: z.string().uuid().nullable(),
   accountId: z.string().uuid().nullable(),

@@ -14,6 +14,7 @@
  * the tenants table, which has no INSERT RLS policy by design.
  */
 import 'dotenv/config';
+import { createCipheriv, createHash, pbkdf2Sync, randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import { and, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -23,6 +24,40 @@ import * as schema from './schema/index';
 import { uuidv7 } from './uuid';
 
 const SEED_PASSWORD = 'ChangeMe123!';
+
+/**
+ * CADS demo-partner credentials — FIXED dev values (idempotent seed, echoed
+ * to the console) so a local sink can verify signatures. Formats mirror
+ * apps/api: whsec_<48 hex> and tc_test_<12 hex>_<64 hex>.
+ */
+const DEMO_CADS_WEBHOOK_SECRET = `whsec_${'ab'.repeat(24)}`;
+/** api_key_prefix is globally unique (cross-tenant login handle), so each
+ *  seeded tenant gets its own fixed prefix. */
+const DEMO_CADS_API_KEY_PREFIXES: Record<string, string> = {
+  acme: 'cad5eeded001',
+  metro: 'cad5eeded002',
+};
+const demoCadsApiKey = (slug: string): { prefix: string; plaintext: string } => {
+  const prefix = DEMO_CADS_API_KEY_PREFIXES[slug] ?? 'cad5eeded0ff';
+  return { prefix, plaintext: `tc_test_${prefix}_${'deadbeef'.repeat(8)}` };
+};
+
+/** AES-256-GCM, same construction as the API's WebhookSecretCipher. */
+function encryptWebhookSecret(plaintext: string): string {
+  const keySource =
+    process.env.WEBHOOK_SIGNING_ENCRYPTION_KEY ??
+    'change-me-webhook-signing-encryption-key-rotate-in-prod';
+  const key = createHash('sha256').update(keySource, 'utf8').digest();
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const enc = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+  return Buffer.concat([iv, cipher.getAuthTag(), enc]).toString('base64');
+}
+
+/** pbkdf2, same parameters as apps/api api-key.util hashApiKey. */
+function hashCadsApiKey(plaintext: string): string {
+  return pbkdf2Sync(plaintext, 'api-key-salt', 100000, 32, 'sha256').toString('hex');
+}
 
 /**
  * Pricing modeled on a typical small/mid-market towing rate card. Tow has a
@@ -528,6 +563,8 @@ async function main(): Promise<void> {
           year: '2021',
           make: 'Ford',
           model: 'F-550',
+          duty: 'light' as const,
+          rotator: false,
         },
         {
           unit: `T-${tenantTag}-02`,
@@ -535,6 +572,8 @@ async function main(): Promise<void> {
           year: '2020',
           make: 'Chevy',
           model: 'Silverado 5500',
+          duty: 'medium' as const,
+          rotator: false,
         },
         {
           unit: `T-${tenantTag}-03`,
@@ -542,6 +581,8 @@ async function main(): Promise<void> {
           year: '2019',
           make: 'Peterbilt',
           model: '337',
+          duty: 'heavy' as const,
+          rotator: true,
         },
         {
           unit: `T-${tenantTag}-04`,
@@ -549,6 +590,8 @@ async function main(): Promise<void> {
           year: '2022',
           make: 'Ford',
           model: 'F-450',
+          duty: 'light' as const,
+          rotator: false,
         },
       ];
       const truckIds: string[] = [];
@@ -569,6 +612,8 @@ async function main(): Promise<void> {
           year: tk.year,
           make: tk.make,
           model: tk.model,
+          dutyClass: tk.duty,
+          isRotator: tk.rotator,
           inService: true,
           createdBy: ownerUserId,
         });
@@ -602,7 +647,8 @@ async function main(): Promise<void> {
         if (existingDriver) {
           driverIds.push(existingDriver.id);
           if (d.empNum.endsWith('D01') && driverUserId) {
-            await db.update(schema.drivers)
+            await db
+              .update(schema.drivers)
               .set({ userId: driverUserId })
               .where(eq(schema.drivers.id, existingDriver.id));
           }
@@ -645,6 +691,51 @@ async function main(): Promise<void> {
           status: 'available',
           createdBy: ownerUserId,
         });
+      }
+
+      // ---------- CADS (Session 58) ----------
+      // Default capacity settings + one enabled demo partner whose webhook
+      // points at a local echo endpoint. Credentials are FIXED dev values so
+      // the seed stays idempotent; run `npx http-echo-server 4010` (or any
+      // local sink) to watch signed capacity broadcasts arrive.
+      const existingCapacitySettings = await db.query.capacitySettings.findFirst({
+        where: eq(schema.capacitySettings.tenantId, tenantId),
+      });
+      if (!existingCapacitySettings) {
+        await db.insert(schema.capacitySettings).values({
+          id: uuidv7(),
+          tenantId,
+          createdBy: ownerUserId,
+        });
+        log('  inserted capacity_settings defaults');
+      }
+
+      const demoPartnerName = 'Demo Motor Club (local echo)';
+      const existingPartner = await db.query.capacityPartners.findFirst({
+        where: and(
+          eq(schema.capacityPartners.tenantId, tenantId),
+          eq(schema.capacityPartners.name, demoPartnerName),
+        ),
+      });
+      if (!existingPartner) {
+        const demoKey = demoCadsApiKey(t.slug);
+        await db.insert(schema.capacityPartners).values({
+          id: uuidv7(),
+          tenantId,
+          name: demoPartnerName,
+          networkCode: 'generic',
+          deliveryMode: 'webhook',
+          webhookUrl: 'http://localhost:4010/cads-echo',
+          webhookSecretEncrypted: encryptWebhookSecret(DEMO_CADS_WEBHOOK_SECRET),
+          apiKeyPrefix: demoKey.prefix,
+          apiKeyHash: hashCadsApiKey(demoKey.plaintext),
+          enabled: true,
+          classVisibility: ['light', 'medium', 'heavy'],
+          createdBy: ownerUserId,
+        });
+        log(
+          `  inserted CADS demo partner (webhook secret ${DEMO_CADS_WEBHOOK_SECRET}, pull key ${demoKey.plaintext})`,
+        );
       }
     }
 

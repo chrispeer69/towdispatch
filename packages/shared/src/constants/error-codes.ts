@@ -83,6 +83,11 @@ export const ERROR_CODES = {
   REPO_MODULE_DISABLED: 'repo_module_disabled',
   LIENHOLDER_IN_USE: 'lienholder_in_use',
 
+  // Capacity-Aware Dispatch Signaling (Session 58)
+  CAPACITY_OVERRIDE_EXISTS: 'capacity_override_exists',
+  CAPACITY_PARTNER_DISABLED: 'capacity_partner_disabled',
+  CAPACITY_WEBHOOK_URL_FORBIDDEN: 'capacity_webhook_url_forbidden',
+
   // 5xx
   INTERNAL_ERROR: 'internal_error',
   SERVICE_UNAVAILABLE: 'service_unavailable',

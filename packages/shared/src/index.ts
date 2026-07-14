@@ -49,3 +49,8 @@ export * from './repo/index';
 // Customer Self-Serve Portal (Session 55) — account-less, per-impound vehicle
 // lookup + ID self-attestation + Stripe pay + release-intent contracts.
 export * from './self-serve-portal/index';
+
+// Capacity-Aware Dispatch Signaling (Session 58) — live load ratio per duty
+// class, tenant-configurable bands + hysteresis, manual overrides, partner
+// webhook/pull-API payload contracts.
+export * from './capacity/index';

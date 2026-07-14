@@ -54,6 +54,15 @@ export type TruckType = (typeof truckTypeValues)[number];
 export const truckCapacityClassValues = ['light', 'medium', 'heavy', 'HD'] as const;
 export type TruckCapacityClass = (typeof truckCapacityClassValues)[number];
 
+/**
+ * CADS-canonical duty bucket (Capacity-Aware Dispatch Signaling).
+ * capacity_class predates it and stays for fleet reporting; duty_class
+ * collapses HD into heavy and is NOT NULL so the capacity compute path
+ * never branches on missing data. Backfilled in 0052.
+ */
+export const truckDutyClassValues = ['light', 'medium', 'heavy'] as const;
+export type TruckDutyClass = (typeof truckDutyClassValues)[number];
+
 export const truckFuelTypeValues = ['gas', 'diesel', 'EV', 'hybrid'] as const;
 export type TruckFuelType = (typeof truckFuelTypeValues)[number];
 
@@ -105,6 +114,10 @@ export const trucks = pgTable(
 
     /** Rated tow-weight bucket — distinct from truck_type's equipment shape. */
     capacityClass: text('capacity_class', { enum: truckCapacityClassValues }),
+    /** CADS duty bucket — see truckDutyClassValues doc above. */
+    dutyClass: text('duty_class', { enum: truckDutyClassValues }).notNull().default('light'),
+    /** Heavy-duty rotator flag (sliding rotator boom); heavy class only. */
+    isRotator: boolean('is_rotator').notNull().default(false),
     /** Gross vehicle weight rating, pounds. */
     gvwrLbs: integer('gvwr_lbs'),
     fuelType: text('fuel_type', { enum: truckFuelTypeValues }),

@@ -5,7 +5,9 @@
  * via the API, then hands off to DispatchClient which opens a Socket.IO
  * connection for live updates and dnd-kit-driven drag-and-drop assignment.
  */
+import { fetchCapacityStatus } from '@/lib/api/capacity';
 import { apiServer, tryFetch } from '@/lib/api/client';
+import { getSessionToken } from '@/lib/auth/session';
 import type { DriverRosterRow, JobDto } from '@ustowdispatch/shared';
 import type { JSX } from 'react';
 import { DispatchClient } from './dispatch-client';
@@ -38,7 +40,17 @@ export default async function DispatchPage({
 
   // Auth is enforced by (app)/layout.tsx. tryFetch surfaces a per-feature
   // 401/403 as data so this page never races the layout's redirect.
-  const result = await tryFetch(() => apiServer<BoardResponse>('/dispatch/board'));
+  // The capacity fetch additionally swallows 5xx/network errors: the panel
+  // is optional and self-heals over its socket — a capacity outage must
+  // never take the whole dispatch board down with it.
+  const token = await getSessionToken();
+  const [result, capacityStatus] = await Promise.all([
+    tryFetch(() => apiServer<BoardResponse>('/dispatch/board')),
+    tryFetch(() => fetchCapacityStatus(token)).then(
+      (r) => r.data,
+      () => null,
+    ),
+  ]);
   const snapshot: BoardResponse = result.data ?? {
     queue: [],
     active: [],
@@ -55,6 +67,7 @@ export default async function DispatchPage({
   return (
     <DispatchClient
       initialSnapshot={snapshot}
+      initialCapacityStatus={capacityStatus}
       mapboxToken={mapboxToken}
       createdJobNumber={createdJobNumber}
       smsHint={smsHint}

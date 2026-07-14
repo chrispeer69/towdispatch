@@ -10,14 +10,17 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { trucks, uuidv7 } from '@ustowdispatch/db';
 import {
   type CreateTruckPayload,
+  DISPATCH_EVENTS,
   ERROR_CODES,
   type PaginatedTrucks,
   type TruckDto,
   type TruckFilters,
   type UpdateTruckPayload,
+  deriveTruckDutyClass,
 } from '@ustowdispatch/shared';
 import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { TenantAwareDb } from '../../database/tenant-aware-db.service.js';
+import { DispatchEventsService } from '../dispatch/dispatch-events.service.js';
 
 interface CallerContext {
   tenantId: string;
@@ -37,7 +40,20 @@ const isUniqueViolation = (err: unknown): err is PgError =>
 
 @Injectable()
 export class TrucksService {
-  constructor(private readonly db: TenantAwareDb) {}
+  constructor(
+    private readonly db: TenantAwareDb,
+    private readonly events: DispatchEventsService,
+  ) {}
+
+  /** CADS recompute trigger — fires whenever in_service flips. */
+  private emitServiceChanged(tenantId: string, t: typeof trucks.$inferSelect): void {
+    this.events.emit(tenantId, DISPATCH_EVENTS.TRUCK_SERVICE_CHANGED, {
+      truckId: t.id,
+      unitNumber: t.unitNumber,
+      inService: t.inService,
+      dutyClass: t.dutyClass,
+    });
+  }
 
   async list(ctx: CallerContext, filters: TruckFilters): Promise<PaginatedTrucks> {
     return this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
@@ -122,6 +138,11 @@ export class TrucksService {
             heavyDutyCapable: input.heavyDutyCapable ?? false,
             currentOdometer: input.currentOdometer ?? null,
             odometerUpdatedAt: input.currentOdometer !== undefined ? new Date() : null,
+            // Pre-CADS clients omit dutyClass — derive it the same way the
+            // 0052 migration backfilled existing trucks (HD → heavy, etc.).
+            dutyClass:
+              input.dutyClass ?? deriveTruckDutyClass(input.capacityClass, input.truckType),
+            isRotator: input.isRotator,
             status: input.status,
             inService: input.status === 'active',
             notes: input.notes ?? null,
@@ -131,6 +152,7 @@ export class TrucksService {
         if (!r) throw new Error('insert trucks .. returning() yielded no row');
         return r;
       });
+      if (row.inService) this.emitServiceChanged(ctx.tenantId, row);
       return toTruckDto(row);
     } catch (err) {
       if (isUniqueViolation(err)) throw conflict();
@@ -140,7 +162,7 @@ export class TrucksService {
 
   async update(ctx: CallerContext, id: string, input: UpdateTruckPayload): Promise<TruckDto> {
     try {
-      const updated = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const result = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
         const existing = await tx.query.trucks.findFirst({
           where: and(eq(trucks.id, id), isNull(trucks.deletedAt)),
         });
@@ -161,10 +183,13 @@ export class TrucksService {
           patch.inService = input.status === 'active';
         }
         const [row] = await tx.update(trucks).set(patch).where(eq(trucks.id, id)).returning();
-        return row;
+        return row ? { row, serviceChanged: row.inService !== existing.inService } : null;
       });
-      if (!updated) throw notFound();
-      return toTruckDto(updated);
+      if (!result) throw notFound();
+      // Emit after commit — a recompute on another connection must see the
+      // new state, and a rolled-back write must never broadcast.
+      if (result.serviceChanged) this.emitServiceChanged(ctx.tenantId, result.row);
+      return toTruckDto(result.row);
     } catch (err) {
       if (isUniqueViolation(err)) throw conflict();
       throw err;
@@ -172,15 +197,23 @@ export class TrucksService {
   }
 
   async softDelete(ctx: CallerContext, id: string): Promise<void> {
-    const ok = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+    const result = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const existing = await tx.query.trucks.findFirst({
+        where: and(eq(trucks.id, id), isNull(trucks.deletedAt)),
+        columns: { inService: true },
+      });
+      if (!existing) return null;
       const [row] = await tx
         .update(trucks)
         .set({ deletedAt: new Date(), updatedAt: new Date(), inService: false, status: 'retired' })
         .where(and(eq(trucks.id, id), isNull(trucks.deletedAt)))
-        .returning({ id: trucks.id });
-      return Boolean(row);
+        .returning();
+      return row ? { row, serviceChanged: existing.inService } : null;
     });
-    if (!ok) throw notFound();
+    if (!result) throw notFound();
+    // Post-commit, and only when the truck was actually in service —
+    // retiring an already-idle truck is a no-op for capacity.
+    if (result.serviceChanged) this.emitServiceChanged(ctx.tenantId, result.row);
   }
 
   /**
@@ -189,8 +222,13 @@ export class TrucksService {
    * audit_log captures the cascading update.
    */
   async markInMaintenance(ctx: CallerContext, truckId: string, reason: string): Promise<void> {
-    await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
-      await tx
+    const result = await this.db.runInTenantContext(this.toTenantCtx(ctx), async (tx) => {
+      const existing = await tx.query.trucks.findFirst({
+        where: and(eq(trucks.id, truckId), isNull(trucks.deletedAt)),
+        columns: { inService: true },
+      });
+      if (!existing) return null;
+      const [row] = await tx
         .update(trucks)
         .set({
           status: 'in_maintenance',
@@ -198,8 +236,12 @@ export class TrucksService {
           updatedAt: new Date(),
           notes: sql`coalesce(${trucks.notes} || E'\n', '') || ${`[auto] ${reason}`}`,
         })
-        .where(and(eq(trucks.id, truckId), isNull(trucks.deletedAt)));
+        .where(and(eq(trucks.id, truckId), isNull(trucks.deletedAt)))
+        .returning();
+      return row ? { row, serviceChanged: existing.inService } : null;
     });
+    // Post-commit, and only on a real in-service → out-of-service flip.
+    if (result?.serviceChanged) this.emitServiceChanged(ctx.tenantId, result.row);
   }
 
   private toTenantCtx(ctx: CallerContext): {
@@ -240,6 +282,8 @@ export function toTruckDto(t: typeof trucks.$inferSelect): TruckDto {
     plateState: t.plateState,
     vin: t.vin,
     capacityClass: t.capacityClass,
+    dutyClass: t.dutyClass,
+    isRotator: t.isRotator,
     gvwrLbs: t.gvwrLbs,
     fuelType: t.fuelType,
     equipment: (t.equipment as TruckDto['equipment']) ?? null,

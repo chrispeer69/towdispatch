@@ -67,6 +67,12 @@ export const SETTINGS_TABS = [
       'Issue API keys for the public REST API and register webhook endpoints for job & impound events.',
   },
   {
+    slug: 'capacity',
+    label: 'Capacity Signaling',
+    description:
+      'CADS thresholds, job weights, manual overrides, and the motor-club partners that receive your live capacity signal.',
+  },
+  {
     slug: 'billing',
     label: 'Billing & Subscription',
     description: 'Stripe Connect onboarding, platform margin, and SaaS subscription billing.',
