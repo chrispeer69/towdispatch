@@ -24,12 +24,18 @@ function makeConfig(opts: {
   secretKey?: string;
   publicKey?: string;
   webhookSecret?: string;
+  nodeEnv?: 'development' | 'test' | 'production';
+  allowStubInProduction?: boolean;
 }): ConfigService {
   const secretKey = opts.secretKey ?? '';
   const publicKey = opts.publicKey ?? '';
   const webhookSecret = opts.webhookSecret ?? 'whsec_test_session11_default_dev_secret';
   return {
-    payments: { provider: opts.provider },
+    payments: {
+      provider: opts.provider,
+      allowStubInProduction: opts.allowStubInProduction ?? false,
+    },
+    nodeEnv: opts.nodeEnv ?? 'test',
     stripe: {
       secretKey,
       publicKey,
@@ -104,6 +110,19 @@ describe('selectPaymentProvider', () => {
         }),
       ),
     ).toThrow(/STRIPE_WEBHOOK_SECRET is missing or still a dev placeholder/);
+  });
+
+  it('throws when NODE_ENV=production and the provider is still the stub', () => {
+    expect(() =>
+      selectPaymentProvider(makeConfig({ provider: 'stub', nodeEnv: 'production' })),
+    ).toThrow(/PAYMENTS_PROVIDER=stub in production/);
+  });
+
+  it('allows the stub in production only with the explicit opt-in flag', () => {
+    const provider = selectPaymentProvider(
+      makeConfig({ provider: 'stub', nodeEnv: 'production', allowStubInProduction: true }),
+    );
+    expect(provider).toBeInstanceOf(StubPaymentProvider);
   });
 
   it('accepts sk_test_ keys in live mode (staging/sandbox cutover rehearsal)', () => {

@@ -4,9 +4,11 @@
  * Unauthenticated by design: SendGrid does not pass a tenant header.
  * Authenticity is established by verifying the ECDSA P-256 signature
  * SendGrid attaches to each delivery (when the public key is
- * configured). When `SENDGRID_WEBHOOK_PUBLIC_KEY` is unset we log a
- * warning and accept the request — production deploys MUST set the
- * key; the warning + the README make this loud.
+ * configured). When `SENDGRID_WEBHOOK_PUBLIC_KEY` is unset the behavior
+ * splits by environment: dev/test log a warning and accept (curl-able
+ * for local work), while NODE_ENV=production REJECTS the request with
+ * 401 — an unverifiable webhook in production is an unauthenticated
+ * write surface, not a convenience.
  *
  * Path: this is the tier-offer-specific endpoint. Other features that
  * later opt into SendGrid event webhooks should mount their own
@@ -27,6 +29,7 @@ import {
   Logger,
   Post,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { Public } from '../../common/decorators/public.decorator.js';
@@ -82,6 +85,14 @@ export class TierOfferWebhookController {
           message: 'SendGrid webhook signature could not be verified',
         });
       }
+    } else if (this.config.nodeEnv === 'production') {
+      this.log.error({
+        msg: 'tier-offer webhook rejected: SENDGRID_WEBHOOK_PUBLIC_KEY is unset in production — set the ECDSA public key from SendGrid Settings → Mail Settings → Event Webhook',
+      });
+      throw new UnauthorizedException({
+        code: 'webhook_verification_unavailable',
+        message: 'Webhook signature verification is not configured on this server',
+      });
     } else {
       this.log.warn({
         msg: 'tier-offer webhook received without signature verification — set SENDGRID_WEBHOOK_PUBLIC_KEY in production',

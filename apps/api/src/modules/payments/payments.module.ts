@@ -83,6 +83,16 @@ export function selectPaymentProvider(config: ConfigService): PaymentProvider {
     );
     return live;
   }
+  // A production deploy quietly running the stub means every "payment" is
+  // fake with no operator signal. Refuse to boot unless the deploy opts in
+  // explicitly (pre-launch / card payments not yet enabled).
+  if (config.nodeEnv === 'production' && !config.payments.allowStubInProduction) {
+    throw new Error(
+      'PAYMENTS_PROVIDER=stub in production. Either cut over to Stripe ' +
+        '(PAYMENTS_PROVIDER=live with real keys — see STRIPE_LIVE_CUTOVER.md) or set ' +
+        'PAYMENTS_ALLOW_STUB_IN_PRODUCTION=true to explicitly acknowledge fake payments.',
+    );
+  }
   config.logger.info({ provider: 'stub' }, 'PaymentsModule: using StubPaymentProvider');
   return new StubPaymentProvider();
 }

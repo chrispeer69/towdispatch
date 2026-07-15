@@ -26,6 +26,22 @@ export function isUsableMapboxToken(token: string | null | undefined): token is 
 }
 
 /**
+ * The graceful degradation above is deliberate, but a Mapbox-side failure
+ * (revoked token, URL restriction, 401/403/429) used to be COMPLETELY
+ * invisible — the address helpers just stopped suggesting, with nothing in
+ * the console to diagnose. Warn once per page load so "geocoding is broken"
+ * is a five-second console check instead of an archaeology dig.
+ */
+let warnedGeocodingFailure = false;
+function warnGeocodingFailure(status: number): void {
+  if (warnedGeocodingFailure) return;
+  warnedGeocodingFailure = true;
+  console.warn(
+    `Mapbox geocoding request failed with HTTP ${status}. Address autocomplete and distance hints are disabled. Check that NEXT_PUBLIC_MAPBOX_TOKEN is a valid public token (Mapbox account → Access tokens) and that its URL restrictions allow this domain. 401/403 = bad or restricted token; 429 = rate limited.`,
+  );
+}
+
+/**
  * Forward-geocode a free-text address. Returns the best match (first result)
  * or null if nothing parsed. Country-biased to the US since this is a US-only
  * dispatch product; loosen later if we expand.
@@ -43,7 +59,10 @@ export async function geocodeAddress(
     `?access_token=${encodeURIComponent(token)}&country=us&limit=1&autocomplete=false`;
   try {
     const res = await fetch(url, signal ? { signal } : {});
-    if (!res.ok) return null;
+    if (!res.ok) {
+      warnGeocodingFailure(res.status);
+      return null;
+    }
     const body = (await res.json()) as {
       features?: Array<{ center?: [number, number] }>;
     };
@@ -126,7 +145,10 @@ export async function searchAddresses(
   }
   try {
     const res = await fetch(url, options.signal ? { signal: options.signal } : {});
-    if (!res.ok) return [];
+    if (!res.ok) {
+      warnGeocodingFailure(res.status);
+      return [];
+    }
     const body = (await res.json()) as {
       features?: Array<{
         id?: string;

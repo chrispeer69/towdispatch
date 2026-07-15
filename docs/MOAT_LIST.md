@@ -37,7 +37,7 @@ Legacy platforms use flat rate sheets that require manual, error-prone overrides
 ---
 
 ## 3. Tier Offer Composer (Motor Club Negotiation)
-**Status:** 🟡 Queued (Issue #47)
+**Status:** ✅ Live in Production (shipped Session 4 — `apps/api/src/modules/tier-offers/`: offer composer UI, magic-link landing pages, signed SendGrid webhooks, acceptance ledger, lifecycle cron, enforcement in dispatch)
 
 **The Capability:**
 An extension of the Dynamic Pricing Engine. Before a major event (e.g., a hurricane or holiday weekend), the operator composes a tier offer specifying a pricing premium, a capacity commitment (e.g., "8 trucks for the duration"), and a time window. The system emails this offer to the operator's motor-club account managers. Accepting clubs lock in the capacity at the premium rate; declining clubs are flagged in the system, allowing the operator to cleanly decline their dispatches during the event.
@@ -51,7 +51,7 @@ This feature turns the US Tow Alliance from a software user base into a collecti
 ---
 
 ## 4. End-to-End Impound & Lien Processing
-**Status:** ❌ Planned (Phase 2)
+**Status:** ✅ Live in Production (impound Session 22, lien processing Session 23, yard management Session 54 — `apps/api/src/modules/{impound,lien-processing,yard}/`; the statutory lien **notice gateway** remains Phase 1)
 
 **The Capability:**
 A comprehensive impound module that tracks daily storage fee accrual, manages state-specific legal hold periods (police, abandoned, repossession), automatically generates the required certified-mail notice ladders, and flags vehicles for auction when lien eligibility is reached.

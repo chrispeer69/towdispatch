@@ -8,7 +8,11 @@ to protect against threats from unauthorized access.
 Full detail in [access-control.md](access-control.md). Summary:
 
 - **Identity & authentication (CC6.1).** JWT + rotating refresh tokens;
-  argon2id passwords; MFA enforced for `OWNER`/`ADMIN`; brute-force lockout;
+  argon2id passwords; TOTP MFA implemented (secrets AES-256-GCM-encrypted at
+  rest; single-use hashed recovery codes) with login-gate enforcement
+  controlled per deployment via `MFA_LOGIN_GATE_ENABLED` — **default off;
+  enforcement is an operating decision, and evidence of the flag's production
+  value must accompany this control**; brute-force lockout;
   refresh-token-reuse family revocation.
 - **Authorization (CC6.1, CC6.3).** `@Roles` + `RolesGuard` on every protected
   route; seven-role least-privilege RBAC; read-only `auditor` role.
