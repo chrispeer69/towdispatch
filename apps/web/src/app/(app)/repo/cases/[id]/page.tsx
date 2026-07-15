@@ -2,13 +2,17 @@
  * /repo/cases/[id] — detail page. Server-fetches the case aggregate (case +
  * lienholder + attempts + recovery events + personal property + condition
  * photos) and hands it to the client component that owns the operator actions.
+ *
+ * The repo module ships dark behind the API's REPO_MODULE_ENABLED flag (503
+ * when off); roles the API gates out get 403; an unknown case id 404s. All
+ * render a calm explainer / not-found instead of crashing the route.
  */
-import { apiServer, tryFetch } from '@/lib/api/client';
+import { ApiError, apiServer } from '@/lib/api/client';
 import { getSessionToken } from '@/lib/auth/session';
 import type { RepoCaseDetailDto } from '@ustowdispatch/shared';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
+import { RepoUnavailable } from '../../repo-unavailable';
 import { RepoCaseDetailClient } from './detail-client';
 
 export const metadata = { title: 'Repo Case — US Tow Dispatch' };
@@ -21,26 +25,38 @@ export default async function RepoCaseDetailPage({
 }): Promise<JSX.Element> {
   const { id } = await params;
   const token = await getSessionToken();
-  const result = await tryFetch(() =>
-    apiServer<RepoCaseDetailDto>(`/repo-cases/${id}`, { accessToken: token ?? null }),
-  );
 
-  if (result.error?.status === 403) {
-    return (
-      <section className="rounded-md border border-border-on-dark bg-bg-surface-elevated p-8">
-        <h1 className="text-2xl font-bold mb-2">Repo Case</h1>
-        <p className="text-text-secondary-on-dark">
-          Your role does not have access to the repossession workflow.
-        </p>
-        <p className="mt-3">
-          <Link href="/repo/cases" className="text-accent-orange">
-            ← Back to repo cases
-          </Link>
-        </p>
-      </section>
-    );
+  let detail: RepoCaseDetailDto;
+  try {
+    detail = await apiServer<RepoCaseDetailDto>(`/repo-cases/${id}`, {
+      accessToken: token ?? null,
+    });
+  } catch (err) {
+    if (err instanceof ApiError) {
+      if (err.code === 'repo_module_disabled' || err.status === 503) {
+        return (
+          <RepoUnavailable
+            kind="disabled"
+            title="Repo Case"
+            backHref="/repo/cases"
+            backLabel="← Back to repo cases"
+          />
+        );
+      }
+      if (err.status === 403) {
+        return (
+          <RepoUnavailable
+            kind="forbidden"
+            title="Repo Case"
+            backHref="/repo/cases"
+            backLabel="← Back to repo cases"
+          />
+        );
+      }
+      if (err.status === 404) notFound();
+    }
+    throw err;
   }
-  if (result.error || !result.data) notFound();
 
-  return <RepoCaseDetailClient detail={result.data} />;
+  return <RepoCaseDetailClient detail={detail} />;
 }
