@@ -392,8 +392,11 @@ export class ConfigService {
    * (PAYMENTS_PROVIDER) that selects the real Stripe SDK (`live`) vs the
    * in-memory stub (`stub`, the default). See STRIPE_LIVE_CUTOVER.md.
    */
-  get payments(): { provider: 'stub' | 'live' } {
-    return { provider: this.config.PAYMENTS_PROVIDER };
+  get payments(): { provider: 'stub' | 'live'; allowStubInProduction: boolean } {
+    return {
+      provider: this.config.PAYMENTS_PROVIDER,
+      allowStubInProduction: this.config.PAYMENTS_ALLOW_STUB_IN_PRODUCTION,
+    };
   }
 
   get dynamicPricing(): {

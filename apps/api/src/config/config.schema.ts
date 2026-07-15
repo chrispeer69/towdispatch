@@ -215,6 +215,14 @@ export const configSchema = z.object({
   // through Stripe; when set, PaymentsModule hard-fails the boot if any Stripe
   // secret is missing or still a dev placeholder (no silent stub fallback).
   PAYMENTS_PROVIDER: z.enum(['stub', 'live']).default('stub'),
+  // Escape hatch for the production stub guard. A NODE_ENV=production boot
+  // with PAYMENTS_PROVIDER=stub refuses to start (a prod deploy quietly
+  // running fake payments is a silent-failure trap) UNLESS this is set to
+  // true — the explicit "we know, pre-launch / no card payments yet" opt-in.
+  PAYMENTS_ALLOW_STUB_IN_PRODUCTION: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
 
   // Session 12 — QuickBooks Online. When QBO_CLIENT_ID is missing the stub
   // provider drives the entire accounting flow so dev can exercise the full
@@ -640,6 +648,42 @@ export const configSchema = z.object({
 
 export type AppConfig = z.infer<typeof configSchema>;
 
+/**
+ * Security keys that ship with a WORKING development default so dev/CI boot
+ * without a .env full of secrets. A production boot must override every one
+ * of them: encrypting at rest with a key that is public in this repo is
+ * equivalent to not encrypting at all, and a webhook verifier token equal to
+ * the repo default lets anyone on the internet forge a validly-signed
+ * webhook. Values are the literal schema defaults above — keep in sync.
+ */
+const PROD_FORBIDDEN_DEFAULTS: Readonly<Record<string, string>> = {
+  TOTP_ENCRYPTION_KEY: 'change-me-totp-encryption-key-please-rotate-in-prod',
+  QBO_TOKEN_ENCRYPTION_KEY: 'change-me-qbo-token-encryption-key-please-rotate-in-prod',
+  QBO_WEBHOOK_VERIFIER_TOKEN: 'verifier-token-session12-default-dev-value',
+  WEBHOOK_SIGNING_ENCRYPTION_KEY: 'change-me-webhook-signing-encryption-key-rotate-in-prod',
+  WEBHOOK_SECRET_ENCRYPTION_KEY: 'change-me-webhook-secret-encryption-key-please-rotate',
+  SSO_TOKEN_ENCRYPTION_KEY: 'change-me-sso-token-encryption-key-please-rotate-in-prod',
+  CUSTOMER_PORTAL_ID_ENCRYPTION_KEY: 'change-me-self-serve-portal-id-encryption-key-rotate-in-prod',
+};
+
+/**
+ * Returns the config keys still carrying a dev-placeholder secret. Exported
+ * for unit tests; loadConfig treats a non-empty result as fatal when
+ * NODE_ENV=production. A value is an offender when it equals its known dev
+ * default OR still contains the `change-me` marker (catches a copy-pasted
+ * .env.example line that was edited but not actually rotated).
+ */
+export function findProductionPlaceholderSecrets(config: AppConfig): string[] {
+  const values = config as unknown as Record<string, unknown>;
+  return Object.entries(PROD_FORBIDDEN_DEFAULTS)
+    .filter(([key, devDefault]) => {
+      const value = values[key];
+      if (typeof value !== 'string') return false;
+      return value === devDefault || value.includes('change-me');
+    })
+    .map(([key]) => key);
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = configSchema.safeParse(env);
   if (!parsed.success) {
@@ -648,6 +692,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .join('\n');
     process.stderr.write(`\nInvalid environment configuration:\n${issues}\n\n`);
     process.exit(1);
+  }
+  if (parsed.data.NODE_ENV === 'production') {
+    const offenders = findProductionPlaceholderSecrets(parsed.data);
+    if (offenders.length > 0) {
+      const lines = offenders.map((k) => `  - ${k}: still set to its dev placeholder default`);
+      process.stderr.write(
+        `\nRefusing to boot in production with placeholder secrets.\nSet a real random value (32+ chars) for each of the following in the\nRailway service's Variables tab, then redeploy:\n${lines.join('\n')}\n\n`,
+      );
+      process.exit(1);
+    }
   }
   return parsed.data;
 }

@@ -14,7 +14,7 @@
  * Tests can also reach into the public `intents`, `refunds`, `customers`,
  * `setupIntents` maps to assert side-effects.
  */
-import { createHmac, randomBytes } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import type {
   CapturePaymentInput,
   ConfirmPaymentInput,
@@ -195,8 +195,14 @@ export class StubPaymentProvider implements PaymentProvider {
     const ts = parts.t;
     const v1 = parts.v1;
     if (!ts || !v1) throw new Error('Invalid stripe signature header');
+    // Constant-time compare — mirrors the real Stripe SDK so the stub never
+    // teaches a timing side-channel that live mode doesn't have.
     const expected = createHmac('sha256', secret).update(`${ts}.${rawBody}`).digest('hex');
-    if (expected !== v1) throw new Error('Stripe signature verification failed');
+    const a = Buffer.from(expected, 'utf8');
+    const b = Buffer.from(v1, 'utf8');
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      throw new Error('Stripe signature verification failed');
+    }
     const parsed = JSON.parse(rawBody) as {
       id?: string;
       type?: string;

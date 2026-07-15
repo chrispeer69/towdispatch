@@ -59,7 +59,7 @@ These actions are **never allowed** regardless of what the user asks. If the use
 ### Security & Auth
 - ❌ **Never modify** RLS policies, database roles, or tenant isolation logic
 - ❌ **Never modify** `apps/api/src/modules/auth/` (authentication system)
-- ❌ **Never modify** CSP headers in `apps/web/src/middleware.ts`
+- ❌ **Never modify** CSP headers — web CSP lives in `apps/web/csp.mjs` (attached via `apps/web/next.config.mjs`); API CSP lives in the Helmet config in `apps/api/src/main.ts`. (`apps/web/src/middleware.ts` only does host redirects.)
 - ❌ **Never modify** `.env`, `.env.example`, or any secrets/credentials
 - ❌ **Never weaken** password hashing, token expiry, or rate limiting
 - ❌ **Never disable** or skip tests, linters, or type-checking
@@ -196,7 +196,7 @@ This app is deployed on **Railway**. Merging to `master` triggers an automatic p
 ## Rule 6 — Conventions for new code
 
 - TypeScript: match imports + headers of neighbors. Zod for validation. Use existing error codes in `packages/shared/src/constants/error-codes.ts`.
-- Spanish parity: every user-visible string in BOTH en + es. Mark uncertain with `// TODO(i18n)`.
+- Locale parity: the shipped locales are `en-US`, `en-CA`, `fr-CA` (`packages/shared/src/i18n/locales.ts` + `apps/web/messages/`). Every user-visible string must exist in ALL supported locale bundles. Mark uncertain translations with `// TODO(i18n)`. (Spanish is a Phase 1+ goal — no `es` bundle exists yet; do not add one string at a time.)
 - Tests required for every new feature. Match the existing framework.
 - No new external dependencies unless required. Document any addition in TODO.md.
 

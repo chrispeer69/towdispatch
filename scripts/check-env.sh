@@ -23,9 +23,6 @@ required_in_prod=(
   DATABASE_URL
   DATABASE_ADMIN_URL
   REDIS_URL
-  JWT_ACCESS_SECRET
-  JWT_REFRESH_SECRET
-  JWT_MFA_SECRET
   TOTP_ENCRYPTION_KEY
   API_PORT
   API_HOST
@@ -36,13 +33,33 @@ required_in_prod=(
   STRIPE_WEBHOOK_SECRET
 )
 
+# Required in production but checked against the environment only (not gated
+# on .env.example, which still documents the legacy per-realm JWT_* names —
+# JWT_SECRET is the canonical secret every realm derives from; the legacy
+# JWT_ACCESS_SECRET / JWT_REFRESH_SECRET / JWT_MFA_SECRET are now optional
+# overrides, see config.schema.ts).
+required_in_prod_env_only=(
+  JWT_SECRET
+)
+
 # Keys that, if missing, *should* fall through to safe defaults but are worth
 # warning about so production isn't accidentally running with dev placeholders.
+# The *_ENCRYPTION_KEY / verifier entries are belt-and-suspenders: since the
+# placeholder-secret guard in config.schema.ts, the API refuses to boot in
+# production with any of them on a dev default — this warns at deploy time,
+# before the failed boot.
 warn_if_dev_default=(
+  JWT_SECRET
   JWT_ACCESS_SECRET
   JWT_REFRESH_SECRET
   JWT_MFA_SECRET
   TOTP_ENCRYPTION_KEY
+  QBO_TOKEN_ENCRYPTION_KEY
+  QBO_WEBHOOK_VERIFIER_TOKEN
+  WEBHOOK_SIGNING_ENCRYPTION_KEY
+  WEBHOOK_SECRET_ENCRYPTION_KEY
+  SSO_TOKEN_ENCRYPTION_KEY
+  CUSTOMER_PORTAL_ID_ENCRYPTION_KEY
   SENTRY_DSN
 )
 
@@ -91,6 +108,16 @@ for key in "${required_in_prod[@]}"; do
   fi
 done
 
+# 1b. Env-only required keys (not expected in .env.example).
+if [[ "$env_target" == "production" ]]; then
+  for key in "${required_in_prod_env_only[@]}"; do
+    if ! is_set "$key"; then
+      echo "::error::$key not set in environment (required in production)" >&2
+      errors=$((errors + 1))
+    fi
+  done
+fi
+
 # 2. Warn if a secret is set to its dev default in production.
 if [[ "$env_target" == "production" ]]; then
   for key in "${warn_if_dev_default[@]}"; do
@@ -99,6 +126,14 @@ if [[ "$env_target" == "production" ]]; then
       warnings=$((warnings + 1))
     fi
   done
+
+  # 2b. MFA login gate — compliance/matrix.md CC6 records the production value
+  # of this flag as control evidence. Off is a legitimate operating choice,
+  # but it should never be off by accident.
+  if [[ "${MFA_LOGIN_GATE_ENABLED:-false}" != "true" ]]; then
+    echo "::warning::MFA_LOGIN_GATE_ENABLED is not 'true' — MFA is NOT enforced at login. Deliberate? See compliance/controls/cc6-logical-access.md" >&2
+    warnings=$((warnings + 1))
+  fi
 fi
 
 # 3. Every key referenced in apps/api/src/config/config.schema.ts should be in .env.example.
