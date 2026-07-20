@@ -161,7 +161,7 @@ export class ConvinicarController {
           tierOfferEnforcementStatus: 'none' as const,
           convinicarOfferId: job.convinicarOfferId,
         };
-        this.dispatchEvents.notifyJobCreated(matchedTenantId!, jobDto as any);
+        this.dispatchEvents.emit(matchedTenantId!, 'job.created' as any, { job: jobDto });
       }
     });
 
