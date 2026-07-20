@@ -8,12 +8,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Public } from '../../common/decorators/public.decorator.js';
-import { CurrentTenant } from '../../common/decorators/current-user.decorator.js';
-import { TransactionRunner } from '../../database/transaction-runner.service.js';
-import { ConvinicarService } from './convinicar.service.js';
 import { uuidv7 } from '@ustowdispatch/db';
+import { CurrentTenant } from '../../common/decorators/current-user.decorator.js';
+import { Public } from '../../common/decorators/public.decorator.js';
+import { TransactionRunner } from '../../database/transaction-runner.service.js';
 import { DispatchEventsService } from '../../modules/dispatch/dispatch-events.service.js';
+import { ConvinicarService } from './convinicar.service.js';
 
 interface ConvinicarWebhookPayload {
   type: string;
@@ -27,10 +27,10 @@ interface ConvinicarWebhookPayload {
     expires_at: string;
   };
   enriched_data?: {
-    offer: any;
-    request: any;
-    customer: any;
-    vehicle: any;
+    offer: Record<string, unknown>;
+    request: Record<string, unknown>;
+    customer: Record<string, unknown>;
+    vehicle: Record<string, unknown>;
   };
 }
 
@@ -51,7 +51,8 @@ export class ConvinicarController {
     @Body() payload: ConvinicarWebhookPayload,
     @Headers('x-webhook-secret') webhookSecret?: string,
   ) {
-    const expectedSecret = this.configService.get<string>('CONVINICAR_WEBHOOK_SECRET') || 'local_dev_secret_123';
+    const expectedSecret =
+      this.configService.get<string>('CONVINICAR_WEBHOOK_SECRET') || 'local_dev_secret_123';
     if (webhookSecret !== expectedSecret) {
       this.logger.warn('Received webhook with invalid or missing x-webhook-secret');
       throw new UnauthorizedException('Invalid webhook secret');
@@ -60,7 +61,11 @@ export class ConvinicarController {
     this.logger.log(`Received Convinicar webhook: ${JSON.stringify(payload)}`);
 
     // We only care about new tow_offers that are pending
-    if (payload.table !== 'tow_offers' || payload.type !== 'INSERT' || payload.record.outcome !== 'pending') {
+    if (
+      payload.table !== 'tow_offers' ||
+      payload.type !== 'INSERT' ||
+      payload.record.outcome !== 'pending'
+    ) {
       return { status: 'ignored', reason: 'Not a pending tow offer' };
     }
 
@@ -79,11 +84,15 @@ export class ConvinicarController {
     });
 
     if (!matchedTenantId) {
-      this.logger.warn(`Received webhook for Convinicar Vendor ${vendor_id}, but no matching USTD Tenant was found!`);
+      this.logger.warn(
+        `Received webhook for Convinicar Vendor ${vendor_id}, but no matching USTD Tenant was found!`,
+      );
       return { status: 'error', reason: 'Unmapped vendor' };
     }
 
-    this.logger.log(`Successfully mapped Convinicar Vendor ${vendor_id} to USTD Tenant ${matchedTenantId}. Ready to dispatch job ${service_request_id}!`);
+    this.logger.log(
+      `Successfully mapped Convinicar Vendor ${vendor_id} to USTD Tenant ${matchedTenantId}. Ready to dispatch job ${service_request_id}!`,
+    );
 
     // Insert the skeletal job into US Tow Dispatch
     const jobId = uuidv7();
@@ -102,23 +111,46 @@ export class ConvinicarController {
       const seq = Number(seqRes.rows[0]?.last_seq ?? 0);
       const jobNumber = `${dayKey}-${String(seq).padStart(4, '0')}`;
 
+      const requestData = payload.enriched_data?.request;
+      const customerData = payload.enriched_data?.customer;
+      const vehicleData = payload.enriched_data?.vehicle;
+
+      const pickupAddress = requestData?.service_address || 'Pending Convinicar Location';
+      const pickupLat = requestData?.customer_lat?.toString() || null;
+      const pickupLng = requestData?.customer_lng?.toString() || null;
+      const rateQuotedCents = requestData?.retail_amount_cents || 0;
+
+      const vehicleNotes = vehicleData
+        ? `Vehicle: ${vehicleData.year || ''} ${vehicleData.make || ''} ${vehicleData.model || ''} - Color: ${vehicleData.color || ''}`
+        : '';
+      const customerNotes = customerData
+        ? `Customer: ${customerData.name || 'Unknown'} - Phone: ${customerData.phone || 'Unknown'}`
+        : '';
+
+      const notes = `convinicar:offer\n${vehicleNotes}\n${customerNotes}`;
+
       // Insert job with 'new' status so it shows up on the board as an offer
       await client.query(
         `INSERT INTO jobs (
             id, tenant_id, job_number, status, service_type,
-            pickup_address, authorized_by, rate_quoted_cents, notes,
+            pickup_address, pickup_lat, pickup_lng, authorized_by, rate_quoted_cents, notes,
             created_at, updated_at,
             convinicar_service_request_id, convinicar_offer_id
          ) VALUES (
             $1, $2, $3, 'new', 'tow',
-            'Pending Convinicar Location', 'other', 0, 'convinicar:offer',
+            $4, $5, $6, 'other', $7, $8,
             now(), now(),
-            $4, $5
+            $9, $10
          ) ON CONFLICT DO NOTHING`,
         [
           jobId,
           matchedTenantId,
           jobNumber,
+          pickupAddress,
+          pickupLat,
+          pickupLng,
+          rateQuotedCents,
+          notes,
           service_request_id,
           offer_id,
         ],
@@ -128,7 +160,7 @@ export class ConvinicarController {
     // Notify the frontend via sockets
     await this.admin.runAsAdmin({}, async (db) => {
       const job = await db.query.jobs.findFirst({
-        where: (j, { eq }) => eq(j.id, jobId)
+        where: (j, { eq }) => eq(j.id, jobId),
       });
       if (job) {
         // Build the basic DTO
@@ -161,7 +193,10 @@ export class ConvinicarController {
           tierOfferEnforcementStatus: 'none' as const,
           convinicarOfferId: job.convinicarOfferId,
         };
-        this.dispatchEvents.emit(matchedTenantId!, 'job.created' as any, { job: jobDto });
+        if (matchedTenantId) {
+          // biome-ignore lint/suspicious/noExplicitAny: bridged event
+          this.dispatchEvents.emit(matchedTenantId, 'job.created' as any, { job: jobDto });
+        }
       }
     });
 
@@ -169,10 +204,7 @@ export class ConvinicarController {
   }
 
   @Post(':jobId/accept')
-  async acceptOffer(
-    @Body() body: { offerId: string },
-    @CurrentTenant() currentTenantId: string,
-  ) {
+  async acceptOffer(@Body() body: { offerId: string }, @CurrentTenant() currentTenantId: string) {
     if (!body.offerId) {
       throw new BadRequestException('offerId is required to accept');
     }
@@ -180,7 +212,8 @@ export class ConvinicarController {
     let jobExistsForTenant = false;
     await this.admin.runAsAdmin({}, async (db) => {
       const job = await db.query.jobs.findFirst({
-        where: (j, { eq, and }) => and(eq(j.convinicarOfferId, body.offerId), eq(j.tenantId, currentTenantId)),
+        where: (j, { eq, and }) =>
+          and(eq(j.convinicarOfferId, body.offerId), eq(j.tenantId, currentTenantId)),
       });
       if (job) jobExistsForTenant = true;
     });
@@ -188,10 +221,10 @@ export class ConvinicarController {
     if (!jobExistsForTenant) {
       throw new UnauthorizedException('You do not have permission to accept this offer');
     }
-    
+
     // Call Convinicar backend to accept the offer before 120s expires
     const response = await this.convinicarService.respondToOffer(body.offerId, 'accept');
-    
+
     // Update the local USTD job status to 'dispatched'
     await this.admin.runAsAdmin({}, async (_db, client) => {
       await client.query(
@@ -204,18 +237,16 @@ export class ConvinicarController {
   }
 
   @Post(':jobId/reject')
-  async rejectOffer(
-    @Body() body: { offerId: string },
-    @CurrentTenant() currentTenantId: string,
-  ) {
+  async rejectOffer(@Body() body: { offerId: string }, @CurrentTenant() currentTenantId: string) {
     if (!body.offerId) {
       throw new BadRequestException('offerId is required to reject');
     }
-    
+
     let jobExistsForTenant = false;
     await this.admin.runAsAdmin({}, async (db) => {
       const job = await db.query.jobs.findFirst({
-        where: (j, { eq, and }) => and(eq(j.convinicarOfferId, body.offerId), eq(j.tenantId, currentTenantId)),
+        where: (j, { eq, and }) =>
+          and(eq(j.convinicarOfferId, body.offerId), eq(j.tenantId, currentTenantId)),
       });
       if (job) jobExistsForTenant = true;
     });
@@ -226,7 +257,7 @@ export class ConvinicarController {
 
     // Call Convinicar backend to decline the offer so they can route it to the next vendor
     const response = await this.convinicarService.respondToOffer(body.offerId, 'decline');
-    
+
     // Update the local USTD job status to 'cancelled' so it leaves the board
     await this.admin.runAsAdmin({}, async (_db, client) => {
       await client.query(
