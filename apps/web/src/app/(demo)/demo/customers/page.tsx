@@ -41,7 +41,7 @@ export default function DemoCustomersPage(): JSX.Element {
               Customers
             </h1>
             <p className="mt-1 text-sm text-text-secondary-on-dark">
-              {DEMO_CUSTOMERS.length} accounts · Demo data
+              {DEMO_CUSTOMERS.length} accounts - Demo data
             </p>
           </div>
         </div>

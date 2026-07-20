@@ -14,7 +14,7 @@ import { clientClearCapacityOverride, clientGetCapacityStatus } from '@/lib/api/
  * Capacity Signal widget (CADS, Session 58) — compact dispatch-board panel
  * showing the live per-class load signal partners see: blended status
  * first/largest, then light / medium / heavy gauges (ratio + band pill +
- * "N drivers · X jobs"), an override banner with clear action when a
+ * "N drivers - X jobs"), an override banner with clear action when a
  * manual override is live, and the last-broadcast stamp.
  *
  * Initial data is server-fetched by the page; live updates arrive on the
@@ -229,7 +229,7 @@ function BlendedGauge({ status }: { status: CapacityStatusDto }): JSX.Element {
         {formatRatio(b.ratio)}
       </p>
       <p className="text-[11px] text-text-secondary-on-dark">
-        {b.eligibleDrivers} {b.eligibleDrivers === 1 ? 'driver' : 'drivers'} ·{' '}
+        {b.eligibleDrivers} {b.eligibleDrivers === 1 ? 'driver' : 'drivers'} -{' '}
         {b.weightedActiveJobs.toFixed(1)} jobs
         {b.overrideActive ? <span className="ml-1 text-warn">(override)</span> : null}
       </p>
@@ -253,7 +253,7 @@ function ClassGauge({ row }: { row: CapacityStatusDto['classes'][number] }): JSX
         {formatRatio(row.ratio)}
       </p>
       <p className="text-[11px] text-text-secondary-on-dark">
-        {row.eligibleDrivers} {row.eligibleDrivers === 1 ? 'driver' : 'drivers'} ·{' '}
+        {row.eligibleDrivers} {row.eligibleDrivers === 1 ? 'driver' : 'drivers'} -{' '}
         {row.weightedActiveJobs.toFixed(1)} jobs
         {row.overrideActive ? (
           <span className="ml-1 text-warn" title={`Computed: ${BAND_LABEL[row.computedBand]}`}>

@@ -414,7 +414,7 @@ export default function DriverWorkspacePage(): JSX.Element {
           <Truck className="h-3.5 w-3.5" />
           Log GPS ping
         </button>
-        <span className="opacity-30">·</span>
+        <span className="opacity-30">-</span>
         <Link
           href="/driver/offline"
           className="inline-flex items-center gap-1 hover:text-text-primary-on-dark"
@@ -507,7 +507,7 @@ function formatVehicle(v: {
 }): string {
   const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ');
   if (!ymm) return 'Vehicle';
-  return v.color ? `${ymm} · ${v.color}` : ymm;
+  return v.color ? `${ymm} - ${v.color}` : ymm;
 }
 
 /**
@@ -535,7 +535,7 @@ function VehicleIdMeta({
   return (
     <p className="mt-0.5 font-mono text-[11px] uppercase tracking-wide text-text-secondary-on-dark">
       {plate ? <span>Plate {plate}</span> : null}
-      {plate && vehicle.vin ? <span className="mx-1.5 opacity-50">·</span> : null}
+      {plate && vehicle.vin ? <span className="mx-1.5 opacity-50">-</span> : null}
       {vehicle.vin ? <span>VIN {vehicle.vin}</span> : null}
     </p>
   );
@@ -653,7 +653,7 @@ function Diagnostics({
         className="select-none text-text-secondary-on-dark/70"
         aria-label="Toggle diagnostics"
       >
-        Driver workspace · v1 (session 3)
+        Driver workspace - v1 (session 3)
       </button>
       {open ? (
         <div className="mt-2 rounded-[10px] border border-divider bg-bg-surface-elevated p-3 text-left text-[11px]">

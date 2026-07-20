@@ -67,7 +67,7 @@ export function InstalledAppsClient({ installs }: Props): JSX.Element {
               <div>
                 <p className="font-bold text-text-primary-on-dark">{install.appName}</p>
                 <p className="text-xs text-text-secondary-on-dark">
-                  Connected {formatDay(install.installedAt)} · {install.scopesGranted.length}{' '}
+                  Connected {formatDay(install.installedAt)} - {install.scopesGranted.length}{' '}
                   permission{install.scopesGranted.length === 1 ? '' : 's'}
                 </p>
                 <p className="mt-1 font-mono text-[10px] text-text-secondary-on-dark">

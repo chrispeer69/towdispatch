@@ -253,7 +253,7 @@ export default async function AuditLogPage({
             aria-label="Audit log pagination"
           >
             <span>
-              {result.data.total} {result.data.total === 1 ? 'entry' : 'entries'} · page {page} of{' '}
+              {result.data.total} {result.data.total === 1 ? 'entry' : 'entries'} - page {page} of{' '}
               {totalPages}
             </span>
             <span className="flex gap-2">

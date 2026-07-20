@@ -63,14 +63,14 @@ export function GateSearchClient(): JSX.Element {
                 <p className="font-semibold">{m.vehicleDescription}</p>
                 <p className="text-text-secondary-on-dark">
                   {m.licensePlate ?? 'no plate'}
-                  {m.licenseState ? ` (${m.licenseState})` : ''} · {m.vehicleVin ?? 'no VIN'} ·{' '}
+                  {m.licenseState ? ` (${m.licenseState})` : ''} - {m.vehicleVin ?? 'no VIN'} -{' '}
                   {m.status}
                 </p>
                 <p className="text-text-secondary-on-dark">
                   {m.facilityName
                     ? `${m.facilityName} / ${m.stallLabel ?? '—'}`
                     : 'Not parked in a stall'}
-                  {m.releaseStatus ? ` · release: ${m.releaseStatus}` : ''}
+                  {m.releaseStatus ? ` - release: ${m.releaseStatus}` : ''}
                 </p>
               </div>
               <div className="text-right">

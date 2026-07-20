@@ -118,7 +118,7 @@ export function RepoCaseDetailClient({ detail }: { detail: RepoCaseDetailDto }):
           </Link>
           <h1 className="text-2xl font-bold tracking-tight mt-1">{vehicleDescription(c)}</h1>
           <p className="text-text-secondary-on-dark text-sm mt-0.5">
-            {c.caseNumber} ·{' '}
+            {c.caseNumber} -{' '}
             <span
               className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold uppercase ${REPO_STATUS_TONE[c.status]}`}
             >
@@ -257,8 +257,8 @@ export function RepoCaseDetailClient({ detail }: { detail: RepoCaseDetailDto }):
                   <p className="text-sm font-medium">{RECOVERY_TYPE_LABEL[r.recoveryType]}</p>
                   <p className="text-[11px] text-text-secondary-on-dark">
                     {formatDate(r.recoveredAt)}
-                    {r.odometer !== null ? ` · ${r.odometer.toLocaleString()} mi` : ''}
-                    {r.conditionNotes ? ` · ${r.conditionNotes}` : ''}
+                    {r.odometer !== null ? ` - ${r.odometer.toLocaleString()} mi` : ''}
+                    {r.conditionNotes ? ` - ${r.conditionNotes}` : ''}
                   </p>
                 </div>
               </li>
@@ -284,7 +284,7 @@ export function RepoCaseDetailClient({ detail }: { detail: RepoCaseDetailDto }):
                   <p className="text-[11px] text-text-secondary-on-dark">
                     Logged {formatDay(p.recordedAt)}
                     {p.releasedAt
-                      ? ` · released to ${p.releasedTo ?? '—'} on ${formatDay(p.releasedAt)}`
+                      ? ` - released to ${p.releasedTo ?? '—'} on ${formatDay(p.releasedAt)}`
                       : ''}
                   </p>
                 </div>

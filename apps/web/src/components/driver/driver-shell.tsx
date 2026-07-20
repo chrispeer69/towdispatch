@@ -29,8 +29,8 @@ export function DriverShell({ title, backHref, children }: Props): JSX.Element {
   return (
     <div className="min-h-screen bg-bg-base text-text-primary-on-dark">
       <header className="sticky top-0 z-30 border-b border-divider bg-bg-surface/95 backdrop-blur">
-        {/* Three-column header: driver identity (left) · HELP (centered)
-           · Sign out (right). HELP gets a permanent, prominent slot so
+        {/* Three-column header: driver identity (left) - HELP (centered)
+           - Sign out (right). HELP gets a permanent, prominent slot so
            the driver can always find training material, towing tips,
            and how-to articles — the in-app Help Center is becoming
            the home for all that content. */}

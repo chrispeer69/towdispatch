@@ -213,7 +213,7 @@ export function BroadcastLogClient({ initialPage, partners }: Props): JSX.Elemen
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-text-secondary-on-dark">
-          {data.total} {data.total === 1 ? 'broadcast' : 'broadcasts'} · page {data.page} of{' '}
+          {data.total} {data.total === 1 ? 'broadcast' : 'broadcasts'} - page {data.page} of{' '}
           {totalPages}
         </p>
         <div className="flex items-center gap-2">

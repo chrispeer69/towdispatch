@@ -69,7 +69,7 @@ export default function DemoJobsPage(): JSX.Element {
               Tow Jobs
             </h1>
             <p className="mt-1 text-sm text-text-secondary-on-dark">
-              {DEMO_JOBS.length} jobs · Demo data
+              {DEMO_JOBS.length} jobs - Demo data
             </p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function DemoJobsPage(): JSX.Element {
           </tbody>
         </table>
         <div className="border-t border-divider px-4 py-2 text-[11px] text-text-secondary-on-dark/60">
-          Showing {DEMO_JOBS.length} demo jobs · Sign up to create real jobs
+          Showing {DEMO_JOBS.length} demo jobs - Sign up to create real jobs
         </div>
       </div>
     </div>

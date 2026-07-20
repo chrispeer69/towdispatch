@@ -145,7 +145,7 @@ export function LienCaseListClient({ cases, status, state, dueSoon }: Props): JS
                     Case {c.id.slice(0, 8)}
                   </Link>
                   <div className="text-[11px] text-text-secondary-on-dark">
-                    Opened {formatDay(c.openedAt)} · {c.vehicleValueTier} value
+                    Opened {formatDay(c.openedAt)} - {c.vehicleValueTier} value
                   </div>
                 </td>
                 <td className="px-4 py-2.5 text-xs font-semibold">{c.state}</td>

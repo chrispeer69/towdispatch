@@ -74,7 +74,7 @@ export default async function ActiveCallsIndexPage(): Promise<JSX.Element> {
               <span className="font-condensed text-base font-extrabold text-text-primary-on-dark">
                 {data.total}
               </span>{' '}
-              total · split across {data.byAccount.length} client
+              total - split across {data.byAccount.length} client
               {data.byAccount.length === 1 ? '' : 's'}
               {data.noAccount ? ` + ${data.noAccount} cash/no-account` : ''}
             </p>

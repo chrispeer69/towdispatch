@@ -14,10 +14,10 @@
  * matches the user expectation set by Linear / GitHub.
  */
 import {
+  type NotificationListResponse,
   clientFetchNotifications,
   clientMarkAllRead,
   clientMarkRead,
-  type NotificationListResponse,
 } from '@/lib/api/notifications';
 import type { InAppNotificationDto } from '@ustowdispatch/shared';
 import { Bell } from 'lucide-react';
@@ -136,7 +136,7 @@ export function NotificationBell(): JSX.Element {
                 </div>
                 <span className="line-clamp-2 text-xs text-text-secondary">{item.body}</span>
                 <span className="mt-1 font-mono text-[10px] uppercase tracking-wider text-text-muted">
-                  {item.category} · {timeAgo(item.createdAt)}
+                  {item.category} - {timeAgo(item.createdAt)}
                 </span>
               </button>
             ))}

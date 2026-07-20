@@ -29,7 +29,7 @@ export default async function CustomerDetailPage({ params }: Props): Promise<JSX
           {customer.name}
         </h1>
         <p className="text-sm text-text-secondary-on-dark">
-          {customer.type.replace('_', ' ')} ·{' '}
+          {customer.type.replace('_', ' ')} -{' '}
           {customer.phone ?? (
             <span className="text-text-secondary-on-dark-on-dark/60">no phone</span>
           )}

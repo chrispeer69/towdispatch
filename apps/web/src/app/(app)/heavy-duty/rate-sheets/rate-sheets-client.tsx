@@ -196,7 +196,7 @@ export function RateSheetsClient({ initial }: { initial: HdRateSheetDto[] }): JS
                 </div>
               </div>
               <div className="text-xs text-text-secondary-on-dark mt-1">
-                {formatCents(s.hourlyRateCents)}/hr · hook-up {formatCents(s.hookupFeeCents)} ·
+                {formatCents(s.hourlyRateCents)}/hr - hook-up {formatCents(s.hookupFeeCents)} -
                 rotator {formatCents(s.rotatorPerHrCents)}/hr
               </div>
             </div>

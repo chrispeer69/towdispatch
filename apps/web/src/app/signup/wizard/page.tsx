@@ -7,7 +7,7 @@ import { OnboardingWizard } from './wizard';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-  title: 'Set up your workspace · US Tow Dispatch',
+  title: 'Set up your workspace - US Tow Dispatch',
 };
 
 /**

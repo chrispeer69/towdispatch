@@ -47,7 +47,7 @@ export default async function CustomersPage({
             Customers
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
-            <span data-testid="customer-count">{initial.total}</span> total Â· who you serve
+            <span data-testid="customer-count">{initial.total}</span> total Â- who you serve
           </p>
         </div>
         <Link href="/customers/new">

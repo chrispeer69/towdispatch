@@ -39,7 +39,7 @@ export default function HelpCenterPage(): JSX.Element {
           roadmap and will be filled in over the coming weeks.
         </p>
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-secondary-on-dark/60">
-          {stats.liveDocuments} live · {stats.plannedDocuments} coming soon · {stats.totalDocuments}{' '}
+          {stats.liveDocuments} live - {stats.plannedDocuments} coming soon - {stats.totalDocuments}{' '}
           total
         </p>
       </header>

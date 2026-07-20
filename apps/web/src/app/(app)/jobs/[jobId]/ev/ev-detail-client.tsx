@@ -426,11 +426,11 @@ function ThermalSection({
           {detail.thermalEvents.map((ev) => (
             <li key={ev.id} className="flex justify-between">
               <span>
-                {severityLabel(ev.severity)} · {ev.observedAt.slice(0, 16).replace('T', ' ')}
+                {severityLabel(ev.severity)} - {ev.observedAt.slice(0, 16).replace('T', ' ')}
               </span>
               <span className="text-text-secondary-on-dark">
-                {ev.fireDeptCalled ? 'FD·' : ''}
-                {ev.hazmatCalled ? 'Hazmat·' : ''}
+                {ev.fireDeptCalled ? 'FD-' : ''}
+                {ev.hazmatCalled ? 'Hazmat-' : ''}
                 {ev.customerEvacuated ? 'Evac' : ''}
               </span>
             </li>
@@ -475,7 +475,7 @@ function ChargeSection({
             <li key={s.id} className="flex justify-between">
               <span>{s.stationNetwork ?? 'Charge stop'}</span>
               <span className="text-text-secondary-on-dark">
-                {formatKwh(s.kwhDelivered)} · {formatCents(s.costCents)} · {s.paidBy}
+                {formatKwh(s.kwhDelivered)} - {formatCents(s.costCents)} - {s.paidBy}
               </span>
             </li>
           ))}

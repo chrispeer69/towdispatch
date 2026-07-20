@@ -452,7 +452,7 @@ export function SimulatePanel(): JSX.Element {
                   <div>
                     <p className="text-sm font-semibold text-text-primary-on-dark">Mike Ramos</p>
                     <p className="font-mono text-[11px] text-text-secondary-on-dark">
-                      Truck #14 · 2019 Toyota Camry
+                      Truck #14 - 2019 Toyota Camry
                     </p>
                   </div>
                 </div>

@@ -240,7 +240,7 @@ export function OfferDetailClient({
                 <td className="px-4 py-2.5">
                   <div className="font-semibold">{r.recipientName}</div>
                   <div className="text-xs text-text-secondary-on-dark">
-                    {r.recipientRole ? `${r.recipientRole} · ` : ''}
+                    {r.recipientRole ? `${r.recipientRole} - ` : ''}
                     {r.recipientEmail}
                   </div>
                 </td>

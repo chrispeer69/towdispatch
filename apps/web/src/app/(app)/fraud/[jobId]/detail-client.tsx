@@ -52,7 +52,7 @@ export function FraudJobDetailClient({ detail }: { detail: JobRiskDetailDto }): 
           </Link>
           <h1 className="text-2xl font-bold tracking-tight mt-1">Job {job.jobNumber}</h1>
           <p className="text-text-secondary-on-dark text-sm mt-0.5">
-            {job.serviceType} · {job.motorClubName ?? 'No motor club'} ·{' '}
+            {job.serviceType} - {job.motorClubName ?? 'No motor club'} -{' '}
             {job.customerName ?? 'No customer'}
           </p>
         </div>
@@ -89,7 +89,7 @@ export function FraudJobDetailClient({ detail }: { detail: JobRiskDetailDto }): 
                   {BAND_LABEL[score.riskBand]} risk
                 </span>
                 <p className="text-[11px] text-text-secondary-on-dark mt-1">
-                  Scored {formatDateTime(score.computedAt)} · {score.modelVersion}
+                  Scored {formatDateTime(score.computedAt)} - {score.modelVersion}
                 </p>
                 {score.reviewAction && (
                   <p className="text-[11px] text-text-secondary-on-dark">
@@ -156,7 +156,7 @@ export function FraudJobDetailClient({ detail }: { detail: JobRiskDetailDto }): 
                       {SIGNAL_LABEL[s.signalType]}
                     </span>
                     <span className="text-[11px] text-text-secondary-on-dark uppercase">
-                      {s.severity} · {s.confidencePct}%
+                      {s.severity} - {s.confidencePct}%
                     </span>
                   </div>
                   <pre className="mt-1 text-[11px] text-text-secondary-on-dark whitespace-pre-wrap break-all">
@@ -205,10 +205,10 @@ export function FraudJobDetailClient({ detail }: { detail: JobRiskDetailDto }): 
               >
                 <div>
                   <p className="text-sm font-medium">
-                    {d.motorClubName} · {d.disputeType}
+                    {d.motorClubName} - {d.disputeType}
                   </p>
                   <p className="text-[11px] text-text-secondary-on-dark">
-                    {formatCents(d.amountDisputedCents)} · disputed {formatDay(d.disputedAt)}
+                    {formatCents(d.amountDisputedCents)} - disputed {formatDay(d.disputedAt)}
                   </p>
                 </div>
                 <span

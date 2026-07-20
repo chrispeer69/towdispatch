@@ -72,7 +72,7 @@ export function LienCaseDetailClient({ detail }: { detail: LienCaseDetailDto }):
             {detail.impound.vehicleDescription}
           </h1>
           <p className="text-text-secondary-on-dark text-sm mt-0.5">
-            {c.state} · Case {c.id.slice(0, 8)} ·{' '}
+            {c.state} - Case {c.id.slice(0, 8)} -{' '}
             <span
               className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold uppercase ${STATUS_TONE[c.status]}`}
             >
@@ -211,10 +211,10 @@ export function LienCaseDetailClient({ detail }: { detail: LienCaseDetailDto }):
                     {RECIPIENT_ROLE_LABEL[n.recipientRole as LienRecipientRole]}
                   </p>
                   <p className="text-[11px] text-text-secondary-on-dark">
-                    {DELIVERY_METHOD_LABEL[n.deliveryMethod as LienDeliveryMethod]} · sent{' '}
+                    {DELIVERY_METHOD_LABEL[n.deliveryMethod as LienDeliveryMethod]} - sent{' '}
                     {formatDay(n.sentAt)}
-                    {n.certifiedTrackingNo ? ` · #${n.certifiedTrackingNo}` : ''}
-                    {n.responseReceivedAt ? ` · responded ${formatDay(n.responseReceivedAt)}` : ''}
+                    {n.certifiedTrackingNo ? ` - #${n.certifiedTrackingNo}` : ''}
+                    {n.responseReceivedAt ? ` - responded ${formatDay(n.responseReceivedAt)}` : ''}
                   </p>
                 </div>
                 {canWrite && open && !n.responseReceivedAt && (

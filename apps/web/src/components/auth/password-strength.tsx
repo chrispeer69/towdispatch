@@ -51,7 +51,7 @@ export function PasswordStrength({ value }: { value: string }): JSX.Element {
                 : 'flex items-center gap-2 text-text-secondary-on-dark-on-dark/60'
             }
           >
-            <span aria-hidden>{r.passed ? '✓' : '·'}</span>
+            <span aria-hidden>{r.passed ? '✓' : '-'}</span>
             <span>{r.label}</span>
           </li>
         ))}

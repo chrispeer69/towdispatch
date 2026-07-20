@@ -135,7 +135,7 @@ export default async function OfferPage({ params, searchParams }: Props): Promis
     <OfferShell tenantName={view.tenant.name}>
       <article className="bg-bg-surface-elevated rounded-lg p-6 md:p-8 max-w-2xl mx-auto">
         <p className="uppercase tracking-[0.18em] text-[11px] text-text-secondary-on-dark mb-2">
-          Capacity offer · {view.tenant.name}
+          Capacity offer - {view.tenant.name}
         </p>
         <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-2">{view.offer.title}</h1>
         <p className="text-text-secondary-on-dark mb-4">
@@ -204,7 +204,7 @@ function OfferShell({
       <div className="max-w-3xl mx-auto">
         <header className="mb-6">
           <p className="uppercase tracking-[0.18em] text-[11px] text-text-secondary-on-dark">
-            Tow<span className="text-accent-orange">Command</span> · From {tenantName}
+            Tow<span className="text-accent-orange">Command</span> - From {tenantName}
           </p>
         </header>
         {children}

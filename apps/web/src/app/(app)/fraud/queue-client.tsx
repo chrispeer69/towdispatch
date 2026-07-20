@@ -97,8 +97,8 @@ export function FraudQueueClient({ items, band }: Props): JSX.Element {
                     {job.jobNumber}
                   </Link>
                   <div className="text-[11px] text-text-secondary-on-dark">
-                    {job.serviceType} · {job.customerName ?? 'No customer'}
-                    {score.reviewAction ? ` · reviewed (${score.reviewAction})` : ''}
+                    {job.serviceType} - {job.customerName ?? 'No customer'}
+                    {score.reviewAction ? ` - reviewed (${score.reviewAction})` : ''}
                   </div>
                 </td>
                 <td className="px-4 py-2.5 text-xs">{job.motorClubName ?? '—'}</td>

@@ -176,7 +176,7 @@ export default async function InvoiceDetailPage({
                   <p className="font-medium">{paymentMethodLabel[p.paymentMethod]}</p>
                   <p className="text-text-secondary-on-dark">
                     {p.receivedAt.slice(0, 10)}
-                    {p.referenceNumber ? `  ·  ${p.referenceNumber}` : ''}
+                    {p.referenceNumber ? `  -  ${p.referenceNumber}` : ''}
                   </p>
                 </div>
                 <span className="font-mono">{formatMoneyCents(p.amountCents)}</span>

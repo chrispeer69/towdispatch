@@ -117,7 +117,7 @@ export default async function EtaTriagePage(): Promise<JSX.Element> {
             <span className="font-condensed text-base font-extrabold text-text-primary-on-dark">
               {items.length}
             </span>{' '}
-            active {items.length === 1 ? 'call' : 'calls'} · longest projected time first · goal: no
+            active {items.length === 1 ? 'call' : 'calls'} - longest projected time first - goal: no
             job past 60 min
           </p>
         </div>

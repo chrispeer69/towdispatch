@@ -55,7 +55,7 @@ function vehicleLabel(v: JobListItemDto['vehicle']): string {
   if (!v) return 'â€”';
   const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ');
   const plate = v.plate ? (v.plateState ? `${v.plate} (${v.plateState})` : v.plate) : '';
-  if (ymm && plate) return `${ymm} Â· ${plate}`;
+  if (ymm && plate) return `${ymm} Â- ${plate}`;
   return ymm || plate || 'â€”';
 }
 
@@ -92,7 +92,7 @@ export default async function JobsPage({
             Tow Jobs
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
-            <span data-testid="jobs-total">{list.total}</span> total Â· newest first
+            <span data-testid="jobs-total">{list.total}</span> total Â- newest first
           </p>
         </div>
       </header>

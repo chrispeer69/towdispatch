@@ -114,7 +114,7 @@ export function TruckListClient({ initial, initialQuery }: Props): JSX.Element {
                     </span>
                     {t.capacityClass ? (
                       <span className="ml-1 text-text-secondary-on-dark-on-dark/60">
-                        · {t.capacityClass}
+                        - {t.capacityClass}
                       </span>
                     ) : null}
                   </Td>

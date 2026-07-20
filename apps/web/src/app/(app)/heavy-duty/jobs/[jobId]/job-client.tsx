@@ -200,12 +200,12 @@ export function HdJobClient({ jobId, initialAttributes, rateSheets }: Props): JS
           </button>
           {attrs && (
             <p className="text-xs text-text-secondary-on-dark">
-              Class {gvwrClassLabel(attrs.vehicleClass)} ·{' '}
+              Class {gvwrClassLabel(attrs.vehicleClass)} -{' '}
               {attrs.onSceneEstimateCents != null
                 ? `estimate ${formatCents(attrs.onSceneEstimateCents)}`
                 : 'no estimate yet'}
               {attrs.finalInvoiceCents != null
-                ? ` · final ${formatCents(attrs.finalInvoiceCents)}`
+                ? ` - final ${formatCents(attrs.finalInvoiceCents)}`
                 : ''}
             </p>
           )}

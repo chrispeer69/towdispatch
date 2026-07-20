@@ -99,7 +99,7 @@ export default function DriverSetPinPage(): JSX.Element {
                   {tenantSlug ? (
                     <>
                       {' '}
-                      · Workshop: <span className="font-mono">{tenantSlug}</span>
+                      - Workshop: <span className="font-mono">{tenantSlug}</span>
                     </>
                   ) : null}
                 </p>

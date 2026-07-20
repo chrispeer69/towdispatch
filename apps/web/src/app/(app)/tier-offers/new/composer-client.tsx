@@ -524,7 +524,7 @@ function RecipientPicker({
               <div>
                 <div className="font-semibold">{r.name}</div>
                 <div className="text-xs text-text-secondary-on-dark">
-                  {r.role ? `${r.role} · ` : ''}
+                  {r.role ? `${r.role} - ` : ''}
                   {r.email}
                 </div>
               </div>
@@ -704,7 +704,7 @@ function Preview({
         <div className="text-xs text-text-secondary-on-dark">
           From:{' '}
           <span className="text-text-primary-on-dark">
-            {senderName} · {tenantName}
+            {senderName} - {tenantName}
           </span>
         </div>
         <hr className="border-border-on-dark/50" />

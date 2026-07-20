@@ -51,7 +51,7 @@ function vehicleLabel(v: JobDto['vehicle']): string {
   if (!v) return '—';
   const ymm = [v.year, v.make, v.model].filter(Boolean).join(' ');
   const plate = v.plate ? (v.plateState ? `${v.plate} (${v.plateState})` : v.plate) : '';
-  return [ymm, plate].filter(Boolean).join(' · ') || '—';
+  return [ymm, plate].filter(Boolean).join(' - ') || '—';
 }
 
 export default async function JobDetailPage({
@@ -99,7 +99,7 @@ export default async function JobDetailPage({
             {STATUS_LABEL[job.status]}
           </span>
           <span>{SERVICE_LABEL[job.serviceType]}</span>
-          <span aria-hidden>·</span>
+          <span aria-hidden>-</span>
           <span>{job.customer?.name ?? 'No customer'}</span>
         </p>
         <Link href={`/jobs/${jobId}/ev`} className="text-accent-orange text-sm">

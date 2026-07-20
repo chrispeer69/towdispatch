@@ -44,8 +44,8 @@ export default async function DriverDetailPage({ params }: Props): Promise<JSX.E
             {driver.preferredName ?? driver.firstName} {driver.lastName}
           </h2>
           <p className="text-sm text-text-secondary-on-dark">
-            {driver.cdlClass} · {driver.employmentStatus.replace('_', ' ')}
-            {driver.email ? ` · ${driver.email}` : ''}
+            {driver.cdlClass} - {driver.employmentStatus.replace('_', ' ')}
+            {driver.email ? ` - ${driver.email}` : ''}
           </p>
         </div>
         <SetDriverPin driverId={driver.id} />
@@ -93,7 +93,7 @@ export default async function DriverDetailPage({ params }: Props): Promise<JSX.E
             {dvirs.slice(0, 10).map((d) => (
               <li key={d.id} className="flex justify-between">
                 <span>
-                  {d.submittedAt.slice(0, 10)} · {d.type.replace('_', ' ')}
+                  {d.submittedAt.slice(0, 10)} - {d.type.replace('_', ' ')}
                 </span>
                 <span className="font-mono text-xs uppercase text-text-secondary-on-dark-on-dark/60">
                   {d.status}

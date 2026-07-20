@@ -361,6 +361,7 @@ export function IntakeClient({
               color: prev.color || v.color || '',
               plate: prev.plate || v.plate || '',
               plateState: prev.plateState || v.plateState || '',
+              // biome-ignore lint/suspicious/noExplicitAny: bridged event
               drivetrain: prev.drivetrain || (v.drivetrain as any) || '',
               specialInstructions: prev.specialInstructions || v.specialInstructions || '',
             }));
@@ -675,7 +676,7 @@ export function IntakeClient({
               inputMode="tel"
             />
             {existingCustomerName ? (
-              <Badge>Existing customer · {existingCustomerName}</Badge>
+              <Badge>Existing customer - {existingCustomerName}</Badge>
             ) : null}
           </Field>
           <Field label="Name">
@@ -772,7 +773,7 @@ export function IntakeClient({
             </div>
           </div>
           {existingVehicleSummary ? (
-            <Badge>Existing vehicle · {existingVehicleSummary}</Badge>
+            <Badge>Existing vehicle - {existingVehicleSummary}</Badge>
           ) : null}
           <Field label="VIN" required>
             <Input
@@ -1431,7 +1432,7 @@ function RateQuotePanel({
       {quote ? (
         <p className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
           <span>
-            Source: {quote.source} · {quote.distanceMiles.toFixed(2)} mi
+            Source: {quote.source} - {quote.distanceMiles.toFixed(2)} mi
           </span>
           <span className="text-brand-primary">Click to edit →</span>
         </p>

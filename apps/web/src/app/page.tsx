@@ -84,7 +84,7 @@ export default function LandingPage(): JSX.Element {
         </p>
 
         <p className="mt-6 font-mono text-xs uppercase tracking-[0.3em] text-text-secondary-on-dark-on-dark/60">
-          AI-powered cloud storage on AWS · Open data export
+          AI-powered cloud storage on AWS - Open data export
         </p>
       </section>
 

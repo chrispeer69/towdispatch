@@ -146,7 +146,7 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
 
       {/* SECTION 1 — Legal & Tax */}
       <Section title="Legal & Tax" description="Filing names, license, and federal IDs.">
-        <Field label="Legal Business Name" required error={errs.name?.message}>
+        <Field label="Legal Business Name" error={errs.name?.message}>
           <Input disabled={!canEdit} {...form.register('name')} />
         </Field>
         <Field label="DBA / Brand Name" error={errs.settings?.dba_name?.message}>
@@ -154,7 +154,6 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
         </Field>
         <Field
           label="Federal EIN"
-          required
           hint="Format NN-NNNNNNN"
           error={errs.settings?.federal_ein?.message}
         >
@@ -171,11 +170,7 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
             })}
           />
         </Field>
-        <Field
-          label="State License #"
-          required
-          error={errs.settings?.state_license_number?.message}
-        >
+        <Field label="State License #" error={errs.settings?.state_license_number?.message}>
           <Input disabled={!canEdit} {...form.register('settings.state_license_number')} />
         </Field>
         <Field label="MC / DOT Number" error={errs.settings?.mc_dot_number?.message}>
@@ -233,7 +228,6 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
       <Section title="Contact" description="Reachability for customers and partners.">
         <Field
           label="Phone"
-          required
           hint="Formatted (NNN) NNN-NNNN, stored as E.164"
           error={errs.settings?.phone?.message}
         >
@@ -245,7 +239,7 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
             }
           />
         </Field>
-        <Field label="Email" required error={errs.settings?.email?.message}>
+        <Field label="Email" error={errs.settings?.email?.message}>
           <Input
             type="email"
             disabled={!canEdit}
@@ -308,7 +302,7 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
       <Section title="Operations" description="Business hours and timezone for dispatching.">
         <BusinessHoursGrid disabled={!canEdit} form={form} />
 
-        <Field label="Timezone" required error={errs.settings?.timezone?.message}>
+        <Field label="Timezone" error={errs.settings?.timezone?.message}>
           <select
             disabled={!canEdit}
             {...form.register('settings.timezone')}
@@ -334,10 +328,10 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
 
       {/* SECTION 6 — Owner */}
       <Section title="Owner" description="The accountable person on file for this account.">
-        <Field label="Owner Name" required error={errs.settings?.owner_name?.message}>
+        <Field label="Owner Name" error={errs.settings?.owner_name?.message}>
           <Input disabled={!canEdit} {...form.register('settings.owner_name')} />
         </Field>
-        <Field label="Owner Mobile" required error={errs.settings?.owner_mobile?.message}>
+        <Field label="Owner Mobile" error={errs.settings?.owner_mobile?.message}>
           <PhoneInput
             disabled={!canEdit}
             value={form.watch('settings.owner_mobile') ?? ''}
@@ -353,11 +347,7 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
 
       {/* SECTION 7 — Compliance */}
       <Section title="Compliance" description="Defaults used by impound and lien workflows.">
-        <Field
-          label="Default Lien State"
-          required
-          error={errs.settings?.default_lien_state?.message}
-        >
+        <Field label="Default Lien State" error={errs.settings?.default_lien_state?.message}>
           <select
             disabled={!canEdit}
             {...form.register('settings.default_lien_state')}

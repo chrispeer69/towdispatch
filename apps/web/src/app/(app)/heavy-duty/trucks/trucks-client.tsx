@@ -244,7 +244,7 @@ export function TruckCapabilitiesClient({
                     </span>
                   </div>
                   <div className="text-xs text-text-secondary-on-dark mt-1">
-                    {c.hasRotator ? 'Rotator · ' : ''}max recovery{' '}
+                    {c.hasRotator ? 'Rotator - ' : ''}max recovery{' '}
                     {lbsLabel(c.maxRecoveryWeightLbs)}
                   </div>
                 </button>

@@ -81,14 +81,14 @@ function TemplateRow({ template }: { template: ReportTemplateDto }): JSX.Element
           ) : null}
           <p className="mt-1 text-[11px] text-text-muted">
             {template.selectedFields.length} fields
-            {template.groupBy.length > 0 ? ` · grouped by ${template.groupBy.join(', ')}` : ''}
-            {template.filters.length > 0 ? ` · ${template.filters.length} filters` : ''}
+            {template.groupBy.length > 0 ? ` - grouped by ${template.groupBy.join(', ')}` : ''}
+            {template.filters.length > 0 ? ` - ${template.filters.length} filters` : ''}
           </p>
         </div>
         <div className="shrink-0 text-right">
           {template.schedule ? (
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ok">
-              {template.schedule.cadence} · {template.schedule.format}
+              {template.schedule.cadence} - {template.schedule.format}
             </span>
           ) : (
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-muted">

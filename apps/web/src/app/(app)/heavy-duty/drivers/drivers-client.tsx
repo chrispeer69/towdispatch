@@ -146,7 +146,7 @@ export function DriverCertsClient({ drivers }: { drivers: DriverOpt[] }): JSX.El
                       )}
                     </div>
                     <div className="text-xs text-text-secondary-on-dark mt-1">
-                      {c.issuedAt ? `issued ${c.issuedAt} · ` : ''}
+                      {c.issuedAt ? `issued ${c.issuedAt} - ` : ''}
                       {c.expiresAt ? `expires ${c.expiresAt}` : 'no expiry'}
                     </div>
                   </div>

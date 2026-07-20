@@ -132,7 +132,7 @@ export function AuctionCreateClient({ eligible }: Props): JSX.Element {
                   model: v.model,
                   vin: v.vin,
                 })}
-                {v.licensePlate ? ` · ${v.licensePlate}` : ''}
+                {v.licensePlate ? ` - ${v.licensePlate}` : ''}
               </option>
             ))}
           </select>

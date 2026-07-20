@@ -35,7 +35,7 @@ export default async function DvirsPage(): Promise<JSX.Element> {
                 className="flex items-center justify-between rounded-[8px] border border-divider bg-bg-surface px-3 py-2"
               >
                 <span>
-                  {d.submittedAt.slice(0, 10)} · {d.type.replace('_', ' ')}
+                  {d.submittedAt.slice(0, 10)} - {d.type.replace('_', ' ')}
                 </span>
                 <span className="font-mono text-xs uppercase text-text-secondary-on-dark-on-dark/60">
                   {d.status}

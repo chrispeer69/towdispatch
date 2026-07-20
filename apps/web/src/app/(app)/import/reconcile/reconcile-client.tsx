@@ -100,7 +100,7 @@ export function ReconcileClient({ tenantId }: { tenantId: string }): JSX.Element
                         {dd.fields.map((f) => (
                           <p key={f.field}>
                             <span className="font-medium">{f.field}:</span> bundle=
-                            <code>{f.bundle ?? 'null'}</code> · db=<code>{f.db ?? 'null'}</code>
+                            <code>{f.bundle ?? 'null'}</code> - db=<code>{f.db ?? 'null'}</code>
                           </p>
                         ))}
                       </li>

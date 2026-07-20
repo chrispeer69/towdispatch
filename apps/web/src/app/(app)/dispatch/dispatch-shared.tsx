@@ -600,7 +600,7 @@ function ActiveJobRow({ job }: { job: JobDto }): JSX.Element {
       <span className="font-mono text-[11px] text-text-primary-on-dark">#{job.jobNumber}</span>
       <span className="min-w-0 flex-1 truncate text-text-primary-on-dark">
         {last ? <span className="font-semibold">{last}</span> : null}
-        {last && veh ? <span className="text-text-secondary-on-dark"> · </span> : null}
+        {last && veh ? <span className="text-text-secondary-on-dark"> - </span> : null}
         {veh ? <span className="text-text-secondary-on-dark">{veh}</span> : null}
         {!last && !veh ? (
           <span className="text-text-secondary-on-dark">{job.pickupAddress}</span>

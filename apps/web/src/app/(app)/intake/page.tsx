@@ -80,11 +80,11 @@ export default async function IntakePage(): Promise<JSX.Element> {
             Call Intake
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
-            Phone-first capture{tenantName ? ` Â· ${tenantName}` : ''}
+            Phone-first capture{tenantName ? ` Â- ${tenantName}` : ''}
           </p>
         </div>
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-text-secondary-on-dark-on-dark/60">
-          Tab to advance Â· Cmd/Ctrl+Enter to dispatch
+          Tab to advance Â- Cmd/Ctrl+Enter to dispatch
         </span>
       </header>
       <IntakeClient

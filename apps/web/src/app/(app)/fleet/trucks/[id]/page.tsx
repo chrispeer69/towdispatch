@@ -45,9 +45,9 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
           {truck.unitNumber}
         </h2>
         <p className="text-sm text-text-secondary-on-dark">
-          {truck.year ?? ''} {truck.make ?? ''} {truck.model ?? ''} ·{' '}
+          {truck.year ?? ''} {truck.make ?? ''} {truck.model ?? ''} -{' '}
           {truck.truckType.replace('_', ' ')}
-          {truck.capacityClass ? ` · ${truck.capacityClass}` : ''}
+          {truck.capacityClass ? ` - ${truck.capacityClass}` : ''}
         </p>
       </header>
 
@@ -118,7 +118,7 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
             {records.map((r) => (
               <li key={r.id} className="flex justify-between">
                 <span>
-                  {r.performedAt} · {r.serviceType}
+                  {r.performedAt} - {r.serviceType}
                 </span>
                 <span className="font-mono text-xs text-text-secondary-on-dark-on-dark/60">
                   ${(r.costCents / 100).toFixed(2)}
@@ -142,7 +142,7 @@ export default async function TruckDetailPage({ params }: Props): Promise<JSX.El
             {dvirs.slice(0, 10).map((d) => (
               <li key={d.id} className="flex justify-between">
                 <span>
-                  {d.submittedAt.slice(0, 10)} · {d.type.replace('_', ' ')}
+                  {d.submittedAt.slice(0, 10)} - {d.type.replace('_', ' ')}
                 </span>
                 <span className="font-mono text-xs uppercase text-text-secondary-on-dark-on-dark/60">
                   {d.status}

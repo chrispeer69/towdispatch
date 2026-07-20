@@ -7,7 +7,7 @@
 
 import { cn } from '@/lib/utils';
 import { Radio } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { DEMO_DRIVERS, DEMO_JOBS } from '../mock-data';
 import { DemoMapPane, type SimStatus } from './demo-map-pane';
 
@@ -48,25 +48,25 @@ export default function DemoDispatchPage(): JSX.Element {
   const [simStatus, setSimStatus] = useState<SimStatus>('idle');
 
   const displayDrivers = useMemo(() => {
-    return DEMO_DRIVERS.map(d => {
+    return DEMO_DRIVERS.map((d) => {
       if (d.driverId === 'drv-001' && simStatus !== 'idle') {
         return {
           ...d,
           shiftStatus: simStatus === 'completed' ? 'available' : 'en_route',
           currentJobStatus: simStatus === 'completed' ? null : simStatus,
-        }
+        };
       }
       return d;
     });
   }, [simStatus]);
 
   const displayJobs = useMemo(() => {
-    return DEMO_JOBS.map(j => {
+    return DEMO_JOBS.map((j) => {
       if (j.id === 'job-001' && simStatus !== 'idle') {
         return {
           ...j,
           status: simStatus,
-        }
+        };
       }
       return j;
     });
@@ -130,7 +130,7 @@ export default function DemoDispatchPage(): JSX.Element {
                     {job.customerName}
                   </p>
                   <p className="mt-0.5 text-xs text-text-secondary-on-dark">
-                    {SERVICE_LABEL[job.serviceType] ?? job.serviceType} ·{' '}
+                    {SERVICE_LABEL[job.serviceType] ?? job.serviceType} -{' '}
                     {job.driverName ?? 'Unassigned'}
                   </p>
                   <p className="mt-1 truncate text-[11px] text-text-secondary-on-dark/70">
@@ -172,7 +172,7 @@ export default function DemoDispatchPage(): JSX.Element {
                     {job.customerName}
                   </p>
                   <p className="mt-0.5 text-xs text-text-secondary-on-dark">
-                    {SERVICE_LABEL[job.serviceType] ?? job.serviceType} · {job.vehicleDesc}
+                    {SERVICE_LABEL[job.serviceType] ?? job.serviceType} - {job.vehicleDesc}
                   </p>
                   <p className="mt-1 truncate text-[11px] text-text-secondary-on-dark/70">
                     📍 {job.pickupAddress}
@@ -183,7 +183,10 @@ export default function DemoDispatchPage(): JSX.Element {
           </div>
 
           {/* Driver Roster */}
-          <div id="demo-sidebar-roster" className="rounded-[14px] border border-divider bg-bg-surface p-5 shrink-0">
+          <div
+            id="demo-sidebar-roster"
+            className="rounded-[14px] border border-divider bg-bg-surface p-5 shrink-0"
+          >
             <h3 className="font-condensed text-base font-extrabold uppercase tracking-wide">
               Driver Roster
             </h3>
@@ -201,7 +204,9 @@ export default function DemoDispatchPage(): JSX.Element {
                       isAvailable
                         ? 'border-ok/30 bg-ok/5 hover:border-ok/50'
                         : 'border-divider bg-bg-surface-elevated/20',
-                      d.driverId === 'drv-001' && simStatus !== 'idle' ? 'ring-2 ring-brand-primary/40 bg-brand-primary/5 border-brand-primary/50 shadow-sm' : ''
+                      d.driverId === 'drv-001' && simStatus !== 'idle'
+                        ? 'ring-2 ring-brand-primary/40 bg-brand-primary/5 border-brand-primary/50 shadow-sm'
+                        : '',
                     )}
                   >
                     <div
@@ -227,7 +232,9 @@ export default function DemoDispatchPage(): JSX.Element {
                         isAvailable
                           ? 'border-ok/40 text-ok'
                           : 'border-divider text-text-secondary-on-dark',
-                        d.driverId === 'drv-001' && simStatus !== 'idle' && !isAvailable ? 'border-brand-primary/50 text-brand-primary bg-brand-primary/10 font-bold' : ''
+                        d.driverId === 'drv-001' && simStatus !== 'idle' && !isAvailable
+                          ? 'border-brand-primary/50 text-brand-primary bg-brand-primary/10 font-bold'
+                          : '',
                       )}
                     >
                       {statusLabel}
@@ -237,15 +244,21 @@ export default function DemoDispatchPage(): JSX.Element {
               })}
             </div>
           </div>
-          
+
           {/* Recently Completed */}
-          <section id="demo-sidebar-completed" className="rounded-[14px] border border-divider bg-bg-surface p-5 shrink-0">
+          <section
+            id="demo-sidebar-completed"
+            className="rounded-[14px] border border-divider bg-bg-surface p-5 shrink-0"
+          >
             <h3 className="font-condensed text-base font-extrabold uppercase tracking-wide">
               Recently Completed
             </h3>
             <ul className="mt-4 divide-y divide-divider rounded-[10px] border border-divider bg-bg-surface-elevated/10">
               {recentlyCompleted.map((job) => (
-                <li key={job.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                <li
+                  key={job.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+                >
                   <span className="font-mono text-xs font-semibold text-brand-primary">
                     #{job.jobNumber}
                   </span>
@@ -261,7 +274,12 @@ export default function DemoDispatchPage(): JSX.Element {
         </div>
 
         <div className="lg:col-span-9 h-full">
-          <DemoMapPane roster={DEMO_DRIVERS} jobs={DEMO_JOBS} mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || null} onSimUpdate={setSimStatus} />
+          <DemoMapPane
+            roster={DEMO_DRIVERS}
+            jobs={DEMO_JOBS}
+            mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || null}
+            onSimUpdate={setSimStatus}
+          />
         </div>
       </div>
     </div>

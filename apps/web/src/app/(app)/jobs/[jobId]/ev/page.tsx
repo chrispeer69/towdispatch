@@ -36,7 +36,7 @@ export default async function JobEvPage({
         </Link>
         <h1 className="text-2xl font-bold tracking-tight mt-1">EV recovery</h1>
         <p className="text-text-secondary-on-dark text-sm mt-0.5">
-          Job {job.jobNumber} · {job.serviceType}
+          Job {job.jobNumber} - {job.serviceType}
         </p>
       </header>
       <EvJobClient jobId={jobId} initialDetail={evResult.data ?? null} />

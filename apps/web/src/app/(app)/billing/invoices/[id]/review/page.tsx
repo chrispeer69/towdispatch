@@ -64,7 +64,7 @@ export default async function InvoiceReviewPage({
             </span>
             {review.job ? (
               <>
-                {' · Job '}
+                {' - Job '}
                 <Link
                   href={`/jobs/${review.job.id}`}
                   className="font-mono text-brand-primary hover:underline"
@@ -72,13 +72,13 @@ export default async function InvoiceReviewPage({
                   {review.job.jobNumber}
                 </Link>
                 {review.job.completedAt
-                  ? ` · Completed ${review.job.completedAt.slice(11, 16)}`
+                  ? ` - Completed ${review.job.completedAt.slice(11, 16)}`
                   : ''}
               </>
             ) : null}
           </p>
           <p className="text-xs text-text-secondary-on-dark-on-dark/60">
-            Customer: {review.customer?.name ?? '—'} · Account: {review.account?.name ?? 'Cash'}
+            Customer: {review.customer?.name ?? '—'} - Account: {review.account?.name ?? 'Cash'}
           </p>
         </div>
         <Link

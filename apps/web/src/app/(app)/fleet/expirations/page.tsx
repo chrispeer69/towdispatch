@@ -65,7 +65,7 @@ function Bucket({
       data-testid={`expirations-${tone}`}
     >
       <h3 className={cn('font-mono text-[10px] uppercase tracking-[0.22em]', labelPalette[tone])}>
-        {title} · {rows.length}
+        {title} - {rows.length}
       </h3>
       {rows.length === 0 ? (
         <p className="mt-2 text-sm text-text-secondary-on-dark-on-dark/60">Nothing here.</p>
@@ -81,7 +81,7 @@ function Bucket({
                 {r.daysUntilExpiry <= 0
                   ? `expired ${Math.abs(r.daysUntilExpiry)}d ago`
                   : `${r.daysUntilExpiry}d left`}
-                {' · '}
+                {' - '}
                 {r.expiresAt}
               </span>
             </li>

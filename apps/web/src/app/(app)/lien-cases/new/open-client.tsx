@@ -10,7 +10,7 @@ function describe(r: ImpoundRecordDto): string {
   const d = [r.vehicleYear, r.vehicleColor, r.vehicleMake, r.vehicleModel]
     .filter((p) => p !== null && p !== undefined && `${p}`.length > 0)
     .join(' ');
-  const plate = r.licensePlate ? ` · ${r.licensePlate}` : '';
+  const plate = r.licensePlate ? ` - ${r.licensePlate}` : '';
   return `${d || 'Unidentified vehicle'}${plate}`;
 }
 

@@ -84,7 +84,7 @@ function placeJob(state: DispatchState, job: JobDto): DispatchState {
   // Carry forward joined customer/vehicle from the prior in-state copy.
   // Socket events (job-assigned, job-status-changed, commit-after-assign)
   // re-publish a plain JobDto without the dispatch-board joins, so without
-  // this merge the Active panel would lose the "LastName · year make model"
+  // this merge the Active panel would lose the "LastName - year make model"
   // line on every status transition.
   const prior = findJob(state, job.id);
   const merged: JobDto =

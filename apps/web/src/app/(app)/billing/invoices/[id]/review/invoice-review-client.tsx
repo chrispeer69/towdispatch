@@ -542,7 +542,7 @@ export function InvoiceReviewClient({ review, allDrivers }: Props): JSX.Element 
                         className={`text-xs ${over ? 'text-red-400' : 'text-text-secondary-on-dark'}`}
                         data-testid={`commission-summary-${l.id}`}
                       >
-                        Total committed: {sum.toFixed(2)}% · Remaining:{' '}
+                        Total committed: {sum.toFixed(2)}% - Remaining:{' '}
                         {Math.max(remaining, 0).toFixed(2)}%
                       </p>
                     </div>

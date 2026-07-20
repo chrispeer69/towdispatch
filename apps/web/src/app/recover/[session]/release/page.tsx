@@ -50,7 +50,7 @@ export default function RecoverReleasePage(): JSX.Element {
         <p className="font-mono text-sm">{view.caseNumber}</p>
         <p className="mt-3 text-xs uppercase tracking-wide text-slate-500">Vehicle</p>
         <p className="text-sm">
-          {[view.vehicleYear, view.vehicleMake, view.vehicleModel].filter(Boolean).join(' ')} ·{' '}
+          {[view.vehicleYear, view.vehicleMake, view.vehicleModel].filter(Boolean).join(' ')} -{' '}
           {view.licensePlate ?? '—'}
         </p>
         <p className="mt-3 text-xs uppercase tracking-wide text-slate-500">ID on file</p>

@@ -180,12 +180,12 @@ export function ImpoundDetailClient({ detail }: { detail: ImpoundRecordDetailDto
                   {h.authorityName && (
                     <span className="text-xs text-text-secondary-on-dark ml-2">
                       {h.authorityName}
-                      {h.authorityReference ? ` · ${h.authorityReference}` : ''}
+                      {h.authorityReference ? ` - ${h.authorityReference}` : ''}
                     </span>
                   )}
                   <div className="text-[11px] text-text-secondary-on-dark">
                     Placed {formatDate(h.placedAt)}
-                    {h.releasedAt ? ` · released ${formatDate(h.releasedAt)}` : ''}
+                    {h.releasedAt ? ` - released ${formatDate(h.releasedAt)}` : ''}
                   </div>
                 </div>
                 {h.releasedAt === null ? (
@@ -368,7 +368,7 @@ export function ImpoundDetailClient({ detail }: { detail: ImpoundRecordDetailDto
             <div>
               <span className={labelCls}>Payment</span>
               {formatCents(release.paymentReceivedCents)}
-              {release.paymentMethod ? ` · ${release.paymentMethod}` : ''}
+              {release.paymentMethod ? ` - ${release.paymentMethod}` : ''}
             </div>
           </div>
         </div>

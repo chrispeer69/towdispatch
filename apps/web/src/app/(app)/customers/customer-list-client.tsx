@@ -166,10 +166,10 @@ export function CustomerListClient({ initial, initialQ, initialType }: Props): J
       <div className="flex items-center justify-between text-xs text-text-secondary-on-dark-on-dark/60">
         <span>
           Showing {data.data.length} of {data.total}
-          {loading ? ' · loading…' : ''}
+          {loading ? ' - loading…' : ''}
         </span>
         <span className="font-mono">
-          page {data.page} · {data.perPage}/page
+          page {data.page} - {data.perPage}/page
         </span>
       </div>
     </div>

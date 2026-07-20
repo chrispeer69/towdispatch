@@ -218,7 +218,7 @@ export default async function DashboardPage(): Promise<JSX.Element> {
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
             {today}
-            {session ? ` · ${session.tenant.name}` : ''}
+            {session ? ` - ${session.tenant.name}` : ''}
           </p>
         </div>
         {session && !session.user.emailVerifiedAt ? (

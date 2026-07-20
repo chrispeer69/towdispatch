@@ -75,7 +75,7 @@ export default async function PortalLayout({
               {branding.supportEmail}
             </a>
           ) : null}
-          {branding.supportPhone ? <span> · {branding.supportPhone}</span> : null}
+          {branding.supportPhone ? <span> - {branding.supportPhone}</span> : null}
         </p>
         <p className="mt-2 space-x-3">
           {branding.termsUrl ? (

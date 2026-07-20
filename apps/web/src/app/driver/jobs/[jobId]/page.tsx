@@ -508,7 +508,7 @@ function VehicleCard({ job }: { job: JobDto }): JSX.Element {
             )}
             {v.color ? (
               <span className="ml-1 text-sm font-semibold text-text-secondary-on-dark">
-                · {v.color}
+                - {v.color}
               </span>
             ) : null}
           </p>
@@ -521,7 +521,7 @@ function VehicleCard({ job }: { job: JobDto }): JSX.Element {
         {plate || v.vin ? (
           <p className="font-mono text-[11px] uppercase tracking-wide text-text-secondary-on-dark">
             {plate ? <>Plate {plate}</> : null}
-            {plate && v.vin ? <span className="mx-1.5 opacity-50">·</span> : null}
+            {plate && v.vin ? <span className="mx-1.5 opacity-50">-</span> : null}
             {v.vin ? <>VIN {v.vin}</> : null}
           </p>
         ) : null}
@@ -709,7 +709,7 @@ function VideoTab({
   return (
     <div className="space-y-3">
       <p className="text-xs uppercase tracking-wide text-text-secondary-on-dark">
-        Walkaround video · max {VIDEO_DURATION_CAP_SECONDS}s per clip
+        Walkaround video - max {VIDEO_DURATION_CAP_SECONDS}s per clip
       </p>
       <label className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-divider bg-bg-surface-elevated text-sm font-semibold">
         <Video className="h-5 w-5" />

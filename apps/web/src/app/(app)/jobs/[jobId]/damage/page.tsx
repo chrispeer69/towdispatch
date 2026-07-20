@@ -71,7 +71,7 @@ export default async function JobDamagePage({
           Damage analysis
         </h1>
         <p className="text-sm text-text-secondary-on-dark">
-          {vehicleLabel(job.vehicle)} · Job {job.jobNumber}
+          {vehicleLabel(job.vehicle)} - Job {job.jobNumber}
         </p>
       </header>
 

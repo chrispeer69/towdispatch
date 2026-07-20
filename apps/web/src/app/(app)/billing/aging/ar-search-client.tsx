@@ -490,7 +490,7 @@ export function ArSearchClient({
       {/* Pagination */}
       <div className="flex items-center justify-between text-xs text-text-secondary-on-dark">
         <span>
-          Showing {Math.min(initial.rows.length, limit)} of {initial.total} · offset {offset}
+          Showing {Math.min(initial.rows.length, limit)} of {initial.total} - offset {offset}
         </span>
         <div className="flex gap-2">
           <Button

@@ -272,7 +272,7 @@ export default function DemoDashboard(): JSX.Element {
             Operations Overview
           </h1>
           <p suppressHydrationWarning className="mt-1 text-sm text-text-secondary-on-dark">
-            {today} · {DEMO_TENANT.name}
+            {today} - {DEMO_TENANT.name}
           </p>
         </div>
       </header>

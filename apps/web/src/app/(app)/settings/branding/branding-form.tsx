@@ -354,7 +354,7 @@ function BrandingPreview(props: {
           </button>
           <p className="text-[11px] text-text-secondary-on-dark">
             Need help? {props.supportEmail || 'support@example.com'}
-            {props.supportPhone ? ` · ${props.supportPhone}` : ''}
+            {props.supportPhone ? ` - ${props.supportPhone}` : ''}
           </p>
         </div>
       </div>

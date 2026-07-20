@@ -109,7 +109,7 @@ export default async function ActiveCallsForAccountPage({
                 {list.length}
               </span>{' '}
               active call{list.length === 1 ? '' : 's'}
-              {subline ? ` · ${subline}` : ''}
+              {subline ? ` - ${subline}` : ''}
             </p>
           </div>
           {!isCash && account ? (

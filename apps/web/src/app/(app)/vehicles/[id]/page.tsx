@@ -44,7 +44,7 @@ export default async function VehicleDetailPage({ params }: Props): Promise<JSX.
           )}
           {vehicle.plate ? (
             <>
-              {' · '}
+              {' - '}
               <span className="font-mono">
                 {vehicle.plate} / {vehicle.plateState ?? ''}
               </span>
@@ -71,7 +71,7 @@ export default async function VehicleDetailPage({ params }: Props): Promise<JSX.
                 </Link>
                 <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary-on-dark-on-dark/60">
                   {c.relationship}
-                  {c.isPrimary ? ' · primary' : ''}
+                  {c.isPrimary ? ' - primary' : ''}
                 </span>
               </li>
             ))}

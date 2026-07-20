@@ -48,10 +48,10 @@ export default async function PortalDashboardPage(): Promise<JSX.Element> {
                 >
                   <span>
                     <span className="block text-sm font-semibold text-neutral-900">
-                      {titleCase(job.serviceType)} · {job.jobNumber}
+                      {titleCase(job.serviceType)} - {job.jobNumber}
                     </span>
                     <span className="block text-xs text-neutral-500">
-                      {job.pickupAddress} · {formatDate(job.createdAt)}
+                      {job.pickupAddress} - {formatDate(job.createdAt)}
                     </span>
                   </span>
                   <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
@@ -80,7 +80,7 @@ export default async function PortalDashboardPage(): Promise<JSX.Element> {
                     {inv.invoiceNumber}
                   </span>
                   <span className="block text-xs text-neutral-500">
-                    {t.balanceDue}: {formatMoney(inv.balanceCents, inv.currency)} ·{' '}
+                    {t.balanceDue}: {formatMoney(inv.balanceCents, inv.currency)} -{' '}
                     {titleCase(inv.status)}
                   </span>
                 </span>

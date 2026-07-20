@@ -48,7 +48,7 @@ export default async function AccountsPage({
             {isMotorClub === 'true' ? 'Motor Clubs' : 'Accounts'}
           </h1>
           <p className="mt-1 text-sm text-text-secondary-on-dark">
-            <span data-testid="account-count">{initial.total}</span> total Â·{' '}
+            <span data-testid="account-count">{initial.total}</span> total Â-{' '}
             {isMotorClub === 'true'
               ? 'AAA, Agero, and friends'
               : 'commercial billing relationships'}

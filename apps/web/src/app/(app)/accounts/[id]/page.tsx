@@ -37,10 +37,10 @@ export default async function AccountDetailPage({ params }: Props): Promise<JSX.
           {account.name}
         </h1>
         <p className="text-sm text-text-secondary-on-dark">
-          {account.billingTerms.replace('_', ' ')} · ${account.creditUsed} used
+          {account.billingTerms.replace('_', ' ')} - ${account.creditUsed} used
           {account.creditLimit ? ` / $${account.creditLimit} limit` : ' / no limit'}
           {account.isMotorClub
-            ? ` · motor club (${account.motorClubNetworkCode ?? 'unknown'})`
+            ? ` - motor club (${account.motorClubNetworkCode ?? 'unknown'})`
             : ''}
         </p>
       </header>
@@ -67,7 +67,7 @@ export default async function AccountDetailPage({ params }: Props): Promise<JSX.
                   {c.name}
                 </Link>
                 <span className="font-mono text-[11px] text-text-secondary-on-dark-on-dark/60">
-                  {c.phone ?? '—'} · {c.type}
+                  {c.phone ?? '—'} - {c.type}
                 </span>
               </li>
             ))}

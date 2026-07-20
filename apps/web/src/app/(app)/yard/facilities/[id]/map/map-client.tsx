@@ -105,7 +105,7 @@ export function StallMapClient({
           </Link>
           <h1 className="text-2xl font-bold">{facility.name} — Stall Map</h1>
           <p className="text-xs text-text-secondary-on-dark">
-            {stalls.length} stalls · {occupied} occupied · {stalls.length - occupied} open
+            {stalls.length} stalls - {occupied} occupied - {stalls.length - occupied} open
           </p>
         </div>
         {canWrite && dirty && (
@@ -180,7 +180,7 @@ export function StallMapClient({
               onDragOver={(e) => canWrite && e.preventDefault()}
               onDrop={(e) => canWrite && onDrop(e, x, y)}
               onClick={() => openStall(stall.id)}
-              title={`${stall.label} · ${stall.stallType}`}
+              title={`${stall.label} - ${stall.stallType}`}
               className={`aspect-square rounded-md border-2 p-1 text-[10px] ${TYPE_TONE[stall.stallType]} ${
                 isOccupied ? 'bg-accent-orange/30' : 'bg-bg-surface-elevated'
               }`}
@@ -271,7 +271,7 @@ function StallDetail({
       <div className="w-full max-w-md space-y-4 rounded-md border border-border-on-dark bg-bg-surface-elevated p-5">
         <header className="flex items-center justify-between">
           <h2 id="stall-detail-title" className="text-lg font-bold">
-            Stall {detail.stall.label} · {detail.stall.stallType}
+            Stall {detail.stall.label} - {detail.stall.stallType}
           </h2>
           <button
             type="button"
@@ -287,7 +287,7 @@ function StallDetail({
           <div className="rounded-md bg-bg-base p-3 text-sm">
             <p className="font-semibold">{detail.occupant.vehicleDescription}</p>
             <p className="text-text-secondary-on-dark">
-              {detail.occupant.licensePlate ?? 'no plate'} · {detail.occupant.status}
+              {detail.occupant.licensePlate ?? 'no plate'} - {detail.occupant.status}
             </p>
             {canWrite && (
               <button type="button" onClick={release} className="mt-2 text-sm text-accent-orange">

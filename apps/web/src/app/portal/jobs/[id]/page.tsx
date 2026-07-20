@@ -40,7 +40,7 @@ export default async function PortalJobDetailPage({
       <div className="rounded-2xl border border-neutral-200 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="text-lg font-bold text-neutral-900">
-            {titleCase(job.serviceType)} · {job.jobNumber}
+            {titleCase(job.serviceType)} - {job.jobNumber}
           </h1>
           <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
             {statusLabel(job.status)}
@@ -62,7 +62,7 @@ export default async function PortalJobDetailPage({
             <div>
               <p className="text-sm font-semibold text-neutral-900">{job.invoice.invoiceNumber}</p>
               <p className="text-xs text-neutral-500">
-                {t.balanceDue}: {formatMoney(job.invoice.balanceCents, job.invoice.currency)} ·{' '}
+                {t.balanceDue}: {formatMoney(job.invoice.balanceCents, job.invoice.currency)} -{' '}
                 {titleCase(job.invoice.status)}
               </p>
             </div>

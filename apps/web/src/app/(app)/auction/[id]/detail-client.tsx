@@ -208,7 +208,7 @@ export function AuctionDetailClient({ detail }: Props): JSX.Element {
                     {b.bidderBusinessName ? (
                       <span className="text-[11px] text-text-secondary-on-dark">
                         {' '}
-                        · {b.bidderBusinessName}
+                        - {b.bidderBusinessName}
                       </span>
                     ) : null}
                     {b.isWinning && (

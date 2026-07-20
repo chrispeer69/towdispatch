@@ -113,7 +113,7 @@ function CandidateCard({ item, rank }: { item: RecommendationItem; rank: number 
           <p className="font-semibold text-text-primary-on-dark">
             <span className="mr-2 font-mono text-text-secondary-on-dark">#{rank}</span>
             {item.driverName ?? 'Driver'}{' '}
-            <span className="text-text-secondary-on-dark">· Unit {item.truckUnit ?? '—'}</span>
+            <span className="text-text-secondary-on-dark">- Unit {item.truckUnit ?? '—'}</span>
           </p>
           <p className="text-xs text-text-secondary-on-dark">
             Predicted ETA to scene:{' '}

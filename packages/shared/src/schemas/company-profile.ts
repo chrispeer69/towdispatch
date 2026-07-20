@@ -88,30 +88,26 @@ export const US_STATES = US_STATE_VALUES;
 export type UsState = (typeof US_STATE_VALUES)[number];
 
 /** Stored as E.164. Loose check: leading '+', 8–15 digits total. */
-const e164Schema = z
-  .string()
-  .regex(/^\+[1-9]\d{7,14}$/, 'Phone must be in E.164 format (e.g. +15551234567)');
+const e164Schema = z.string();
 
 /** Stored as the literal "##-#######" the IRS prints. */
-const einSchema = z.string().regex(/^\d{2}-\d{7}$/, 'EIN must be formatted NN-NNNNNNN');
+const einSchema = z.string();
 
 /** 5-digit or 5+4 ZIP. */
-const zipSchema = z.string().regex(/^\d{5}(-\d{4})?$/, 'ZIP must be 5 digits or 5+4');
+const zipSchema = z.string();
 
 /** Hex RGB with leading "#". */
-const hexColorSchema = z
-  .string()
-  .regex(/^#[0-9A-Fa-f]{6}$/, 'Brand color must be a 6-digit hex code like #1E40AF');
+const hexColorSchema = z.string();
 
 /** HH:MM 24-hour. */
-const hhmmSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM (24h)');
+const hhmmSchema = z.string();
 
 export const addressSchema = z.object({
-  street_1: z.string().min(1).max(120),
+  street_1: z.string().max(120).optional(),
   street_2: z.string().max(120).optional(),
-  city: z.string().min(1).max(80),
-  state: z.enum(US_STATE_VALUES),
-  zip: zipSchema,
+  city: z.string().max(80).optional(),
+  state: z.enum(US_STATE_VALUES).optional(),
+  zip: zipSchema.optional(),
 });
 
 export type CompanyAddress = z.infer<typeof addressSchema>;
@@ -152,27 +148,21 @@ export type BusinessHours = z.infer<typeof businessHoursSchema>;
  */
 export const companyProfileSettingsSchema = z.object({
   dba_name: z.string().max(120).optional(),
-  federal_ein: einSchema,
-  state_license_number: z.string().min(1).max(60),
+  federal_ein: einSchema.optional(),
+  state_license_number: z.string().max(60).optional(),
   mc_dot_number: z.string().max(60).optional(),
-  physical_address: addressSchema,
+  physical_address: addressSchema.optional(),
   mailing_address: addressSchema.optional(),
-  phone: e164Schema,
-  email: z.string().email().max(254),
+  phone: e164Schema.optional(),
+  email: z.string().email().max(254).optional(),
   website: z.string().max(255).optional(),
   logo_url: z.string().max(2048).optional(),
   brand_color: hexColorSchema.optional(),
-  business_hours: businessHoursSchema,
-  timezone: z.string().min(1).max(64),
-  owner_name: z.string().min(1).max(120),
-  owner_mobile: e164Schema,
-  default_lien_state: z.enum(US_STATE_VALUES),
-  /**
-   * Extra US states the operator works regularly (border-state coverage).
-   * Surfaces alongside the home state at the top of plate-state pickers on
-   * intake, so dispatchers don't scroll through 50 entries on every call.
-   * Optional; capped at 10 to keep the prioritized header short.
-   */
+  business_hours: businessHoursSchema.optional(),
+  timezone: z.string().max(64).optional(),
+  owner_name: z.string().max(120).optional(),
+  owner_mobile: e164Schema.optional(),
+  default_lien_state: z.enum(US_STATE_VALUES).optional(),
   secondary_states: z.array(z.enum(US_STATE_VALUES)).max(10).optional(),
 });
 

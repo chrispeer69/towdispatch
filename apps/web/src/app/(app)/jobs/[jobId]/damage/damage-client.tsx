@@ -354,7 +354,7 @@ function AnalysisSelect({
       >
         {options.map((o) => (
           <option key={o.id} value={o.id}>
-            {PHASE_LABEL[lang][o.phase]} · {formatDateTime(o.requestedAt)}
+            {PHASE_LABEL[lang][o.phase]} - {formatDateTime(o.requestedAt)}
           </option>
         ))}
       </select>
@@ -386,7 +386,7 @@ function AnalysisCard({
             {STATUS_LABEL[lang][analysis.status]}
           </span>
           <span className="text-[11px] text-text-secondary-on-dark/70">
-            {analysis.provider} · {formatDateTime(analysis.requestedAt)}
+            {analysis.provider} - {formatDateTime(analysis.requestedAt)}
           </span>
         </div>
         {analysis.status === 'complete' ? (

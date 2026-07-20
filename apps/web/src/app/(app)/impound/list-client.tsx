@@ -157,7 +157,7 @@ export function ImpoundListClient({
                   </Link>
                   <div className="text-[11px] text-text-secondary-on-dark">
                     {r.licensePlate
-                      ? `${r.licensePlate}${r.licenseState ? ` · ${r.licenseState}` : ''}`
+                      ? `${r.licensePlate}${r.licenseState ? ` - ${r.licenseState}` : ''}`
                       : (r.vehicleVin ?? '—')}
                   </div>
                 </td>

@@ -176,8 +176,8 @@ function TrackingModal({
               Tracking — #{jobNumber}
             </h3>
             <p className="text-xs text-text-secondary-on-dark mt-0.5">
-              SMS to {link.smsToPhone ?? '—'} · status {link.smsStatus}
-              {link.viewCount > 0 ? ` · viewed ${link.viewCount}× ` : ''}
+              SMS to {link.smsToPhone ?? '—'} - status {link.smsStatus}
+              {link.viewCount > 0 ? ` - viewed ${link.viewCount}× ` : ''}
             </p>
           </div>
           <button

@@ -36,7 +36,7 @@ export default async function NotificationsHistoryPage({
           Notifications
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
-          {data.total} total · {data.unread} unread
+          {data.total} total - {data.unread} unread
         </p>
       </header>
       <NotificationsHistory initial={data} />

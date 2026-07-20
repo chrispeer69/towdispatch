@@ -158,7 +158,7 @@ function DriverRow({ driver }: { driver: DotDriverDqViewDto }) {
           </p>
           <p className="text-[11px] text-text-secondary-on-dark">
             CDL {driver.cdlClass}
-            {driver.employeeNumber ? ` · ${driver.employeeNumber}` : ''}
+            {driver.employeeNumber ? ` - ${driver.employeeNumber}` : ''}
           </p>
         </div>
         <span

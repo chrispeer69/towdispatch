@@ -47,7 +47,7 @@ export default function RecoverDetailPage(): JSX.Element {
             'Your vehicle'}
         </h1>
         <p className="text-sm text-slate-600">
-          {view.licensePlate ?? '—'} · {view.yardName ?? 'Impound yard'} · {view.status}
+          {view.licensePlate ?? '—'} - {view.yardName ?? 'Impound yard'} - {view.status}
         </p>
       </header>
 
@@ -79,7 +79,7 @@ export default function RecoverDetailPage(): JSX.Element {
           href={`/recover/${sessionId}/pay`}
           className="block rounded-lg bg-slate-900 px-4 py-3 text-center font-medium text-white"
         >
-          {t.payNow} · {usd(balance.balanceCents)}
+          {t.payNow} - {usd(balance.balanceCents)}
         </Link>
       ) : (
         <Link
