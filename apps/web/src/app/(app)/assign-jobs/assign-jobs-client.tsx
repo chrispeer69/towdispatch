@@ -20,13 +20,21 @@ interface Props {
   initialSnapshot: DispatchSnapshot;
 }
 
+import { ConvinicarAlarmModal } from '@/components/convinicar-alarm-modal';
+
 export function AssignJobsClient({ initialSnapshot }: Props): JSX.Element {
   const { state, dispatch, connected } = useDispatchBoard(initialSnapshot);
   const sensors = useAssignDndSensors();
   const onDragEnd = buildAssignDragHandler(dispatch);
 
+  const convinicarOffer = state.queue.find((j) => j.convinicarOfferId && j.status === 'new') || null;
+
   return (
     <div className="space-y-4" data-testid="assign-jobs-board">
+      <ConvinicarAlarmModal
+        job={convinicarOffer}
+        onClose={() => {}}
+      />
       <header className="flex items-end justify-between gap-4">
         <div>
           <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">

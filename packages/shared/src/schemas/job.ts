@@ -326,6 +326,7 @@ export const jobSchema = z.object({
     .enum(['accepted', 'declined', 'pending', 'none'])
     .default('none')
     .optional(),
+  convinicarOfferId: z.string().uuid().nullable().optional(),
 });
 export type JobDto = z.infer<typeof jobSchema>;
 

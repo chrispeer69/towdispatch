@@ -68,11 +68,9 @@ export class ConvinicarService {
   async respondToOffer(offerId: string, action: 'accept' | 'decline') {
     const url = this.apiUrl.replace('/integration-api', '/respond-tow-offer');
     
-    // This must be Convinicar's SUPABASE_SERVICE_ROLE_KEY — not the integration API key.
-    const serviceRoleKey = this.configService.get<string>('CONVINICAR_SERVICE_ROLE_KEY') || '';
-    if (!serviceRoleKey) {
-      this.logger.warn('CONVINICAR_SERVICE_ROLE_KEY is not configured — cannot respond to offers');
-      throw new Error('CONVINICAR_SERVICE_ROLE_KEY is missing');
+    if (!this.apiKey) {
+      this.logger.warn('CONVINICAR_INTEGRATION_API_KEY is missing — cannot respond to offers');
+      throw new Error('CONVINICAR_INTEGRATION_API_KEY is missing');
     }
 
     try {
@@ -80,8 +78,7 @@ export class ConvinicarService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${serviceRoleKey}`,
-          'x-internal-key': serviceRoleKey,
+          'x-api-key': this.apiKey,
         },
         body: JSON.stringify({ offer_id: offerId, action }),
       });

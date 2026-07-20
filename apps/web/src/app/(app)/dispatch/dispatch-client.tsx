@@ -23,6 +23,8 @@ interface Props {
   smsHint?: 'pending' | 'skipped' | null;
 }
 
+import { ConvinicarAlarmModal } from '@/components/convinicar-alarm-modal';
+
 export function DispatchClient({
   initialSnapshot,
   initialCapacityStatus,
@@ -35,8 +37,14 @@ export function DispatchClient({
   // map to that driver's row + jobs. Toggle off by clicking again.
   const [focusedDriverId, setFocusedDriverId] = useState<string | null>(null);
 
+  const convinicarOffer = state.queue.find((j) => j.convinicarOfferId && j.status === 'new') || null;
+
   return (
     <div className="space-y-4" data-testid="dispatch-board">
+      <ConvinicarAlarmModal
+        job={convinicarOffer}
+        onClose={() => {}}
+      />
       <header className="flex items-end justify-between gap-4">
         <div>
           <h1 className="font-condensed text-xl font-extrabold uppercase leading-none tracking-tight md:text-2xl">

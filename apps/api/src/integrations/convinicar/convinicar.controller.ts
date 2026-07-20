@@ -13,6 +13,7 @@ import { CurrentTenant } from '../../common/decorators/current-user.decorator.js
 import { TransactionRunner } from '../../database/transaction-runner.service.js';
 import { ConvinicarService } from './convinicar.service.js';
 import { uuidv7 } from '@ustowdispatch/db';
+import { DispatchEventsService } from '../../modules/dispatch/dispatch-events.service.js';
 
 interface ConvinicarWebhookPayload {
   type: string;
@@ -41,6 +42,7 @@ export class ConvinicarController {
     private readonly convinicarService: ConvinicarService,
     private readonly admin: TransactionRunner,
     private readonly configService: ConfigService,
+    private readonly dispatchEvents: DispatchEventsService,
   ) {}
 
   @Public()
@@ -121,6 +123,46 @@ export class ConvinicarController {
           offer_id,
         ],
       );
+    });
+
+    // Notify the frontend via sockets
+    await this.admin.runAsAdmin({}, async (db) => {
+      const job = await db.query.jobs.findFirst({
+        where: (j, { eq }) => eq(j.id, jobId)
+      });
+      if (job) {
+        // Build the basic DTO
+        const jobDto = {
+          id: job.id,
+          tenantId: job.tenantId,
+          jobNumber: job.jobNumber,
+          status: job.status,
+          serviceType: job.serviceType,
+          pickupAddress: job.pickupAddress,
+          pickupLat: job.pickupLat,
+          pickupLng: job.pickupLng,
+          dropoffAddress: job.dropoffAddress,
+          dropoffLat: job.dropoffLat,
+          dropoffLng: job.dropoffLng,
+          authorizedBy: job.authorizedBy,
+          authorizedByName: job.authorizedByName,
+          rateQuotedCents: job.rateQuotedCents,
+          rateBreakdown: job.rateBreakdown,
+          notes: job.notes,
+          cancelledReason: job.cancelledReason,
+          assignedDriverId: job.assignedDriverId,
+          assignedTruckId: job.assignedTruckId,
+          assignedShiftId: job.assignedShiftId,
+          assignedAt: job.assignedAt ? job.assignedAt.toISOString() : null,
+          createdByUserId: job.createdByUserId,
+          createdAt: job.createdAt.toISOString(),
+          updatedAt: job.updatedAt.toISOString(),
+          deletedAt: job.deletedAt ? job.deletedAt.toISOString() : null,
+          tierOfferEnforcementStatus: 'none' as const,
+          convinicarOfferId: job.convinicarOfferId,
+        };
+        this.dispatchEvents.notifyJobCreated(matchedTenantId!, jobDto as any);
+      }
     });
 
     return { status: 'received', offer_id, mapped_tenant_id: matchedTenantId, job_id: jobId };
