@@ -399,6 +399,17 @@ export function CompanyProfileForm({ initial, callerRole }: Props): JSX.Element 
         </Field>
       </Section>
 
+      {/* SECTION 8 — Integrations */}
+      <Section title="Integrations" description="Third-party vendor and service integrations.">
+        <Field
+          label="Convinicar Vendor ID"
+          error={errs.convinicarVendorId?.message}
+          hint="Paste your vendor ID from Convinicar to receive automated dispatch offers."
+        >
+          <Input disabled={!canEdit} {...form.register('convinicarVendorId')} />
+        </Field>
+      </Section>
+
       {canEdit ? (
         <div
           className={`fixed inset-x-0 bottom-0 z-20 border-t border-divider bg-bg-base/95 px-6 py-3 backdrop-blur transition-opacity ${

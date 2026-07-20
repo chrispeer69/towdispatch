@@ -25,6 +25,7 @@ export const tenantSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   deletedAt: z.string().datetime().nullable(),
+  convinicarVendorId: z.string().nullable().optional(),
 });
 
 export type TenantDto = z.infer<typeof tenantSchema>;

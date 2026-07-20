@@ -201,11 +201,12 @@ export const companyProfilePatchSchema = z
   .object({
     name: z.string().min(1).max(120).optional(),
     settings: companyProfileSettingsPartialSchema.optional(),
+    convinicarVendorId: z.string().max(120).nullable().optional(),
   })
   .strict()
   .refine(
-    (v) => v.name !== undefined || v.settings !== undefined,
-    'Provide name, settings, or both',
+    (v) => v.name !== undefined || v.settings !== undefined || v.convinicarVendorId !== undefined,
+    'Provide name, settings, convinicarVendorId, or combinations',
   );
 
 export type CompanyProfilePatchPayload = z.infer<typeof companyProfilePatchSchema>;

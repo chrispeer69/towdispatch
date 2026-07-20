@@ -43,6 +43,7 @@ interface CallerContext {
 export interface UpdateTenantInput {
   name?: string | undefined;
   settings?: Record<string, unknown> | undefined;
+  convinicarVendorId?: string | null | undefined;
 }
 
 @Injectable()
@@ -71,6 +72,8 @@ export class TenantsService {
         updatedAt: new Date(),
       };
       if (input.name !== undefined) patch.name = input.name;
+      if (input.convinicarVendorId !== undefined)
+        patch.convinicarVendorId = input.convinicarVendorId;
       if (input.settings !== undefined) {
         const merged = deepMergeSettings(
           (existing.settings as Record<string, unknown> | null) ?? {},
@@ -142,6 +145,7 @@ function toDto(t: typeof tenants.$inferSelect): TenantDto {
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),
     deletedAt: t.deletedAt ? t.deletedAt.toISOString() : null,
+    convinicarVendorId: t.convinicarVendorId,
   };
 }
 
