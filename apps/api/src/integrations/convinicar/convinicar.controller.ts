@@ -51,9 +51,8 @@ export class ConvinicarController {
     @Body() payload: ConvinicarWebhookPayload,
     @Headers('x-webhook-secret') webhookSecret?: string,
   ) {
-    const expectedSecret =
-      this.configService.get<string>('CONVINICAR_WEBHOOK_SECRET') || 'local_dev_secret_123';
-    if (webhookSecret !== expectedSecret) {
+    const expectedSecret = this.configService.get<string>('CONVINICAR_WEBHOOK_SECRET');
+    if (!expectedSecret || webhookSecret !== expectedSecret) {
       this.logger.warn('Received webhook with invalid or missing x-webhook-secret');
       throw new UnauthorizedException('Invalid webhook secret');
     }
