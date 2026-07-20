@@ -32,7 +32,7 @@ export class ConvinicarService {
         throw new Error(`Convinicar API returned ${response.status}: ${await response.text()}`);
       }
 
-      return await response.json();
+      return (await response.json()) as T;
     } catch (error) {
       this.logger.error(`Failed to call Convinicar API for action ${action}`, error);
       throw error;
