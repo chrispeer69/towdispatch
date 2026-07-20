@@ -181,6 +181,13 @@ export const jobs = pgTable(
      */
     repoCaseId: uuid('repo_case_id'),
 
+    /**
+     * Convinicar Integration Linkage. Set when a job is synced from the
+     * Convinicar API. Null for natively created jobs.
+     */
+    convinicarServiceRequestId: uuid('convinicar_service_request_id'),
+    convinicarOfferId: uuid('convinicar_offer_id'),
+
     notes: text('notes'),
 
     cancelledReason: text('cancelled_reason'),
@@ -223,6 +230,10 @@ export const jobs = pgTable(
     tenantRepoCaseIdx: index('jobs_tenant_repo_case_idx')
       .on(t.tenantId, t.repoCaseId)
       .where(sql`repo_case_id IS NOT NULL`),
+    // Convinicar Integration index to quickly look up if a sync has already occurred
+    tenantConvinicarIdx: index('jobs_tenant_convinicar_idx')
+      .on(t.tenantId, t.convinicarServiceRequestId)
+      .where(sql`convinicar_service_request_id IS NOT NULL`),
   }),
 );
 

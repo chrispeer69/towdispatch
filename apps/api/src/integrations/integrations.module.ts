@@ -5,9 +5,11 @@
  */
 import { Global, Module } from '@nestjs/common';
 import { IntegrationRegistry } from './types.js';
+import { ConvinicarModule } from './convinicar/convinicar.module.js';
 
 @Global()
 @Module({
+  imports: [ConvinicarModule],
   providers: [IntegrationRegistry],
   exports: [IntegrationRegistry],
 })

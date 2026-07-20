@@ -87,6 +87,12 @@ export const tenants = pgTable(
       .notNull()
       .default('imperial'),
 
+    /**
+     * Convinicar Integration Linkage. Maps a US Tow Dispatch tenant to a
+     * Convinicar Vendor ID so webhooks can be routed correctly.
+     */
+    convinicarVendorId: text('convinicar_vendor_id'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
@@ -94,6 +100,10 @@ export const tenants = pgTable(
   (t) => ({
     slugIdx: uniqueIndex('tenants_slug_unique').on(t.slug),
     companyCodeIdx: uniqueIndex('tenants_company_code_idx').on(t.companyCode),
+    // Ensure one Convinicar Vendor isn't mapped to multiple USTD tenants
+    convinicarVendorIdx: uniqueIndex('tenants_convinicar_vendor_idx')
+      .on(t.convinicarVendorId)
+      .where(sql`convinicar_vendor_id IS NOT NULL`),
   }),
 );
 
