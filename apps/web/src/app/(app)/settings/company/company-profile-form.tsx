@@ -720,6 +720,7 @@ function hydrate(tenant: TenantDto): FormValues {
   const s = (tenant.settings ?? {}) as Record<string, unknown>;
   return {
     name: tenant.name,
+    convinicarVendorId: tenant.convinicarVendorId,
     settings: {
       dba_name: pickString(s.dba_name) ?? undefined,
       federal_ein: pickString(s.federal_ein) ?? '',
