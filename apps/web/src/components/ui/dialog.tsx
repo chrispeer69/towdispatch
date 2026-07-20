@@ -89,12 +89,12 @@ export function DialogHeader({ children, className }: { children: React.ReactNod
   return <div className={cn('mb-4 flex flex-col gap-1', className)}>{children}</div>;
 }
 
-export function DialogTitle({ children }: { children: React.ReactNode }): JSX.Element {
-  return <h2 className="text-lg font-semibold">{children}</h2>;
+export function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element {
+  return <h2 className={cn("text-lg font-semibold", className)}>{children}</h2>;
 }
 
-export function DialogDescription({ children }: { children: React.ReactNode }): JSX.Element {
-  return <p className="text-sm text-text-secondary-on-dark">{children}</p>;
+export function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element {
+  return <p className={cn("text-sm text-text-secondary-on-dark", className)}>{children}</p>;
 }
 
 export function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }): JSX.Element {
